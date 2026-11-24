@@ -4,7 +4,8 @@ const Banco = preload("res://logica/simulador/banco_arnes.gd")
 const PUNTOS := ["tp1", "tp2"]
 const AVISO_NEGRA := "La punta negra va en TP0."
 const INDICIOS := ["tp1_medido", "tp2_medido", "tp1_reportado", "tp2_reportado"]
-const OPCIONES := {"0": "≈0 V", "5": "≈5 V", "otra": "Otra"}
+# La clave "5" significa "nivel alto" y conserva su id aunque el banco sea de 3.3 V.
+const CLAVES_OPCION := ["0", "5", "otra"]
 const ERRORES_MEDICION := ["punto-de-medicion-incorrecto", "valor-fuera-de-rango", "paso-omitido"]
 const INTERPRETACION := "lectura-mal-interpretada"
 const MOTIVOS := {
@@ -29,6 +30,15 @@ var aviso_puntas := ""
 func _init(lector: Callable = leer_variante, nombre_fuente := "virtual") -> void:
 	leer = lector
 	fuente = nombre_fuente
+
+
+static func opciones() -> Dictionary:
+	return {"0": "≈0 V", "5": Banco.etiqueta_alto(), "otra": "Otra"}
+
+
+# Tensión que representa una opción de lectura ("0" o "5").
+static func valor_opcion(opcion: String) -> float:
+	return Banco.nominal_alto if opcion == "5" else 0.0
 
 
 static func leer_variante(estado: Dictionary) -> Dictionary:
@@ -107,10 +117,10 @@ func aplicar(id: String, estado: Dictionary, lectura_previa: Dictionary = {}) ->
 			pantalla = "%.1f V" % lectura
 			return {"punto_medido": punto, "lectura_mostrada": lectura}
 		"reportar":
-			if campos.size() != 3 or campos[1] not in PUNTOS or not OPCIONES.has(campos[2]):
+			if campos.size() != 3 or campos[1] not in PUNTOS or campos[2] not in CLAVES_OPCION:
 				return {}
 			reportadas[campos[1]] = campos[2]
-			return {"punto_reportado": campos[1], "lectura-reportada": OPCIONES[campos[2]]}
+			return {"punto_reportado": campos[1], "lectura-reportada": opciones()[campos[2]]}
 		"reconectar":
 			return {"tipo_error": evaluar(estado, lectura_previa)}
 	return {}
@@ -128,8 +138,8 @@ func evaluar(estado: Dictionary, lectura_previa: Dictionary = {}) -> String:
 	for punto in PUNTOS:
 		var opcion: String = reportadas[punto]
 		if opcion not in ["0", "5"] \
-				or (fuente != "banco" and not Banco.coincide(opcion.to_float(), medidas[punto])) \
-				or not Banco.coincide(opcion.to_float(), tensiones[punto]):
+				or (fuente != "banco" and not Banco.coincide(valor_opcion(opcion), medidas[punto])) \
+				or not Banco.coincide(valor_opcion(opcion), tensiones[punto]):
 			return "valor-fuera-de-rango"
 	return ""
 

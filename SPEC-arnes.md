@@ -51,6 +51,7 @@ Los puntos de prueba van del lado de J2, después de los interruptores.
 - RF-18: EL SISTEMA funciona sin el banco físico usando el multímetro virtual, e indica en pantalla cuál de las dos fuentes de falla está activa.
 - RF-19: EL SISTEMA opera el banco físico solo a 5 V por USB, rotulado como maqueta didáctica, sin conexión a sistemas reales.
 - RF-20: EL SISTEMA funciona sin conexión a internet.
+- RF-21: EL SISTEMA admite un banco con ESP32 por Wi-Fi mediante un adaptador local (`tools/puente_esp32.py`) que traduce `{"tp1","tp2"}` a eventos `nodo_p` y `nodo_q`, y admite una tensión de nivel alto configurable (`nominal_alto` en la orden o `--nominal-alto=3.3`), de modo que las opciones, los textos y la calificación usan 3.3 V o 5 V según el banco.
 
 ## Protocolo y firmware (si hay banco físico)
 - Se añaden al contrato dos controles de entrada, `nodo_p` y `nodo_q` (valor 0 o 1, de las entradas A1 y A2 con umbral de 2,5 V y antirrebote de 50 ms). Se envían al cambiar y con el latido. **Cambiar el contrato exige actualizar `SPEC-panel.md` y `docs/protocolo-panel.md` antes del firmware** (constitución, principio 7).

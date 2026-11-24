@@ -32,7 +32,7 @@ func _ready() -> void:
 	titulo.text = "Hoja de diagnóstico"
 	contenido.add_child(titulo)
 	for punto: String in Mediciones.PUNTOS:
-		agregar_bloque(contenido, "Lectura de " + punto.to_upper(), "reportar_" + punto + "_", Mediciones.OPCIONES)
+		agregar_bloque(contenido, "Lectura de " + punto.to_upper(), "reportar_" + punto + "_", Mediciones.opciones())
 	aviso = Label.new()
 	aviso.add_theme_color_override("font_color", Color("#ffe1a1"))
 	contenido.add_child(aviso)
