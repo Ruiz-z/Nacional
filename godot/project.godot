@@ -1,0 +1,28 @@
+config_version=5
+
+[application]
+
+config/name="HackaTec 2026 - Reto Volvo"
+run/main_scene="res://escenas/menu.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
+[gui]
+
+theme/custom="res://escenas/tema.tres"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.070588, 0.086275, 0.105882, 1)
+
+[input]
+
+ui_accept={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":4194309), Object(InputEventKey,"keycode":4194310), Object(InputEventKey,"keycode":32), Object(InputEventJoypadButton,"button_index":0)]
+}

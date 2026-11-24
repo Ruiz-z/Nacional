@@ -1,0 +1,89 @@
+{
+  "id": "comunicacion",
+  "version": "1",
+  "titulo": "[MUESTRA] Falla de comunicación en la red",
+  "descripcion": "[MUESTRA] Identifica la causa del aviso a partir de los síntomas del bus virtual.",
+  "sintomas": [
+    "[MUESTRA] Un módulo virtual deja de aparecer en la vista de red.",
+    "[MUESTRA] Los demás módulos virtuales siguen visibles."
+  ],
+  "codigo_falla": "[MUESTRA] Aviso genérico de comunicación",
+  "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+  "muestra": true,
+  "dificultad": "facil",
+  "causas": [
+    "modulo-sin-comunicacion",
+    "otro-modulo"
+  ],
+  "estado": {
+    "modulo": "Módulo virtual A",
+    "sintomas_revisados": false,
+    "resuelto": false
+  },
+  "estados_imposibles": [
+    {
+      "sintomas_revisados": false,
+      "resuelto": true
+    }
+  ],
+  "acciones": {
+    "revisar_sintomas": {
+      "componente": "monitor",
+      "previas": {},
+      "efectos": {
+        "sintomas_revisados": true
+      },
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Revisar los síntomas de la red virtual.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "seleccionar_otro_modulo": {
+      "componente": "monitor",
+      "previas": {
+        "sintomas_revisados": true
+      },
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "leve",
+      "tipo_error": "causa-equivocada",
+      "causa": "otro-modulo",
+      "descripcion": "[MUESTRA] Seleccionar un módulo ajeno al aviso.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "confirmar_diagnostico": {
+      "componente": "monitor",
+      "previas": {
+        "sintomas_revisados": true
+      },
+      "efectos": {
+        "resuelto": true
+      },
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "modulo-sin-comunicacion",
+      "descripcion": "[MUESTRA] Confirmar el diagnóstico del módulo ausente.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    }
+  },
+  "eventos": {},
+  "recuperaciones": {},
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 6
+  },
+  "ruta_ideal": [
+    "revisar_sintomas",
+    "confirmar_diagnostico"
+  ],
+  "variante": {
+    "estado": {
+      "modulo": "Módulo virtual B"
+    }
+  }
+}

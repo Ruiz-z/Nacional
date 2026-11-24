@@ -1,0 +1,45 @@
+{
+  "teclado": {
+    "W": ["mover", "adelante"],
+    "A": ["mover", "izquierda"],
+    "S": ["mover", "atras"],
+    "D": ["mover", "derecha"],
+    "raton": ["mirar"],
+    "clic": ["inspeccionar"],
+    "1": ["elegir-accion", 1],
+    "2": ["elegir-accion", 2],
+    "3": ["elegir-accion", 3],
+    "4": ["elegir-accion", 4],
+    "5": ["elegir-accion", 5],
+    "6": ["elegir-accion", 6],
+    "7": ["elegir-accion", 7],
+    "8": ["elegir-accion", 8],
+    "9": ["elegir-accion", 9],
+    "0": ["elegir-accion", 0],
+    "E": ["bloqueo"],
+    "Q": ["etiquetado"],
+    "rueda-arriba": ["torque", 1],
+    "rueda-abajo": ["torque", -1],
+    "Enter": ["confirmar"],
+    "Escape": ["cancelar"]
+  },
+  "control": {
+    "stick-izquierdo": ["mover"],
+    "stick-derecho": ["mirar"],
+    "A": ["inspeccionar"],
+    "dpad": ["elegir-accion"],
+    "L": ["bloqueo"],
+    "R": ["etiquetado"],
+    "ZR": ["torque", 1],
+    "ZL": ["torque", -1],
+    "X": ["confirmar"],
+    "B": ["cancelar"]
+  },
+  "panel": {
+    "bloqueo": ["bloqueo"],
+    "etiquetado": ["etiquetado"],
+    "torque": ["torque"],
+    "confirmar": ["confirmar"],
+    "cancelar": ["cancelar"]
+  }
+}

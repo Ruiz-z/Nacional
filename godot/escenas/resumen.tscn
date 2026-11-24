@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://escenas/resumen.gd" id="1"]
+
+[node name="Resumen" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+script = ExtResource("1")
+
+[node name="Titulo" type="Label" parent="."]
+autowrap_mode = 3
+theme_type_variation = &"Titulo"
+text = "Resumen de práctica"
+
+[node name="Vacio" type="Label" parent="."]
+autowrap_mode = 3
+theme_type_variation = &"Chip"
+text = "Aquí podrás revisar tus decisiones y comparar intentos al terminar una práctica."
+
+[node name="Detalle" type="RichTextLabel" parent="."]
+visible = false
+custom_minimum_size = Vector2(0, 168)
+focus_mode = 2
+
+[node name="Pregunta" type="Label" parent="."]
+autowrap_mode = 3
+visible = false
+theme_type_variation = &"Seccion"
+
+[node name="Reflexion" type="LineEdit" parent="."]
+visible = false
+custom_minimum_size = Vector2(0, 52)
+
+[node name="Guardar" type="Button" parent="."]
+custom_minimum_size = Vector2(0, 52)
+text = "Guardar reflexión y ver ruta ideal"
+autowrap_mode = 3
+visible = false
+theme_type_variation = &"Primario"
+
+[node name="Reintentar" type="Button" parent="."]
+custom_minimum_size = Vector2(0, 52)
+text = "Reintentar con variante"
+visible = false
+theme_type_variation = &"Primario"

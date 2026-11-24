@@ -1,0 +1,73 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://escenas/actividad_aprendizaje.gd" id="1"]
+
+[node name="ActividadAprendizaje" type="ScrollContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+follow_focus = true
+script = ExtResource("1")
+
+[node name="Margen" type="MarginContainer" parent="."]
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Centro" type="CenterContainer" parent="Margen"]
+
+[node name="Tarjeta" type="PanelContainer" parent="Margen/Centro"]
+custom_minimum_size = Vector2(1056, 0)
+
+[node name="Contenido" type="VBoxContainer" parent="Margen/Centro/Tarjeta"]
+theme_override_constants/separation = 12
+
+[node name="Titulo" type="Label" parent="Margen/Centro/Tarjeta/Contenido"]
+autowrap_mode = 3
+theme_type_variation = &"Titulo"
+text = "Actividad de aprendizaje"
+
+[node name="Aviso" type="Label" parent="Margen/Centro/Tarjeta/Contenido"]
+autowrap_mode = 3
+visible = false
+theme_type_variation = &"Aviso"
+
+[node name="Numero" type="Label" parent="Margen/Centro/Tarjeta/Contenido"]
+visible = false
+theme_type_variation = &"Metadato"
+
+[node name="Progreso" type="ProgressBar" parent="Margen/Centro/Tarjeta/Contenido"]
+custom_minimum_size = Vector2(0, 8)
+show_percentage = false
+visible = false
+
+[node name="Detalle" type="RichTextLabel" parent="Margen/Centro/Tarjeta/Contenido"]
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="Pregunta" type="Label" parent="Margen/Centro/Tarjeta/Contenido"]
+autowrap_mode = 3
+theme_type_variation = &"Seccion"
+
+[node name="Opciones" type="VBoxContainer" parent="Margen/Centro/Tarjeta/Contenido"]
+
+[node name="Fuente" type="Label" parent="Margen/Centro/Tarjeta/Contenido"]
+autowrap_mode = 3
+theme_type_variation = &"Secundario"
+
+[node name="Enviar" type="Button" parent="Margen/Centro/Tarjeta/Contenido"]
+custom_minimum_size = Vector2(0, 52)
+text = "Enviar respuesta"
+visible = false
+theme_type_variation = &"Primario"
+
+[node name="Reiniciar" type="Button" parent="Margen/Centro/Tarjeta/Contenido"]
+custom_minimum_size = Vector2(0, 52)
+text = "Borrar respuesta"
+visible = false

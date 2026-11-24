@@ -11,5 +11,5 @@
 9. **Privacidad:** los técnicos se identifican con alias o ID, sin datos personales.
 10. **Verificable:** cada RF tiene una prueba (automática o checklist manual) antes de marcarse hecho.
 11. **Alcance:** primero el escenario eléctrico completo; el diésel solo si el eléctrico ya está validado.
-12. **Dependencias:** no se añaden librerías o plugins sin preguntar. Aprobadas: plugin SQLite para Godot, runtime LLM local opcional (Ollama o similar) y búsqueda de texto de SQLite (FTS5) para el RAG, sin embeddings. Plugin serial o puente Python: se decide con la prueba de 30 minutos.
+12. **Dependencias:** no se añaden librerías o plugins sin preguntar. Aprobadas: plugin SQLite para Godot, runtime LLM local opcional (Ollama o similar) y búsqueda por palabras clave en GDScript para el RAG (el godot-sqlite incluido no trae FTS5), sin embeddings. Plugin serial o puente Python: se decide con la prueba de 30 minutos.
 13. **Idioma:** código y commits en español claro; nombres técnicos en inglés si el motor lo exige.
