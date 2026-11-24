@@ -297,6 +297,7 @@ func abrir_tablero(tecnico: Dictionary) -> void:
 
 func abrir_ordenes(tecnico: Dictionary) -> void:
 	var ordenes := Ordenes.instantiate()
+	ordenes.tecnico = tecnico
 	ordenes.orden_elegida.connect(func(archivo: String): abrir_bus(tecnico, archivo))
 	abrir(ordenes)
 

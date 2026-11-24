@@ -1,6 +1,7 @@
 extends SceneTree
 
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
+# Órdenes: godot --path godot -s ../tools/captura.gd -- ordenes salida.png 1280 720
 # Menú: godot --path godot -s ../tools/captura.gd -- escenas/menu.tscn salida.png 1280 720
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
@@ -103,7 +104,8 @@ func capturar() -> void:
 	if not verificar and DisplayServer.get_name() == "headless":
 		fallar("La captura requiere un servidor gráfico. Usa --verificar para comprobar el estado sin generar PNG.")
 		return
-	var paquete := load("res://" + args[0]) as PackedScene
+	var ruta := "escenas/ordenes.tscn" if args[0] == "ordenes" else args[0]
+	var paquete := load("res://" + ruta) as PackedScene
 	if paquete == null:
 		fallar("No se pudo cargar la escena.")
 		return
