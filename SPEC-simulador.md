@@ -69,6 +69,7 @@ Escena en Godot de un bus eléctrico donde el técnico inspecciona, diagnostica 
 - RF-32: EL SISTEMA ofrece órdenes de servicio, una por escenario con su `zona`, y activa solo la falla de la orden elegida; las demás piezas se pueden inspeccionar sin falla.
 - RF-33: EL SISTEMA incluye las zonas gabinete lateral, faros, motor eléctrico de tracción y cabina interior, accesibles caminando; la cabina se alcanza por la puerta de pasajeros.
 - RF-34: CUANDO ocurre un error, un rechazo o un aviso importante (falta una herramienta o pieza, acción no aplicada, error del técnico, falta crítica), EL SISTEMA lo muestra en una tarjeta modal con título, explicación y botón **OK** que no se cierra sola; mientras está abierta, la práctica queda en pausa y al cerrarla se recupera el control. Los resultados de éxito que incluyen explicación o el siguiente paso también se muestran en tarjeta con **OK**, con chip verde "Bien hecho". Solo las confirmaciones de una o dos palabras ("Compuerta abierta") son temporales, con fondo oscuro legible y al menos 3 segundos de duración.
+- RF-35: AL terminar una orden, EL SISTEMA muestra un resumen con botones visibles **Guardar y ver ruta ideal**, **Omitir**, **Reintentar** y **Volver al menú**; SI el campo de reflexión está vacío al guardar, ENTONCES avisa en la pantalla "Escribe tu respuesta o pulsa Omitir" y no se queda sin responder; el resumen usa texto claro ("Orden resuelta", sin palabras internas) y su contenido se puede leer completo con desplazamiento.
 
 ## Requisitos no funcionales
 - Godot 4.7.2; modo escritorio; español.
