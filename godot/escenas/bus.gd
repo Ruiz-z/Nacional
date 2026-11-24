@@ -1232,9 +1232,8 @@ func _physics_process(_delta: float) -> void:
 	var rotulo := "Clic / A · %s" % objetivo.nombre if objetivo != null else ""
 	if objetivo != null and zona_activa == $Banco and objetivo.componente in ["tp0", "tp1", "tp2"]:
 		var mediciones: RefCounted = motor.mediciones
-		var punta := "negra" if mediciones.punta_negra.is_empty() or not mediciones.punta_roja.is_empty() else "roja"
-		rotulo = "Poner la punta %s aquí (%s)" % [punta, objetivo.nombre] if taller.mano == "multimetro" \
-			else "Toma el multímetro para medir (%s)" % objetivo.nombre
+		rotulo = Mediciones.texto_apuntado(mediciones.punta_negra, mediciones.punta_roja, objetivo.componente) \
+			if taller.mano == "multimetro" else "Toma el multímetro para medir (%s)" % objetivo.nombre
 	$Apuntado/Fondo/Nombre.text = rotulo
 
 

@@ -24,16 +24,21 @@ unique_name_in_owner = true
 theme_override_constants/separation = 12
 
 [node name="Cabecera" type="HBoxContainer" parent="Fondo/Centro/Tarjeta/Contenido"]
+alignment = 2
+
+[node name="Contador" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Cabecera"]
+unique_name_in_owner = true
+theme_type_variation = &"Secundario"
 
 [node name="Chip" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Cabecera"]
 unique_name_in_owner = true
 theme_type_variation = &"Chip"
 
-[node name="Contador" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Cabecera"]
+[node name="Marca" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Cabecera"]
 unique_name_in_owner = true
-size_flags_horizontal = 3
-theme_type_variation = &"Secundario"
-horizontal_alignment = 2
+visible = false
+size_flags_vertical = 4
+theme_type_variation = &"ChipOrden"
 
 [node name="Titulo" type="Label" parent="Fondo/Centro/Tarjeta/Contenido"]
 unique_name_in_owner = true
@@ -81,13 +86,6 @@ autowrap_mode = 3
 unique_name_in_owner = true
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
-
-[node name="Marca" type="Label" parent="Fondo/Centro/Tarjeta/Contenido"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_type_variation = &"Secundario"
-theme_override_font_sizes/font_size = 14
 
 [node name="Fuente" type="Label" parent="Fondo/Centro/Tarjeta/Contenido"]
 unique_name_in_owner = true

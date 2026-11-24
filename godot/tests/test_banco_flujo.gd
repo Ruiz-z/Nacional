@@ -59,8 +59,8 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 		Taller.cerrar_exitos(bus)
 		if bus.hud_mision.progreso != [false, false, false, false]:
 			return "Medir un borne no debe cumplir la misión compuesta."
-		if not apuntar_y_pulsar(bus, "tp0") or zona.pinzas.tp1.visible \
-				or not apuntar_y_pulsar(bus, "tp2") or not zona.pinzas.tp2.visible:
+		if not apuntar_y_pulsar(bus, "tp2") or not zona.pinzas.tp2.visible \
+				or not zona.pinzas.tp0.visible or zona.pinzas.tp1.visible:
 			return "La pinza roja debe pasar de TP1 a TP2."
 		if bus.jugador.pantalla_multimetro.text != ("0.0 V" if variante else "5.0 V") \
 				or bus.indicador_puntas.text != "Punta negra: TP0 · Punta roja: TP2":

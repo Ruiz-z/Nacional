@@ -43,6 +43,8 @@ static func ejecutar() -> bool:
 		"donde": "", "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"})
 	var marca: Label = tarjeta.get_node("%Marca")
 	var correcto: bool = marca.visible and marca.text == "Ejemplo didáctico" \
+		and marca.theme_type_variation == &"ChipOrden" and marca.get_parent() == tarjeta.chip.get_parent() \
+		and marca.get_index() == tarjeta.chip.get_index() + 1 \
 		and tarjeta.cuerpo.text == "Revisa el foco." and tarjeta.titulo.text == "Cierre" \
 		and tarjeta.fuente.text == "Fuente: ejemplo didáctico, sin fuente oficial"
 	tarjeta.free()

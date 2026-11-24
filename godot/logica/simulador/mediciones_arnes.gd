@@ -2,6 +2,7 @@ extends RefCounted
 
 const Banco = preload("res://logica/simulador/banco_arnes.gd")
 const PUNTOS := ["tp1", "tp2"]
+const AVISO_NEGRA := "La punta negra va en TP0."
 const INDICIOS := ["tp1_medido", "tp2_medido", "tp1_reportado", "tp2_reportado", "diagnostico_registrado"]
 const OPCIONES := {"0": "≈0 V", "5": "≈5 V", "otra": "Otra"}
 const ERRORES_MEDICION := ["punto-de-medicion-incorrecto", "valor-fuera-de-rango", "paso-omitido"]
@@ -65,21 +66,35 @@ func reiniciar_puntas() -> void:
 	aviso_puntas = ""
 
 
+static func texto_apuntado(negra: String, roja: String, punto: String) -> String:
+	if roja == "tp0":
+		return AVISO_NEGRA
+	var borne := punto.to_upper()
+	if negra.is_empty():
+		return "Poner la punta negra aquí (TP0)" if punto == "tp0" else AVISO_NEGRA
+	if punto == "tp0":
+		return "La punta negra ya está aquí (TP0)"
+	if punto == roja:
+		return "La punta roja ya está aquí (%s)" % borne
+	if roja.is_empty():
+		return "Poner la punta roja aquí (%s)" % borne
+	return "Mover la punta roja aquí (%s)" % borne
+
+
 func tocar(punto: String) -> String:
-	if punto.is_empty() or not punta_roja.is_empty():
-		reiniciar_puntas()
 	if punto.is_empty():
+		reiniciar_puntas()
 		return ""
 	aviso_puntas = ""
-	if punta_negra.is_empty():
+	if punta_roja == "tp0":
+		reiniciar_puntas()
+		aviso_puntas = AVISO_NEGRA
+	elif punta_negra.is_empty():
 		if punto == "tp0":
 			punta_negra = punto
 		else:
-			aviso_puntas = "La punta negra va en TP0."
-	elif punto == "tp0":
-		reiniciar_puntas()
-		aviso_puntas = "Coloca la punta roja en TP1 o TP2."
-	elif punto in PUNTOS:
+			aviso_puntas = AVISO_NEGRA
+	elif punto in PUNTOS and punto != punta_roja:
 		punta_roja = punto
 		return "medir_" + punto
 	return ""

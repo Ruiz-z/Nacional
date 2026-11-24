@@ -32,5 +32,10 @@ static func ejecutar() -> bool:
 	mediciones.tocar("tp0")
 	if mediciones.tocar("tp2") != "medir_tp2" or mediciones.puntas() != ["tp0", "tp2"]:
 		return false
-	mediciones.tocar("tp0")
-	return mediciones.puntas() == ["tp0", ""]
+	if mediciones.tocar("tp0") != "" or mediciones.tocar("tp2") != "" \
+			or mediciones.puntas() != ["tp0", "tp2"]:
+		return false
+	if mediciones.tocar("tp1") != "medir_tp1" or mediciones.puntas() != ["tp0", "tp1"]:
+		return false
+	mediciones.tocar("")
+	return mediciones.puntas() == ["", ""]

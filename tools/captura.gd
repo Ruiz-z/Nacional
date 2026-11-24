@@ -342,6 +342,15 @@ func capturar() -> void:
 	if vista in ["cierre", "exito", "orden"] and not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect()):
 		fallar("La tarjeta de la orden queda recortada.")
 		return
+	if vista == "orden":
+		var marca: Label = escena.flashcard.get_node("%Marca")
+		var chip: Label = escena.flashcard.chip
+		if not marca.visible or marca.text != "Ejemplo didáctico" or marca.theme_type_variation != &"ChipOrden" \
+				or marca.get_global_rect().position.x < chip.get_global_rect().end.x \
+				or not is_equal_approx(marca.get_global_rect().get_center().y, chip.get_global_rect().get_center().y) \
+				or not escena.flashcard.tarjeta.get_global_rect().encloses(marca.get_global_rect()):
+			fallar("La etiqueta didáctica debe aparecer junto al chip de la orden y dentro de la tarjeta.")
+			return
 	if vista in ["resumen", "resumen-critico"] and (not escena.resumen.visible \
 			or not vp.get_visible_rect().encloses(escena.resumen.get_node("%Acciones").get_global_rect())):
 		fallar("Las acciones del resumen quedan recortadas.")
