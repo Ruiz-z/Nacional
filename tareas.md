@@ -54,16 +54,16 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [x] T-43 S — Caso corto de falla de comunicación — Hecho cuando: valida.
 
 ## 4. entrada y panel
-- [ ] T-44 S — Vocabulario de acciones y archivo de mapeo (entrada RF-1, 2) — Hecho cuando: prueba traduce tecla y botón a la misma acción.
-- [ ] T-45 S — Registro de fuente y regla de la última fuente (RF-3) — Hecho cuando: prueba con dos fuentes.
-- [ ] T-46 S — Parser de líneas JSON con `v`, `n`, `t`; ignora y registra errores (RF-4, 5) — Hecho cuando: pruebas de malformado, versión, control inexistente y `n` repetido.
-- [ ] T-47 S — Filtro de 50 ms (RF-6) — Hecho cuando: prueba con ráfaga.
-- [ ] T-48 S — Comparación de secuencias: `orden-incorrecto`, `paso-innecesario`, `accion-insegura` (RF-10, 11, 12) — Hecho cuando: una prueba por tipo.
-- [ ] T-49 S — Rango de perilla (RF-13) — Hecho cuando: prueba dentro y fuera de rango.
-- [ ] T-50 S — `tools/emisor_eventos` (RF-14) — Hecho cuando: reproduce una secuencia contra el simulador.
-- [ ] T-51 S — Latido y detección de desconexión a 3 s (RF-8) — Hecho cuando: prueba pausa y cambia a virtual.
+- [x] T-44 S — Vocabulario de acciones y archivo de mapeo (entrada RF-1, 2) — Hecho cuando: prueba traduce tecla y botón a la misma acción.
+- [x] T-45 S — Registro de fuente y regla de la última fuente (RF-3) — Hecho cuando: prueba con dos fuentes.
+- [x] T-46 S — Parser de líneas JSON con `v`, `n`, `t`; ignora y registra errores (RF-4, 5) — Hecho cuando: pruebas de malformado, versión, control inexistente y `n` repetido.
+- [x] T-47 S — Filtro de 50 ms (RF-6) — Hecho cuando: prueba con ráfaga.
+- [x] T-48 S — Comparación de secuencias: `orden-incorrecto`, `paso-innecesario`, `accion-insegura` (RF-10, 11, 12) — Hecho cuando: una prueba por tipo.
+- [x] T-49 S — Rango de perilla (RF-13) — Hecho cuando: prueba dentro y fuera de rango.
+- [x] T-50 S — `tools/emisor_eventos` (RF-14) — Hecho cuando: reproduce una secuencia contra el simulador.
+- [x] T-51 S — Latido y detección de desconexión a 3 s (RF-8) — Hecho cuando: prueba pausa y cambia a virtual.
 - [ ] T-52 S — Panel virtual en pantalla con los mismos eventos y LEDs (RF-9) — Hecho cuando: demo manual de un escenario con ratón.
-- [ ] T-53 S — Redactar `docs/protocolo-panel.md` (RF-15) — Hecho cuando: campos, versión y ejemplos.
+- [x] T-53 S — Redactar `docs/protocolo-panel.md` (RF-15) — Hecho cuando: campos, versión y ejemplos.
 - [ ] T-54 E — Firmware: leer controles, filtrar rebotes, enviar JSON, latido (RF-16) — Hecho cuando: el emisor y el firmware producen líneas iguales.
 - [ ] T-55 E — Firmware: recibir estado de LEDs — Hecho cuando: los 3 LEDs responden al simulador.
 - [ ] T-56 E — Montar la maqueta y etiquetas — Hecho cuando: checklist manual de cada control.
