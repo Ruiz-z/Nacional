@@ -11,6 +11,7 @@ var entrada: RefCounted
 var teclas := {}
 var mover_stick := false
 var mirar_stick := false
+var mirar_raton := false
 var gravedad: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 @onready var camara: Camera3D = $Camara
@@ -81,12 +82,13 @@ func configurar(traductor: RefCounted) -> void:
 			teclas[accion[1]] = tecla
 	mover_stick = entrada.buscar_asignacion("control", "stick-izquierdo") == ["mover"]
 	mirar_stick = entrada.buscar_asignacion("control", "stick-derecho") == ["mirar"]
+	mirar_raton = entrada.buscar_asignacion("teclado", "raton") == ["mirar"]
 
 
-func _unhandled_input(evento: InputEvent) -> void:
-	if activo and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and evento is InputEventMouseMotion:
-		if entrada != null and entrada.traducir("teclado", "raton", evento.relative).get("accion") == "mirar":
-			mirar(evento.relative * 0.003)
+func _input(evento: InputEvent) -> void:
+	# El movimiento del ratón no pasa por el filtro anti-rebote de la entrada: se consulta el mapeo una vez.
+	if activo and mirar_raton and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and evento is InputEventMouseMotion:
+		mirar(evento.relative * 0.003)
 
 
 func mirar(giro: Vector2) -> void:

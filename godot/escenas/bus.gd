@@ -271,6 +271,14 @@ func actualizar_panel(ahora: int) -> void:
 	panel.visible = $AlternarPanel.visible and not panel_oculto
 
 
+func _unhandled_input(evento: InputEvent) -> void:
+	# Un clic en la escena (fuera de los paneles) recupera el ratón si la ventana no lo tenía capturado.
+	if motor != null and motor.fin().is_empty() and not pausa_visible and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED \
+			and evento is InputEventMouseButton and evento.pressed and evento.button_index == MOUSE_BUTTON_LEFT:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		get_viewport().set_input_as_handled()
+
+
 func _input(evento: InputEvent) -> void:
 	if motor == null or not motor.fin().is_empty() or not evento.is_pressed() or evento.is_echo():
 		return
