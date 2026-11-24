@@ -40,18 +40,18 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [x] T-31 S — Indicadores hacia `tablero` (RF-20) — Hecho cuando: errores recurrentes con regla de 3 o más.
 
 ## 3. simulador (motor)
-- [ ] T-32 S — Formato JSON de escenario y validador con archivo y campo (RF-1, 2) — Hecho cuando: pruebas de campos faltantes y estado imposible.
-- [ ] T-33 S — Detección de eventos circulares al validar — Hecho cuando: un ciclo se rechaza.
-- [ ] T-34 S — Motor: condiciones previas, efectos y rechazo con motivo (RF-3, 4) — Hecho cuando: pruebas de acción permitida y rechazada.
-- [ ] T-35 S — Eventos por estado y menú de recuperación (RF-5, 6, 7) — Hecho cuando: `tornillo_roto` ofrece opciones con costo, tiempo y riesgo.
-- [ ] T-36 S — Faltas críticas y leves (RF-8, 9) — Hecho cuando: crítica detiene y registra; leve resta y sigue.
-- [ ] T-37 S — Puntaje 0–100 con crédito por recuperación (RF-17) — Hecho cuando: pruebas con valores calculados.
-- [ ] T-38 S — Brecha causa marcada vs acción (RF-16, 24) — Hecho cuando: prueba envía la brecha y la fuente de entrada.
-- [ ] T-39 S — Reintento desde punto seguro y variante (RF-19) — Hecho cuando: prueba tras falta crítica.
-- [ ] T-40 S — Resumen: línea de tiempo, ruta ideal, comparación con intento anterior, "¿qué harías distinto?" (RF-18, 20, 21) — Hecho cuando: pruebas de la estructura devuelta.
-- [ ] T-41 S — Entrega de resultados a `aprendizaje` y `tablero` (RF-22) — Hecho cuando: prueba verifica los campos.
-- [ ] T-42 S — Escenario `[MUESTRA]` de aislamiento con 3 o 4 fallas y recuperaciones — Hecho cuando: valida y se completa en una prueba por la ruta ideal.
-- [ ] T-43 S — Caso corto de falla de comunicación — Hecho cuando: valida.
+- [x] T-32 S — Formato JSON de escenario y validador con archivo y campo (RF-1, 2) — Hecho cuando: pruebas de campos faltantes y estado imposible.
+- [x] T-33 S — Detección de eventos circulares al validar — Hecho cuando: un ciclo se rechaza.
+- [x] T-34 S — Motor: condiciones previas, efectos y rechazo con motivo (RF-3, 4) — Hecho cuando: pruebas de acción permitida y rechazada.
+- [x] T-35 S — Eventos por estado y menú de recuperación (RF-5, 6, 7) — Hecho cuando: `tornillo_roto` ofrece opciones con costo, tiempo y riesgo.
+- [x] T-36 S — Faltas críticas y leves (RF-8, 9) — Hecho cuando: crítica detiene y registra; leve resta y sigue.
+- [x] T-37 S — Puntaje 0–100 con crédito por recuperación (RF-17) — Hecho cuando: pruebas con valores calculados.
+- [x] T-38 S — Brecha causa marcada vs acción (RF-16, 24) — Hecho cuando: prueba envía la brecha y la fuente de entrada.
+- [x] T-39 S — Reintento desde punto seguro y variante (RF-19) — Hecho cuando: prueba tras falta crítica.
+- [x] T-40 S — Resumen: línea de tiempo, ruta ideal, comparación con intento anterior, "¿qué harías distinto?" (RF-18, 20, 21) — Hecho cuando: pruebas de la estructura devuelta.
+- [x] T-41 S — Entrega de resultados a `aprendizaje` y `tablero` (RF-22) — Hecho cuando: prueba verifica los campos.
+- [x] T-42 S — Escenario `[MUESTRA]` de aislamiento con 3 o 4 fallas y recuperaciones — Hecho cuando: valida y se completa en una prueba por la ruta ideal.
+- [x] T-43 S — Caso corto de falla de comunicación — Hecho cuando: valida.
 
 ## 4. entrada y panel
 - [ ] T-44 S — Vocabulario de acciones y archivo de mapeo (entrada RF-1, 2) — Hecho cuando: prueba traduce tecla y botón a la misma acción.

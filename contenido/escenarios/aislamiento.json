@@ -1,0 +1,242 @@
+{
+  "id": "aislamiento",
+  "version": "1",
+  "titulo": "[MUESTRA] Pérdida de aislamiento",
+  "descripcion": "[MUESTRA] El bus virtual muestra un aviso genérico de aislamiento en un sector simulado.",
+  "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+  "muestra": true,
+  "dificultad": "media",
+  "causas": [
+    "aislamiento-degradado",
+    "aviso-inconsistente"
+  ],
+  "estado": {
+    "sector": "Sector virtual A",
+    "inspeccionado": false,
+    "indicio_confirmado": false,
+    "tornillo_roto": false,
+    "sector_equivocado": false,
+    "indicio_descartado": false,
+    "resuelto": false
+  },
+  "estados_imposibles": [
+    {
+      "resuelto": true,
+      "tornillo_roto": true
+    },
+    {
+      "resuelto": true,
+      "sector_equivocado": true
+    },
+    {
+      "resuelto": true,
+      "indicio_descartado": true
+    }
+  ],
+  "acciones": {
+    "inspeccionar": {
+      "previas": {},
+      "efectos": {
+        "inspeccionado": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Inspeccionar el sector señalado en la maqueta virtual.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "evaluar_indicio": {
+      "previas": {
+        "inspeccionado": true,
+        "indicio_descartado": false,
+        "sector_equivocado": false
+      },
+      "efectos": {
+        "indicio_confirmado": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Relacionar el indicio simulado con el aviso de aislamiento.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "confirmar_solucion": {
+      "previas": {
+        "indicio_confirmado": true,
+        "tornillo_roto": false,
+        "sector_equivocado": false,
+        "indicio_descartado": false
+      },
+      "efectos": {
+        "resuelto": true
+      },
+      "competencia": "sistema-electrico-bateria",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "aislamiento-degradado",
+      "descripcion": "[MUESTRA] Confirmar la solución ficticia en el simulador.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "ignorar_aviso_seguridad": {
+      "previas": {},
+      "efectos": {},
+      "competencia": "seguridad-alto-voltaje",
+      "criticidad": "critica",
+      "tipo_error": "accion-insegura",
+      "causa": "",
+      "descripcion": "[MUESTRA] Ignorar el aviso de seguridad del simulador detiene la práctica.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "forzar_pieza": {
+      "previas": {
+        "inspeccionado": true,
+        "tornillo_roto": false
+      },
+      "efectos": {
+        "tornillo_roto": true
+      },
+      "competencia": "sistema-electrico-bateria",
+      "criticidad": "leve",
+      "tipo_error": "valor-fuera-de-rango",
+      "causa": "",
+      "descripcion": "[MUESTRA] La pieza virtual se rompe al forzarla.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "elegir_otro_sector": {
+      "previas": {
+        "inspeccionado": true,
+        "sector_equivocado": false
+      },
+      "efectos": {
+        "sector_equivocado": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "leve",
+      "tipo_error": "causa-equivocada",
+      "causa": "",
+      "descripcion": "[MUESTRA] La selección apunta a un sector virtual ajeno al aviso.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "descartar_indicio": {
+      "previas": {
+        "inspeccionado": true,
+        "indicio_descartado": false
+      },
+      "efectos": {
+        "indicio_descartado": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "leve",
+      "tipo_error": "paso-omitido",
+      "causa": "",
+      "descripcion": "[MUESTRA] Se descarta el indicio del ejercicio.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    }
+  },
+  "eventos": {
+    "tornillo_roto": {
+      "condicion": {
+        "tornillo_roto": true
+      },
+      "efectos": {},
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "descripcion": "[MUESTRA] La pieza virtual se rompe al forzarla.",
+      "recuperaciones": [
+        "reponer_pieza"
+      ]
+    },
+    "sector_equivocado": {
+      "condicion": {
+        "sector_equivocado": true
+      },
+      "efectos": {},
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "descripcion": "[MUESTRA] La selección apunta a un sector virtual ajeno al aviso.",
+      "recuperaciones": [
+        "volver_al_sector"
+      ]
+    },
+    "indicio_descartado": {
+      "condicion": {
+        "indicio_descartado": true
+      },
+      "efectos": {},
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "descripcion": "[MUESTRA] Se descarta el indicio del ejercicio.",
+      "recuperaciones": [
+        "recuperar_indicio"
+      ]
+    }
+  },
+  "recuperaciones": {
+    "reponer_pieza": {
+      "previas": {
+        "tornillo_roto": true
+      },
+      "efectos": {
+        "tornillo_roto": false
+      },
+      "competencia": "sistema-electrico-bateria",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Reponer la pieza en la maqueta virtual.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "costo": "[MUESTRA] bajo",
+      "tiempo": "[MUESTRA] breve",
+      "riesgo": "[MUESTRA] bajo"
+    },
+    "volver_al_sector": {
+      "previas": {
+        "sector_equivocado": true
+      },
+      "efectos": {
+        "sector_equivocado": false
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Volver al sector virtual indicado.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "costo": "[MUESTRA] bajo",
+      "tiempo": "[MUESTRA] breve",
+      "riesgo": "[MUESTRA] bajo"
+    },
+    "recuperar_indicio": {
+      "previas": {
+        "indicio_descartado": true
+      },
+      "efectos": {
+        "indicio_descartado": false
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Recuperar el indicio en la pantalla de revisión.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "costo": "[MUESTRA] bajo",
+      "tiempo": "[MUESTRA] breve",
+      "riesgo": "[MUESTRA] bajo"
+    }
+  },
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 20
+  },
+  "ruta_ideal": [
+    "inspeccionar",
+    "evaluar_indicio",
+    "confirmar_solucion"
+  ],
+  "variante": {
+    "estado": {
+      "sector": "Sector virtual B"
+    }
+  }
+}
