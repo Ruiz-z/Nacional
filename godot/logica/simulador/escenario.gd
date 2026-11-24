@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Inventario = preload("res://logica/simulador/inventario.gd")
+
 const RutasContenido = preload("res://logica/rutas_contenido.gd")
 
 const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria",
@@ -152,6 +154,8 @@ static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> S
 			if not datos.recuperaciones.has(id) or regla.recuperaciones.count(id) != 1:
 				return ".recuperaciones"
 		return ""
+	if regla.has("requiere") and not Inventario.requisitos_validos(regla.requiere):
+		return ".requiere"
 	if regla.has("titulo") and not Banco.texto_presente(regla.titulo):
 		return ".titulo"
 	if not regla.get("requiere_panel", false) is bool:

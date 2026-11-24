@@ -196,6 +196,7 @@
   },
   "recuperaciones": {
     "reponer_pieza": {
+      "requiere": {"herramientas": ["llave_ajustable"]},
       "titulo": "Reponer pieza",
       "requiere_panel": true,
       "componente": "terminal",

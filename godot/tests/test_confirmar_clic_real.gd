@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 const Protocolo = preload("res://logica/entrada/protocolo.gd")
 const REPARAR := "Repara: abre el multímetro, elige Reconectar conductor y confirma en el panel."
@@ -45,6 +47,7 @@ static func recorrer_faros(bus: Node3D, arbol: SceneTree) -> bool:
 			or not comprobar_ayuda(bus, "Mide la continuidad en el conector de los faros.") \
 			or not elegir(bus, "conector_faros", "medir_continuidad") \
 			or not comprobar_ayuda(bus, "Cambia el foco del faro izquierdo y confirma en el panel.") \
+			or not Taller.equipar(bus, "cambiar_foco_correcto") \
 			or not elegir(bus, "faro_izquierdo", "cambiar_foco_correcto"):
 		return false
 	if not await confirmar(bus, arbol, "cambiar_foco_correcto") \

@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 const INDICIOS := ["Caja de fusibles inspeccionada", "Continuidad medida",
 	"Foco izquierdo repuesto", "Falla resuelta"]
@@ -58,6 +60,8 @@ static func recorrer(bus: Node3D, variante: String, arbol: SceneTree) -> bool:
 
 
 static func paso(bus: Node3D, pieza: String, id: String, arbol: SceneTree, aplicada := true) -> bool:
+	if not Taller.equipar(bus, id):
+		return false
 	bus.abrir_menu(bus.zona_activa.piezas[pieza])
 	var indice: int = bus.menu_pieza.entradas.find_custom(func(entrada: Dictionary) -> bool:
 		return entrada.id == id)

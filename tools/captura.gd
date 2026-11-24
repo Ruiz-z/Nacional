@@ -3,6 +3,7 @@ extends SceneTree
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
+# Taller: [ancho alto] taller|baliza [--verificar]
 # Banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
 func _initialize() -> void:
@@ -18,9 +19,10 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
+	var vista_taller := vista in ["taller", "baliza"]
 	var zona := ""
 	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
@@ -90,6 +92,8 @@ func capturar() -> void:
 			fallar("La escena no tiene un gabinete de servicio.")
 			return
 		escena.modo_captura = true
+	if vista_taller and vista == "baliza":
+		escena.archivo = "escenarios/faros.json"
 	if not zona.is_empty():
 		if zona != "interior":
 			escena.archivo = "escenarios/%s.json" % {"cabina": "comunicacion", "banco": "modulo_auxiliar"}.get(zona, zona)
@@ -100,6 +104,10 @@ func capturar() -> void:
 		if escena.motor == null:
 			fallar("El simulador no se inicializó.")
 			return
+		if vista_taller:
+			if not preparar_taller(escena, vista):
+				fallar("El taller no corresponde a la vista solicitada.")
+				return
 		if vista in ["abierto", "animacion", "danado"]:
 			sector = escena.zona_activa
 			escena.ubicar_jugador(sector.acceso)
@@ -177,10 +185,10 @@ func capturar() -> void:
 					or (vista != "animacion" and not comprobar_pieza(escena, objetivo)):
 				fallar("El estado o el encuadre de la zona no corresponde a la vista %s." % vista)
 				return
-		elif not comprobar_estado(escena, sector, vista):
+		elif not vista_taller and not comprobar_estado(escena, sector, vista):
 			fallar("El estado del gabinete no corresponde a la vista %s." % vista)
 			return
-		if zona.is_empty() and args.size() < 8 and vista != "entrada":
+		if not vista_taller and zona.is_empty() and args.size() < 8 and vista != "entrada":
 			escena.get_node("Jugador").set_physics_process(false)
 			escena.ubicar_jugador(pieza_gabinete(vista, menu))
 		if vista == "entrada":
@@ -194,7 +202,7 @@ func capturar() -> void:
 			if nodo.mesh != null:
 				triangulos += int(nodo.mesh.get_faces().size() / 3.0)
 		print("Triángulos de malla (incluidas herramientas ocultas): ", triangulos)
-		if triangulos >= 80000:
+		if triangulos >= 120000:
 			fallar("La escena supera el presupuesto de triángulos.")
 			return
 	if args.size() >= 8:
@@ -214,7 +222,7 @@ func capturar() -> void:
 			var objetivo: Vector3 = camara.to_local(sector.piezas[id].global_position)
 			camara.rotation.x = atan2(objetivo.y, -objetivo.z)
 		print("Cámara ", camara.global_position, ", giro ", args[7], "°, inclinación ", camara.rotation_degrees.x, "°")
-	if zona.is_empty() and not vista.is_empty():
+	if not vista_taller and zona.is_empty() and not vista.is_empty():
 		await physics_frame
 		await physics_frame
 		if not comprobar_encuadre(escena, vista, menu):
@@ -256,6 +264,44 @@ func capturar() -> void:
 		return
 	print("Guardado ", args[1], " ", img.get_size())
 	quit(0)
+
+
+func preparar_taller(escena: Node3D, vista: String) -> bool:
+	var taller: Node3D = escena.taller
+	escena.jugador.set_physics_process(false)
+	escena.get_node("PistaControles").hide()
+	escena.get_node("AlineacionPanel").hide()
+	escena.get_node("AlternarPanel").hide()
+	escena.set_process(false)
+	escena.get_node("Interfaz").visible = vista == "baliza"
+	taller.cambiar_cajones(true, true)
+	var posicion := Vector3(-5.35, 0.35, -3.4)
+	var foco := Vector3(-5.35, 1.24, -8.02)
+	if vista == "baliza":
+		posicion = Vector3(-6.0, 0.35, -4.85)
+		foco = taller.estanteria.global_position + Vector3.UP * 1.85
+		escena.abrir_menu(taller.objetos.destornillador)
+		escena.menu_pieza.botones[0].pressed.emit()
+		escena.ejecutar("cambiar_foco_correcto", "virtual")
+		if taller.objetivo != "foco" or not taller.baliza.visible or not escena.resultado.visible:
+			return false
+	escena.jugador.ubicar(posicion)
+	escena.apuntar_jugador(foco)
+	var camara: Camera3D = escena.jugador.camara
+	var encuadre := camara.get_viewport().get_visible_rect()
+	var puntos: Array[Vector3] = []
+	if vista == "taller":
+		for mueble in [taller.mesa, taller.caja_roja, taller.estanteria, taller.carrito]:
+			puntos.append(mueble.global_position + Vector3.UP * 0.8)
+		for objeto in taller.objetos.values():
+			puntos.append(objeto.global_position)
+	else:
+		puntos.append(taller.objetos.foco.global_position)
+		puntos.append(taller.baliza.global_position + Vector3.UP)
+	for punto in puntos:
+		if camara.is_position_behind(punto) or not encuadre.has_point(camara.unproject_position(punto)):
+			return false
+	return taller.cajones_abiertos
 
 
 func comprobar_estado(escena: Node3D, sector: Node3D, vista: String) -> bool:

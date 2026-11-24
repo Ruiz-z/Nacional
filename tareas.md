@@ -151,12 +151,12 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-119 S — Ayuda de siguiente paso en el HUD y tras cada acción, y prueba del clic real sobre Confirmar (RF-31) — Hecho cuando: en el banco, tras registrar el diagnóstico, el aviso y el HUD indican reparar con Reconectar conductor y confirmar en el panel; la prueba hace clic real en el botón Confirmar en faros y banco.
 
 ## 13. Taller, inventario y elevador (SPEC-taller.md)
-- [ ] T-120 S — Inventario como lógica pura: capacidad 4+4, tomar, dejar y consumir (taller RF-2, 3, 6, 9) — Hecho cuando: pruebas de capacidad, duplicados, consumo y reinicio.
-- [ ] T-121 S — Campo `requiere` en las acciones de los escenarios, validación y rechazo que nombra lo que falta (RF-5) — Hecho cuando: prueba de rechazo y de consumo de piezas.
-- [ ] T-122 S — Mesa de trabajo, caja roja funcional con cajones, estantería de piezas y carrito en el taller (RF-1) — Hecho cuando: capturas de los muebles y prueba de que cada pieza es apuntable.
-- [ ] T-123 S — Tomar y dejar por el menú de pieza y HUD de inventario con selección de la mano (RF-2, 4) — Hecho cuando: prueba de flujo real y captura del HUD.
-- [ ] T-124 S — Guía: ubicación en el aviso, baliza visible, indicador en pantalla y tecla de guía (RF-7, 8) — Hecho cuando: captura con la baliza y prueba de que la guía apunta al mueble correcto.
-- [ ] T-125 S — Requisitos en los escenarios existentes: foco y fusible en faros, llave en motor y aislamiento, multímetro en el banco (RF-5) — Hecho cuando: las rutas ideales siguen pasando tomando lo requerido.
+- [x] T-120 S — Inventario como lógica pura: capacidad 4+4, tomar, dejar y consumir (taller RF-2, 3, 6, 9) — Hecho cuando: pruebas de capacidad, duplicados, consumo y reinicio.
+- [x] T-121 S — Campo `requiere` en las acciones de los escenarios, validación y rechazo que nombra lo que falta (RF-5) — Hecho cuando: prueba de rechazo y de consumo de piezas.
+- [x] T-122 S — Mesa de trabajo, caja roja funcional con cajones, estantería de piezas y carrito en el taller (RF-1) — Hecho cuando: capturas de los muebles y prueba de que cada pieza es apuntable.
+- [x] T-123 S — Tomar y dejar por el menú de pieza y HUD de inventario con selección de la mano (RF-2, 4) — Hecho cuando: prueba de flujo real y captura del HUD.
+- [x] T-124 S — Guía: ubicación en el aviso, baliza visible, indicador en pantalla y tecla de guía (RF-7, 8) — Hecho cuando: captura con la baliza y prueba de que la guía apunta al mueble correcto.
+- [x] T-125 S — Requisitos en los escenarios existentes: foco y fusible en faros, llave en motor y aislamiento, multímetro en el banco (RF-5) — Hecho cuando: las rutas ideales siguen pasando tomando lo requerido.
 - [ ] T-126 S — Elevador: consola, animación, calzas, trabas y falta crítica bajo el autobús (RF-10 a 12) — Hecho cuando: pruebas del procedimiento y captura con el autobús elevado.
 - [ ] T-127 S — Zona de bajos: ruedas con tuercas, suspensión neumática, amortiguador y frenos, con colisiones bajo el autobús (RF-13) — Hecho cuando: capturas desde abajo y prueba de movimiento.
 - [ ] T-128 S — Órdenes mecánicas: neumático pinchado, tuercas flojas con perilla de torque, fuga de suspensión, amortiguador y freno (RF-14, 15) — Hecho cuando: ruta ideal de cada una pasa por `motor.gd`.

@@ -19,6 +19,10 @@ var gravedad: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var camara: Camera3D = $Camara
 
 var herramientas := {}
+var soporte_mano: Node3D
+var objeto_mano: Node3D
+var id_mano := ""
+var accion_mano := ""
 
 
 func _ready() -> void:
@@ -31,6 +35,7 @@ func _ready() -> void:
 	var mano := Node3D.new()
 	mano.position = Vector3(0.15, -0.32, -0.65)
 	camara.add_child(mano)
+	soporte_mano = mano
 	var llave := Llave.instantiate() as Node3D
 	llave.scale = Vector3.ONE * 0.75
 	llave.position.z = -0.035
@@ -70,11 +75,41 @@ func pieza_multimetro(padre: Node3D, centro: Vector3, tam: Vector3, color: Color
 	padre.add_child(pieza)
 
 
+func elegir_objeto(id: String, forma: Node3D) -> void:
+	if id == id_mano:
+		return
+	id_mano = id
+	if is_instance_valid(objeto_mano):
+		objeto_mano.free()
+		objeto_mano = null
+	if forma != null and id not in ["llave_ajustable", "flexometro", "multimetro"]:
+		objeto_mano = forma.duplicate() as Node3D
+		objeto_mano.position *= 0.52
+		objeto_mano.scale *= 0.52
+		soporte_mano.add_child(objeto_mano)
+		for malla in objeto_mano.find_children("*", "MeshInstance3D", true, false):
+			malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			malla.material_overlay = null
+	mostrar_herramienta(accion_mano)
+
+
 func mostrar_herramienta(accion: String) -> void:
-	herramientas.llave.visible = accion in ["apretar", "apretar_terminal", "reponer_pieza",
-		"apretar_abrazadera", "ajustar_abrazadera", "reponer_abrazadera"]
-	herramientas.flexometro.visible = accion in ["medir", "inspeccionar"]
-	herramientas.multimetro.visible = accion in ["evaluar_indicio", "medir_continuidad", "medir_banco", "medir_tp1", "medir_tp2"]
+	accion_mano = accion
+	var herramienta := id_mano
+	if accion in ["medir_banco", "medir_tp1", "medir_tp2", "reconectar"]:
+		herramienta = "multimetro"
+	elif herramienta.is_empty():
+		if accion in ["apretar", "apretar_terminal", "reponer_abrazadera"]:
+			herramienta = "llave_ajustable"
+		elif accion in ["medir", "inspeccionar"]:
+			herramienta = "flexometro"
+		elif accion in ["evaluar_indicio", "medir_continuidad"]:
+			herramienta = "multimetro"
+	herramientas.llave.visible = herramienta == "llave_ajustable"
+	herramientas.flexometro.visible = herramienta == "flexometro"
+	herramientas.multimetro.visible = herramienta == "multimetro"
+	if is_instance_valid(objeto_mano):
+		objeto_mano.visible = herramienta == id_mano
 
 
 func configurar(traductor: RefCounted) -> void:

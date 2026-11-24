@@ -74,6 +74,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "medir_temperatura": {
+      "requiere": {"herramientas": ["multimetro"]},
       "titulo": "Medir temperatura",
       "requiere_panel": false,
       "componente": "monitor_temperatura",
@@ -127,6 +128,7 @@
       "explicacion_seguridad": "Activa ambos interruptores del panel y vuelve a confirmar."
     },
     "apretar_abrazadera": {
+      "requiere": {"herramientas": ["llave_torque"], "piezas": ["abrazadera"]},
       "titulo": "Forzar la abrazadera",
       "requiere_panel": true,
       "componente": "abrazadera_motor",
@@ -151,6 +153,7 @@
       "explicacion_seguridad": "Activa bloqueo y etiquetado en el panel."
     },
     "ajustar_abrazadera": {
+      "requiere": {"herramientas": ["llave_torque"], "piezas": ["abrazadera"]},
       "titulo": "Ajustar la abrazadera",
       "requiere_panel": true,
       "componente": "abrazadera_motor",

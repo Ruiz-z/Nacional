@@ -85,6 +85,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reponer_fusible_equivocado": {
+      "requiere": {"piezas": ["fusible_equivocado"]},
       "titulo": "Instalar otro fusible",
       "requiere_panel": true,
       "componente": "fusible_faros",
@@ -103,6 +104,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "cambiar_foco_correcto": {
+      "requiere": {"herramientas": ["destornillador"], "piezas": ["foco"]},
       "titulo": "Desconectar y cambiar el foco",
       "requiere_panel": true,
       "componente": "faro_izquierdo",
@@ -162,6 +164,7 @@
   },
   "recuperaciones": {
     "reponer_fusible": {
+      "requiere": {"piezas": ["fusible_correcto"]},
       "titulo": "Reponer el fusible",
       "requiere_panel": true,
       "componente": "fusible_faros",

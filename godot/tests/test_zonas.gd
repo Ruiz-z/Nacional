@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 
 
@@ -44,6 +46,8 @@ static func comprobar(bus: Node3D, nombre: String) -> bool:
 		bus.ejecutar("medir_continuidad", "teclado")
 		bus.ejecutar("cambiar_foco_sin_desconectar", "teclado")
 		if not zona.chispa.visible:
+			return false
+		if not Taller.equipar(bus, "cambiar_foco_correcto"):
 			return false
 		bus.ejecutar("cambiar_foco_correcto", "virtual")
 		return izquierdo.material_override.emission_enabled and not zona.chispa.visible
