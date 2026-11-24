@@ -11,6 +11,10 @@
   "causas": [
     "Fuga en la suspensión neumática"
   ],
+  "causa_correcta": "Fuga en la suspensión neumática",
+  "explicacion_causa": {
+    "Fuga en la suspensión neumática": "[MUESTRA] La fuga en la bolsa explica la pérdida de presión de la suspensión."
+  },
   "indicios": [
     {
       "clave": "medir_bolsa",
@@ -59,12 +63,13 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
-        "herramientas": [
-          "manometro"
-        ]
+        "herramienta": "manometro"
       }
     },
     "localizar_fuga": {
+      "requiere": {
+        "herramienta": "lampara"
+      },
       "titulo": "Localizar fuga",
       "componente": "bolsa_trasero_derecho",
       "previas": {
@@ -100,6 +105,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "bolsa_aire"
         ]

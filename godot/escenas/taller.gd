@@ -6,7 +6,7 @@ const Llave = preload("res://assets/modelos/herramientas/adjustable_wrench.glb")
 const Flexometro = preload("res://assets/modelos/herramientas/tape_measure.glb")
 const HERRAMIENTAS := [
 	["calzas", "lampara"], ["manometro", "llave_torque"],
-	["multimetro", "flexometro"], ["llave_ajustable", "destornillador"],
+	["multimetro", "flexometro"], ["llave_ajustable", "destornillador", "tech_tool"],
 ]
 const REPUESTOS := [
 	["neumatico", "bolsa_aire", "amortiguador"],
@@ -17,6 +17,7 @@ const ROJO := Color("#9f302d")
 const CAUCHO := Color("#232830")
 const AMARILLO := Color("#e5a936")
 const GUIA := Color("#54f5e3")
+const LIMITE_SUPERFICIE := 6
 
 var inventario := Inventario.new()
 var objetos := {}
@@ -30,7 +31,9 @@ var objetivo := ""
 var baliza: MeshInstance3D
 var contorno := StandardMaterial3D.new()
 var flecha: Label
-var hud: Label
+var hud: HBoxContainer
+var espacios_hud: Array[Label] = []
+var superficies := {}
 var caducidad: Timer
 var alturas := {}
 var ubicaciones := {}
@@ -47,12 +50,19 @@ func _ready() -> void:
 	crear_guia()
 	var interfaz := CanvasLayer.new()
 	add_child(interfaz)
-	hud = etiqueta(interfaz, "", 16)
+	hud = HBoxContainer.new()
+	interfaz.add_child(hud)
 	hud.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	hud.offset_left = 16
-	hud.offset_top = -104
-	hud.offset_bottom = -14
-	hud.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	hud.offset_top = -116
+	hud.add_theme_constant_override("separation", 24)
+	for grupo in ["Cinturón", "Carrito"]:
+		var columna := VBoxContainer.new()
+		columna.add_theme_constant_override("separation", 0)
+		hud.add_child(columna)
+		etiqueta(columna, grupo, 14)
+		for indice in Inventario.CAPACIDAD:
+			espacios_hud.append(etiqueta(columna, "", 14))
 	flecha = etiqueta(interfaz, "▲", 32)
 	flecha.modulate = GUIA
 	flecha.hide()
@@ -101,9 +111,12 @@ func crear_muebles() -> void:
 		var altura := 0.27 + fila * 0.255
 		caja_roja.caja(cajon, Vector3(0, altura - 0.075, 0.11),
 			Vector3(1.20, 0.04, 0.48), Zona.FONDO)
-		for columna in 2:
-			crear_objeto(caja_roja, cajon, HERRAMIENTAS[fila][columna],
-				Vector3(-0.32 + columna * 0.64, altura - 0.055 + dimensiones(HERRAMIENTAS[fila][columna]).y / 2.0, 0.25))
+		var ids: Array = HERRAMIENTAS[fila]
+		for columna in ids.size():
+			var id: String = ids[columna]
+			crear_objeto(caja_roja, cajon, id, Vector3(
+				remap(columna, 0, ids.size() - 1, -0.46, 0.46) if ids.size() == 3 else -0.32 + columna * 0.64,
+				altura - 0.055 + dimensiones(id).y / 2.0, 0.25))
 	cambiar_cajones(false, true)
 	registrar_mueble(caja_roja, "la caja roja de herramientas, junto a la mesa", 1.65)
 
@@ -190,6 +203,9 @@ func crear_objeto(zona: Zona, padre: Node3D, id: String, centro: Vector3) -> voi
 				for extremo in [-1, 1]:
 					zona.cilindro(visual, Vector3(extremo * 0.21, 0, 0), 0.043, 0.034, plata)
 					zona.cilindro(visual, Vector3(extremo * 0.21, 0.018, 0), 0.018, 0.003, CAUCHO)
+		"tech_tool":
+			zona.caja(visual, Vector3.ZERO, Vector3(0.22, 0.045, 0.16), CAUCHO)
+			zona.caja(visual, Vector3.UP * 0.023, Vector3(0.18, 0.008, 0.12), Color("#47a9a3"))
 		"multimetro":
 			zona.caja(visual, Vector3.ZERO, Vector3(0.13, 0.05, 0.18), AMARILLO)
 			zona.caja(visual, Vector3(0, 0.026, -0.045), Vector3(0.095, 0.01, 0.06), Color("#7ba594"))
@@ -273,6 +289,8 @@ func cerca(posicion: Vector3) -> bool:
 func tomar(id: String, cerca_carrito: bool) -> String:
 	var aviso := inventario.tomar(id, cerca_carrito)
 	if aviso.is_empty():
+		if superficies.erase(id):
+			objetos[id].scale = Vector3.ONE
 		mano = id
 		if id in inventario.carrito:
 			ordenar_carrito()
@@ -282,35 +300,50 @@ func tomar(id: String, cerca_carrito: bool) -> String:
 	return aviso
 
 
-func dejar(id: String, cerca_carrito: bool) -> String:
+func objetos_en(mueble: Node3D) -> Array[String]:
+	var disponibles: Array[String] = []
+	for id in objetos:
+		if objetos[id].zona == mueble and id not in inventario.cinturon and id not in inventario.carrito:
+			disponibles.append(id)
+	return disponibles
+
+
+func dejar(id: String, cerca_carrito: bool, mueble: Node3D = mesa) -> String:
+	if mueble == caja_roja and Inventario.CATALOGO.get(id, {}).get("tipo") != "herramienta":
+		return "La caja roja solo guarda herramientas."
+	var ranura := 0
+	if mueble != caja_roja:
+		var ocupadas := []
+		for otro in superficies:
+			if objetos[otro].zona == mueble:
+				ocupadas.append(superficies[otro])
+		while ranura in ocupadas:
+			ranura += 1
+		if ranura >= LIMITE_SUPERFICIE:
+			return "No hay espacio libre sobre el mueble."
 	var aviso := inventario.dejar(id, cerca_carrito)
 	if not aviso.is_empty():
 		return aviso
-	var objeto: StaticBody3D = objetos[id]
-	objeto.reparent(mesa, false)
-	var ranura := 0
-	var ocupadas := []
-	for otro in objetos.values():
-		if otro != objeto and otro.zona == mesa:
-			ocupadas.append(otro.position)
-	var altura := 1.12 + dimensiones(id).y / 2.0
-	while ocupadas.any(func(pos: Vector3) -> bool: return is_equal_approx(pos.x, posicion_mesa(ranura)) and is_equal_approx(pos.z, fila_mesa(ranura))):
-		ranura += 1
-	objeto.position = Vector3(posicion_mesa(ranura), altura, fila_mesa(ranura))
-	objeto.zona = mesa
-	mostrar_objeto(id)
+	if mueble == caja_roja:
+		devolver(id)
+	else:
+		var objeto: StaticBody3D = objetos[id]
+		if objeto.get_parent() != mueble:
+			objeto.reparent(mueble, false)
+		objeto.zona = mueble
+		superficies[id] = ranura
+		var altura := 1.12 if mueble == mesa else 0.94
+		var tam := dimensiones(id)
+		var escala := 1.0 if mueble == mesa else minf(1.0, minf(0.26 / tam.x, 0.23 / tam.z))
+		objeto.scale = Vector3.ONE * escala
+		var x := -1.40 + ranura * 0.56 if mueble == mesa else (ranura % 3 - 1) * 0.28
+		var z := 0.35 if mueble == mesa else (0.13 if ranura < 3 else -0.13)
+		objeto.position = Vector3(x, altura + tam.y * escala / 2.0, z)
+		mostrar_objeto(id)
 	ordenar_carrito()
 	if mano == id:
 		mano = ""
 	return ""
-
-
-func posicion_mesa(ranura: int) -> float:
-	return -1.40 + float(ranura % 6) * 0.56
-
-
-func fila_mesa(ranura: int) -> float:
-	return 0.35 - floorf(float(ranura) / 6.0) * 0.35
 
 
 func ordenar_carrito() -> void:
@@ -321,7 +354,7 @@ func ordenar_carrito() -> void:
 			objeto.reparent(carrito, false)
 		objeto.zona = carrito
 		objeto.position = Vector3(-0.20 + float(indice % 2) * 0.40,
-			0.94 + dimensiones(id).y / 2.0, 0.12 - floorf(float(indice) / 2.0) * 0.26)
+			0.30 + dimensiones(id).y / 2.0, 0.12 - floorf(float(indice) / 2.0) * 0.26)
 
 
 func consumir(requiere: Dictionary, cerca_carrito: bool) -> void:
@@ -335,10 +368,12 @@ func consumir(requiere: Dictionary, cerca_carrito: bool) -> void:
 
 
 func devolver(id: String) -> void:
+	superficies.erase(id)
 	var objeto: StaticBody3D = objetos[id]
 	var origen: Dictionary = origenes[id]
 	if objeto.get_parent() != origen.padre:
 		objeto.reparent(origen.padre, false)
+	objeto.scale = Vector3.ONE
 	objeto.position = origen.posicion
 	objeto.zona = origen.zona
 	mostrar_objeto(id)
@@ -369,20 +404,38 @@ func seleccionar(paso: int, cerca_carrito: bool) -> void:
 		mano = lista[posmod(indice + paso if indice >= 0 else (0 if paso > 0 else -1), lista.size())]
 
 
+func objeto_en_espacio(numero: int) -> String:
+	var almacen := inventario.cinturon if numero <= 4 else inventario.carrito
+	var indice := 1 if numero <= 4 else 5
+	for id in almacen:
+		if indice == numero:
+			return id
+		indice += Inventario.CATALOGO[id].espacio
+	return ""
+
+
+func espacio_de(id: String) -> int:
+	for numero in range(1, 9):
+		if objeto_en_espacio(numero) == id:
+			return numero
+	return 0
+
+
 func actualizar_hud(cerca_carrito: bool, visible_hud: bool) -> void:
-	var disponibles := inventario.accesibles(cerca_carrito)
-	if mano not in disponibles:
-		mano = disponibles[0] if not disponibles.is_empty() else ""
+	if not cerca_carrito and mano in inventario.carrito:
+		mano = ""
 	hud.visible = visible_hud
 	var firma := [mano, inventario.cinturon, inventario.carrito, cerca_carrito]
 	if firma == ultimo_inventario:
 		return
 	ultimo_inventario = firma.duplicate(true)
-	hud.text = "Mano · %s\nCinturón %d/4 · %s\nCarrito %d/4%s · %s" % [
-		Inventario.CATALOGO[mano].nombre if not mano.is_empty() else "Vacía",
-		Inventario.espacio(inventario.cinturon), nombres(inventario.cinturon),
-		Inventario.espacio(inventario.carrito), "" if cerca_carrito else " (lejos)",
-		nombres(inventario.carrito)]
+	for numero in range(1, 9):
+		var id := objeto_en_espacio(numero)
+		var etiqueta_espacio := espacios_hud[numero - 1]
+		etiqueta_espacio.text = "%d %s" % [numero, Inventario.CATALOGO.get(id, {}).get("nombre", "—")]
+		etiqueta_espacio.modulate = Color("#98a2ad") if numero > 4 and not cerca_carrito else Color.WHITE
+		if not id.is_empty() and id == mano:
+			etiqueta_espacio.modulate = GUIA
 
 
 func nombres(ids: Array[String]) -> String:

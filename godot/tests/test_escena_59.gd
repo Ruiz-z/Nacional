@@ -1,10 +1,15 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 
 static func ejecutar() -> bool:
 	var bus := Bus.instantiate()
 	(Engine.get_main_loop() as SceneTree).root.add_child(bus)
+	if not Taller.equipar(bus, "inspeccionar"):
+		bus.free()
+		return false
 	bus.panel.conexion.iniciar_panel(0)
 	bus.actualizar_panel(3000)
 	bus.ejecutar("inspeccionar", "teclado")

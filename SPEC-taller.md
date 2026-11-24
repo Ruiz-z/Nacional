@@ -16,7 +16,7 @@ Amplía la práctica en primera persona para que se parezca a trabajar en un tal
 
 ## Taller
 - **Mesa de trabajo:** superficie donde se pueden dejar y volver a tomar herramientas y piezas.
-- **Caja roja de herramientas** (la que ya está junto al autobús, ahora funcional con cajones): llave ajustable, destornillador, multímetro, manómetro de presión de neumáticos, llave de torque, flexómetro, lámpara y calzas.
+- **Caja roja de herramientas** (la que ya está junto al autobús, ahora funcional con cajones): llave ajustable, destornillador, multímetro, manómetro de presión de neumáticos, llave de torque, flexómetro, lámpara, calzas y Tech Tool.
 - **Estantería de piezas:** foco, fusibles (correcto y equivocado), abrazadera, tuercas de rueda, bolsa de aire, amortiguador, neumático y pastillas de freno.
 - **Carrito de herramientas:** amplía la capacidad de carga mientras se empuja o se tiene cerca.
 - **Elevador:** consola con **Subir** y **Bajar** junto al autobús.
@@ -43,8 +43,8 @@ Amplía la práctica en primera persona para que se parezca a trabajar en un tal
 - RF-22: EL SISTEMA incluye órdenes alineadas con los cursos de Volvo: sistema electrónico de suspensión (FG 7), frenos neumáticos (FG 5), puerta de pasajeros y aire acondicionado (FG 8).
 - RF-23: EL SISTEMA permite dejar y guardar lo que lleva el técnico: en la mesa de trabajo y en el carrito puede dejar herramientas y piezas, y en la caja roja puede guardar las herramientas en sus cajones; el carrito y la mesa no se pueden tomar como objeto.
 - RF-24: EL SISTEMA permite elegir el objeto en la mano con las teclas numéricas 1 a 4 (cinturón) y 5 a 8 (carrito, si está cerca) cuando no hay un menú abierto, y con rueda, flechas o L y R; el HUD muestra los ocho espacios numerados con su contenido y marca el elegido.
-- RF-25: CADA acción de un escenario que implique trabajo sobre una pieza declara la herramienta que requiere y EL SISTEMA exige que esa herramienta esté **en la mano**; SI el técnico la lleva pero no la tiene en la mano, ENTONCES lo avisa y le indica la tecla; SI tiene en la mano otra herramienta, ENTONCES muestra una tarjeta "Herramienta equivocada" con la que tiene y la que necesita y registra el error leve `herramienta-equivocada`.
-- RF-26: AL terminar una orden, EL SISTEMA muestra las preguntas de diagnóstico ("¿Qué causó la falla?") y dice si la respuesta fue correcta o incorrecta, con la causa real, una explicación breve y la fuente, y registra el resultado para `aprendizaje` y `tablero`.
+- RF-25: CADA acción de un escenario que implique trabajo sobre una pieza declara `requiere.herramienta` y EL SISTEMA exige que esa herramienta esté **en la mano**; SI el técnico la lleva pero no la tiene en la mano, ENTONCES lo avisa y le indica la tecla; SI tiene en la mano otra herramienta, ENTONCES muestra una tarjeta "Herramienta equivocada" con la que tiene y la que necesita y registra el error leve `herramienta-equivocada`.
+- RF-26: AL terminar una orden, EL SISTEMA muestra las preguntas de diagnóstico ("¿Qué causó la falla?") y dice si la respuesta fue correcta o incorrecta, con la causa real, una explicación breve y la fuente, y registra el resultado para `aprendizaje` y `tablero`. El contenido vincula `causa_correcta` y `explicacion_causa` con las claves de `causas`. El intento final conserva la puntuación de práctica que aporta al dominio.
 - RF-27: EL SISTEMA muestra el título completo de la orden en el HUD, en varias líneas si hace falta.
 - RF-17: EL SISTEMA mapea las órdenes nuevas a las cuatro competencias existentes (`diagnostico-fallas` para las mecánicas, `sistema-electrico-bateria` y `electronica-conectividad` para las eléctricas).
 - RF-18: EL SISTEMA funciona con teclado y ratón, Pro Controller y panel virtual, y sin conexión a internet.

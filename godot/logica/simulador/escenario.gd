@@ -75,6 +75,15 @@ static func campo_invalido(datos: Dictionary) -> String:
 	for causa in datos.causas:
 		if not Banco.texto_presente(causa) or datos.causas.count(causa) != 1:
 			return "causas"
+	if datos.has("causa_correcta") and datos.causa_correcta not in datos.causas:
+		return "causa_correcta"
+	if datos.has("causa_correcta") or datos.has("explicacion_causa"):
+		var explicaciones: Variant = datos.get("explicacion_causa")
+		if not explicaciones is Dictionary or explicaciones.size() != datos.causas.size():
+			return "explicacion_causa"
+		for causa in datos.causas:
+			if not Banco.texto_presente(explicaciones.get(causa)):
+				return "explicacion_causa." + causa
 	if datos.acciones.is_empty():
 		return "acciones"
 	for grupo in ["acciones", "recuperaciones", "eventos"]:

@@ -1,6 +1,7 @@
 extends Node3D
 
 signal decision_tomada(decision: Dictionary)
+signal resultados_registrados
 signal salida_solicitada
 
 const ANCHO_HUD := 352.0
@@ -47,6 +48,7 @@ const Inventario = preload("res://logica/simulador/inventario.gd")
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Practica = preload("res://logica/simulador/practica.gd")
 const MenuPieza = preload("res://logica/simulador/menu_pieza.gd")
+const MenuVisual = preload("res://escenas/menu_pieza.gd")
 const FuenteBanco = preload("res://logica/simulador/fuente_banco.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
 const Elevador = preload("res://escenas/elevador.gd")
@@ -79,6 +81,7 @@ var torque_fisico := -1.0
 var fuente_seguridad := ""
 var requisito_pendiente := ""
 var inicio_flashcard := 0
+var inicio_cierre := 0
 var activo_antes_flashcard := false
 var navegando_antes_flashcard := false
 var raton_antes_flashcard: Input.MouseMode
@@ -150,6 +153,7 @@ func _ready() -> void:
 	flashcard.confirmada.connect(func(aviso: Dictionary):
 		if not aviso.objeto.is_empty():
 			taller.senalar(aviso.objeto))
+	flashcard.opcion_elegida.connect(responder_cierre)
 	flashcard.terminada.connect(reanudar_tras_flashcard)
 	zona_activa = zonas[datos.zona]
 	puerta_pasajeros.componente = "puerta_pasajeros"
@@ -251,7 +255,7 @@ func ejecutar(id: String, fuente: String, lectura_previa: Dictionary = {}) -> vo
 			controles["torque"] = panel.get_node("Torque").value
 		elif torque_fisico >= 0.0:
 			controles["torque"] = torque_fisico
-	if (not bajos or id == "cerrar_orden" or controles.elevador_seguro) and not comprobar_inventario(id):
+	if (not bajos or id == "cerrar_orden" or controles.elevador_seguro) and not comprobar_inventario(id, fuente):
 		return
 	var ahora := Time.get_ticks_msec()
 	var decision: Dictionary = motor.ejecutar(id, fuente, ahora - ultimo_ms, controles, lectura_previa)
@@ -268,19 +272,55 @@ func ejecutar(id: String, fuente: String, lectura_previa: Dictionary = {}) -> vo
 			zona.cambiar_acceso(true)
 	mostrar_resultado(decision)
 	actualizar_inventario()
-	jugador.mostrar_herramienta(id if decision.get("aplicada", false) else "")
-	if not motor.fin().is_empty() and not tecnico.is_empty() and not resultados_guardados:
-		resultados_guardados = Practica.guardar(tecnico.base, tecnico.id, tecnico.alias, motor,
-			int(Time.get_unix_time_from_system()))
-		if not resultados_guardados:
-			lateral.get_node("Aviso").text += "\nNo se pudo guardar el resultado de la práctica."
+	if not motor.pendiente_diagnostico() or not flashcard.visible:
+		finalizar_orden()
 	mostrar_estado()
 	if not flashcard.visible and not motor.fin().is_empty() and resumen.get_node("Reflexion").visible:
 		resumen.get_node("Reflexion").grab_focus()
 	decision_tomada.emit(decision)
 
 
+func finalizar_orden() -> void:
+	if motor.fin().is_empty():
+		return
+	if motor.pendiente_diagnostico():
+		inicio_cierre = Time.get_ticks_msec()
+		flashcard.encolar({"tipo": "cierre", "titulo": "¿Qué causó la falla?", "texto": "",
+			"fuente": "", "donde": "", "objeto": "", "opciones": datos.causas.map(MenuVisual.nombre_causa)})
+		return
+	guardar_resultados()
+
+
+func guardar_resultados() -> void:
+	if not tecnico.is_empty() and not resultados_guardados:
+		resultados_guardados = Practica.guardar(tecnico.base, tecnico.id, tecnico.alias, motor,
+			int(Time.get_unix_time_from_system()))
+		if resultados_guardados:
+			resultados_registrados.emit()
+		else:
+			lateral.get_node("Aviso").text = "No se pudo guardar el resultado de la práctica."
+
+
+func responder_cierre(indice: int, fuente: String) -> void:
+	if indice < 0 or indice >= datos.causas.size() or not flashcard.visible:
+		return
+	var cierre: Dictionary = motor.registrar_diagnostico(datos.causas[indice], fuente,
+		Time.get_ticks_msec() - inicio_cierre)
+	if cierre.is_empty():
+		return
+	var tipo := "correcto" if cierre.correcto else "incorrecto"
+	flashcard.mostrar_respuesta({"tipo": tipo, "titulo": tipo.capitalize(), "donde": "", "objeto": "",
+		"texto": "Causa real: %s\n%s" % [MenuVisual.nombre_causa(cierre.real), cierre.explicacion],
+		"fuente": cierre.fuente})
+	guardar_resultados()
+
+
 func requisitos(id: String) -> Dictionary:
+	match id:
+		"elevar_bus", "colocar_calzas":
+			return {"herramienta": "calzas"}
+		"trabar_soporte", "destrabar_soporte":
+			return {"herramienta": "llave_ajustable"}
 	var regla: Dictionary = datos.acciones.get(id, datos.recuperaciones.get(id, {}))
 	return regla.get("requiere", {})
 
@@ -289,17 +329,46 @@ func carrito_cerca() -> bool:
 	return taller.cerca(jugador.global_position)
 
 
-func comprobar_inventario(id: String) -> bool:
-	if not motor.fin().is_empty() or (datos.recuperaciones.has(id) \
+func comprobar_inventario(id: String, fuente := "teclado", solo_guia := false) -> bool:
+	if not motor.fin().is_empty() or (datos.recuperaciones.has(id)
 			and not motor.recuperaciones_disponibles().has(id)):
 		return true
-	var faltantes: Array[String] = taller.inventario.faltantes(requisitos(id), carrito_cerca())
-	if faltantes.is_empty():
+	var requiere := requisitos(id)
+	var herramienta: String = requiere.get("herramienta", "")
+	var cerca := carrito_cerca()
+	var faltantes: Array[String] = taller.inventario.faltantes(requiere, cerca)
+	var numero: int = taller.espacio_de(herramienta) if not herramienta.is_empty() else 0
+	if numero > 0:
+		faltantes.erase(herramienta)
+	var equipada: bool = herramienta.is_empty() or (taller.mano == herramienta and (numero <= 4 or cerca))
+	if not faltantes.is_empty() and (numero == 0 or equipada or solo_guia):
+		requisito_pendiente = id
+		if menu_pieza.visible:
+			cerrar_menu()
+		avisar_objeto("Necesitas: " + taller.nombres(faltantes), "falta", "Te falta algo", faltantes[0])
+		return false
+	if equipada:
 		return true
 	requisito_pendiente = id
 	if menu_pieza.visible:
 		cerrar_menu()
-	avisar_objeto("Necesitas: " + taller.nombres(faltantes), "falta", "Te falta algo", faltantes[0])
+	var nombre: String = Inventario.CATALOGO[herramienta].nombre
+	var mano: Dictionary = Inventario.objeto(taller.mano)
+	if not solo_guia and taller.mano != herramienta and mano.get("tipo") == "herramienta" 			and (cerca or taller.mano in taller.inventario.cinturon):
+		var texto := "Tienes en la mano: %s. Para esto necesitas: %s." % [mano.nombre, nombre]
+		var ahora := Time.get_ticks_msec()
+		var decision: Dictionary = motor.registrar_herramienta_equivocada(id, fuente, ahora - ultimo_ms, texto)
+		ultimo_ms = ahora
+		avisar(texto, "error", "Herramienta equivocada")
+		if not motor.fin().is_empty():
+			finalizar_orden()
+		decision_tomada.emit(decision)
+	elif numero > 4 and not cerca:
+		avisar_objeto("El carrito está lejos. Acércate y presiona %d para tomar %s." % [numero, nombre],
+			"aviso", "Toma la herramienta en la mano", herramienta)
+	else:
+		avisar("Toma la herramienta en la mano: presiona %d." % numero,
+			"aviso", "Selecciona " + nombre)
 	return false
 
 
@@ -315,7 +384,7 @@ func orientar_requisitos() -> void:
 			continue
 		candidatos.append(id)
 	for id in candidatos:
-		if not comprobar_inventario(id):
+		if not comprobar_inventario(id, "teclado", true):
 			return
 	avisar("Tienes los objetos necesarios para los pasos pendientes.")
 
@@ -445,6 +514,10 @@ func pausar_por_flashcard() -> void:
 func reanudar_tras_flashcard() -> void:
 	ultimo_ms += Time.get_ticks_msec() - inicio_flashcard
 	if not motor.fin().is_empty():
+		finalizar_orden()
+		if flashcard.visible:
+			return
+		actualizar_hud()
 		resumen.mostrar(motor)
 		if resumen.get_node("Reflexion").visible:
 			resumen.get_node("Reflexion").grab_focus()
@@ -503,17 +576,39 @@ func mostrar_estado(inmediato := false) -> void:
 		if not terminado:
 			lineas.append("Fuente: %s · TP0 primero, luego TP1 o TP2." % $Banco.etiqueta_fuente(motor.mediciones.fuente))
 	lateral.get_node("Indicios").text = "\n".join(lineas)
+	actualizar_ayuda()
+	actualizar_leds()
+	actualizar_hud()
+	if not flashcard.visible:
+		resumen.mostrar(motor)
+
+
+func actualizar_ayuda() -> void:
+	var estado: Dictionary = motor.estado()
+	var terminado: bool = not motor.fin().is_empty()
+	var progreso := progreso_indicios(estado)
 	var ayuda := siguiente_ayuda(progreso)
 	if zona_activa == $Bajos and not Escenario.cumple(estado, datos.acciones.cerrar_orden.previas):
 		if not $Elevador.arriba:
 			ayuda = "Toma las calzas de la caja roja y sube el autobús desde la consola."
 		elif not $Elevador.seguro():
 			ayuda = "Traba ambos soportes antes de trabajar en los bajos."
+	if not terminado and not ayuda.is_empty():
+		var herramienta := ""
+		if zona_activa == $Banco:
+			herramienta = "llave_ajustable" if progreso.diagnostico_registrado else "multimetro"
+		elif zona_activa == $Bajos and not $Elevador.seguro():
+			herramienta = "llave_ajustable" if $Elevador.arriba else ""
+		else:
+			for id in datos.ruta_ideal:
+				var regla: Dictionary = datos.acciones[id]
+				if regla.efectos.is_empty() or Escenario.cumple(estado, regla.efectos):
+					continue
+				herramienta = requisitos(id).get("herramienta", "")
+				break
+		if not herramienta.is_empty() and taller.mano != herramienta:
+			ayuda = "Toma en la mano: %s. %s" % [Inventario.CATALOGO[herramienta].nombre, ayuda]
 	lateral.get_node("Siguiente").text = "" if ayuda.is_empty() else "Siguiente: " + ayuda
-	actualizar_leds()
-	actualizar_hud()
-	if not flashcard.visible:
-		resumen.mostrar(motor)
 
 
 func actualizar_leds() -> void:
@@ -601,15 +696,8 @@ func abrir_menu(pieza: Interactuable) -> void:
 				opciones.append(MenuPieza.navegacion("destrabar_soporte" if trabado else "trabar_soporte",
 					"Destrabar soportes" if trabado else "Trabar soportes"))
 			lectura = "Soporte trabado" if trabado else "Soporte libre"
-		"mesa_taller":
-			if not taller.mano.is_empty():
-				opciones.append(MenuPieza.navegacion("dejar", "Dejar"))
-				lectura = Inventario.CATALOGO[taller.mano].nombre
-			else:
-				lectura = "Selecciona un objeto en la mano para dejarlo aquí."
-		"carrito_taller":
-			opciones.append(MenuPieza.navegacion("carrito", "Estacionar carrito" if taller.lleva_carrito else "Llevar carrito"))
-			lectura = ""
+		"mesa_taller", "carrito_taller":
+			lectura = "Selecciona un objeto en la mano para dejarlo aquí."
 		"puerta_pasajeros":
 			opciones.append(MenuPieza.navegacion("subir", "Subir al autobús"))
 			lectura = ""
@@ -620,11 +708,25 @@ func abrir_menu(pieza: Interactuable) -> void:
 		var titulo := "Cerrar cajones" if taller.cajones_abiertos else "Abrir cajones"
 		opciones.append(MenuPieza.navegacion("cajones", titulo))
 		lectura = ""
+	var mueble := mueble_para_dejar(pieza)
+	if mueble != null:
+		if not taller.mano.is_empty() and (mueble != taller.caja_roja
+				or Inventario.CATALOGO[taller.mano].tipo == "herramienta"):
+			opciones.append(MenuPieza.navegacion("dejar", "Dejar aquí: " + Inventario.CATALOGO[taller.mano].nombre))
+		var disponibles: Array[String] = taller.objetos_en(mueble)
+		if mueble == taller.carrito and carrito_cerca():
+			disponibles.append_array(taller.inventario.carrito)
+		for objeto in disponibles:
+			var opcion := MenuPieza.navegacion("tomar", "Tomar: " + Inventario.CATALOGO[objeto].nombre)
+			opcion["objeto"] = objeto
+			opciones.append(opcion)
+	if mueble == taller.carrito:
+		opciones.append(MenuPieza.navegacion("carrito", "Estacionar carrito" if taller.lleva_carrito else "Empujar carrito"))
 	if taller.objetos.get(pieza.componente) == pieza:
 		if not pieza.visible:
 			return
 		if pieza.componente not in taller.inventario.carrito:
-			opciones.append(MenuPieza.navegacion("tomar", "Tomar"))
+			opciones.append(MenuPieza.navegacion("tomar", "Tomar: " + pieza.nombre))
 		lectura = "%d espacio(s)" % Inventario.CATALOGO[pieza.componente].espacio
 	if opciones.is_empty() and pieza.zona == zona_activa:
 		opciones = MenuPieza.entradas(motor, datos, pieza.componente)
@@ -644,7 +746,7 @@ func abrir_menu(pieza: Interactuable) -> void:
 	resultado.hide()
 	var banco := zona_activa == $Banco and pieza.zona == $Banco and pieza.componente == "multimetro"
 	var reportadas: Dictionary = motor.mediciones.reportadas if banco else {}
-	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada, estado_pieza(pieza), reportadas, banco)
+	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada, estado_pieza(pieza), reportadas, banco, mueble != null)
 	jugador.activo = false
 	$Apuntado.hide()
 
@@ -685,7 +787,6 @@ func cerrar_menu() -> void:
 	zona_menu = null
 	pieza_menu = null
 	menu_pieza.cerrar()
-	jugador.mostrar_herramienta("")
 	if not flashcard.visible and not navegando and not pausa_visible and motor != null and motor.fin().is_empty():
 		jugador.activo = true
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -701,9 +802,9 @@ func elegir_accion(indice: int, fuente: String) -> void:
 			zona_menu.cambiar_acceso(entrada.id == "abrir_acceso")
 			cerrar_menu()
 		elif entrada.id in ["elevar_bus", "descender_bus", "colocar_calzas", "trabar_soporte", "destrabar_soporte"]:
-			accion_elevador(entrada.id, pieza_menu.componente)
+			accion_elevador(entrada.id, pieza_menu.componente, fuente)
 		elif entrada.id in ["tomar", "dejar", "cajones", "carrito"]:
-			accion_taller(entrada.id)
+			accion_taller(entrada.id, entrada.get("objeto", ""))
 		else:
 			if taller.lleva_carrito and entrada.id == "subir":
 				taller.lleva_carrito = false
@@ -711,7 +812,7 @@ func elegir_accion(indice: int, fuente: String) -> void:
 	elif pieza_menu.zona == $Bajos and not $Elevador.seguro():
 		cerrar_menu()
 		ejecutar(entrada.id, fuente)
-	elif not comprobar_inventario(entrada.id):
+	elif not comprobar_inventario(entrada.id, fuente):
 		return
 	elif entrada.requiere_panel:
 		accion_pendiente = entrada.id
@@ -721,27 +822,24 @@ func elegir_accion(indice: int, fuente: String) -> void:
 		if not torque.is_empty():
 			avisar_temporal("Ajusta la perilla a %d–%d en la escala del panel [MUESTRA]." %
 				[torque.minimo, torque.maximo], true, 5.0)
-		jugador.mostrar_herramienta(entrada.id)
 	else:
 		cerrar_menu()
 		ejecutar(entrada.id, fuente)
 
 
-func accion_elevador(id: String, componente: String) -> void:
+func accion_elevador(id: String, componente: String, fuente := "teclado") -> void:
 	cerrar_menu()
 	if $Elevador.en_movimiento():
 		return
-	var tiene_calzas: bool = "calzas" in taller.inventario.accesibles(carrito_cerca())
 	match id:
 		"colocar_calzas":
 			if $Elevador.arriba:
 				return
-			if not tiene_calzas:
-				avisar_objeto("Necesitas las calzas.", "aviso", "Coloca las calzas", "calzas")
+			if not comprobar_inventario(id, fuente):
 				return
 			$Elevador.colocar_calzas()
 		"trabar_soporte", "destrabar_soporte":
-			if not $Elevador.arriba or not $Elevador.trabas.has(componente):
+			if not $Elevador.arriba or not $Elevador.trabas.has(componente) or not comprobar_inventario(id, fuente):
 				return
 			$Elevador.cambiar_traba(componente, id == "trabar_soporte")
 		"elevar_bus", "descender_bus":
@@ -749,8 +847,7 @@ func accion_elevador(id: String, componente: String) -> void:
 			if subir == $Elevador.arriba:
 				avisar("El autobús ya está %s." % ("arriba" if subir else "abajo"), "aviso", "Comprueba el elevador")
 				return
-			if subir and not $Elevador.calzas_colocadas and not tiene_calzas:
-				avisar_objeto("Necesitas las calzas.", "aviso", "Coloca las calzas", "calzas")
+			if subir and not $Elevador.calzas_colocadas and not comprobar_inventario(id, fuente):
 				return
 			if not subir and true in $Elevador.trabas.values():
 				avisar("Destraba ambos soportes antes de bajar el autobús.", "aviso", "Comprueba el elevador")
@@ -765,22 +862,39 @@ func accion_elevador(id: String, componente: String) -> void:
 			$Elevador.mover(subir)
 			await $Elevador.recorrido.finished
 			navegando = false
+	if requisito_pendiente == id:
+		requisito_pendiente = ""
 	mostrar_estado()
 
 
-func accion_taller(id: String) -> void:
+func mueble_para_dejar(pieza: Interactuable) -> Node3D:
+	match pieza.componente:
+		"mesa_taller": return taller.mesa
+		"carrito_taller": return taller.carrito
+		"caja_taller": return taller.caja_roja
+	if pieza.componente.begins_with("cajon_taller_"):
+		return taller.caja_roja
+	return null
+
+
+func accion_taller(id: String, objeto := "") -> void:
 	var aviso := ""
 	match id:
 		"tomar":
-			aviso = taller.tomar(pieza_menu.componente, carrito_cerca())
+			var id_objeto := pieza_menu.componente if objeto.is_empty() else objeto
+			if id_objeto in taller.inventario.carrito and carrito_cerca():
+				taller.mano = id_objeto
+			else:
+				aviso = taller.tomar(id_objeto, carrito_cerca())
 		"dejar":
-			aviso = taller.dejar(taller.mano, carrito_cerca())
+			aviso = taller.dejar(taller.mano, carrito_cerca(), mueble_para_dejar(pieza_menu))
 		"cajones":
 			taller.cambiar_cajones(not taller.cajones_abiertos)
 		"carrito":
 			taller.lleva_carrito = not taller.lleva_carrito
 	cerrar_menu()
 	actualizar_inventario()
+	actualizar_ayuda()
 	if not aviso.is_empty():
 		avisar(aviso, "aviso", "Revisa el inventario")
 
@@ -839,8 +953,9 @@ func recibir_accion(accion: Dictionary) -> void:
 func tocar_borne(punto: String, fuente: String) -> void:
 	if flashcard.visible:
 		return
+	if not punto.is_empty() and not comprobar_inventario("medir_tp2" if punto == "tp2" else "medir_tp1", fuente):
+		return
 	var id: String = motor.mediciones.tocar(punto)
-	jugador.mostrar_herramienta("medir_banco")
 	if not id.is_empty():
 		ejecutar(id, fuente)
 	else:
@@ -1047,6 +1162,15 @@ func _input(evento: InputEvent) -> void:
 func entrada_inventario(evento: InputEvent) -> bool:
 	var paso := 0
 	if evento is InputEventKey:
+		if evento.keycode >= KEY_1 and evento.keycode <= KEY_8:
+			var numero: int = evento.keycode - KEY_1 + 1
+			if numero > 4 and not carrito_cerca():
+				avisar_temporal("El carrito está lejos")
+			else:
+				taller.mano = taller.objeto_en_espacio(numero)
+				actualizar_inventario()
+				actualizar_ayuda()
+			return true
 		if evento.keycode == KEY_G:
 			orientar_requisitos()
 			return true
@@ -1064,4 +1188,5 @@ func entrada_inventario(evento: InputEvent) -> bool:
 		return false
 	taller.seleccionar(paso, carrito_cerca())
 	actualizar_inventario()
+	actualizar_ayuda()
 	return true

@@ -303,15 +303,14 @@ func abrir_bus(tecnico: Dictionary, archivo: String = Escenario.AISLAMIENTO) -> 
 	var bus := Bus.instantiate()
 	bus.archivo = archivo
 	if tecnico.base == base:
-		bus.decision_tomada.connect(func(_decision: Dictionary):
-			if bus.resultados_guardados:
-				var cierre := Recorrido.cerrar_escenario(base, tecnico.id, bus.motor.fin(),
-					int(Time.get_unix_time_from_system()))
-				if not cierre.is_empty():
-					if not cierre.guardado:
-						bus.lateral.get_node("Aviso").text += "\nNo se pudo guardar el avance."
-					elif not cierre.respaldo:
-						bus.lateral.get_node("Aviso").text += "\nSe guardó el avance, pero falta el respaldo.")
+		bus.resultados_registrados.connect(func():
+			var cierre := Recorrido.cerrar_escenario(base, tecnico.id, bus.motor.fin(),
+				int(Time.get_unix_time_from_system()))
+			if not cierre.is_empty():
+				if not cierre.guardado:
+					bus.lateral.get_node("Aviso").text += "\nNo se pudo guardar el avance."
+				elif not cierre.respaldo:
+					bus.lateral.get_node("Aviso").text += "\nSe guardó el avance, pero falta el respaldo.")
 	bus.conexion_panel = conexion
 	bus.tecnico = tecnico
 	abrir(bus)

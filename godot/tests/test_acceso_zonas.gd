@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 
 
@@ -36,6 +38,8 @@ static func comprobar(bus: Node3D, componente: String, nombre: String) -> bool:
 	if not acceso(bus, "Cerrar " + nombre) or zona.abierta or interna.collision_layer != 0:
 		return false
 	if not decisiones.is_empty() or bus.motor.puntaje() != puntaje:
+		return false
+	if not Taller.equipar(bus, "inspeccionar"):
 		return false
 	bus.abrir_menu(interna)
 	if bus.menu_pieza.visible or not acceso(bus, "Inspeccionar", false) or not zona.abierta:

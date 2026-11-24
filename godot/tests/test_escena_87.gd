@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Base = preload("res://tests/base_tablero.gd")
 const Pantallas = preload("res://tests/pantallas_aprendizaje.gd")
 const Recorrido = preload("res://logica/flujo/recorrido.gd")
@@ -44,7 +46,11 @@ static func recorrido(menu: Node, base: String) -> bool:
 		return false
 	bus.cerrar_menu()
 	for accion in bus.datos.ruta_ideal:
+		if not Taller.equipar(bus, accion):
+			return false
 		bus.ejecutar(accion, "teclado")
+	if not Taller.cerrar_orden(bus):
+		return false
 	menu.volver()
 	if menu.botones.post.disabled:
 		return false

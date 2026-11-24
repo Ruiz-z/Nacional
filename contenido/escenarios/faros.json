@@ -12,6 +12,11 @@
     "foco-danado",
     "fusible-abierto"
   ],
+  "causa_correcta": "foco-danado",
+  "explicacion_causa": {
+    "foco-danado": "[MUESTRA] La prueba de continuidad distingue el foco dañado del fusible.",
+    "fusible-abierto": "[MUESTRA] El fusible abierto no explica la falla inicial del foco."
+  },
   "indicios": [
     {"clave": "inspeccionado", "etiqueta": "Caja de fusibles inspeccionada", "ayuda": "Inspecciona la caja de fusibles."},
     {"clave": "continuidad_medida", "etiqueta": "Continuidad medida", "ayuda": "Mide la continuidad en el conector de los faros."},
@@ -37,6 +42,9 @@
   ],
   "acciones": {
     "inspeccionar": {
+      "requiere": {
+        "herramienta": "destornillador"
+      },
       "titulo": "Inspeccionar",
       "requiere_panel": false,
       "componente": "caja_fusibles",
@@ -52,6 +60,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "medir_continuidad": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Medir continuidad",
       "requiere_panel": false,
       "componente": "conector_faros",
@@ -69,6 +80,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "cambiar_foco_sin_desconectar": {
+      "requiere": {
+        "herramienta": "destornillador"
+      },
       "titulo": "Cambiar foco sin desconectar",
       "requiere_panel": false,
       "componente": "faro_izquierdo",
@@ -86,7 +100,8 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reponer_fusible_equivocado": {
-      "requiere": {"piezas": ["fusible_equivocado"]},
+      "requiere": {
+        "herramienta": "llave_ajustable","piezas": ["fusible_equivocado"]},
       "titulo": "Instalar otro fusible",
       "requiere_panel": true,
       "componente": "fusible_faros",
@@ -105,7 +120,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "cambiar_foco_correcto": {
-      "requiere": {"herramientas": ["destornillador"], "piezas": ["foco"]},
+      "requiere": {"herramienta": "destornillador", "piezas": ["foco"]},
       "titulo": "Desconectar y cambiar el foco",
       "requiere_panel": true,
       "componente": "faro_izquierdo",
@@ -126,6 +141,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_solucion": {
+      "requiere": {
+        "herramienta": "tech_tool"
+      },
       "titulo": "Confirmar la solución",
       "requiere_panel": true,
       "componente": "rele_faros",
@@ -165,7 +183,8 @@
   },
   "recuperaciones": {
     "reponer_fusible": {
-      "requiere": {"piezas": ["fusible_correcto"]},
+      "requiere": {
+        "herramienta": "llave_ajustable","piezas": ["fusible_correcto"]},
       "titulo": "Reponer el fusible",
       "requiere_panel": true,
       "componente": "fusible_faros",

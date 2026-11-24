@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 
 
@@ -27,6 +29,8 @@ static func comprobar(bus: Node3D, acceso: String, arbol: SceneTree) -> String:
 	var tapa: StaticBody3D = zona.piezas[acceso]
 	if zona.abierta:
 		return "La tapa ya está abierta al aparecer."
+	if not Taller.equipar(bus, "inspeccionar"):
+		return "No se pudo empuñar el destornillador."
 	await arbol.physics_frame
 	await arbol.physics_frame
 	await arbol.physics_frame

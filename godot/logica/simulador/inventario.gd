@@ -2,6 +2,7 @@ extends RefCounted
 
 const CAPACIDAD := 4
 const CATALOGO := {
+	"tech_tool": {"nombre": "Tech Tool", "tipo": "herramienta", "espacio": 1},
 	"llave_ajustable": {"nombre": "Llave ajustable", "tipo": "herramienta", "espacio": 1},
 	"destornillador": {"nombre": "Destornillador", "tipo": "herramienta", "espacio": 1},
 	"multimetro": {"nombre": "Multímetro", "tipo": "herramienta", "espacio": 1},
@@ -33,7 +34,13 @@ static func requisitos_validos(requiere: Variant) -> bool:
 	if not requiere is Dictionary:
 		return false
 	var tipos := {"herramientas": "herramienta", "piezas": "pieza"}
+	if requiere.has("herramienta") and (requiere.has("herramientas")
+			or not requiere.herramienta is String
+			or objeto(requiere.herramienta).get("tipo") != "herramienta"):
+		return false
 	for grupo in requiere:
+		if grupo == "herramienta":
+			continue
 		if not tipos.has(grupo) or not requiere[grupo] is Array:
 			return false
 		for id in requiere[grupo]:
@@ -81,6 +88,9 @@ func dejar(id: String, cerca := false) -> String:
 func faltantes(requiere: Dictionary, cerca := false) -> Array[String]:
 	var disponibles := accesibles(cerca)
 	var resultado: Array[String] = []
+	var herramienta: String = requiere.get("herramienta", "")
+	if not herramienta.is_empty() and herramienta not in disponibles:
+		resultado.append(herramienta)
 	for grupo in ["herramientas", "piezas"]:
 		for id in requiere.get(grupo, []):
 			if id not in disponibles:

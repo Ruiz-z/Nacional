@@ -22,7 +22,6 @@ var herramientas := {}
 var soporte_mano: Node3D
 var objeto_mano: Node3D
 var id_mano := ""
-var accion_mano := ""
 
 
 func _ready() -> void:
@@ -60,7 +59,7 @@ func _ready() -> void:
 	herramientas = {"llave": llave, "flexometro": flexometro, "multimetro": multimetro}
 	for malla in camara.find_children("*", "MeshInstance3D", true, false):
 		malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mostrar_herramienta("")
+	mostrar_herramienta()
 
 
 func pieza_multimetro(padre: Node3D, centro: Vector3, tam: Vector3, color: Color) -> void:
@@ -90,21 +89,11 @@ func elegir_objeto(id: String, forma: Node3D) -> void:
 		for malla in objeto_mano.find_children("*", "MeshInstance3D", true, false):
 			malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			malla.material_overlay = null
-	mostrar_herramienta(accion_mano)
+	mostrar_herramienta()
 
 
-func mostrar_herramienta(accion: String) -> void:
-	accion_mano = accion
+func mostrar_herramienta() -> void:
 	var herramienta := id_mano
-	if accion in ["medir_banco", "medir_tp1", "medir_tp2", "reconectar"]:
-		herramienta = "multimetro"
-	elif herramienta.is_empty():
-		if accion in ["apretar", "apretar_terminal", "reponer_abrazadera"]:
-			herramienta = "llave_ajustable"
-		elif accion in ["medir", "inspeccionar"]:
-			herramienta = "flexometro"
-		elif accion in ["evaluar_indicio", "medir_continuidad"]:
-			herramienta = "multimetro"
 	herramientas.llave.visible = herramienta == "llave_ajustable"
 	herramientas.flexometro.visible = herramienta == "flexometro"
 	herramientas.multimetro.visible = herramienta == "multimetro"

@@ -13,6 +13,12 @@
     "senal",
     "modulo"
   ],
+  "causa_correcta": "alimentacion",
+  "explicacion_causa": {
+    "alimentacion": "[MUESTRA] La lectura del punto de alimentación indica una interrupción del circuito.",
+    "senal": "[MUESTRA] La alimentación está presente, pero falta la señal esperada en su punto de prueba.",
+    "modulo": "[MUESTRA] Las lecturas distinguen una interrupción del arnés de una avería interna del módulo."
+  },
   "indicios": [
     {"clave": "tp1_medido", "etiqueta": "TP1 medido", "ayuda": "Mide TP1 con referencia en TP0."},
     {"clave": "tp2_medido", "etiqueta": "TP2 medido", "ayuda": "Mide TP2 con referencia en TP0."},
@@ -29,6 +35,9 @@
   "estados_imposibles": [],
   "acciones": {
     "medir_tp1": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Medir TP1",
       "componente": "tp1",
       "previas": {},
@@ -41,6 +50,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp1_0": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "≈0 V",
       "componente": "multimetro",
       "previas": {},
@@ -53,6 +65,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp1_5": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "≈5 V",
       "componente": "multimetro",
       "previas": {},
@@ -65,6 +80,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp1_otra": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Otra",
       "componente": "multimetro",
       "previas": {},
@@ -77,6 +95,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "medir_tp2": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Medir TP2",
       "componente": "tp2",
       "previas": {},
@@ -89,6 +110,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp2_0": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "≈0 V",
       "componente": "multimetro",
       "previas": {},
@@ -101,6 +125,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp2_5": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "≈5 V",
       "componente": "multimetro",
       "previas": {},
@@ -113,6 +140,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp2_otra": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Otra",
       "componente": "multimetro",
       "previas": {},
@@ -125,6 +155,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "diagnosticar_alimentacion": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Falla de alimentación",
       "componente": "multimetro",
       "previas": {},
@@ -137,6 +170,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "diagnosticar_senal": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Falla de señal",
       "componente": "multimetro",
       "previas": {},
@@ -149,6 +185,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "diagnosticar_modulo": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Módulo dañado",
       "componente": "multimetro",
       "previas": {},
@@ -161,6 +200,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reconectar": {
+      "requiere": {
+        "herramienta": "llave_ajustable"
+      },
       "titulo": "Reconectar conductor",
       "componente": "multimetro",
       "previas": {},

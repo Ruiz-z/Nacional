@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 const Clic = preload("res://tests/test_zonas_flujo.gd")
 
@@ -29,6 +31,8 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	var aviso_banco: String = zona.estado_banco.text
 	if aviso != "MÓDULO AUXILIAR · SIN RESPUESTA" or not aviso_banco.contains("virtual"):
 		return "Falta el aviso del módulo o la fuente del banco."
+	if not Taller.equipar(bus, "medir_tp1"):
+		return "No se pudo empuñar el multímetro."
 	await arbol.physics_frame
 	await arbol.physics_frame
 	for paso in [["tp1", "—", "La punta negra va en TP0."],
@@ -65,7 +69,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	pulsar(menu.botones[0])
 	if bus.motor.mediciones.diagnostico != "alimentacion" or not bus.motor.mediciones.error_diagnostico.is_empty():
 		return "El diagnóstico correcto no se registró."
-	if not apuntar_y_pulsar(bus, "multimetro"):
+	if not Taller.equipar(bus, "reconectar") or not apuntar_y_pulsar(bus, "multimetro"):
 		return "No se pudo volver al multímetro para reparar."
 	await arbol.process_frame
 	await arbol.process_frame
@@ -76,6 +80,8 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	pulsar(bus.panel.get_node("Confirmar"))
 	if bus.motor.fin() != "resuelto" or bus.motor.puntaje() != 100 or bus.interior.falla_auxiliar:
 		return "El panel no cerró la falla."
+	if not Taller.cerrar_orden(bus):
+		return "No se mostró el cierre de la orden."
 	bus.reintentar()
 	if not bus.motor.estado().s2_abierto or not bus.motor.mediciones.medidas.is_empty() \
 			or bus.interior.pantalla.text != aviso or zona.estado_banco.text != aviso_banco:

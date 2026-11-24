@@ -4,6 +4,8 @@ signal reintento_solicitado
 
 const FondoTarjeta = preload("res://escenas/fondo_tarjeta.gd")
 
+const MenuVisual = preload("res://escenas/menu_pieza.gd")
+
 var motor: RefCounted
 
 
@@ -36,6 +38,12 @@ func mostrar(actual: RefCounted) -> void:
 	$Guardar.visible = not reflexionado
 	$Reintentar.visible = reflexionado
 	var lineas := PackedStringArray([datos.fin.replace("-", " ")])
+	var cierre: Dictionary = datos.diagnostico_final
+	if not cierre.is_empty():
+		lineas.append("Diagnóstico final: %s · Respuesta: %s" % [
+			"Correcto" if cierre.correcto else "Incorrecto", MenuVisual.nombre_causa(cierre.elegida)])
+		lineas.append("Causa real: %s · %s" % [MenuVisual.nombre_causa(cierre.real), cierre.explicacion])
+		lineas.append("Fuente: " + cierre.fuente)
 	for intento in datos.comparacion:
 		var metricas: Dictionary = datos.comparacion[intento]
 		if not metricas.is_empty():

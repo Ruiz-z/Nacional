@@ -12,6 +12,11 @@
     "aislamiento-degradado",
     "aviso-inconsistente"
   ],
+  "causa_correcta": "aislamiento-degradado",
+  "explicacion_causa": {
+    "aislamiento-degradado": "[MUESTRA] El indicio del gabinete corresponde a aislamiento degradado.",
+    "aviso-inconsistente": "[MUESTRA] El aviso sí coincide con el indicio observado en el gabinete."
+  },
   "indicios": [
     {"clave": "inspeccionado", "etiqueta": "Gabinete inspeccionado", "ayuda": "Inspecciona la compuerta del gabinete."},
     {"clave": "indicio_confirmado", "etiqueta": "Indicio de aislamiento confirmado", "ayuda": "Abre el monitor y elige Evaluar el indicio."},
@@ -42,6 +47,9 @@
   ],
   "acciones": {
     "inspeccionar": {
+      "requiere": {
+        "herramienta": "destornillador"
+      },
       "titulo": "Inspeccionar",
       "requiere_panel": false,
       "componente": "compuerta",
@@ -57,6 +65,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "evaluar_indicio": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Evaluar el indicio",
       "requiere_panel": false,
       "componente": "monitor",
@@ -76,6 +87,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_solucion": {
+      "requiere": {
+        "herramienta": "tech_tool"
+      },
       "titulo": "Confirmar la solución",
       "requiere_panel": true,
       "componente": "bateria",
@@ -96,6 +110,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "ignorar_aviso_seguridad": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Ignorar el aviso de seguridad",
       "componente": "cables",
       "previas": {},
@@ -108,6 +125,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "forzar_pieza": {
+      "requiere": {
+        "herramienta": "llave_ajustable"
+      },
       "titulo": "Forzar la pieza",
       "requiere_panel": false,
       "componente": "terminal",
@@ -143,6 +163,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "descartar_indicio": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Descartar el indicio",
       "componente": "bateria",
       "previas": {
@@ -197,7 +220,7 @@
   },
   "recuperaciones": {
     "reponer_pieza": {
-      "requiere": {"herramientas": ["llave_ajustable"]},
+      "requiere": {"herramienta": "llave_ajustable"},
       "titulo": "Reponer pieza",
       "requiere_panel": true,
       "componente": "terminal",
@@ -238,6 +261,9 @@
       "riesgo": "[MUESTRA] bajo"
     },
     "recuperar_indicio": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
       "titulo": "Recuperar el indicio",
       "requiere_panel": true,
       "componente": "bateria",

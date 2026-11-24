@@ -11,6 +11,10 @@
   "causas": [
     "Amortiguador dañado"
   ],
+  "causa_correcta": "Amortiguador dañado",
+  "explicacion_causa": {
+    "Amortiguador dañado": "[MUESTRA] La inspección de la pieza revela el daño en el amortiguador."
+  },
   "indicios": [
     {
       "clave": "revisar_amortiguador",
@@ -37,6 +41,9 @@
   "estados_imposibles": [],
   "acciones": {
     "revisar_amortiguador": {
+      "requiere": {
+        "herramienta": "lampara"
+      },
       "titulo": "Revisar inclinación y ruido",
       "componente": "amortiguador_trasero_derecho",
       "previas": {
@@ -71,6 +78,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "amortiguador"
         ]

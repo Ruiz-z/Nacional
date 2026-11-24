@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 const Fuente = preload("res://logica/simulador/fuente_banco.gd")
 const Protocolo = preload("res://logica/entrada/protocolo.gd")
@@ -72,10 +74,14 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 		bus.recibir_banco(linea, ahora)
 	if not bus.zona_activa.estado_banco.text.contains("Fuente: banco físico"):
 		return false
+	if not Taller.equipar(bus, "reportar_tp1_0"):
+		return false
 	bus.ejecutar("reportar_tp1_0", "teclado")
 	bus.ejecutar("reportar_tp2_5", "teclado")
 	bus.ejecutar("diagnosticar_alimentacion", "teclado")
 	if not bus.lateral.get_node("Siguiente").text.ends_with("cierra el conductor abierto en el banco físico."):
+		return false
+	if not Taller.equipar(bus, "reconectar"):
 		return false
 	bus.ejecutar("reconectar", "virtual")
 	if not bus.flashcard.visible or not bus.motor.fin().is_empty() \
@@ -98,6 +104,8 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	var decisiones: Array = bus.motor.resumen().linea_tiempo
 	if decisiones.back().fuente_entrada != "banco" or decisiones.back().fuente_falla != "banco" \
 			or decisiones[0].get("lectura-reportada") != "≈0 V":
+		return false
+	if not Taller.cerrar_orden(bus):
 		return false
 	bus.reintentar()
 	bus.fuente_banco.conexion.iniciar_fisica(ahora - 3000)

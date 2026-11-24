@@ -11,6 +11,10 @@
   "causas": [
     "Tuercas de rueda flojas"
   ],
+  "causa_correcta": "Tuercas de rueda flojas",
+  "explicacion_causa": {
+    "Tuercas de rueda flojas": "[MUESTRA] La comprobación con la llave de torque detecta las tuercas flojas."
+  },
   "indicios": [
     {
       "clave": "detectar_tuercas",
@@ -82,9 +86,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       }
     },
     "apretar_tuerca_1": {
@@ -106,9 +108,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       },
       "torque": {
         "minimo": 40,
@@ -137,9 +137,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       },
       "torque": {
         "minimo": 40,
@@ -168,9 +166,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       },
       "torque": {
         "minimo": 40,
@@ -199,9 +195,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       },
       "torque": {
         "minimo": 40,
@@ -230,9 +224,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       },
       "torque": {
         "minimo": 40,
@@ -336,6 +328,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "tuercas"
         ]
@@ -361,6 +354,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "tuercas"
         ]
@@ -386,6 +380,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "tuercas"
         ]
@@ -411,6 +406,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "tuercas"
         ]
@@ -436,6 +432,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "tuercas"
         ]

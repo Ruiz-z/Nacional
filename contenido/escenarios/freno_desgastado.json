@@ -11,6 +11,10 @@
   "causas": [
     "Freno desgastado"
   ],
+  "causa_correcta": "Freno desgastado",
+  "explicacion_causa": {
+    "Freno desgastado": "[MUESTRA] La medición confirma el desgaste de las pastillas del freno."
+  },
   "indicios": [
     {
       "clave": "medir_pastillas",
@@ -53,9 +57,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
-        "herramientas": [
-          "flexometro"
-        ]
+        "herramienta": "flexometro"
       }
     },
     "reponer_pastillas": {
@@ -76,6 +78,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "pastillas_freno"
         ]
@@ -112,9 +115,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
-        "herramientas": [
-          "flexometro"
-        ]
+        "herramienta": "flexometro"
       }
     }
   },

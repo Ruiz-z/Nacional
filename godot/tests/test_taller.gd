@@ -1,5 +1,8 @@
 extends RefCounted
 
+const Base = preload("res://tests/base_tablero.gd")
+const Alias = preload("res://logica/flujo/alias.gd")
+const Dominio = preload("res://logica/aprendizaje/dominio.gd")
 const Bus = preload("res://escenas/bus.tscn")
 const Clic = preload("res://tests/test_zonas_flujo.gd")
 const Acciones = preload("res://tests/acciones_taller.gd")
@@ -24,7 +27,7 @@ static func ejecutar() -> bool:
 	if not fallo.is_empty():
 		printerr(fallo)
 		return false
-	return probar_motor(arbol)
+	return probar_motor(arbol) and Base.con_base(probar_cierres)
 
 
 static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
@@ -51,7 +54,13 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 		return "Tomar alteró las decisiones o no seleccionó la herramienta."
 	var faro: StaticBody3D = bus.zona_activa.piezas.faro_izquierdo
 	bus.ejecutar("inspeccionar", "teclado")
+	if not Acciones.equipar(bus, "medir_continuidad"):
+		return "No se pudo empuñar el multímetro."
 	bus.ejecutar("medir_continuidad", "teclado")
+	Acciones.tecla(bus, 2)
+	if not apuntar(bus, caja) or not await elegir(bus, "dejar", arbol) 			or "multimetro" in taller.inventario.cinturon 			or taller.objetos.multimetro.get_parent() != taller.origenes.multimetro.padre 			or taller.objetos.multimetro.position != taller.origenes.multimetro.posicion:
+		return "El multímetro no volvió a su cajón."
+	Acciones.tecla(bus, 1)
 	bus.mostrar_estado(true)
 	var puntaje: int = bus.motor.puntaje()
 	bus.abrir_menu(faro)
@@ -97,7 +106,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	rueda.button_index = MOUSE_BUTTON_WHEEL_DOWN
 	rueda.pressed = true
 	bus._input(rueda)
-	if taller.mano != "foco" or not taller.hud.text.contains("Cinturón 2/4"):
+	if taller.mano != "foco" or taller.espacios_hud[1].text != "2 Foco de repuesto":
 		return "La rueda no seleccionó el foco o el HUD mostró una carga incorrecta."
 	var mesa: StaticBody3D = taller.mesa.piezas.mesa_taller
 	if not apuntar(bus, mesa) or not await elegir(bus, "dejar", arbol):
@@ -105,6 +114,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	await arbol.physics_frame
 	if foco.zona != taller.mesa or not apuntar(bus, foco) or not await elegir(bus, "tomar", arbol):
 		return "No se pudo volver a tomar el foco de la mesa."
+	Acciones.tecla(bus, 1)
 	bus.abrir_menu(faro)
 	if not await elegir(bus, "cambiar_foco_correcto", arbol) or bus.accion_pendiente != "cambiar_foco_correcto":
 		return "La acción equipada no pidió confirmación."
@@ -113,7 +123,55 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 			or "foco" in taller.inventario.cinturon or "destornillador" not in taller.inventario.cinturon \
 			or foco.zona != taller.estanteria:
 		return "El panel no consumió la pieza y conservó la herramienta."
+	return await probar_carrito(bus, arbol, eventos)
+
+
+static func probar_carrito(bus: Node3D, arbol: SceneTree, eventos: Array[Dictionary]) -> String:
+	var taller: Node3D = bus.taller
+	var carrito: StaticBody3D = taller.carrito.piezas.carrito_taller
+	var mesa: StaticBody3D = taller.mesa.piezas.mesa_taller
+	Acciones.tecla(bus, 1)
+	for mueble in [mesa, carrito]:
+		await arbol.physics_frame
+		if not apuntar(bus, mueble):
+			return "La mira no alcanza el mueble."
+		bus.recibir_accion(bus.panel.entrada.traducir("teclado", "clic", 1))
+		if bus.menu_pieza.entradas.any(func(entrada: Dictionary) -> bool: return entrada.id == "tomar"):
+			return "Un mueble vacío ofrece una opción Tomar."
+		if not await elegir(bus, "dejar", arbol) or taller.objetos.destornillador.zona != mueble.zona:
+			return "El objeto no quedó sobre el mueble elegido."
+		await arbol.physics_frame
+		if not apuntar(bus, mueble) or not await elegir(bus, "tomar", arbol) or taller.mano != "destornillador":
+			return "El menú del mueble no recuperó el objeto."
+	if eventos.size() != 3:
+		return "Usar los muebles alteró las decisiones de la orden."
+	var ids := ["destornillador", "multimetro", "flexometro", "lampara",
+		"llave_torque", "llave_ajustable", "tech_tool", "calzas"]
+	for id in ids.slice(1):
+		bus.abrir_menu(taller.objetos[id])
+		if not Acciones.elegir(bus, "tomar"):
+			return "No se pudo llenar el inventario."
+	bus.abrir_menu(carrito)
+	if not Acciones.elegir(bus, "tomar", "llave_torque") or taller.mano != "llave_torque":
+		return "El menú del carrito no empuñó un objeto de la bandeja."
+	for numero in range(1, 9):
+		Acciones.tecla(bus, numero)
+		if taller.mano != ids[numero - 1] or bus.jugador.id_mano != taller.mano 				or taller.espacios_hud[numero - 1].modulate != taller.GUIA:
+			return "El número %d no empuñó o resaltó el objeto." % numero
+	bus.jugador.ubicar(taller.carrito.global_position + Vector3.BACK * 3.1)
+	bus.actualizar_inventario()
+	Acciones.tecla(bus, 5)
+	if not taller.mano.is_empty() or bus.resultado.text != "El carrito está lejos" 			or taller.espacios_hud[4].modulate == Color.WHITE:
+		return "El carrito lejano sigue disponible en el HUD."
+	Acciones.tecla(bus, 2)
+	if taller.mano != "multimetro":
+		return "El cinturón dejó de funcionar al alejarse."
+	bus.abrir_menu(taller.caja_roja.piezas.caja_taller)
+	Acciones.tecla(bus, 1)
+	if taller.cajones_abiertos or bus.menu_pieza.visible or taller.mano != "multimetro":
+		return "El número no eligió la acción del menú abierto."
 	return ""
+
 
 
 static func apuntar(bus: Node3D, pieza: StaticBody3D) -> bool:
@@ -161,12 +219,23 @@ static func verificar_catalogo(taller: Node3D) -> bool:
 			for id in datos[grupo]:
 				var requiere: Dictionary = datos[grupo][id].get("requiere", {})
 				for tipo in requiere:
-					for objeto in requiere[tipo]:
+					for objeto in ([requiere[tipo]] if tipo == "herramienta" else requiere[tipo]):
 						if Inventario.objeto(objeto).is_empty() or not taller.objetos.has(objeto) \
 								or not taller.ubicaciones.has(taller.objetos[objeto].zona):
 							return false
 	var alterado: Dictionary = Escenario.cargar("escenarios/faros.json").escenario
+	var original: String = alterado.causa_correcta
+	alterado.causa_correcta = "desconocida"
+	if Escenario.campo_invalido(alterado) != "causa_correcta":
+		return false
+	alterado.causa_correcta = original
+	var explicacion: String = alterado.explicacion_causa[original]
+	alterado.explicacion_causa[original] = ""
+	if Escenario.campo_invalido(alterado) != "explicacion_causa." + original:
+		return false
+	alterado.explicacion_causa[original] = explicacion
 	for requiere in [[], {"piezas": ["multimetro"]}, {"piezas": ["desconocido"]},
+			{"herramienta": "foco"}, {"herramienta": "desconocida"}, {"herramienta": ["destornillador"]},
 			{"herramientas": ["destornillador", "destornillador"]}]:
 		alterado.acciones.cambiar_foco_correcto.requiere = requiere
 		if Escenario.campo_invalido(alterado) != "acciones.cambiar_foco_correcto.requiere":
@@ -178,9 +247,38 @@ static func probar_motor(arbol: SceneTree) -> bool:
 	var bus := Bus.instantiate()
 	bus.archivo = "escenarios/motor.json"
 	arbol.root.add_child(bus)
-	var correcto := ruta_motor(bus)
+	var correcto := probar_herramienta(bus) and ruta_motor(bus)
 	bus.free()
 	return correcto
+
+
+static func probar_herramienta(bus: Node3D) -> bool:
+	var antes: Dictionary = bus.motor.estado()
+	var titulo: Label = bus.lateral.get_node("Estado")
+	if titulo.autowrap_mode == TextServer.AUTOWRAP_OFF or titulo.text_overrun_behavior != TextServer.OVERRUN_NO_TRIMMING 			or titulo.text != bus.datos.titulo.trim_prefix("[MUESTRA] "):
+		return false
+	bus.ejecutar("inspeccionar", "teclado")
+	if not bus.flashcard.visible or bus.flashcard.cola[0].tipo != "falta" or bus.flashcard.donde.text.is_empty():
+		return false
+	bus.flashcard.confirmar()
+	if not Acciones.equipar(bus, "inspeccionar"):
+		return false
+	Acciones.tecla(bus, 4)
+	bus.ejecutar("inspeccionar", "teclado")
+	if not bus.flashcard.visible or bus.flashcard.cola[0].tipo != "aviso" 			or bus.flashcard.cuerpo.text != "Toma la herramienta en la mano: presiona 1." 			or bus.motor.puntaje() != 100 or bus.motor.estado() != antes:
+		return false
+	bus.flashcard.confirmar()
+	if not Acciones.equipar(bus, "revisar_refrigerante"):
+		return false
+	var errores: Array[Dictionary] = []
+	bus.decision_tomada.connect(func(decision: Dictionary):
+		if decision.tipo_error == "herramienta-equivocada":
+			errores.append(decision))
+	bus.ejecutar("inspeccionar", "teclado")
+	if bus.flashcard.titulo.text != "Herramienta equivocada" 			or bus.flashcard.cuerpo.text != "Tienes en la mano: Lámpara. Para esto necesitas: Destornillador." 			or bus.motor.puntaje() != 96 or bus.motor.estado() != antes or errores.size() != 1 			or errores[0].aplicada or errores[0].criticidad != "leve":
+		return false
+	bus.flashcard.confirmar()
+	return true
 
 
 static func ruta_motor(bus: Node3D) -> bool:
@@ -197,6 +295,52 @@ static func ruta_motor(bus: Node3D) -> bool:
 		if not Acciones.equipar(bus, id):
 			return false
 		bus.ejecutar(id, "virtual")
-	return bus.motor.fin() == "resuelto" and abrazadera.visible \
+	return bus.motor.fin() == "resuelto" and Acciones.cerrar_orden(bus) and abrazadera.visible \
 		and "abrazadera" not in bus.taller.inventario.cinturon \
 		and "llave_torque" in bus.taller.inventario.cinturon
+
+
+static func probar_cierres(base: String) -> bool:
+	var raiz := (Engine.get_main_loop() as SceneTree).root
+	for caso in [["correcto", 0, 100], ["incorrecto", 1, 0]]:
+		var bus := Bus.instantiate()
+		bus.archivo = "escenarios/faros.json"
+		bus.tecnico = Alias.alta(base, "T-613%d" % caso[1]).merged({"base": base})
+		raiz.add_child(bus)
+		var correcto := comprobar_cierre(bus, base, caso)
+		bus.free()
+		if not correcto:
+			return false
+	return true
+
+
+static func comprobar_cierre(bus: Node3D, base: String, caso: Array) -> bool:
+	for accion in bus.datos.ruta_ideal:
+		if not Acciones.equipar(bus, accion):
+			return false
+		bus.ejecutar(accion, "virtual")
+	if not bus.flashcard.visible or bus.flashcard.titulo.text != "¿Qué causó la falla?" 			or bus.flashcard.opciones.size() != 2 or bus.resultados_guardados or bus.resumen.visible:
+		return false
+	if caso[1] == 0:
+		bus.flashcard.opciones[0].pressed.emit()
+	else:
+		bus.flashcard.opciones[1].grab_focus()
+		var evento := InputEventJoypadButton.new()
+		evento.button_index = JOY_BUTTON_A
+		evento.pressed = true
+		bus.get_viewport().push_input(evento, true)
+	if bus.flashcard.titulo.text != caso[0].capitalize() 			or not bus.flashcard.cuerpo.text.contains("Causa real: Foco dañado") 			or not bus.flashcard.fuente.text.contains(bus.datos.fuente) or not bus.resultados_guardados:
+		return false
+	bus.flashcard.confirmar()
+	if not bus.resumen.visible or not bus.resumen.get_node("Detalle").text.contains("Diagnóstico final: " + caso[0].capitalize()):
+		return false
+	var intentos: Array = Base.consultar(base,
+		"SELECT formato, valor, peso, tipo_error FROM intento WHERE tecnico = ? ORDER BY id;", [bus.tecnico.id])
+	if intentos.size() != 2 or Dominio.calcular(intentos) != 100.0:
+		return false
+	var intento: Dictionary = intentos[1]
+	var error: Variant = null if caso[1] == 0 else "causa-equivocada"
+	var eventos: Array = Base.consultar(base,
+		"SELECT json_extract(estado_despues, '$.causa_elegida') AS causa FROM evento WHERE tecnico = ? AND accion = 'diagnostico_final';",
+		[bus.tecnico.id])
+	return intento.valor == caso[2] and intento.tipo_error == error 		and eventos == [{"causa": bus.datos.causas[caso[1]]}]

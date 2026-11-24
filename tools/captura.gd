@@ -5,9 +5,14 @@ extends SceneTree
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
 # Flashcard: [ancho alto] flashcard falta|aviso|error|critico [--verificar]
+# Cierre: [ancho alto] cierre [correcto|incorrecto] [--verificar]
+# Inventario y título largo: [ancho alto] inventario [--verificar]
 # Taller: [ancho alto] taller|baliza|elevador|bajos [--verificar]
 # Banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
+const Acciones = preload("res://tests/acciones_taller.gd")
+
+
 func _initialize() -> void:
 	call_deferred("capturar")
 
@@ -24,14 +29,18 @@ func capturar() -> void:
 			fallar("Usa flashcard falta|aviso|error|critico.")
 			return
 		args.resize(args.size() - 2)
+	var respuesta := ""
+	if args.size() > 3 and args[-2] == "cierre" and args[-1] in ["correcto", "incorrecto"]:
+		respuesta = args[-1]
+		args.remove_at(args.size() - 1)
 	var menu := args.size() > 2 and args[-1] == "menu"
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "bajos"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "bajos", "inventario", "cierre"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
-	var vista_taller := vista in ["taller", "baliza", "elevador", "bajos"]
+	var vista_taller := vista in ["taller", "baliza", "elevador", "bajos", "inventario", "cierre"]
 	var zona := ""
 	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
@@ -103,8 +112,10 @@ func capturar() -> void:
 		escena.modo_captura = true
 	if vista in ["elevador", "bajos"]:
 		escena.archivo = "escenarios/neumatico_pinchado.json"
-	elif vista == "baliza":
+	elif vista in ["baliza", "cierre"]:
 		escena.archivo = "escenarios/faros.json"
+	elif vista == "inventario":
+		escena.archivo = "escenarios/motor.json"
 	if not zona.is_empty():
 		if zona != "interior":
 			escena.archivo = "escenarios/%s.json" % {"cabina": "comunicacion", "banco": "modulo_auxiliar"}.get(zona, zona)
@@ -119,12 +130,19 @@ func capturar() -> void:
 			if not preparar_elevador(escena, vista):
 				fallar("El elevador o su encuadre no corresponde a la vista.")
 				return
+		elif vista in ["cierre", "inventario"]:
+			if not preparar_orden(escena, vista, respuesta):
+				fallar("La orden no corresponde a la vista solicitada.")
+				return
 		elif vista_taller:
 			if not preparar_taller(escena, vista):
 				fallar("El taller no corresponde a la vista solicitada.")
 				return
 		if vista in ["abierto", "animacion", "danado"]:
 			sector = escena.zona_activa
+			if not Acciones.equipar(escena, "inspeccionar"):
+				fallar("No se pudo empuñar el destornillador.")
+				return
 			escena.ubicar_jugador(sector.acceso)
 			await physics_frame
 			await physics_frame
@@ -147,6 +165,9 @@ func capturar() -> void:
 			else:
 				await sector.animacion.finished
 		if vista == "danado":
+			if not Acciones.equipar(escena, "forzar_pieza"):
+				fallar("No se pudo empuñar la llave ajustable.")
+				return
 			escena.ejecutar("forzar_pieza", "teclado")
 		if zona in ["cabina", "interior"]:
 			sector = escena.interior
@@ -172,6 +193,9 @@ func capturar() -> void:
 			await physics_frame
 			await physics_frame
 			if vista == "midiendo":
+				if not Acciones.equipar(escena, "medir_tp1"):
+					fallar("No se pudo empuñar el multímetro.")
+					return
 				for punto in ["tp0", "tp1"]:
 					escena.apuntar_jugador(sector.piezas[punto].global_position)
 					if not comprobar_pieza(escena, punto):
@@ -276,6 +300,14 @@ func capturar() -> void:
 			or not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect())):
 		fallar("La tarjeta no se abrió o queda recortada.")
 		return
+	if vista == "cierre" and not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect()):
+		fallar("El cierre de la orden queda recortado.")
+		return
+	if vista == "inventario":
+		var titulo: Label = escena.lateral.get_node("Estado")
+		if titulo.get_line_count() < 2 or not vp.get_visible_rect().encloses(escena.taller.hud.get_global_rect()):
+			fallar("El título debe envolver y el inventario debe caber en el encuadre.")
+			return
 	if verificar:
 		quit(0)
 		return
@@ -290,6 +322,32 @@ func capturar() -> void:
 		return
 	print("Guardado ", args[1], " ", img.get_size())
 	quit(0)
+
+
+func preparar_orden(escena: Node3D, vista: String, respuesta: String) -> bool:
+	escena.jugador.set_physics_process(false)
+	escena.ubicar_jugador(escena.zona_activa.acceso)
+	if vista == "cierre":
+		for id in escena.datos.ruta_ideal:
+			if not Acciones.equipar(escena, id):
+				return false
+			escena.ejecutar(id, "virtual")
+		if not escena.flashcard.visible or escena.flashcard.opciones.size() != 2:
+			return false
+		if not respuesta.is_empty():
+			escena.flashcard.opciones[0 if respuesta == "correcto" else 1].pressed.emit()
+			return escena.flashcard.titulo.text == respuesta.capitalize()
+		return true
+	var taller: Node3D = escena.taller
+	escena.jugador.ubicar(taller.carrito.global_position + Vector3.BACK * 1.6)
+	escena.apuntar_jugador(taller.carrito.global_position + Vector3.UP * 0.8)
+	taller.cambiar_cajones(true, true)
+	for id in ["destornillador", "multimetro", "lampara", "llave_ajustable", "tech_tool", "llave_torque"]:
+		escena.abrir_menu(taller.objetos[id])
+		if not Acciones.elegir(escena, "tomar"):
+			return false
+	Acciones.tecla(escena, 1)
+	return taller.mano == "destornillador" and taller.espacios_hud.size() == 8 and escena.carrito_cerca()
 
 
 func preparar_flashcard(escena: Node3D, tipo: String) -> void:

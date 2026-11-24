@@ -65,6 +65,8 @@ static func recorrer_faros(bus: Node3D, arbol: SceneTree) -> bool:
 
 
 static func recorrer_banco(bus: Node3D, arbol: SceneTree) -> bool:
+	if not Taller.equipar(bus, "medir_tp1"):
+		return false
 	for borne in ["tp0", "tp1", "tp0", "tp2"]:
 		bus.tocar_borne(borne, "teclado")
 	bus.abrir_menu(bus.zona_activa.piezas["multimetro"])
@@ -84,6 +86,8 @@ static func recorrer_banco(bus: Node3D, arbol: SceneTree) -> bool:
 
 static func elegir(bus: Node3D, pieza: String, id: String) -> bool:
 	if not bus.menu_pieza.visible:
+		if not Taller.equipar(bus, id):
+			return false
 		bus.abrir_menu(bus.zona_activa.piezas[pieza])
 	var indice: int = bus.menu_pieza.entradas.find_custom(func(entrada: Dictionary) -> bool:
 		return entrada.id == id)
@@ -121,7 +125,7 @@ static func confirmar(bus: Node3D, arbol: SceneTree, id: String) -> bool:
 
 static func comprobar_ayuda(bus: Node3D, texto: String) -> bool:
 	var ayuda := bus.lateral.get_node_or_null("Siguiente") as Label
-	return ayuda != null and ayuda.is_visible_in_tree() and ayuda.text == "Siguiente: " + texto
+	return ayuda != null and ayuda.is_visible_in_tree() and ayuda.text.begins_with("Siguiente: ") and ayuda.text.ends_with(texto)
 
 
 static func comprobar_resuelto(bus: Node3D) -> bool:

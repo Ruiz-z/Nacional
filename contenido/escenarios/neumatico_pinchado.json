@@ -11,6 +11,10 @@
   "causas": [
     "Neumático pinchado"
   ],
+  "causa_correcta": "Neumático pinchado",
+  "explicacion_causa": {
+    "Neumático pinchado": "[MUESTRA] El pinchazo explica la pérdida de presión del neumático."
+  },
   "indicios": [
     {
       "clave": "medir_presion",
@@ -94,12 +98,13 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
-        "herramientas": [
-          "manometro"
-        ]
+        "herramienta": "manometro"
       }
     },
     "localizar_pinchazo": {
+      "requiere": {
+        "herramienta": "lampara"
+      },
       "titulo": "Localizar pinchazo",
       "componente": "neumatico_delantero_derecho",
       "previas": {
@@ -135,6 +140,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "neumatico"
         ]
@@ -159,9 +165,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       },
       "torque": {
         "minimo": 40,
@@ -190,9 +194,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       },
       "torque": {
         "minimo": 40,
@@ -221,9 +223,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       },
       "torque": {
         "minimo": 40,
@@ -252,9 +252,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       },
       "torque": {
         "minimo": 40,
@@ -283,9 +281,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
-        "herramientas": [
-          "llave_torque"
-        ]
+        "herramienta": "llave_torque"
       },
       "torque": {
         "minimo": 40,
@@ -326,9 +322,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
-        "herramientas": [
-          "manometro"
-        ]
+        "herramienta": "manometro"
       }
     }
   },
@@ -407,6 +401,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "tuercas"
         ]
@@ -432,6 +427,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "tuercas"
         ]
@@ -457,6 +453,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "tuercas"
         ]
@@ -482,6 +479,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "tuercas"
         ]
@@ -507,6 +505,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
+        "herramienta": "llave_ajustable",
         "piezas": [
           "tuercas"
         ]

@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 
 
@@ -77,6 +79,8 @@ static func comprobar_diagnostico(bus: Node3D) -> bool:
 		return false
 	bus.cerrar_menu()
 	for id in bus.datos.ruta_ideal:
+		if not Taller.equipar(bus, id):
+			return false
 		var regla: Dictionary = bus.datos.acciones[id]
 		bus.abrir_menu(interior.piezas[regla.componente])
 		var indice := -1

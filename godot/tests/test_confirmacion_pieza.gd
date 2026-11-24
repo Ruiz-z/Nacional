@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 
 
@@ -8,8 +10,9 @@ static func ejecutar() -> bool:
 	var raiz := (Engine.get_main_loop() as SceneTree).root
 	raiz.add_child(bus)
 	var sector := bus.get_node("Sector")
+	var equipado := Taller.equipar(bus, "inspeccionar")
 	bus.abrir_menu(sector.piezas.compuerta)
-	var correcto: bool = not bus.menu_pieza.diagnostico.visible
+	var correcto: bool = equipado and not bus.menu_pieza.diagnostico.visible
 	tecla(raiz, KEY_H)
 	correcto = correcto and not bus.get_node("Interfaz").visible
 	tecla(raiz, KEY_H)
@@ -18,6 +21,7 @@ static func ejecutar() -> bool:
 	correcto = correcto and sector.abierta and not bus.menu_pieza.visible \
 		and bus.resultado.text == "Compuerta abierta. Ahora abre el monitor y elige Evaluar el indicio." \
 		and not bus.duracion_aviso.is_stopped()
+	correcto = correcto and Taller.equipar(bus, "evaluar_indicio")
 	bus.abrir_menu(sector.piezas.monitor)
 	correcto = correcto and bus.menu_pieza.diagnostico.visible
 	tecla(raiz, KEY_UP)
@@ -28,6 +32,7 @@ static func ejecutar() -> bool:
 	control(raiz, JOY_BUTTON_DPAD_UP)
 	control(raiz, JOY_BUTTON_A)
 	bus.menu_pieza.botones[0].pressed.emit()
+	correcto = correcto and Taller.equipar(bus, "confirmar_solucion")
 	bus.abrir_menu(sector.piezas.bateria)
 	control(raiz, JOY_BUTTON_DPAD_DOWN)
 	correcto = correcto and raiz.gui_get_focus_owner() == bus.menu_pieza.botones[1]
@@ -43,7 +48,7 @@ static func ejecutar() -> bool:
 	tecla(raiz, KEY_1)
 	correcto = correcto and bus.accion_pendiente == "confirmar_solucion" and bus.motor.fin().is_empty()
 	bus.panel.get_node("Confirmar").pressed.emit()
-	correcto = correcto and bus.motor.fin() == "resuelto"
+	correcto = correcto and bus.motor.fin() == "resuelto" and Taller.cerrar_orden(bus)
 	var salidas: Array[bool] = []
 	bus.salida_solicitada.connect(func(): salidas.append(true))
 	tecla(raiz, KEY_ESCAPE)

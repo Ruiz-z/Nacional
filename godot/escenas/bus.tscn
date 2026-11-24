@@ -1247,7 +1247,7 @@ offset_top = 12.0
 offset_bottom = 48.0
 
 [node name="Estado" type="Label" parent="Interfaz/Lateral"]
-text_overrun_behavior = 3
+autowrap_mode = 3
 theme_override_font_sizes/font_size = 15
 
 [node name="Indicios" type="Label" parent="Interfaz/Lateral"]
@@ -1297,7 +1297,7 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_outline_color = Color(0.04, 0.06, 0.08, 1)
 theme_override_constants/outline_size = 5
-text = "Tab · Cursor libre\n← / →, rueda o L / R · Elegir objeto     G / Y · Guía"
+text = "Números 1 a 8: elegir herramienta · Tab · Cursor libre\n← / →, rueda o L / R · Elegir objeto     G / Y · Guía"
 
 [node name="Mira" type="Label" parent="."]
 anchor_left = 0.5

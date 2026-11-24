@@ -17,6 +17,11 @@
     "modulo-sin-comunicacion",
     "otro-modulo"
   ],
+  "causa_correcta": "modulo-sin-comunicacion",
+  "explicacion_causa": {
+    "modulo-sin-comunicacion": "[MUESTRA] El módulo afectado dejó de comunicarse con la red.",
+    "otro-modulo": "[MUESTRA] Los síntomas señalan al módulo sin comunicación, no a otro módulo de la red."
+  },
   "indicios": [
     {"clave": "sintomas_revisados", "etiqueta": "Síntomas de red revisados", "ayuda": "Abre el monitor y elige Revisar los síntomas."},
     {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar el diagnóstico en los cables y confirma en el panel."}
@@ -34,6 +39,9 @@
   ],
   "acciones": {
     "revisar_sintomas": {
+      "requiere": {
+        "herramienta": "tech_tool"
+      },
       "titulo": "Revisar los síntomas",
       "requiere_panel": false,
       "componente": "monitor",
@@ -49,6 +57,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "seleccionar_otro_modulo": {
+      "requiere": {
+        "herramienta": "tech_tool"
+      },
       "titulo": "Seleccionar otro módulo",
       "componente": "cables",
       "previas": {
@@ -63,6 +74,9 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_diagnostico": {
+      "requiere": {
+        "herramienta": "tech_tool"
+      },
       "titulo": "Confirmar el diagnóstico",
       "requiere_panel": true,
       "componente": "cables",

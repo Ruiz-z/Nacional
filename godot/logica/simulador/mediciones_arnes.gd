@@ -92,11 +92,15 @@ func aplicar(id: String, estado: Dictionary, causa: String, lectura_previa: Dict
 	return {}
 
 
+static func causa_de_lectura(tensiones: Dictionary) -> String:
+	return "alimentacion" if Banco.coincide(tensiones.tp1, 0.0) else "senal"
+
+
 func evaluar(estado: Dictionary, lectura_previa: Dictionary = {}) -> String:
 	var tensiones: Dictionary = leer.call(estado) if lectura_previa.is_empty() else lectura_previa
 	var evidencia := reportadas if fuente == "banco" else medidas
-	var alimentacion := Banco.coincide(tensiones.tp1, 0.0)
-	var punto_falla := "tp1" if alimentacion else "tp2"
+	var causa := causa_de_lectura(tensiones)
+	var punto_falla := "tp1" if causa == "alimentacion" else "tp2"
 	if not evidencia.has(punto_falla):
 		return "punto-de-medicion-incorrecto"
 	for punto in PUNTOS:
@@ -105,7 +109,7 @@ func evaluar(estado: Dictionary, lectura_previa: Dictionary = {}) -> String:
 				or (fuente != "banco" and not Banco.coincide(opcion.to_float(), medidas[punto])) \
 				or not Banco.coincide(opcion.to_float(), tensiones[punto]):
 			return "valor-fuera-de-rango"
-	if not diagnostico.is_empty() and diagnostico != ("alimentacion" if alimentacion else "senal"):
+	if not diagnostico.is_empty() and diagnostico != causa:
 		return INTERPRETACION
 	return ""
 

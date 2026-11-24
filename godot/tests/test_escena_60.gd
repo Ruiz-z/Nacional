@@ -26,6 +26,7 @@ static func ejecutar() -> bool:
 	correcto = correcto and elegir(bus, "monitor", "evaluar_indicio")
 	correcto = correcto and gabinete.lectura == "Verde" and elegir(bus, "bateria", "confirmar_solucion")
 	bus.recibir_accion({"accion": "confirmar", "fuente_entrada": "teclado"})
+	correcto = correcto and Taller.cerrar_orden(bus)
 	var resumen := lateral.get_node("Resumen")
 	correcto = correcto and resumen.visible and not resumen.get_node("Reintentar").visible
 	resumen.get_node("Reflexion").text = "Revisaría el aviso"
@@ -40,6 +41,8 @@ static func ejecutar() -> bool:
 
 
 static func elegir(bus: Node, pieza: String, accion: String) -> bool:
+	if not Taller.equipar(bus, accion):
+		return false
 	bus.abrir_menu(bus.get_node("Sector").piezas[pieza])
 	for indice in range(bus.menu_pieza.entradas.size()):
 		if bus.menu_pieza.entradas[indice].id == accion:

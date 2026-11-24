@@ -18,6 +18,9 @@ const CAUSAS := {
 	"modulo-sin-comunicacion": "Módulo sin comunicación",
 	"otro-modulo": "Otro módulo",
 	"foco-danado": "Foco dañado",
+	"alimentacion": "Alimentación",
+	"senal": "Señal",
+	"modulo": "Módulo",
 }
 
 var entradas: Array[Dictionary] = []
@@ -39,8 +42,12 @@ func _ready() -> void:
 	estilo_chip(pendiente, "azul", 16)
 
 
+static func nombre_causa(id: String) -> String:
+	return CAUSAS.get(id, id.left(1).to_upper() + id.substr(1).replace("-", " "))
+
+
 func abrir(titulo: String, lectura: String, opciones: Array[Dictionary],
-		ids_causa: Array, marcada: String, estado: Dictionary, reportadas: Dictionary = {}, banco := false) -> void:
+		ids_causa: Array, marcada: String, estado: Dictionary, reportadas: Dictionary = {}, banco := false, mueble := false) -> void:
 	entradas = opciones
 	preparar_lecturas(reportadas, banco)
 	contenido.get_node("Cabecera/Titulo").text = titulo
@@ -57,7 +64,7 @@ func abrir(titulo: String, lectura: String, opciones: Array[Dictionary],
 	var grupo := ButtonGroup.new()
 	for id: String in ids_causa:
 		var boton := Button.new()
-		var nombre: String = CAUSAS.get(id, id.left(1).to_upper() + id.substr(1).replace("-", " "))
+		var nombre := nombre_causa(id)
 		boton.toggle_mode = true
 		boton.button_group = grupo
 		boton.add_theme_font_size_override("font_size", 15)
@@ -70,7 +77,7 @@ func abrir(titulo: String, lectura: String, opciones: Array[Dictionary],
 		causas.append(boton)
 	diagnostico.visible = not causas.is_empty()
 	for indice in range(entradas.size()):
-		agregar_accion(indice, entradas[indice], banco)
+		agregar_accion(indice, entradas[indice], banco or mueble)
 	lista.visible = not botones.is_empty()
 	ajustar_lista()
 	contenido.get_node("SinAcciones").visible = botones.is_empty()

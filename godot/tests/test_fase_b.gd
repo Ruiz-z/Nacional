@@ -1,9 +1,10 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Bus = preload("res://escenas/bus.tscn")
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Elevador = preload("res://escenas/elevador.gd")
-const Inventario = preload("res://logica/simulador/inventario.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
 const ORDENES := {"neumatico_pinchado": "FG7", "tuercas_rueda_flojas": "FG7",
 	"fuga_suspension_neumatica": "FG7", "amortiguador_danado": "FG7", "freno_desgastado": "FG5"}
@@ -31,29 +32,51 @@ static func ruta_ideal(id: String) -> bool:
 	var datos: Dictionary = carga.escenario
 	if datos.grupo_funcion != ORDENES[id] or datos.zona != "bajos":
 		return false
-	var motor := Motor.new(datos)
-	var variante: Dictionary = datos.duplicate(true)
-	variante.estado.merge(datos.variante.estado, true)
-	for simulador in [motor, Motor.new(variante)]:
-		var inventario := Inventario.new()
-		for accion in datos.ruta_ideal:
-			var regla: Dictionary = datos.acciones[accion]
-			var requisitos: Dictionary = regla.get("requiere", {})
-			for objeto in inventario.faltantes(requisitos):
-				if not inventario.tomar(objeto).is_empty():
-					return false
-			var decision: Dictionary = simulador.ejecutar(accion, "virtual" if regla.requiere_panel else "teclado",
-				1, {"elevador_seguro": true, "torque": 50})
-			if not decision.aplicada or not decision.tipo_error.is_empty() \
-					or decision.competencia != "diagnostico-fallas":
-				return false
-			inventario.consumir(requisitos)
-			for pieza in requisitos.get("piezas", []):
-				if pieza in inventario.accesibles():
-					return false
-		if simulador.fin() != "resuelto" or simulador.puntaje() != 100:
+	var raiz := (Engine.get_main_loop() as SceneTree).root
+	for variante in [false, true]:
+		var bus := Bus.instantiate()
+		bus.archivo = "escenarios/%s.json" % id
+		raiz.add_child(bus)
+		if variante:
+			var adaptado := datos.duplicate(true)
+			adaptado.estado.merge(datos.variante.estado, true)
+			bus.motor = Motor.new(adaptado)
+		var correcto := recorrer_ideal(bus, datos)
+		bus.free()
+		if not correcto:
 			return false
 	return true
+
+
+static func recorrer_ideal(bus: Node3D, datos: Dictionary) -> bool:
+	var elevador: Node3D = bus.get_node("Elevador")
+	if not Taller.equipar(bus, "colocar_calzas") 			or not elegir(bus, elevador.piezas[Elevador.CALZAS], "colocar_calzas"):
+		return false
+	elevador.mover(true, true)
+	if not Taller.equipar(bus, "trabar_soporte"):
+		return false
+	for soporte in elevador.trabas:
+		if not elegir(bus, elevador.piezas[soporte], "trabar_soporte"):
+			return false
+	bus.panel.get_node("Torque").value = 50
+	for accion in datos.ruta_ideal:
+		if accion == "cerrar_orden":
+			if not Taller.equipar(bus, "destrabar_soporte"):
+				return false
+			for soporte in elevador.trabas:
+				if not elegir(bus, elevador.piezas[soporte], "destrabar_soporte"):
+					return false
+			elevador.mover(false, true)
+		if not Taller.equipar(bus, accion):
+			return false
+		var regla: Dictionary = datos.acciones[accion]
+		bus.ejecutar(accion, "virtual" if regla.requiere_panel else "teclado")
+		for pieza in regla.get("requiere", {}).get("piezas", []):
+			if pieza in bus.taller.inventario.accesibles():
+				return false
+		if bus.motor.puntaje() != 100:
+			return false
+	return bus.motor.fin() == "resuelto" and Taller.cerrar_orden(bus)
 
 
 static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
@@ -123,6 +146,8 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	bus.taller.tomar("calzas", false)
 	if not await mover(bus, consola, elevador, "elevar_bus"):
 		return false
+	if not Taller.equipar(bus, "trabar_soporte"):
+		return false
 	for soporte in elevador.trabas:
 		if not elegir(bus, elevador.piezas[soporte], "trabar_soporte"):
 			return false
@@ -134,10 +159,12 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	if bus.taller.objetivo != "manometro":
 		return false
 	bus.taller.tomar("manometro", false)
-	if not elegir(bus, rueda, "medir_presion") or not elegir(bus, rueda, "localizar_pinchazo"):
+	if not elegir(bus, rueda, "medir_presion") or not Taller.equipar(bus, "localizar_pinchazo") \
+			or not elegir(bus, rueda, "localizar_pinchazo"):
 		return false
 	bus.taller.dejar("manometro", false)
-	bus.taller.tomar("neumatico", false)
+	if not Taller.equipar(bus, "cambiar_rueda"):
+		return false
 	if not elegir(bus, rueda, "cambiar_rueda") or bus.accion_pendiente != "cambiar_rueda":
 		return false
 	bus.panel.get_node("Confirmar").pressed.emit()
@@ -157,13 +184,15 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	if not bus.flashcard.visible or bus.flashcard.titulo.text != "Valor fuera de rango":
 		return false
 	bus.flashcard.ok.pressed.emit()
-	bus.taller.tomar("tuercas", false)
+	if not Taller.equipar(bus, "reponer_tuerca_1"):
+		return false
 	if not elegir(bus, tuerca, "reponer_tuerca_1"):
 		return false
 	while Time.get_ticks_msec() - primer_envio < 60:
 		await arbol.process_frame
 	bus.panel.get_node("Confirmar").pressed.emit()
-	if bus.motor.hay_problemas() or not elegir(bus, tuerca, "apretar_tuerca_1"):
+	if bus.motor.hay_problemas() or not Taller.equipar(bus, "apretar_tuerca_1") \
+			or not elegir(bus, tuerca, "apretar_tuerca_1"):
 		return false
 	while Time.get_ticks_msec() - primer_torque < 60:
 		await arbol.process_frame
@@ -181,6 +210,8 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	if not elegir(bus, consola, "descender_bus") or elevador.en_movimiento():
 		return false
 	bus.flashcard.ok.pressed.emit()
+	if not Taller.equipar(bus, "destrabar_soporte"):
+		return false
 	for soporte in elevador.trabas:
 		if not elegir(bus, elevador.piezas[soporte], "destrabar_soporte"):
 			return false
