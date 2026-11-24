@@ -22,3 +22,5 @@ Se declara si las personas que probaron el sistema tenían o no conocimiento té
 ## Créditos de modelos 3D
 - Autobús exterior: "3D Bus" de ajanhallinta, licencia CC0 (https://opengameart.org/content/3d-bus). Referencia visual genérica; no representa un modelo Volvo ni el vehículo del escenario.
 - Props del taller: conos y señales de "LowPoly Public Transport" de Quaternius, licencia CC0 (https://opengameart.org/node/83020).
+- Brazos de primera persona: "Low Poly Arms (Rigged)" de DevMops, CC0 (https://opengameart.org/node/156502).
+- Herramientas: "Tool Pack 1", CC0 (https://opengameart.org/content/tool-pack-1).
