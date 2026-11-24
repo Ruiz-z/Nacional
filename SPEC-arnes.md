@@ -81,6 +81,12 @@ Los puntos de prueba van del lado de J2, después de los interruptores.
 - Demo manual: aviso en la cabina, medir TP1 y TP2 en el banco, registrar lecturas, diagnosticar, reparar y ver en el resumen si el error fue de medición o de interpretación, con las dos variantes.
 - Si hay banco físico: las tres filas de la tabla se comprueban con un multímetro real antes de conectar el simulador.
 
+## Ajustes tras la prueba con el equipo (24/11/2026)
+- Hay un solo multímetro, el de mano, que nace sobre la mesa del banco; al tomarlo, el de la mesa queda apagado y la lectura se ve en el de la mano.
+- Las lecturas y la causa se anotan en una **hoja de diagnóstico** sobre la mesa; el multímetro solo mide.
+- Las puntas son visibles: cables y pinzas negra y roja, un indicador "Punta negra / Punta roja" y avisos de apuntado por punta.
+- La orden tiene cuatro misiones: medir TP1 y TP2, anotar las lecturas, identificar la causa y reparar.
+
 ## Decisiones
 - Se construyen el banco **virtual y el físico**; el virtual es el respaldo.
 - El banco físico usa un **Arduino Uno R3 aparte**, sin tocar el panel de torque.
