@@ -49,7 +49,9 @@ static func consultar_local(base: String, sql: String, parametros: Array = []) -
 			sentencia += str(valor)
 		sentencia += partes[indice + 1]
 	var salida: Array = []
-	var codigo := OS.execute("sqlite3", ["-batch", "-bail", "-json", base,
+	# El binario del SDK de Android puede aparecer primero en PATH y carecer de FTS5.
+	var ejecutable := "/usr/bin/sqlite3" if FileAccess.file_exists("/usr/bin/sqlite3") else "sqlite3"
+	var codigo := OS.execute(ejecutable, ["-batch", "-bail", "-json", base,
 		"PRAGMA foreign_keys = ON; " + sentencia], salida, true)
 	if codigo != 0:
 		printerr("Falló sqlite3 en la prueba: ", salida)

@@ -75,22 +75,22 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [ ] T-60 S — Pantalla de resumen y reintento — Hecho cuando: demo manual con error, recuperación y reintento.
 
 ## 6. tablero
-- [ ] T-61 S — Consultas de los 9 indicadores (RF-4) — Hecho cuando: pruebas con el técnico `[DEMO]`.
-- [ ] T-62 S — Datos `[DEMO]` precargados (RF-15, 16) — Hecho cuando: historial con pre, post y retest.
+- [x] T-61 S — Consultas de los 9 indicadores (RF-4) — Hecho cuando: pruebas con el técnico `[DEMO]`.
+- [x] T-62 S — Datos `[DEMO]` precargados (RF-15, 16) — Hecho cuando: historial con pre, post y retest.
 - [ ] T-63 S — Vista del técnico (RF-3, 6, 8) — Hecho cuando: demo manual.
 - [ ] T-64 S — Vista del instructor y detalle con línea de tiempo (RF-7, 9, 10, 12) — Hecho cuando: demo manual.
 - [ ] T-65 S — Fórmulas en ayuda, color solo con texto (RF-5, 11) — Hecho cuando: checklist manual.
-- [ ] T-66 S — Exportar CSV y JSON; borrar técnico con confirmación (RF-13, 14) — Hecho cuando: pruebas de contenido y de borrado.
-- [ ] T-67 S — Estados vacíos y "pendiente" — Hecho cuando: técnico sin sesiones sin errores.
-- [ ] T-68 S — Asistente: FTS5 de las fuentes, prompt y respuesta con cita, "no tengo esa información" (RF-18 a 21, 23) — Hecho cuando: prueba con pregunta con y sin respaldo.
-- [ ] T-69 S — Asistente desactivado sin modelo (RF-22) — Hecho cuando: aviso y el resto funciona.
+- [x] T-66 S — Exportar CSV y JSON; borrar técnico con confirmación (RF-13, 14) — Hecho cuando: pruebas de contenido y de borrado.
+- [x] T-67 S — Estados vacíos y "pendiente" — Hecho cuando: técnico sin sesiones sin errores.
+- [x] T-68 S — Asistente: FTS5 de las fuentes, prompt y respuesta con cita, "no tengo esa información" (RF-18 a 21, 23) — Hecho cuando: prueba con pregunta con y sin respaldo.
+- [x] T-69 S — Asistente desactivado sin modelo (RF-22) — Hecho cuando: aviso y el resto funciona.
 
 ## 7. flujo
-- [ ] T-70 S — Alias único y sin nombres reales (RF-1) — Hecho cuando: prueba de alias repetido.
-- [ ] T-71 S — Siguiente paso recomendado y diagnóstico obligatorio (RF-2, 3) — Hecho cuando: pruebas por estado.
-- [ ] T-72 S — Guardado por paso y reanudación (RF-4, 5) — Hecho cuando: prueba cierra y reabre a mitad de un paso.
+- [x] T-70 S — Alias único y sin nombres reales (RF-1) — Hecho cuando: prueba de alias repetido.
+- [x] T-71 S — Siguiente paso recomendado y diagnóstico obligatorio (RF-2, 3) — Hecho cuando: pruebas por estado.
+- [x] T-72 S — Guardado por paso y reanudación (RF-4, 5) — Hecho cuando: prueba cierra y reabre a mitad de un paso.
 - [ ] T-73 S — Menú principal navegable con teclado, control y ratón — Hecho cuando: checklist manual.
-- [ ] T-74 S — Modo demo: base separada, adelantar reloj, restablecer (RF-6, 7, 8) — Hecho cuando: demo manual.
+- [ ] T-74 S — Modo demo: base separada, adelantar reloj, restablecer (RF-6, 7, 8) — Lógica probada. Falta la pantalla con los controles, mostrar el estado de entrada en el menú (RF-8) y verificar la demo manual.
 
 ## 8. entrega
 - [ ] T-75 S — README con instalación en 3 pasos y estructura (RF-5) — Hecho cuando: otra persona lo sigue sin ayuda.
