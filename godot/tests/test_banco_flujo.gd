@@ -31,9 +31,16 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 		return "Falta el aviso del módulo o la fuente del banco."
 	await arbol.physics_frame
 	await arbol.physics_frame
-	for paso in [["tp1", "—"], ["tp0", "—"], ["tp0", "—"], ["tp0", "0.0 V"]]:
+	for paso in [["tp1", "—", "La punta negra va en TP0."],
+			["tp0", "—", "Polaridad invertida. Empieza en TP0."], ["tp0", "—", ""], ["tp0", "0.0 V", ""]]:
 		if not apuntar_y_pulsar(bus, paso[0]) or zona.pantalla.text != paso[1]:
 			return "No se manejaron las puntas invertidas o TP0 contra TP0."
+		if bus.flashcard.visible != (not paso[2].is_empty()):
+			return "La advertencia de puntas no se mostró cuando correspondía."
+		if bus.flashcard.visible:
+			if bus.flashcard.cuerpo.text != paso[2]:
+				return "La tarjeta no explicó cómo colocar las puntas."
+			bus.flashcard.ok.pressed.emit()
 	if not bus.motor.mediciones.medidas.is_empty():
 		return "Se guardó una medición sin un borne válido."
 	for paso in [["tp0", "—"], ["tp1", "0.0 V"], ["tp0", "—"], ["tp2", "5.0 V"]]:

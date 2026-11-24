@@ -411,17 +411,24 @@ func crear_guia() -> void:
 	caducidad.timeout.connect(apagar_guia)
 
 
-func senalar(id: String) -> String:
+func mueble_de(id: String) -> Node3D:
+	return carrito if id in inventario.carrito else objetos[id].zona
+
+
+func ubicacion(id: String) -> String:
+	return ubicaciones[mueble_de(id)]
+
+
+func senalar(id: String) -> void:
 	apagar_guia()
 	objetivo = id
 	var pieza: StaticBody3D = objetos[id]
-	var mueble: Node3D = carrito if id in inventario.carrito else pieza.zona
+	var mueble := mueble_de(id)
 	for malla in pieza.get_node("Forma").find_children("*", "MeshInstance3D", true, false):
 		malla.material_overlay = contorno
 	baliza.position = to_local(mueble.global_position) + Vector3.UP * (alturas[mueble] + 1.02)
 	baliza.show()
 	caducidad.start()
-	return "Está en %s." % ubicaciones[mueble]
 
 
 func apagar_guia() -> void:

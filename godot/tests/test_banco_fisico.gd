@@ -78,8 +78,10 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	if not bus.lateral.get_node("Siguiente").text.ends_with("cierra el conductor abierto en el banco físico."):
 		return false
 	bus.ejecutar("reconectar", "virtual")
-	if not bus.motor.fin().is_empty() or not bus.motor.mediciones.error_diagnostico.is_empty():
+	if not bus.flashcard.visible or not bus.motor.fin().is_empty() \
+			or not bus.motor.mediciones.error_diagnostico.is_empty():
 		return false
+	bus.flashcard.ok.pressed.emit()
 	bus.abrir_menu(bus.zona_activa.piezas.multimetro)
 	bus.elegir_accion(bus.menu_pieza.entradas.size() - 1, "teclado")
 	if bus.accion_pendiente != "reconectar":

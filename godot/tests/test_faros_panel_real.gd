@@ -38,6 +38,7 @@ static func recorrer(bus: Node3D, variante: String, arbol: SceneTree) -> bool:
 			if not await paso(bus, "fusible_faros", "reponer_fusible_equivocado", arbol) \
 					or not bus.motor.estado().fusible_quemado:
 				return false
+			bus.flashcard.ok.pressed.emit()
 			if not await paso(bus, "fusible_faros", "reponer_fusible", arbol) \
 					or bus.motor.estado().fusible_quemado:
 				return false
@@ -45,11 +46,14 @@ static func recorrer(bus: Node3D, variante: String, arbol: SceneTree) -> bool:
 			if not await paso(bus, "faro_izquierdo", "cambiar_foco_sin_desconectar", arbol) \
 					or not bus.zona_activa.chispa.visible:
 				return false
+			bus.flashcard.ok.pressed.emit()
 		"confirmacion_anticipada":
 			if not await paso(bus, "rele_faros", "confirmar_solucion", arbol, false) \
-					or not bus.resultado.visible or bus.resultado.text != "Falta: Foco izquierdo repuesto" \
+					or not bus.flashcard.visible or bus.flashcard.titulo.text != "Aún no puedes hacerlo" \
+					or bus.flashcard.cuerpo.text != "Falta: Foco izquierdo repuesto" \
 					or not comprobar_indicios(bus, 2):
 				return false
+			bus.flashcard.ok.pressed.emit()
 	if not await paso(bus, "faro_izquierdo", "cambiar_foco_correcto", arbol) \
 			or bus.zona_activa.chispa.visible or not comprobar_indicios(bus, 3):
 		return false

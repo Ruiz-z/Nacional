@@ -58,10 +58,16 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	if not await elegir(bus, "cambiar_foco_correcto", arbol):
 		return "Falta la opción de cambiar el foco."
 	if bus.accion_pendiente != "" or eventos.size() != 2 or bus.motor.puntaje() != puntaje \
-			or not bus.resultado.visible or not bus.resultado.text.begins_with("Necesitas: Foco de repuesto") \
-			or not bus.resultado.text.contains("estantería de piezas"):
+			or not bus.flashcard.visible or bus.flashcard.titulo.text != "Te falta algo" \
+			or bus.flashcard.cuerpo.text != "Necesitas: Foco de repuesto" \
+			or bus.flashcard.donde.text != "Dónde está: la estantería de piezas, a la izquierda de la mesa":
 		return "El rechazo por inventario no explicó el faltante o afectó la orden."
-	if taller.objetivo != "foco" or not taller.baliza.visible \
+	if taller.baliza.visible:
+		return "La guía se encendió antes de cerrar la tarjeta."
+	await arbol.process_frame
+	await arbol.process_frame
+	Clic.clic(bus.get_viewport(), bus.flashcard.ok.get_global_rect().get_center())
+	if bus.flashcard.visible or taller.objetivo != "foco" or not taller.baliza.visible \
 			or not is_equal_approx(taller.baliza.global_position.x, taller.estanteria.global_position.x):
 		return "La guía del foco no apunta a la estantería."
 	taller.caducidad.timeout.emit()
@@ -71,6 +77,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	guia.keycode = KEY_G
 	guia.pressed = true
 	bus._input(guia)
+	bus.flashcard.ok.pressed.emit()
 	if taller.objetivo != "foco" or taller.caducidad.wait_time != 30.0:
 		return "G no volvió a emitir la guía."
 	bus.jugador.camara.rotate_y(PI)
@@ -181,8 +188,9 @@ static func ruta_motor(bus: Node3D) -> bool:
 		return false
 	var abrazadera: StaticBody3D = bus.taller.objetos.abrazadera
 	bus.ejecutar("ajustar_abrazadera", "virtual")
-	if abrazadera.visible or "abrazadera" not in bus.taller.inventario.cinturon:
+	if not bus.flashcard.visible or abrazadera.visible or "abrazadera" not in bus.taller.inventario.cinturon:
 		return false
+	bus.flashcard.ok.pressed.emit()
 	bus.panel.get_node("Bloqueo").button_pressed = true
 	bus.panel.get_node("Etiquetado").button_pressed = true
 	for id in bus.datos.ruta_ideal:

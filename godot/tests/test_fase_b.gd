@@ -68,7 +68,10 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 			return false
 	bus.abrir_menu(rueda)
 	if bus.menu_pieza.visible or not elegir(bus, consola, "elevar_bus") \
-			or elevador.en_movimiento() or bus.taller.objetivo != "calzas":
+			or elevador.en_movimiento() or not bus.flashcard.visible or bus.taller.baliza.visible:
+		return false
+	bus.flashcard.ok.pressed.emit()
+	if bus.taller.objetivo != "calzas":
 		return false
 	bus.taller.cambiar_cajones(true, true)
 	if not elegir(bus, bus.taller.objetos.calzas, "tomar"):
@@ -78,6 +81,7 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	bus.jugador.ubicar(Vector3.ZERO)
 	if not elegir(bus, consola, "elevar_bus") or elevador.en_movimiento():
 		return false
+	bus.flashcard.ok.pressed.emit()
 	bus.jugador.ubicar(Vector3(-4, 0, 0))
 	if not await mover(bus, consola, elevador, "elevar_bus"):
 		return false
@@ -105,6 +109,12 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	if falta.tipo_error != "accion-insegura" or falta.criticidad != "critica" \
 			or falta.fuente != Motor.FUENTE_ELEVADOR or not falta.motivo.contains("soportes"):
 		return false
+	if not bus.flashcard.visible or bus.flashcard.titulo.text != "Falta crítica" \
+			or not bus.flashcard.fuente.text.contains(Motor.FUENTE_ELEVADOR) or bus.resumen.visible:
+		return false
+	bus.flashcard.ok.pressed.emit()
+	if not bus.resumen.visible:
+		return false
 	bus.reintentar()
 	decisiones.clear()
 	if elevador.arriba or elevador.calzas_colocadas or rueda.collision_layer != 0 \
@@ -118,7 +128,10 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 			return false
 	if not elevador.seguro() or not decisiones.is_empty() or bus.motor.puntaje() != 100:
 		return false
-	if not elegir(bus, rueda, "medir_presion") or not decisiones.is_empty() or bus.taller.objetivo != "manometro":
+	if not elegir(bus, rueda, "medir_presion") or not decisiones.is_empty() or not bus.flashcard.visible:
+		return false
+	bus.flashcard.ok.pressed.emit()
+	if bus.taller.objetivo != "manometro":
 		return false
 	bus.taller.tomar("manometro", false)
 	if not elegir(bus, rueda, "medir_presion") or not elegir(bus, rueda, "localizar_pinchazo"):
@@ -141,6 +154,9 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	if decisiones[-1].tipo_error != "valor-fuera-de-rango" or decisiones[-1].torque_simulado != 85 \
 			or not bus.motor.hay_problemas() or bus.motor.estado().apretar_tuerca_1:
 		return false
+	if not bus.flashcard.visible or bus.flashcard.titulo.text != "Valor fuera de rango":
+		return false
+	bus.flashcard.ok.pressed.emit()
 	bus.taller.tomar("tuercas", false)
 	if not elegir(bus, tuerca, "reponer_tuerca_1"):
 		return false
@@ -164,6 +180,7 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 			return false
 	if not elegir(bus, consola, "descender_bus") or elevador.en_movimiento():
 		return false
+	bus.flashcard.ok.pressed.emit()
 	for soporte in elevador.trabas:
 		if not elegir(bus, elevador.piezas[soporte], "destrabar_soporte"):
 			return false
@@ -171,6 +188,7 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	if not elegir(bus, consola, "descender_bus") or elevador.en_movimiento():
 		return false
 	bus.jugador.ubicar(Vector3(-4, 0, 0))
+	bus.flashcard.ok.pressed.emit()
 	if not await mover(bus, consola, elevador, "descender_bus"):
 		return false
 	await arbol.physics_frame

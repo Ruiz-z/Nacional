@@ -45,8 +45,9 @@ static func comprobar(bus: Node3D, nombre: String) -> bool:
 			return false
 		bus.ejecutar("medir_continuidad", "teclado")
 		bus.ejecutar("cambiar_foco_sin_desconectar", "teclado")
-		if not zona.chispa.visible:
+		if not zona.chispa.visible or not bus.flashcard.visible:
 			return false
+		bus.flashcard.ok.pressed.emit()
 		if not Taller.equipar(bus, "cambiar_foco_correcto"):
 			return false
 		bus.ejecutar("cambiar_foco_correcto", "virtual")

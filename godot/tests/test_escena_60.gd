@@ -14,6 +14,8 @@ static func ejecutar() -> bool:
 	correcto = correcto and gabinete.abierta and elegir(bus, "terminal", "forzar_pieza")
 	correcto = correcto and gabinete.fragmento.visible and gabinete.chispa.visible \
 		and not gabinete.tornillo.visible and gabinete.lectura == "Rojo"
+	correcto = correcto and bus.flashcard.visible
+	bus.flashcard.ok.pressed.emit()
 	correcto = correcto and Taller.equipar(bus, "reponer_pieza") \
 		and elegir(bus, "terminal", "reponer_pieza") \
 		and bus.accion_pendiente == "reponer_pieza" and gabinete.fragmento.visible \

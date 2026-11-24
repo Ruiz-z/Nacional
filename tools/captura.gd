@@ -4,6 +4,7 @@ extends SceneTree
 # Menú: godot --path godot -s ../tools/captura.gd -- escenas/menu.tscn salida.png 1280 720
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
+# Flashcard: [ancho alto] flashcard falta|aviso|error|critico [--verificar]
 # Taller: [ancho alto] taller|baliza|elevador|bajos [--verificar]
 # Banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
@@ -16,6 +17,13 @@ func capturar() -> void:
 	var verificar := args.size() > 0 and args[-1] == "--verificar"
 	if verificar:
 		args.remove_at(args.size() - 1)
+	var tipo_flashcard := ""
+	if args.size() >= 4 and args[-2] == "flashcard":
+		tipo_flashcard = args[-1]
+		if tipo_flashcard not in ["falta", "aviso", "error", "critico"]:
+			fallar("Usa flashcard falta|aviso|error|critico.")
+			return
+		args.resize(args.size() - 2)
 	var menu := args.size() > 2 and args[-1] == "menu"
 	if menu:
 		args.remove_at(args.size() - 1)
@@ -257,8 +265,17 @@ func capturar() -> void:
 				or (escena.panel.visible and tarjeta.get_global_rect().intersects(escena.panel.get_global_rect())):
 			fallar("El menú queda recortado o invade el panel virtual.")
 			return
+	if not tipo_flashcard.is_empty():
+		if not escena.has_method("avisar"):
+			fallar("Usa la escena del autobús para la vista flashcard.")
+			return
+		preparar_flashcard(escena, tipo_flashcard)
 	await process_frame
 	await process_frame
+	if not tipo_flashcard.is_empty() and (not escena.flashcard.visible \
+			or not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect())):
+		fallar("La tarjeta no se abrió o queda recortada.")
+		return
 	if verificar:
 		quit(0)
 		return
@@ -273,6 +290,20 @@ func capturar() -> void:
 		return
 	print("Guardado ", args[1], " ", img.get_size())
 	quit(0)
+
+
+func preparar_flashcard(escena: Node3D, tipo: String) -> void:
+	match tipo:
+		"falta":
+			escena.avisar("Necesitas: Foco de repuesto", tipo, "Te falta algo", escena.taller.ubicacion("foco"))
+		"aviso":
+			escena.avisar("Falta: Foco izquierdo repuesto", tipo, "Aún no puedes hacerlo")
+		"error":
+			escena.avisar("Revisa las lecturas reportadas y compáralas con el multímetro.",
+				tipo, "Valor fuera de rango", "", "Banco de diagnóstico · lecturas reportadas")
+		"critico":
+			escena.avisar("Intentaste trabajar en los bajos sin ambos soportes trabados.",
+				tipo, "Falta crítica", "", "Procedimiento de seguridad del elevador")
 
 
 func preparar_elevador(escena: Node3D, vista: String) -> bool:
@@ -326,7 +357,10 @@ func preparar_taller(escena: Node3D, vista: String) -> bool:
 		escena.abrir_menu(taller.objetos.destornillador)
 		escena.menu_pieza.botones[0].pressed.emit()
 		escena.ejecutar("cambiar_foco_correcto", "virtual")
-		if taller.objetivo != "foco" or not taller.baliza.visible or not escena.resultado.visible:
+		if not escena.flashcard.visible or taller.baliza.visible:
+			return false
+		escena.flashcard.ok.pressed.emit()
+		if taller.objetivo != "foco" or not taller.baliza.visible:
 			return false
 	escena.jugador.ubicar(posicion)
 	escena.apuntar_jugador(foco)
