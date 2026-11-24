@@ -38,6 +38,9 @@ Amplía la práctica en primera persona para que se parezca a trabajar en un tal
 - RF-14: CUANDO se aprietan las tuercas de una rueda, EL SISTEMA compara el valor de la perilla del panel con el rango del escenario y registra `valor-fuera-de-rango` si no coincide.
 - RF-15: EL SISTEMA incluye al menos 8 órdenes nuevas (neumático pinchado, tuercas de rueda flojas, fuga de suspensión neumática, amortiguador dañado, freno desgastado, carga CCS que no inicia, puerta de pasajeros que no cierra y luces interiores apagadas), cada una con sus acciones, requisitos y variante.
 - RF-16: EL SISTEMA agrupa el catálogo de órdenes por zona o tema y permite desplazarse por él con teclado, ratón y control.
+- RF-20: CADA escenario declara su `grupo_funcion` (FG 0 a FG 9, según la estructura de Volvo en `docs/fuentes-volvo.md`) y el catálogo de órdenes se agrupa por FG.
+- RF-21: EL SISTEMA incluye en la caja de herramientas una herramienta de diagnóstico tipo Tech Tool que muestra códigos de falla genéricos `[MUESTRA]` de la orden activa.
+- RF-22: EL SISTEMA incluye órdenes alineadas con los cursos de Volvo: sistema electrónico de suspensión (FG 7), frenos neumáticos (FG 5), puerta de pasajeros y aire acondicionado (FG 8).
 - RF-17: EL SISTEMA mapea las órdenes nuevas a las cuatro competencias existentes (`diagnostico-fallas` para las mecánicas, `sistema-electrico-bateria` y `electronica-conectividad` para las eléctricas).
 - RF-18: EL SISTEMA funciona con teclado y ratón, Pro Controller y panel virtual, y sin conexión a internet.
 - RF-19: EL SISTEMA marca `[MUESTRA]` en todo valor técnico que no provenga de material oficial; los valores de las órdenes mecánicas son genéricos y no se inventan cifras.
@@ -64,6 +67,9 @@ Amplía la práctica en primera persona para que se parezca a trabajar en un tal
 - Todos los RF con prueba (automática para inventario, requisitos, consumo, seguridad del elevador y escenarios; checklist manual para la escena, la guía y las balizas) en verde.
 - Demo manual: tomar una pieza y una herramienta, que falte una y el sistema la señale, subir el autobús con el procedimiento, resolver una falla de rueda con la perilla de torque y bajar.
 - Las ocho órdenes nuevas se completan por su ruta ideal y aparecen en el catálogo.
+
+## Decisión sobre aprobación
+La línea de aprobación del tablero es **91**, tomada de la "calificación mínima aprobatoria" de los cursos Volvo Buses 2023. Se muestra como referencia sin cambiar el cálculo de dominio de `aprendizaje`.
 
 ## Dudas abiertas
 - [NECESITA ACLARACIÓN] La documentación técnica de Volvo, que ya fue entregada a los organizadores y se enviará al equipo: sustituirá valores `[MUESTRA]` y pasos genéricos.

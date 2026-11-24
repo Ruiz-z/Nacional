@@ -163,3 +163,6 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [ ] T-129 S — Órdenes eléctricas nuevas: carga CCS que no inicia, puerta de pasajeros que no cierra y luces interiores apagadas (RF-15) — Hecho cuando: ruta ideal de cada una pasa y la fuente citada es la de Volvo cuando aplique.
 - [ ] T-130 S — Catálogo de órdenes agrupado y desplazable con teclado, ratón y control (RF-16) — Hecho cuando: captura del catálogo con 13 órdenes.
 - [ ] T-131 S — Documentación, checklist y recorrido e2e con Playwright del taller (RF-18) — Hecho cuando: el recorrido toma una pieza, la guía la señala y se resuelve una orden.
+- [ ] T-132 S — Campo `grupo_funcion` en los escenarios, validación y catálogo agrupado por FG (taller RF-20) — Hecho cuando: el catálogo muestra grupos FG con sus órdenes.
+- [ ] T-133 S — Línea de aprobación de 91 en el tablero como referencia, sin cambiar el cálculo de dominio (decisión de aprobación) — Hecho cuando: barras del tablero muestran la línea y la prueba la verifica.
+- [ ] T-134 S — Herramienta de diagnóstico tipo Tech Tool con códigos de falla genéricos y órdenes de suspensión electrónica, frenos, puerta y aire acondicionado (RF-21, 22) — Hecho cuando: ruta ideal de cada orden pasa y el Tech Tool muestra su código.
