@@ -1,2 +1,5 @@
 /samples
 build/
+tools/e2e/node_modules/
+tools/e2e/capturas/
+godot/contenido/
