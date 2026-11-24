@@ -9,6 +9,7 @@ const Bus = preload("res://escenas/bus.tscn")
 static func ejecutar() -> bool:
 	var bus := Bus.instantiate()
 	(Engine.get_main_loop() as SceneTree).root.add_child(bus)
+	bus.flashcard.confirmar()
 	var gabinete := bus.get_node("Sector")
 	var correcto: bool = not gabinete.abierta and elegir(bus, "compuerta", "inspeccionar")
 	correcto = correcto and gabinete.abierta and elegir(bus, "terminal", "forzar_pieza")

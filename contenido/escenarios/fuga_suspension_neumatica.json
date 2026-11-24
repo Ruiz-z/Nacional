@@ -3,6 +3,13 @@
   "version": "1",
   "titulo": "[MUESTRA] Fuga en la suspensión neumática",
   "descripcion": "[MUESTRA] La suspensión trasera derecha pierde altura.",
+  "briefing": {
+    "sintoma": "La suspensión trasera derecha pierde altura.",
+    "objetivo": "Localiza la fuga y recupera la altura de la suspensión.",
+    "como": [
+      "Prepara el elevador para revisar la bolsa de aire."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "bajos",

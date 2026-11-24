@@ -3,6 +3,13 @@
   "version": "1",
   "titulo": "[MUESTRA] Amortiguador dañado",
   "descripcion": "[MUESTRA] La carrocería se inclina. Se oye un golpeteo del lado trasero derecho.",
+  "briefing": {
+    "sintoma": "La carrocería se inclina y se oye un golpeteo del lado trasero derecho.",
+    "objetivo": "Encuentra el origen del golpeteo y repara la falla.",
+    "como": [
+      "Prepara el elevador para revisar el amortiguador."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "bajos",

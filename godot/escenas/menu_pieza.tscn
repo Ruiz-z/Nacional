@@ -36,9 +36,6 @@ theme_override_font_sizes/font_size = 14
 theme_type_variation = &"Metadato"
 autowrap_mode = 3
 
-[node name="LecturasReportadas" type="VBoxContainer" parent="Centro/Tarjeta/Contenido"]
-visible = false
-
 [node name="Diagnostico" type="VBoxContainer" parent="Centro/Tarjeta/Contenido"]
 theme_override_constants/separation = 6
 

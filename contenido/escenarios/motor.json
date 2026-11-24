@@ -3,6 +3,13 @@
   "version": "1",
   "titulo": "[MUESTRA] Alerta de temperatura del motor de tracción",
   "descripcion": "[MUESTRA] Revisa el circuito de refrigerante del motor. La ficha describe un motor de hasta 200 kW y una transmisión automática de 2 velocidades. El ESS de 600 V tiene control automático de temperatura y BMS. Fuente: Volvo Buses, BZR Low Entry Eléctrico (página pública).",
+  "briefing": {
+    "sintoma": "El tablero muestra una alerta de temperatura del motor de tracción.",
+    "objetivo": "Encuentra la causa del calentamiento y corrige la falla.",
+    "como": [
+      "Inspecciona la tapa del motor y revisa el circuito de refrigerante."
+    ]
+  },
   "fuente": "Volvo Buses, BZR Low Entry Eléctrico (página pública)",
   "muestra": true,
   "zona": "motor",

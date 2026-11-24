@@ -8,6 +8,7 @@ signal salida_solicitada
 
 const ANCHO_HUD := 440.0
 const FONDO_MISION := Color("#11507D")
+const Hoja = preload("res://escenas/hoja_diagnostico.gd")
 const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
 const PASOS_ELEVADOR := {
 	"colocar_calzas": "Coloca las calzas",
@@ -61,6 +62,8 @@ var motor: RefCounted
 var datos: Dictionary
 var indicios := {}
 var misiones: Array = []
+var hoja: Hoja
+var indicador_puntas: Label
 var acciones_mision := {}
 var firma_mision: Array = []
 var ultimo_ms: int
@@ -139,7 +142,8 @@ func _ready() -> void:
 	if datos.has("indicios"):
 		indicios = {}
 		for indicio in datos.indicios:
-			indicios[indicio.clave] = indicio.etiqueta
+			if indicio.has("clave"):
+				indicios[indicio.clave] = indicio.etiqueta
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	if datos.zona == "banco":
 		motor = Motor.new(datos, fuente_banco.leer)
@@ -151,7 +155,6 @@ func _ready() -> void:
 	ultimo_ms = Time.get_ticks_msec()
 	menu_pieza.elegida.connect(elegir_accion)
 	menu_pieza.cierre_solicitado.connect(cerrar_menu)
-	menu_pieza.lectura_reportada.connect(ejecutar)
 	menu_pieza.causa_marcada.connect(func(causa: String):
 		if motor.marcar_causa(causa):
 			causa_marcada = causa)
@@ -167,8 +170,20 @@ func _ready() -> void:
 	zona_activa = zonas[datos.zona]
 	puerta_pasajeros.componente = "puerta_pasajeros"
 	puerta_pasajeros.nombre = "Puerta de pasajeros"
+	if datos.get("ubicacion_inicial", {}).has("multimetro"):
+		taller.ubicar_multimetro_en_banco($Banco)
 	if zona_activa != $Banco:
-		$Banco.mostrar_multimetro("—", "Módulo disponible", "virtual")
+		$Banco.mostrar_fuente("Módulo disponible", "virtual")
+	else:
+		hoja = Hoja.new()
+		add_child(hoja)
+		hoja.guardada.connect(guardar_hoja)
+		hoja.cancelada.connect(cerrar_menu)
+		indicador_puntas = Label.new()
+		indicador_puntas.add_theme_font_size_override("font_size", 15)
+		var columna: Node = hud_mision.titulo.get_parent()
+		columna.add_child(indicador_puntas)
+		columna.move_child(indicador_puntas, hud_mision.titulo.get_index() + 1)
 	for zona in [$Faros, $Motor]:
 		if zona != zona_activa:
 			zona.reflejar_estado({}, false, true)
@@ -176,6 +191,8 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(actualizar_hud)
 	if not modo_captura:
 		ubicar_jugador(zona_activa.acceso)
+		if zona_activa == $Banco and $Banco.piezas.multimetro.visible:
+			apuntar_jugador($Banco.piezas.multimetro.global_position)
 	lateral.get_node("Continuar").pressed.connect(func():
 		panel.conexion.reanudar()
 		ultimo_ms = Time.get_ticks_msec()
@@ -188,6 +205,13 @@ func _ready() -> void:
 	lateral.minimum_size_changed.connect(actualizar_hud)
 	mostrar_estado(true)
 	actualizar_panel(ultimo_ms)
+	mostrar_orden()
+
+
+func mostrar_orden() -> void:
+	if datos.has("briefing"):
+		flashcard.encolar({"tipo": "orden", "titulo": datos.titulo, "briefing": datos.briefing,
+			"texto": "", "donde": "", "fuente": "", "objeto": ""})
 
 
 func ubicar_jugador(componente: String) -> void:
@@ -249,7 +273,7 @@ func navegar(destino: String) -> void:
 
 
 func ejecutar(id: String, fuente: String, lectura_previa: Dictionary = {}) -> void:
-	if flashcard.visible or motor == null or (panel.conexion.pausado() and fuente != "banco"):
+	if flashcard.visible or hoja_abierta() or motor == null or (panel.conexion.pausado() and fuente != "banco"):
 		return
 	var bajos: bool = zona_activa == $Bajos
 	sincronizar_fuente_seguridad()
@@ -437,7 +461,13 @@ func actualizar_inventario() -> void:
 	var forma: Node3D
 	if not taller.mano.is_empty():
 		forma = taller.objetos[taller.mano].get_node("Forma")
+	var dejo_multimetro: bool = jugador.id_mano == "multimetro" and taller.mano != "multimetro"
+	var empuno_multimetro: bool = jugador.id_mano != "multimetro" and taller.mano == "multimetro"
 	jugador.elegir_objeto(taller.mano, forma)
+	if zona_activa == $Banco and (dejo_multimetro or empuno_multimetro):
+		if dejo_multimetro:
+			motor.mediciones.reiniciar_puntas()
+		actualizar_banco()
 
 
 func mostrar_resultado(decision: Dictionary) -> void:
@@ -553,7 +583,7 @@ func reanudar_tras_flashcard() -> void:
 		lateral.get_node("Continuar").grab_focus()
 		return
 	jugador.activo = (activo_antes_flashcard or navegando_antes_flashcard) \
-		and not navegando and not menu_pieza.visible
+		and not navegando and not menu_pieza.visible and not hoja_abierta()
 	Input.mouse_mode = raton_antes_flashcard
 	if accion_pendiente == "reconectar":
 		menu_pieza.esperar_panel(fuente_banco.fuente() == "banco")
@@ -568,12 +598,12 @@ func progreso_indicios(estado: Dictionary) -> Dictionary:
 func siguiente_ayuda(progreso: Dictionary) -> String:
 	if not motor.fin().is_empty():
 		return ""
-	for indicio in datos.get("indicios", []):
-		if not progreso.get(indicio.clave, false):
+	for indicio in misiones:
+		if not Escenario.mision_cumplida(indicio, progreso):
 			var ayuda: String = indicio.get("ayuda", "")
-			if not ayuda.is_empty() and indicio.clave == "resuelto" \
+			if not ayuda.is_empty() and indicio.get("clave") == "resuelto" \
 					and zona_activa == $Banco and fuente_banco.fuente() == "banco":
-				return ("Abre el multímetro y elige Reconectar conductor. "
+				return ("Elige Reconectar conductor en el banco. "
 					+ "Cierra el conductor abierto en el banco físico.")
 			return ayuda
 	return ""
@@ -582,7 +612,7 @@ func siguiente_ayuda(progreso: Dictionary) -> String:
 func mostrar_estado(inmediato := false) -> void:
 	var estado: Dictionary = motor.estado()
 	var terminado: bool = not motor.fin().is_empty()
-	jugador.activo = not flashcard.visible and not terminado and not pausa_visible and not navegando and not menu_pieza.visible
+	jugador.activo = not flashcard.visible and not terminado and not pausa_visible and not navegando and not menu_pieza.visible and not hoja_abierta()
 	if terminado:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if zona_activa == $Bajos and $Elevador.piezas.has(taller.objetivo):
@@ -605,33 +635,40 @@ func mostrar_estado(inmediato := false) -> void:
 
 
 func configurar_misiones() -> void:
-	misiones = datos.get("indicios", [])
+	var agrupadas := []
+	for indicio in datos.get("indicios", []):
+		agrupadas.append_array(indicio.get("claves", []))
+	misiones = datos.get("indicios", []).filter(func(indicio: Dictionary):
+		return indicio.get("clave") not in agrupadas)
 	if not datos.has("indicios"):
 		for clave in indicios:
 			if progreso_indicios(motor.estado()).has(clave):
 				misiones.append({"clave": clave, "etiqueta": indicios[clave]})
 	TextoLimpio.mostrar_chip(hud_mision.marca, datos.titulo)
-	for mision in misiones:
-		var clave: String = mision.clave
+	acciones_mision.clear()
+	for indice in misiones.size():
+		var claves := Escenario.claves_mision(misiones[indice])
 		var grupos := {}
 		for id in datos.acciones:
 			var regla: Dictionary = datos.acciones[id]
-			if regla.efectos.get(clave, false) == true:
+			if claves.any(func(clave: String): return regla.efectos.get(clave, false) == true):
 				grupos[id] = {"ids": [id], "regla": regla, "titulo": regla.titulo}
-			elif motor.mediciones != null and Mediciones.indicio_de_accion(id) == clave:
-				# Las respuestas del banco comparten un subpaso y la orden no revela cuál elegir.
+			elif motor.mediciones != null:
+				var clave := Mediciones.indicio_de_accion(id)
+				if clave not in claves:
+					continue
+				# Las opciones de una lectura cuentan como un solo subpaso.
 				if not grupos.has(clave):
 					grupos[clave] = {"ids": [], "regla": regla, "titulo": regla.titulo}
 				grupos[clave].ids.append(id)
-		acciones_mision[clave] = grupos.values()
-
+		acciones_mision[indice] = grupos.values()
 
 func actualizar_mision(inmediato := false) -> void:
 	if misiones.is_empty():
 		return
 	var estado: Dictionary = motor.estado()
 	var progreso := progreso_indicios(estado)
-	var cumplidas: Array = misiones.map(func(mision: Dictionary): return progreso.get(mision.clave, false))
+	var cumplidas: Array = misiones.map(func(mision: Dictionary): return Escenario.mision_cumplida(mision, progreso))
 	var actual := cumplidas.find(false)
 	var anterior: int = hud_mision.indice
 	var fondo := $Interfaz.get_theme_stylebox("panel") as StyleBoxFlat
@@ -670,8 +707,8 @@ func actualizar_mision(inmediato := false) -> void:
 		return
 	firma_mision = firma
 	var filas: Array = []
-	var clave: String = mision.clave
-	var grupos: Array = acciones_mision[clave]
+	var clave: String = mision.get("clave", "")
+	var grupos: Array = acciones_mision[actual]
 	if not elevador.is_empty() and elevador.id != "cerrar_orden":
 		var texto: String = PASOS_ELEVADOR[elevador.id]
 		if elevador.id in ["trabar_soporte", "destrabar_soporte"]:
@@ -691,6 +728,8 @@ func actualizar_mision(inmediato := false) -> void:
 		var herramientas: Array = requiere.get("herramientas", [])
 		if requiere.has("herramienta"):
 			herramientas = [requiere.herramienta]
+		if id.begins_with("medir_") and motor.mediciones != null and motor.mediciones.fuente == "banco":
+			herramientas = []
 		for herramienta in herramientas:
 			var nombre: String = Inventario.CATALOGO[herramienta].nombre
 			agregar_subpaso(filas, "Toma " + nombre, hecha or herramienta in disponibles)
@@ -710,18 +749,18 @@ func actualizar_mision(inmediato := false) -> void:
 			if id.begins_with("medir_"):
 				texto = "Toca %s con la punta roja después de TP0" % nombre_pieza
 				if motor.mediciones.fuente == "banco":
-					texto = "Reporta la lectura de %s en el multímetro" % nombre_pieza
+					texto = "Reporta la lectura de %s en la hoja" % nombre_pieza
 			elif id.begins_with("reportar_"):
-				texto = "Reporta la lectura de %s en el multímetro" % id.get_slice("_", 1).to_upper()
+				texto = "Reporta la lectura de %s en la hoja" % id.get_slice("_", 1).to_upper()
 			elif id.begins_with("diagnosticar_"):
-				texto = "Elige la causa de la falla en el multímetro"
+				texto = "Elige la causa y guarda la hoja"
 		filas.append({"texto": TextoLimpio.limpiar(texto).texto, "hecho": hecha or accion_pendiente in grupo.ids})
 		if regla.get("requiere_panel", false):
 			var confirmar := "Confirma en el panel"
 			if id == "reconectar" and fuente_banco.fuente() == "banco":
 				confirmar = "Cierra el conductor abierto en el banco físico"
 			filas.append({"texto": confirmar, "hecho": hecha})
-	var titulo: String = TextoLimpio.limpiar(mision.get("mision", mision.etiqueta)).texto
+	var titulo: String = TextoLimpio.limpiar(mision.get("mision", mision.get("etiqueta", ""))).texto
 	# Conserva las pistas que añaden contexto a los controles o a la pieza.
 	if ayuda.trim_suffix(".") == titulo or (not grupos.is_empty() and clave == "bloqueo_confirmado"):
 		ayuda = ""
@@ -754,6 +793,7 @@ func actualizar_hud() -> void:
 	hud_mision.visible = mision_visible
 	hud_mision.mostrando_detalle = not hud_oculto
 	hud_mision.actualizar_visibilidad()
+	$PistaOrden.visible = datos.has("briefing") and not terminado
 	$Interfaz.visible = mision_visible or terminado or pausa_visible or aviso.visible or datos.is_empty()
 	var ventana := get_viewport().get_visible_rect().size
 	$Interfaz.offset_right = minf(12.0 + ANCHO_HUD, ventana.x - 12.0)
@@ -792,14 +832,20 @@ func reintentar() -> void:
 	lateral.get_node("Aviso").text = ""
 	ultimo_ms = Time.get_ticks_msec()
 	mostrar_estado()
+	mostrar_orden()
 
 
 func abrir_menu(pieza: Interactuable) -> void:
-	if flashcard.visible:
+	if flashcard.visible or hoja_abierta():
 		return
 	if motor == null or not motor.fin().is_empty() or pausa_visible or navegando or not accion_pendiente.is_empty():
 		return
 	if pieza.zona == $Bajos and not $Elevador.arriba:
+		return
+	if zona_activa == $Banco and pieza == $Banco.piezas.hoja_diagnostico:
+		hoja.abrir(motor.mediciones.reportadas, motor.mediciones.diagnostico)
+		jugador.activo = false
+		$Apuntado.hide()
 		return
 	var zona := pieza.zona as ZonaBase
 	pieza_menu = pieza
@@ -825,7 +871,7 @@ func abrir_menu(pieza: Interactuable) -> void:
 				opciones.append(MenuPieza.navegacion("destrabar_soporte" if trabado else "trabar_soporte",
 					"Destrabar soportes" if trabado else "Trabar soportes"))
 			lectura = "Soporte trabado" if trabado else "Soporte libre"
-		"mesa_taller", "carrito_taller":
+		"mesa_taller", "carrito_taller", "mesa_banco":
 			lectura = "Selecciona un objeto en la mano para dejarlo aquí."
 		"puerta_pasajeros":
 			opciones.append(MenuPieza.navegacion("subir", "Subir al autobús"))
@@ -839,7 +885,8 @@ func abrir_menu(pieza: Interactuable) -> void:
 		lectura = ""
 	var mueble := mueble_para_dejar(pieza)
 	if mueble != null:
-		if not taller.mano.is_empty() and (mueble != taller.caja_roja
+		if not taller.mano.is_empty() and (mueble != $Banco or taller.mano == "multimetro") \
+				and (mueble != taller.caja_roja
 				or Inventario.CATALOGO[taller.mano].tipo == "herramienta"):
 			opciones.append(MenuPieza.navegacion("dejar", "Dejar aquí: " + Inventario.CATALOGO[taller.mano].nombre))
 		var disponibles: Array[String] = taller.objetos_en(mueble)
@@ -851,6 +898,11 @@ func abrir_menu(pieza: Interactuable) -> void:
 			opciones.append(opcion)
 	if mueble == taller.carrito:
 		opciones.append(MenuPieza.navegacion("carrito", "Estacionar carrito" if taller.lleva_carrito else "Empujar carrito"))
+	if pieza == $Banco.piezas.multimetro:
+		if not pieza.visible:
+			return
+		opciones.append(MenuPieza.navegacion("tomar", "Tomar: Multímetro"))
+		lectura = ""
 	if taller.objetos.get(pieza.componente) == pieza:
 		if not pieza.visible:
 			return
@@ -874,9 +926,7 @@ func abrir_menu(pieza: Interactuable) -> void:
 	if salida_hasta != 0:
 		salida_hasta = 0
 		resultado.hide()
-	var banco := zona_activa == $Banco and pieza.zona == $Banco and pieza.componente == "multimetro"
-	var reportadas: Dictionary = motor.mediciones.reportadas if banco else {}
-	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada, estado_pieza(pieza), reportadas, banco, mueble != null)
+	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada, estado_pieza(pieza), mueble != null)
 	jugador.activo = false
 	$Apuntado.hide()
 
@@ -911,7 +961,21 @@ func estado_pieza(pieza: Interactuable) -> Dictionary:
 	return {"texto": "Correcto", "color": "verde"}
 
 
+func hoja_abierta() -> bool:
+	return hoja != null and hoja.visible
+
+
+func guardar_hoja(acciones: Array, fuente: String) -> void:
+	if not hoja_abierta() or flashcard.visible or panel.conexion.pausado() or not motor.fin().is_empty():
+		return
+	cerrar_menu()
+	for id in acciones:
+		ejecutar(id, fuente)
+
+
 func cerrar_menu() -> void:
+	if hoja_abierta():
+		hoja.hide()
 	accion_pendiente = ""
 	panel.resaltar_confirmar(false)
 	zona_menu = null
@@ -1002,6 +1066,7 @@ func accion_elevador(id: String, componente: String, fuente := "teclado") -> voi
 
 func mueble_para_dejar(pieza: Interactuable) -> Node3D:
 	match pieza.componente:
+		"mesa_banco": return taller.mesa_banco
 		"mesa_taller": return taller.mesa
 		"carrito_taller": return taller.carrito
 		"caja_taller": return taller.caja_roja
@@ -1052,7 +1117,7 @@ func recibir_accion(accion: Dictionary) -> void:
 				if datos.zona == "motor":
 					actualizar_leds()
 		"inspeccionar":
-			if not menu_pieza.visible and jugador.activo:
+			if not menu_pieza.visible and not hoja_abierta() and jugador.activo:
 				# El aviso usa el rayo del último paso físico. El clic puede llegar antes
 				# del primer paso o justo después de mover la cámara.
 				alcance.force_raycast_update()
@@ -1061,8 +1126,6 @@ func recibir_accion(accion: Dictionary) -> void:
 						and pieza.componente in ["tp0", "tp1", "tp2"]):
 					tocar_borne(pieza.componente, accion.fuente_entrada)
 				else:
-					if zona_activa == $Banco and not motor.mediciones.punta_negra.is_empty():
-						tocar_borne("", accion.fuente_entrada)
 					if pieza != null:
 						abrir_menu(pieza)
 		"elegir-accion":
@@ -1101,7 +1164,15 @@ func tocar_borne(punto: String, fuente: String) -> void:
 func actualizar_banco() -> void:
 	var mediciones: RefCounted = motor.mediciones
 	var lectura: Dictionary = mediciones.leer.call(motor.estado())
-	$Banco.mostrar_multimetro(mediciones.pantalla, lectura.aviso, mediciones.fuente)
+	$Banco.mostrar_fuente(lectura.aviso, mediciones.fuente)
+	var puntas: Array[String] = mediciones.puntas()
+	for punto in $Banco.pinzas:
+		$Banco.pinzas[punto].visible = punto in puntas
+	jugador.pantalla_multimetro.text = mediciones.pantalla
+	indicador_puntas.text = "Punta negra: %s · Punta roja: %s" % [
+		"—" if puntas[0].is_empty() else puntas[0].to_upper(),
+		"—" if puntas[1].is_empty() else puntas[1].to_upper()]
+	indicador_puntas.visible = taller.mano == "multimetro"
 
 
 func recibir_banco(linea: String, ahora: int) -> void:
@@ -1128,7 +1199,7 @@ func _process(_delta: float) -> void:
 	if motor != null:
 		actualizar_inventario()
 		actualizar_mision()
-	taller.actualizar_flecha(jugador.camara, not flashcard.visible and not menu_pieza.visible and not hud_oculto)
+	taller.actualizar_flecha(jugador.camara, not flashcard.visible and not menu_pieza.visible and not hoja_abierta() and not hud_oculto)
 	if zona_activa != $Banco:
 		return
 	var fuente_anterior := fuente_banco.fuente()
@@ -1158,7 +1229,13 @@ func _physics_process(_delta: float) -> void:
 			objetivo.resaltar(true)
 	$Mira.visible = caminando
 	$Apuntado.visible = objetivo != null
-	$Apuntado/Fondo/Nombre.text = "Clic / A · %s" % objetivo.nombre if objetivo != null else ""
+	var rotulo := "Clic / A · %s" % objetivo.nombre if objetivo != null else ""
+	if objetivo != null and zona_activa == $Banco and objetivo.componente in ["tp0", "tp1", "tp2"]:
+		var mediciones: RefCounted = motor.mediciones
+		var punta := "negra" if mediciones.punta_negra.is_empty() or not mediciones.punta_roja.is_empty() else "roja"
+		rotulo = "Poner la punta %s aquí (%s)" % [punta, objetivo.nombre] if taller.mano == "multimetro" \
+			else "Toma el multímetro para medir (%s)" % objetivo.nombre
+	$Apuntado/Fondo/Nombre.text = rotulo
 
 
 func _exit_tree() -> void:
@@ -1189,7 +1266,7 @@ func actualizar_panel(ahora: int) -> void:
 	$AlternarPanel.text = "Mostrar panel virtual" if panel_oculto else "Ocultar panel virtual"
 	var pendiente := not accion_pendiente.is_empty()
 	$AlternarPanel.disabled = pendiente
-	var registro_banco: bool = zona_activa == $Banco and menu_pieza.visible and not pendiente
+	var registro_banco: bool = zona_activa == $Banco and (hoja_abierta() or (menu_pieza.visible and not pendiente))
 	panel.visible = $AlternarPanel.visible and (pendiente or not panel_oculto) and not registro_banco
 	panel.resaltar_confirmar(pendiente and panel.visible and not (
 		accion_pendiente == "reconectar" and fuente_banco.fuente() == "banco"))
@@ -1216,7 +1293,7 @@ func sincronizar_fuente_seguridad() -> void:
 
 func _unhandled_input(evento: InputEvent) -> void:
 	# Un clic en la escena (fuera de los paneles) recupera el ratón si la ventana no lo tenía capturado.
-	if not flashcard.visible and motor != null and motor.fin().is_empty() and not pausa_visible and not menu_pieza.visible \
+	if not flashcard.visible and not hoja_abierta() and motor != null and motor.fin().is_empty() and not pausa_visible and not menu_pieza.visible \
 			and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED \
 			and evento is InputEventMouseButton and evento.pressed and evento.button_index == MOUSE_BUTTON_LEFT:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -1224,7 +1301,12 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 
 func _input(evento: InputEvent) -> void:
-	if flashcard.visible or resumen.visible or navegando or motor == null or not evento.is_pressed() or evento.is_echo():
+	if flashcard.visible or hoja_abierta() or resumen.visible or navegando or motor == null or not evento.is_pressed() or evento.is_echo():
+		return
+	if ((evento is InputEventKey and evento.keycode == KEY_O) \
+			or (evento is InputEventJoypadButton and evento.button_index == JOY_BUTTON_START)) and datos.has("briefing"):
+		mostrar_orden()
+		get_viewport().set_input_as_handled()
 		return
 	if evento is InputEventKey:
 		if evento.keycode == KEY_ESCAPE and not menu_pieza.visible and motor.fin().is_empty():

@@ -3,6 +3,13 @@
   "version": "1",
   "titulo": "[MUESTRA] Tuercas de rueda flojas",
   "descripcion": "[MUESTRA] Hay un golpeteo en la rueda delantera derecha.",
+  "briefing": {
+    "sintoma": "Hay un golpeteo en la rueda delantera derecha.",
+    "objetivo": "Encuentra el origen del golpeteo y corrige la falla.",
+    "como": [
+      "Prepara el elevador para revisar las tuercas de la rueda."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "bajos",

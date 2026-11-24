@@ -15,6 +15,7 @@ static func ejecutar() -> bool:
 		var bus := Bus.instantiate()
 		bus.archivo = "escenarios/faros.json"
 		visor.add_child(bus)
+		bus.flashcard.confirmar()
 		await arbol.process_frame
 		var correcta := await recorrer(bus, variante, arbol)
 		visor.free()

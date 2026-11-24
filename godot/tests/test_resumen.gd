@@ -18,6 +18,7 @@ static func ejecutar() -> bool:
 		arbol.root.size = prueba[0]
 		var bus := Bus.instantiate()
 		arbol.root.add_child(bus)
+		bus.flashcard.confirmar()
 		var correcto := await comprobar(bus, arbol, prueba[1])
 		bus.free()
 		if not correcto:
@@ -100,6 +101,9 @@ static func comprobar(bus: Node3D, arbol: SceneTree, modo: String) -> bool:
 				return false
 			await arbol.process_frame
 			pulsar(arbol.root, resumen.get_node("%Reintentar"))
+			if not bus.flashcard.visible or bus.flashcard.chip.text != "ORDEN DE TRABAJO":
+				return false
+			bus.flashcard.confirmar()
 			if resumen.visible or not bus.motor.fin().is_empty() or not bus.jugador.activo:
 				return false
 			if not agotar_intentos(bus):
@@ -121,6 +125,9 @@ static func comprobar(bus: Node3D, arbol: SceneTree, modo: String) -> bool:
 			if bus.motor.resumen().reflexion != "T" or not resumen.get_node("%Ruta").visible:
 				return false
 			tecla(arbol.root, KEY_ENTER)
+			if not bus.flashcard.visible or bus.flashcard.chip.text != "ORDEN DE TRABAJO":
+				return false
+			bus.flashcard.confirmar()
 			if resumen.visible or not bus.motor.fin().is_empty() or not agotar_intentos(bus):
 				return false
 			tecla(arbol.root, KEY_TAB)

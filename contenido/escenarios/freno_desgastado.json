@@ -3,6 +3,13 @@
   "version": "1",
   "titulo": "[MUESTRA] Freno desgastado",
   "descripcion": "[MUESTRA] Se oye un roce en el freno delantero derecho.",
+  "briefing": {
+    "sintoma": "Se oye un roce en el freno delantero derecho.",
+    "objetivo": "Encuentra el origen del roce y corrige la falla.",
+    "como": [
+      "Prepara el elevador para revisar las pastillas."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "bajos",

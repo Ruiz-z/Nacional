@@ -44,6 +44,8 @@ var estanteria: Zona
 var carrito: Zona
 var origen_carrito: Vector3
 var lleva_carrito := false
+var mesa_banco: Zona
+var origen_caja_multimetro := {}
 
 
 func _ready() -> void:
@@ -283,6 +285,14 @@ func cambiar_cajones(abrir: bool, inmediato := false) -> void:
 			mostrar_objeto(id)
 
 
+func ubicar_multimetro_en_banco(banco: Zona) -> void:
+	mesa_banco = banco
+	registrar_mueble(banco, "Mesa del banco", 0.92)
+	origen_caja_multimetro = origenes.multimetro
+	origenes.multimetro = {"padre": banco, "zona": banco, "posicion": banco.piezas.multimetro.position}
+	devolver("multimetro")
+
+
 func cerca(posicion: Vector3) -> bool:
 	return posicion.distance_squared_to(carrito.global_position) < 9.0
 
@@ -313,7 +323,7 @@ func dejar(id: String, cerca_carrito: bool, mueble: Node3D = mesa) -> String:
 	if mueble == caja_roja and Inventario.CATALOGO.get(id, {}).get("tipo") != "herramienta":
 		return "La caja roja es para herramientas. Deja este objeto en otro mueble."
 	var ranura := 0
-	if mueble != caja_roja:
+	if mueble != caja_roja and mueble != mesa_banco:
 		var ocupadas := []
 		for otro in superficies:
 			if objetos[otro].zona == mueble:
@@ -326,6 +336,8 @@ func dejar(id: String, cerca_carrito: bool, mueble: Node3D = mesa) -> String:
 	if not aviso.is_empty():
 		return aviso
 	if mueble == caja_roja:
+		devolver(id, origen_caja_multimetro if id == "multimetro" else {})
+	elif mueble == mesa_banco:
 		devolver(id)
 	else:
 		var objeto: StaticBody3D = objetos[id]
@@ -368,10 +380,10 @@ func consumir(requiere: Dictionary, cerca_carrito: bool) -> void:
 	ordenar_carrito()
 
 
-func devolver(id: String) -> void:
+func devolver(id: String, destino: Dictionary = {}) -> void:
 	superficies.erase(id)
 	var objeto: StaticBody3D = objetos[id]
-	var origen: Dictionary = origenes[id]
+	var origen: Dictionary = origenes[id] if destino.is_empty() else destino
 	if objeto.get_parent() != origen.padre:
 		objeto.reparent(origen.padre, false)
 	objeto.scale = Vector3.ONE
@@ -383,8 +395,11 @@ func devolver(id: String) -> void:
 func mostrar_objeto(id: String) -> void:
 	var objeto: StaticBody3D = objetos[id]
 	objeto.visible = id not in inventario.cinturon \
-		and (objeto.zona != caja_roja or cajones_abiertos)
+		and objeto.zona != mesa_banco and (objeto.zona != caja_roja or cajones_abiertos)
 	objeto.set_deferred("collision_layer", 2 if objeto.visible and id not in inventario.carrito else 0)
+	if id == "multimetro" and mesa_banco != null:
+		var en_mesa: bool = objeto.zona == mesa_banco and id not in inventario.cinturon and id not in inventario.carrito
+		mesa_banco.mostrar_multimetro(en_mesa)
 
 
 func reiniciar() -> void:
@@ -474,6 +489,8 @@ func ubicacion(id: String) -> String:
 
 
 func senalar(id: String, pieza: Node3D = null) -> void:
+	if id == "multimetro" and mesa_banco != null and mueble_de(id) == mesa_banco:
+		pieza = mesa_banco.piezas.multimetro
 	apagar_guia()
 	objetivo = id
 	pieza_guia = pieza if pieza != null else objetos[id]
@@ -491,7 +508,9 @@ func senalar(id: String, pieza: Node3D = null) -> void:
 
 func apagar_guia() -> void:
 	if is_instance_valid(pieza_guia):
-		var forma := pieza_guia.get_node_or_null("Forma") if objetos.has(objetivo) else pieza_guia
+		var forma := pieza_guia.get_node_or_null("Forma")
+		if forma == null:
+			forma = pieza_guia
 		for malla in forma.find_children("*", "MeshInstance3D", true, false):
 			malla.material_overlay = null
 	pieza_guia = null

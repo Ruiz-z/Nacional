@@ -8,6 +8,7 @@ const Escena = preload("res://escenas/bus.tscn")
 static func ejecutar() -> bool:
 	var bus := Escena.instantiate()
 	(Engine.get_main_loop() as SceneTree).root.add_child(bus)
+	bus.flashcard.confirmar()
 	if not Taller.equipar(bus, "inspeccionar"):
 		bus.free()
 		return false

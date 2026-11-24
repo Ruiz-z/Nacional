@@ -3,6 +3,13 @@
   "version": "1",
   "titulo": "[MUESTRA] Neumático pinchado",
   "descripcion": "[MUESTRA] El neumático delantero derecho pierde presión.",
+  "briefing": {
+    "sintoma": "El neumático delantero derecho pierde presión.",
+    "objetivo": "Localiza el pinchazo y corrige la pérdida de presión.",
+    "como": [
+      "Prepara el elevador y mide la presión del neumático."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "bajos",

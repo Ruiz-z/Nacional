@@ -4,7 +4,7 @@ const Taller = preload("res://tests/acciones_taller.gd")
 
 const Bus = preload("res://escenas/bus.tscn")
 const Protocolo = preload("res://logica/entrada/protocolo.gd")
-const REPARAR := "Abre el multímetro y elige Reconectar conductor. Confirma en el panel."
+const REPARAR := "Elige Reconectar conductor en el banco. Confirma en el panel."
 const CONFIRMAR_FAROS := "Elige Confirmar la solución en el relé y confirma en el panel."
 
 
@@ -22,13 +22,14 @@ static func probar_ordenes(arbol: SceneTree) -> bool:
 		"aislamiento": "Inspecciona el gabinete",
 		"comunicacion": "Revisa los síntomas de la red",
 		"faros": "Inspecciona la caja de fusibles",
-		"modulo_auxiliar": "Mide TP1 con referencia en TP0.",
+		"modulo_auxiliar": "Mide TP1 y TP2 con el multímetro",
 		"motor": "Inspecciona la tapa del motor",
 	}
 	for orden in inicio:
 		var bus := Bus.instantiate()
 		bus.archivo = "escenarios/%s.json" % orden
 		arbol.root.add_child(bus)
+		bus.flashcard.confirmar()
 		await arbol.process_frame
 		var correcta := comprobar_ayuda(bus, inicio[orden])
 		if correcta and orden == "faros":
@@ -71,18 +72,15 @@ static func recorrer_banco(bus: Node3D, arbol: SceneTree) -> bool:
 		bus.tocar_borne(borne, "teclado")
 		if bus.flashcard.visible:
 			bus.flashcard.confirmar()
-	bus.abrir_menu(bus.zona_activa.piezas["multimetro"])
-	for lectura: Button in bus.menu_pieza.lecturas:
-		if lectura.get_meta("accion") in ["reportar_tp1_0", "reportar_tp2_5"]:
-			lectura.pressed.emit()
-			Taller.cerrar_exitos(bus)
-	if not comprobar_ayuda(bus, "Abre el multímetro y elige la causa que indiquen tus lecturas.") \
-			or not elegir(bus, "multimetro", "diagnosticar_alimentacion") \
-			or not comprobar_ayuda(bus, REPARAR) \
-			or bus.flashcard.visible:
+	if not comprobar_ayuda(bus, "Anota las lecturas en la hoja"):
 		return false
-	Taller.cerrar_exitos(bus)
-	if not elegir(bus, "multimetro", "reconectar"):
+	bus.abrir_menu(bus.zona_activa.piezas.hoja_diagnostico)
+	for numero in [1, 5, 7]:
+		Taller.tecla(bus, numero)
+	bus.hoja.guardar.pressed.emit()
+	if not comprobar_ayuda(bus, REPARAR) or bus.flashcard.visible:
+		return false
+	if not elegir(bus, "conductor_banco", "reconectar"):
 		return false
 	return await confirmar(bus, arbol, "reconectar") and comprobar_resuelto(bus)
 

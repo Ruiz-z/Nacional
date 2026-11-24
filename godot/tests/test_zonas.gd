@@ -11,6 +11,7 @@ static func ejecutar() -> bool:
 		var bus := Bus.instantiate()
 		bus.archivo = "escenarios/%s.json" % nombre
 		raiz.add_child(bus)
+		bus.flashcard.confirmar()
 		var correcto := comprobar(bus, nombre)
 		bus.free()
 		if not correcto:

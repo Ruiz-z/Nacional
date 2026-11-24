@@ -11,7 +11,8 @@ extends SceneTree
 # Misiones: [ancho alto] mision [motor|faros|neumatico] [--verificar]
 # Inventario: [ancho alto] inventario [--verificar]
 # Taller: [ancho alto] taller|baliza|elevador|elevador-guia|bajos [--verificar]
-# Banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
+# Banco: [ancho alto] banco-mesa|banco-puntas|hoja|orden [--verificar]
+# Alias del banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
 const Acciones = preload("res://tests/acciones_taller.gd")
 
@@ -47,7 +48,7 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito", "mision"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito", "mision", "banco-mesa", "banco-puntas", "hoja", "orden"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
 	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito", "mision"]
@@ -79,6 +80,8 @@ func capturar() -> void:
 		if args.size() not in [2, 4]:
 			fallar("Indica la zona después de las dimensiones opcionales.")
 			return
+	if vista in ["banco-mesa", "banco-puntas", "hoja", "orden"]:
+		zona = "banco"
 	if vista == "midiendo" and zona != "banco":
 		fallar("Usa banco para la vista midiendo.")
 		return
@@ -135,6 +138,8 @@ func capturar() -> void:
 			escena.archivo = "escenarios/%s.json" % {"cabina": "comunicacion", "banco": "modulo_auxiliar"}.get(zona, zona)
 		escena.get_node("Jugador").set_physics_process(false)
 	vp.add_child(escena)
+	if vista != "orden" and escena.get_node_or_null("Flashcard") != null:
+		escena.flashcard.confirmar()
 
 	if not vista.is_empty():
 		if escena.motor == null:
@@ -208,10 +213,12 @@ func capturar() -> void:
 				return
 		elif zona == "banco":
 			sector = escena.zona_activa
-			escena.ubicar_jugador(sector.acceso)
+			var midiendo := vista in ["midiendo", "banco-puntas"]
+			var objetivo := "tp0" if midiendo else "multimetro"
+			escena.ubicar_jugador(objetivo)
 			await physics_frame
 			await physics_frame
-			if vista == "midiendo":
+			if midiendo:
 				if not Acciones.equipar(escena, "medir_tp1"):
 					fallar("No se pudo empuñar el multímetro.")
 					return
@@ -221,12 +228,23 @@ func capturar() -> void:
 						fallar("La mira no alcanza %s." % punto.to_upper())
 						return
 					escena.recibir_accion(escena.panel.entrada.traducir("teclado", "clic", 1))
-					if escena.flashcard.visible:
-						escena.flashcard.confirmar()
-			escena.apuntar_jugador(sector.piezas[sector.acceso].global_position)
-			var lectura := "0.0 V" if vista == "midiendo" else "—"
-			if sector.pantalla.text != lectura or not comprobar_pieza(escena, sector.acceso):
-				fallar("La lectura o el encuadre no corresponde al banco.")
+					Acciones.cerrar_exitos(escena)
+				if escena.jugador.pantalla_multimetro.text != "0.0 V" \
+						or not sector.pinzas.tp0.visible or not sector.pinzas.tp1.visible:
+					fallar("Falta la lectura en la mano o una pinza.")
+					return
+			elif vista == "hoja":
+				escena.apuntar_jugador(sector.piezas.hoja_diagnostico.global_position)
+				escena.abrir_menu(sector.piezas.hoja_diagnostico)
+				if not escena.hoja.visible:
+					fallar("La hoja de diagnóstico no se abrió.")
+					return
+			elif vista == "orden":
+				if not escena.flashcard.visible or escena.flashcard.chip.text != "ORDEN DE TRABAJO":
+					fallar("No se mostró la tarjeta de orden.")
+					return
+			elif not sector.piezas.multimetro.visible or not comprobar_pieza(escena, objetivo):
+				fallar("El multímetro no aparece sobre la mesa.")
 				return
 		elif not zona.is_empty():
 			sector = escena.zona_activa
@@ -321,8 +339,8 @@ func capturar() -> void:
 			or not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect())):
 		fallar("La tarjeta no se abrió o queda recortada.")
 		return
-	if vista in ["cierre", "exito"] and not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect()):
-		fallar("El cierre de la orden queda recortado.")
+	if vista in ["cierre", "exito", "orden"] and not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect()):
+		fallar("La tarjeta de la orden queda recortada.")
 		return
 	if vista in ["resumen", "resumen-critico"] and (not escena.resumen.visible \
 			or not vp.get_visible_rect().encloses(escena.resumen.get_node("%Acciones").get_global_rect())):
@@ -331,6 +349,11 @@ func capturar() -> void:
 	if vista == "mision" and not vp.get_visible_rect().encloses(escena.hud_mision.get_global_rect()):
 		fallar("La tarjeta de misión queda recortada.")
 		return
+	if vista == "hoja":
+		var guardar: Button = escena.hoja.guardar
+		if not vp.get_visible_rect().encloses(guardar.get_parent().get_global_rect()):
+			fallar("Los botones de la hoja quedan recortados.")
+			return
 	if vista == "inventario":
 		if not vp.get_visible_rect().encloses(escena.taller.hud.get_global_rect()):
 			fallar("El inventario debe caber en el encuadre.")

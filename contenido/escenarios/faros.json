@@ -3,6 +3,13 @@
   "version": "1",
   "titulo": "[MUESTRA] Faro delantero apagado",
   "descripcion": "[MUESTRA] El faro izquierdo no enciende. Inspecciona la caja de fusibles y comprueba el circuito con el multímetro.",
+  "briefing": {
+    "sintoma": "El faro izquierdo no enciende.",
+    "objetivo": "Encuentra la falla del circuito y recupera la iluminación.",
+    "como": [
+      "Inspecciona la caja de fusibles y comprueba el circuito con el multímetro."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "faros",

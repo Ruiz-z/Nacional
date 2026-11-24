@@ -8,6 +8,7 @@ signal terminada
 signal opcion_elegida(indice: int, fuente: String)
 
 const TIPOS := {
+	"orden": ["ORDEN DE TRABAJO", Color("#124747"), Color("#b5fffc")],
 	"exito": ["BIEN HECHO", Color("#215040"), Color("#c7f9dd")],
 	"cierre": ["CIERRE DE LA ORDEN", Color("#124747"), Color("#b5fffc")],
 	"correcto": ["CORRECTO", Color("#215040"), Color("#c7f9dd")],
@@ -66,6 +67,13 @@ func mostrar_primera() -> void:
 	chip.text = estilo[0]
 	titulo.text = TextoLimpio.limpiar(aviso.titulo).texto if not aviso.titulo.is_empty() else estilo[0].capitalize()
 	cuerpo.text = TextoLimpio.limpiar(aviso.texto).texto
+	var briefing: Dictionary = aviso.get("briefing", {})
+	%Briefing.visible = not briefing.is_empty()
+	cuerpo.visible = briefing.is_empty()
+	if not briefing.is_empty():
+		%Sintoma.text = briefing.sintoma
+		%Objetivo.text = briefing.objetivo
+		%Como.text = "\n".join(briefing.como)
 	var textos := [aviso.titulo, aviso.texto, aviso.donde, aviso.fuente, aviso.get("marca", "")]
 	textos.append_array(aviso.get("opciones", []))
 	var marca: String = TextoLimpio.limpiar("\n".join(textos)).etiqueta

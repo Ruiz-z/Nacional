@@ -22,6 +22,7 @@ static func ejecutar() -> bool:
 	bus.archivo = "escenarios/faros.json"
 	bus.modo_captura = true
 	visor.add_child(bus)
+	bus.flashcard.confirmar()
 	bus.jugador.set_physics_process(false)
 	var fallo := await comprobar(bus, arbol)
 	visor.free()
@@ -251,6 +252,7 @@ static func probar_motor(arbol: SceneTree) -> bool:
 	var bus := Bus.instantiate()
 	bus.archivo = "escenarios/motor.json"
 	arbol.root.add_child(bus)
+	bus.flashcard.confirmar()
 	var correcto := probar_herramienta(bus) and ruta_motor(bus)
 	bus.free()
 	return correcto
@@ -311,6 +313,7 @@ static func probar_cierres(base: String) -> bool:
 		bus.archivo = "escenarios/faros.json"
 		bus.tecnico = Alias.alta(base, "T-613%d" % caso[1]).merged({"base": base})
 		raiz.add_child(bus)
+		bus.flashcard.confirmar()
 		var correcto := comprobar_cierre(bus, base, caso)
 		bus.free()
 		if not correcto:

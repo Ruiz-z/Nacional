@@ -14,6 +14,7 @@ static func comprobar(base: String) -> bool:
 	var bus := Bus.instantiate()
 	bus.tecnico = Alias.alta(base, "T-58").merged({"base": base})
 	(Engine.get_main_loop() as SceneTree).root.add_child(bus)
+	bus.flashcard.confirmar()
 	if not Taller.equipar(bus, "inspeccionar"):
 		bus.free()
 		return false

@@ -9,6 +9,7 @@ static func ejecutar() -> bool:
 	var bus := Bus.instantiate()
 	var raiz := (Engine.get_main_loop() as SceneTree).root
 	raiz.add_child(bus)
+	bus.flashcard.confirmar()
 	var sector := bus.get_node("Sector")
 	var equipado := Taller.equipar(bus, "inspeccionar")
 	bus.abrir_menu(sector.piezas.compuerta)

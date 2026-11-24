@@ -29,6 +29,9 @@ Abrir `godot/` en Godot 4.7.2 y pulsar Ejecutar (abre el menú principal). Marca
 - [ ] En faros, inspeccionar la caja y medir continuidad. Intentar confirmar la solución desde el relé antes de reponer el foco. Al confirmar en el panel virtual, el aviso central muestra **Falta: Foco izquierdo repuesto**. Reponer el foco y confirmar desde el relé. Comprobar los cuatro indicios marcados en el HUD y el resumen de orden resuelta.
 - [ ] Repetir faros con un fusible equivocado y luego uno correcto. En otro recorrido provocar una chispa y corregirla con el cambio de foco. Dejar una pausa entre confirmaciones del panel y verificar que ambos recorridos terminan con la falla resuelta.
 - [ ] En aislamiento, comunicación, motor y el banco, comprobar que el HUD marca los pasos de la orden a medida que se completan.
+- [ ] En el banco, toma el multímetro de la mesa. Mide TP1 y TP2 y comprueba la lectura en la mano, las pinzas y su indicador.
+- [ ] Guarda las lecturas y la causa en la hoja. Reconecta el conductor y confirma en el panel. Reintenta y comprueba que el multímetro vuelve a la mesa.
+- [ ] Abre una orden, comprueba la tarjeta inicial y ciérrala con OK. Vuelve a abrirla con O o Start.
 
 ### Capturas de primera persona
 

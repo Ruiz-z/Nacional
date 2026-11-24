@@ -14,6 +14,7 @@ static func ejecutar() -> bool:
 	var bus := Bus.instantiate()
 	bus.archivo = "escenarios/motor.json"
 	visor.add_child(bus)
+	bus.flashcard.confirmar()
 	bus.jugador.set_physics_process(false)
 	var correcto := await recorrer(bus, arbol)
 	if correcto:

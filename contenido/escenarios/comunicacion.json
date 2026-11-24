@@ -8,6 +8,13 @@
     "[MUESTRA] Los demás módulos siguen apareciendo en el monitor."
   ],
   "codigo_falla": "[MUESTRA] Aviso de comunicación",
+  "briefing": {
+    "sintoma": "Un módulo dejó de aparecer en la red.",
+    "objetivo": "Averigua por qué el módulo perdió comunicación y resuelve la falla.",
+    "como": [
+      "Revisa los síntomas en el monitor de la cabina."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "cabina",

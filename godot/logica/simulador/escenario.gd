@@ -7,7 +7,7 @@ const RutasContenido = preload("res://logica/rutas_contenido.gd")
 const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria",
 	"caja_fusibles", "fusible_faros", "conector_faros", "faro_izquierdo", "faro_derecho", "rele_faros",
 	"tapa_motor", "motor_traccion", "inversor_motor", "bomba_motor", "radiador_motor",
-	"monitor_temperatura", "abrazadera_motor", "fusibles_cabina", "multimetro", "tp0", "tp1", "tp2"]
+	"monitor_temperatura", "abrazadera_motor", "fusibles_cabina", "multimetro", "hoja_diagnostico", "conductor_banco", "tp0", "tp1", "tp2"]
 const ZONAS := ["gabinete", "faros", "motor", "cabina", "banco", "bajos"]
 const GRUPOS_FUNCION := ["FG0", "FG1", "FG2", "FG3", "FG4", "FG5", "FG6", "FG7", "FG8", "FG9"]
 const ZonaBajos = preload("res://escenas/zona_bajos.gd")
@@ -61,6 +61,10 @@ static func campo_invalido(datos: Dictionary) -> String:
 	for variable in datos.estado:
 		if not Banco.texto_presente(variable) or not valor_simple(datos.estado[variable]):
 			return "estado.%s" % variable
+	if datos.has("briefing") and not briefing_valido(datos.briefing):
+		return "briefing"
+	if datos.has("ubicacion_inicial") and not ubicacion_valida(datos.ubicacion_inicial, datos.zona):
+		return "ubicacion_inicial"
 	if datos.has("indicios") and not indicios_validos(datos):
 		return "indicios"
 	if not datos.get("estados_imposibles") is Array:
@@ -120,23 +124,62 @@ static func campo_invalido(datos: Dictionary) -> String:
 	return ""
 
 
+static func briefing_valido(briefing: Variant) -> bool:
+	if not briefing is Dictionary or not Banco.texto_presente(briefing.get("sintoma")) \
+			or not Banco.texto_presente(briefing.get("objetivo")):
+		return false
+	var como: Variant = briefing.get("como")
+	return como is Array and como.size() in [1, 2, 3] and como.all(Banco.texto_presente)
+
+
+static func ubicacion_valida(ubicacion: Variant, zona: String) -> bool:
+	if not ubicacion is Dictionary:
+		return false
+	for objeto in ubicacion:
+		if objeto != "multimetro" or ubicacion[objeto] != "mesa_banco" or zona != "banco":
+			return false
+	return true
+
+
 static func indicios_validos(datos: Dictionary) -> bool:
 	if not datos.indicios is Array:
 		return false
-	var claves := {}
+	var simples := {}
 	for indicio in datos.indicios:
-		if not indicio is Dictionary or not Banco.texto_presente(indicio.get("clave")) \
-				or not Banco.texto_presente(indicio.get("etiqueta")):
+		if not indicio is Dictionary:
 			return false
 		for campo in ["mision", "ayuda"]:
 			if indicio.has(campo) and not Banco.texto_presente(indicio[campo]):
 				return false
-		var clave: String = indicio.clave
-		if claves.has(clave) or not (datos.estado.get(clave) is bool \
+		if indicio.has("claves"):
+			if indicio.has("clave") or not Banco.texto_presente(indicio.get("mision")):
+				return false
+			continue
+		var clave: Variant = indicio.get("clave")
+		if not Banco.texto_presente(clave) or not Banco.texto_presente(indicio.get("etiqueta")) \
+				or simples.has(clave) or not (datos.estado.get(clave) is bool \
 				or (datos.zona == "banco" and clave in Mediciones.INDICIOS)):
 			return false
-		claves[clave] = true
+		simples[clave] = true
+	var agrupadas := {}
+	for indicio in datos.indicios:
+		if not indicio.has("claves"):
+			continue
+		if not indicio.claves is Array or indicio.claves.size() < 2:
+			return false
+		for clave in indicio.claves:
+			if not Banco.texto_presente(clave) or not simples.has(clave) or agrupadas.has(clave):
+				return false
+			agrupadas[clave] = true
 	return true
+
+
+static func claves_mision(mision: Dictionary) -> Array:
+	return mision.claves if mision.has("claves") else [mision.clave]
+
+
+static func mision_cumplida(mision: Dictionary, progreso: Dictionary) -> bool:
+	return claves_mision(mision).all(func(clave: String): return progreso.get(clave, false))
 
 
 static func ruta_valida(ruta: Variant, acciones: Dictionary) -> bool:

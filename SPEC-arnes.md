@@ -83,9 +83,9 @@ Los puntos de prueba van del lado de J2, después de los interruptores.
 
 ## Ajustes tras la prueba con el equipo (24/11/2026)
 - Hay un solo multímetro, el de mano, que nace sobre la mesa del banco; al tomarlo, el de la mesa queda apagado y la lectura se ve en el de la mano.
-- Las lecturas y la causa se anotan en una **hoja de diagnóstico** sobre la mesa; el multímetro solo mide.
+- Anota las dos lecturas y la causa en la **hoja de diagnóstico** de la mesa. Pulsa **Guardar hoja** para registrar las tres respuestas. Usa la misma hoja con el banco físico.
 - Las puntas son visibles: cables y pinzas negra y roja, un indicador "Punta negra / Punta roja" y avisos de apuntado por punta.
-- La orden tiene cuatro misiones: medir TP1 y TP2, anotar las lecturas, identificar la causa y reparar.
+- La orden tiene cuatro misiones: medir TP1 y TP2, anotar las lecturas, identificar la causa y reparar. Elige **Reconectar conductor** en el conductor del banco y confirma con el panel virtual o con el interruptor del banco físico.
 
 ## Decisiones
 - Se construyen el banco **virtual y el físico**; el virtual es el respaldo.

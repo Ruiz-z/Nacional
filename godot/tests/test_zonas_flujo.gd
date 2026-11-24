@@ -16,6 +16,7 @@ static func ejecutar() -> bool:
 		visor.own_world_3d = true
 		arbol.root.add_child(visor)
 		visor.add_child(bus)
+		bus.flashcard.confirmar()
 		var fallo := await comprobar(bus, caso[1], arbol)
 		if not fallo.is_empty():
 			printerr("%s: %s" % [caso[0], fallo])

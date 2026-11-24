@@ -22,6 +22,7 @@ var reportadas := {}
 var diagnostico := ""
 var error_diagnostico := ""
 var punta_negra := ""
+var punta_roja := ""
 var pantalla := "—"
 var aviso_puntas := ""
 
@@ -53,22 +54,34 @@ func indicios() -> Dictionary:
 		"diagnostico_registrado": not diagnostico.is_empty()}
 
 
-func tocar(punto: String) -> String:
+func puntas() -> Array[String]:
+	return [punta_negra, punta_roja]
+
+
+func reiniciar_puntas() -> void:
+	punta_negra = ""
+	punta_roja = ""
 	pantalla = "—"
 	aviso_puntas = ""
-	if punta_negra.is_empty():
-		punta_negra = punto
-		aviso_puntas = "Coloca la punta roja." if punto == "tp0" else "La punta negra va en TP0."
+
+
+func tocar(punto: String) -> String:
+	if punto.is_empty() or not punta_roja.is_empty():
+		reiniciar_puntas()
+	if punto.is_empty():
 		return ""
-	var negra := punta_negra
-	punta_negra = ""
-	if negra == "tp0":
+	aviso_puntas = ""
+	if punta_negra.is_empty():
 		if punto == "tp0":
-			pantalla = "0.0 V"
-			return ""
-		if punto in PUNTOS:
-			return "medir_" + punto
-	aviso_puntas = "Polaridad invertida. Empieza en TP0." if punto == "tp0" else "Empieza en TP0."
+			punta_negra = punto
+		else:
+			aviso_puntas = "La punta negra va en TP0."
+	elif punto == "tp0":
+		reiniciar_puntas()
+		aviso_puntas = "Coloca la punta roja en TP1 o TP2."
+	elif punto in PUNTOS:
+		punta_roja = punto
+		return "medir_" + punto
 	return ""
 
 

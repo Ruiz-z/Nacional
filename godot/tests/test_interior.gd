@@ -9,11 +9,13 @@ static func ejecutar() -> bool:
 	var arbol := Engine.get_main_loop() as SceneTree
 	var bus := Bus.instantiate()
 	arbol.root.add_child(bus)
+	bus.flashcard.confirmar()
 	var navegacion: bool = await comprobar_navegacion(bus, arbol)
 	bus.free()
 	bus = Bus.instantiate()
 	bus.archivo = "escenarios/comunicacion.json"
 	arbol.root.add_child(bus)
+	bus.flashcard.confirmar()
 	var diagnostico := comprobar_diagnostico(bus)
 	bus.free()
 	return navegacion and diagnostico

@@ -22,6 +22,7 @@ var herramientas := {}
 var soporte_mano: Node3D
 var objeto_mano: Node3D
 var id_mano := ""
+var pantalla_multimetro: Label3D
 
 
 func _ready() -> void:
@@ -51,8 +52,14 @@ func _ready() -> void:
 	mano.add_child(multimetro)
 	pieza_multimetro(multimetro, Vector3.ZERO, Vector3(0.083, 0.035, 0.135), Color("#edbb31"))
 	pieza_multimetro(multimetro, Vector3(0, 0.019, -0.023), Vector3(0.057, 0.005, 0.041), Color("#365448"))
+	pantalla_multimetro = etiqueta_multimetro(multimetro, Vector3(0, 0.023, -0.023), "—", 0.00043)
 	for lado in [-1, 1]:
 		var color := Color("#d13931") if lado == 1 else Color("#292a2e")
+		cable_multimetro(multimetro, Vector3(lado * 0.026, 0, 0.056), Vector3(lado * 0.062, 0, 0.078), color)
+		cable_multimetro(multimetro, Vector3(lado * 0.062, 0, 0.078), Vector3(lado * 0.072, 0, -0.064), color)
+		cable_multimetro(multimetro, Vector3(lado * 0.072, 0, -0.064), Vector3(lado * 0.026, 0, -0.085), color)
+		etiqueta_multimetro(multimetro, Vector3(lado * 0.072, 0.009, -0.008),
+			"NEGRA" if lado == -1 else "ROJA", 0.00034)
 		pieza_multimetro(multimetro, Vector3(lado * 0.026, 0, -0.085), Vector3(0.012, 0.012, 0.048), color)
 		pieza_multimetro(multimetro, Vector3(lado * 0.026, 0, -0.114), Vector3(0.004, 0.004, 0.022), Color.SILVER)
 
@@ -60,6 +67,26 @@ func _ready() -> void:
 	for malla in camara.find_children("*", "MeshInstance3D", true, false):
 		malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mostrar_herramienta()
+
+
+func etiqueta_multimetro(padre: Node3D, centro: Vector3, texto: String, escala: float) -> Label3D:
+	var etiqueta := Label3D.new()
+	etiqueta.position = centro
+	etiqueta.rotation_degrees.x = -90
+	etiqueta.text = texto
+	etiqueta.font_size = 32
+	etiqueta.pixel_size = escala
+	etiqueta.modulate = Color("#dcffe6")
+	padre.add_child(etiqueta)
+	return etiqueta
+
+
+func cable_multimetro(padre: Node3D, desde: Vector3, hasta: Vector3, color: Color) -> void:
+	var segmento := Node3D.new()
+	padre.add_child(segmento)
+	segmento.position = (desde + hasta) / 2.0
+	segmento.look_at(padre.to_global(hasta))
+	pieza_multimetro(segmento, Vector3.ZERO, Vector3(0.005, 0.005, desde.distance_to(hasta)), color)
 
 
 func pieza_multimetro(padre: Node3D, centro: Vector3, tam: Vector3, color: Color) -> void:

@@ -46,6 +46,37 @@ unique_name_in_owner = true
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
 
+[node name="Briefing" type="VBoxContainer" parent="Fondo/Centro/Tarjeta/Contenido"]
+unique_name_in_owner = true
+theme_override_constants/separation = 6
+
+[node name="TituloSintoma" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Briefing"]
+theme_type_variation = &"Secundario"
+text = "Síntoma"
+
+[node name="Sintoma" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Briefing"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="TituloObjetivo" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Briefing"]
+theme_type_variation = &"Secundario"
+text = "Tu objetivo"
+
+[node name="Objetivo" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Briefing"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="TituloComo" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Briefing"]
+theme_type_variation = &"Secundario"
+text = "Cómo empezar"
+
+[node name="Como" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Briefing"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
 [node name="Donde" type="Label" parent="Fondo/Centro/Tarjeta/Contenido"]
 unique_name_in_owner = true
 theme_override_font_sizes/font_size = 18

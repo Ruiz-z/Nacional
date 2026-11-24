@@ -3,6 +3,7 @@ extends RefCounted
 const Taller = preload("res://tests/acciones_taller.gd")
 
 const Bus = preload("res://escenas/bus.tscn")
+const Escenario = preload("res://logica/simulador/escenario.gd")
 const Fuente = preload("res://logica/simulador/fuente_banco.gd")
 const Protocolo = preload("res://logica/entrada/protocolo.gd")
 const LATIDO := '{"v":1,"ctrl":"hb"}'
@@ -21,6 +22,7 @@ static func ejecutar() -> bool:
 	var bus := Bus.instantiate()
 	bus.archivo = "escenarios/modulo_auxiliar.json"
 	arbol.root.add_child(bus)
+	bus.flashcard.confirmar()
 	var correcto := practicar(bus, lineas)
 	bus.free()
 	return correcto
@@ -74,13 +76,14 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 		bus.recibir_banco(linea, ahora)
 	if not bus.zona_activa.estado_banco.text.contains("Fuente: banco físico"):
 		return false
-	if not Taller.equipar(bus, "reportar_tp1_0"):
-		return false
-	bus.ejecutar("reportar_tp1_0", "teclado")
-	Taller.cerrar_exitos(bus)
-	bus.ejecutar("reportar_tp2_5", "teclado")
-	Taller.cerrar_exitos(bus)
-	bus.ejecutar("diagnosticar_alimentacion", "teclado")
+	bus.abrir_menu(bus.zona_activa.piezas.hoja_diagnostico)
+	for numero in [1, 5, 7]:
+		Taller.tecla(bus, numero)
+	for boton in [JOY_BUTTON_DPAD_DOWN, JOY_BUTTON_A]:
+		var evento := InputEventJoypadButton.new()
+		evento.pressed = true
+		evento.button_index = boton
+		bus.get_viewport().push_input(evento, true)
 	Taller.mostrar_siguiente_mision(bus)
 	if not bus.hud_mision.ayuda.text.ends_with("Cierra el conductor abierto en el banco físico."):
 		return false
@@ -91,7 +94,7 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 			or not bus.motor.mediciones.error_diagnostico.is_empty():
 		return false
 	bus.flashcard.ok.pressed.emit()
-	bus.abrir_menu(bus.zona_activa.piezas.multimetro)
+	bus.abrir_menu(bus.zona_activa.piezas.conductor_banco)
 	bus.elegir_accion(bus.menu_pieza.entradas.size() - 1, "teclado")
 	if bus.accion_pendiente != "reconectar":
 		return false
@@ -100,7 +103,7 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 			or not bus.accion_pendiente.is_empty():
 		return false
 	var progreso: Dictionary = bus.progreso_indicios(bus.motor.estado())
-	if not bus.misiones.all(func(mision: Dictionary): return progreso[mision.clave]):
+	if not bus.misiones.all(func(mision: Dictionary): return Escenario.mision_cumplida(mision, progreso)):
 		return false
 	var decisiones: Array = bus.motor.resumen().linea_tiempo
 	if decisiones.back().fuente_entrada != "banco" or decisiones.back().fuente_falla != "banco" \
@@ -109,6 +112,7 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	if not Taller.cerrar_orden(bus):
 		return false
 	bus.reintentar()
+	bus.flashcard.confirmar()
 	bus.fuente_banco.conexion.iniciar_fisica(ahora - 3000)
 	bus._process(0.0)
 	return bus.zona_activa.estado_banco.text.contains("Se desconectó el banco físico. Sigue con el banco en pantalla.") \

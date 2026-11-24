@@ -3,6 +3,13 @@
   "version": "1",
   "titulo": "[MUESTRA] Pérdida de aislamiento",
   "descripcion": "[MUESTRA] El tablero muestra un aviso de aislamiento. Revisa el gabinete señalado.",
+  "briefing": {
+    "sintoma": "El tablero muestra un aviso de aislamiento.",
+    "objetivo": "Encuentra la causa del aviso y resuelve la falla.",
+    "como": [
+      "Abre el gabinete señalado y revisa el monitor."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "gabinete",

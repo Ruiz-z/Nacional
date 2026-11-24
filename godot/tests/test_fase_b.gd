@@ -19,6 +19,7 @@ static func ejecutar() -> bool:
 	var bus := Bus.instantiate()
 	bus.archivo = "escenarios/neumatico_pinchado.json"
 	arbol.root.add_child(bus)
+	bus.flashcard.confirmar()
 	bus.jugador.set_physics_process(false)
 	var correcto := await procedimiento(arbol, bus)
 	bus.free()
@@ -37,6 +38,7 @@ static func ruta_ideal(id: String) -> bool:
 		var bus := Bus.instantiate()
 		bus.archivo = "escenarios/%s.json" % id
 		raiz.add_child(bus)
+		bus.flashcard.confirmar()
 		var marca: Label = bus.hud_mision.marca
 		if bus.hud_mision.contador.text != "MISIÓN 1 DE %d" % datos.indicios.size() \
 				or datos.indicios.back().mision != "Cierra la orden en la consola" \
@@ -152,6 +154,7 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	if not bus.resumen.visible or Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
 		return false
 	bus.reintentar()
+	bus.flashcard.confirmar()
 	decisiones.clear()
 	if elevador.arriba or elevador.calzas_colocadas or rueda.collision_layer != 0 \
 			or not bus.taller.inventario.accesibles().is_empty():

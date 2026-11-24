@@ -13,6 +13,7 @@ static func ejecutar() -> bool:
 	var bus := Bus.instantiate()
 	bus.archivo = "escenarios/motor.json"
 	visor.add_child(bus)
+	bus.flashcard.confirmar()
 	var correcto := await comprobar(bus, arbol)
 	visor.free()
 	return correcto

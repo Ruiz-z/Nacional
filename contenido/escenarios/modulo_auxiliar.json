@@ -3,8 +3,16 @@
   "version": "1",
   "titulo": "[MUESTRA] Módulo auxiliar sin respuesta",
   "descripcion": "[MUESTRA] Mide TP1 y TP2. Guarda las dos lecturas y confirma la causa de la falla.",
+  "briefing": {
+    "sintoma": "El módulo auxiliar no responde.",
+    "objetivo": "Averigua si falla la alimentación o la señal.",
+    "como": [
+      "Toma el multímetro de la mesa, mide TP1 y TP2 contra TP0, anota las lecturas en la hoja y repara."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
+  "ubicacion_inicial": {"multimetro": "mesa_banco"},
   "zona": "banco",
   "grupo_funcion": "FG3",
   "dificultad": "dificil",
@@ -20,12 +28,14 @@
     "modulo": "[MUESTRA] Las lecturas te ayudan a distinguir si la falla está en el arnés o dentro del módulo."
   },
   "indicios": [
-    {"clave": "tp1_medido", "etiqueta": "TP1 medido", "mision": "Mide TP1", "ayuda": "Mide TP1 con referencia en TP0."},
-    {"clave": "tp2_medido", "etiqueta": "TP2 medido", "mision": "Mide TP2", "ayuda": "Mide TP2 con referencia en TP0."},
-    {"clave": "tp1_reportado", "etiqueta": "Lectura de TP1 reportada", "mision": "Reporta la lectura de TP1", "ayuda": "Abre el multímetro y reporta la lectura de TP1."},
-    {"clave": "tp2_reportado", "etiqueta": "Lectura de TP2 reportada", "mision": "Reporta la lectura de TP2", "ayuda": "Abre el multímetro y reporta la lectura de TP2."},
-    {"clave": "diagnostico_registrado", "etiqueta": "Diagnóstico registrado", "mision": "Identifica la causa de la falla", "ayuda": "Abre el multímetro y elige la causa que indiquen tus lecturas."},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Reconecta el conductor", "ayuda": "Abre el multímetro y elige Reconectar conductor. Confirma en el panel."}
+    {"clave": "tp1_medido", "etiqueta": "TP1 medido"},
+    {"clave": "tp2_medido", "etiqueta": "TP2 medido"},
+    {"clave": "tp1_reportado", "etiqueta": "Lectura de TP1 reportada"},
+    {"clave": "tp2_reportado", "etiqueta": "Lectura de TP2 reportada"},
+    {"claves": ["tp1_medido", "tp2_medido"], "mision": "Mide TP1 y TP2 con el multímetro", "ayuda": "Toma el multímetro de la mesa. Coloca la punta negra en TP0 y mide con la roja."},
+    {"claves": ["tp1_reportado", "tp2_reportado"], "mision": "Anota las lecturas en la hoja", "ayuda": "Abre la hoja de diagnóstico y selecciona las dos lecturas."},
+    {"clave": "diagnostico_registrado", "etiqueta": "Diagnóstico registrado", "mision": "Identifica la causa de la falla", "ayuda": "Elige la causa que indiquen tus lecturas y guarda la hoja."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Repara: reconecta el conductor", "ayuda": "Elige Reconectar conductor en el banco. Confirma en el panel."}
   ],
   "estado": {
     "s1_abierto": true,
@@ -50,11 +60,8 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp1_0": {
-      "requiere": {
-        "herramienta": "multimetro"
-      },
       "titulo": "≈0 V",
-      "componente": "multimetro",
+      "componente": "hoja_diagnostico",
       "previas": {},
       "efectos": {},
       "competencia": "electronica-conectividad",
@@ -65,11 +72,8 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp1_5": {
-      "requiere": {
-        "herramienta": "multimetro"
-      },
       "titulo": "≈5 V",
-      "componente": "multimetro",
+      "componente": "hoja_diagnostico",
       "previas": {},
       "efectos": {},
       "competencia": "electronica-conectividad",
@@ -80,11 +84,8 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp1_otra": {
-      "requiere": {
-        "herramienta": "multimetro"
-      },
       "titulo": "Otra",
-      "componente": "multimetro",
+      "componente": "hoja_diagnostico",
       "previas": {},
       "efectos": {},
       "competencia": "electronica-conectividad",
@@ -110,11 +111,8 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp2_0": {
-      "requiere": {
-        "herramienta": "multimetro"
-      },
       "titulo": "≈0 V",
-      "componente": "multimetro",
+      "componente": "hoja_diagnostico",
       "previas": {},
       "efectos": {},
       "competencia": "electronica-conectividad",
@@ -125,11 +123,8 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp2_5": {
-      "requiere": {
-        "herramienta": "multimetro"
-      },
       "titulo": "≈5 V",
-      "componente": "multimetro",
+      "componente": "hoja_diagnostico",
       "previas": {},
       "efectos": {},
       "competencia": "electronica-conectividad",
@@ -140,11 +135,8 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reportar_tp2_otra": {
-      "requiere": {
-        "herramienta": "multimetro"
-      },
       "titulo": "Otra",
-      "componente": "multimetro",
+      "componente": "hoja_diagnostico",
       "previas": {},
       "efectos": {},
       "competencia": "electronica-conectividad",
@@ -155,11 +147,8 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "diagnosticar_alimentacion": {
-      "requiere": {
-        "herramienta": "multimetro"
-      },
       "titulo": "Falla de alimentación",
-      "componente": "multimetro",
+      "componente": "hoja_diagnostico",
       "previas": {},
       "efectos": {},
       "competencia": "electronica-conectividad",
@@ -170,11 +159,8 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "diagnosticar_senal": {
-      "requiere": {
-        "herramienta": "multimetro"
-      },
       "titulo": "Falla de señal",
-      "componente": "multimetro",
+      "componente": "hoja_diagnostico",
       "previas": {},
       "efectos": {},
       "competencia": "electronica-conectividad",
@@ -185,11 +171,8 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "diagnosticar_modulo": {
-      "requiere": {
-        "herramienta": "multimetro"
-      },
       "titulo": "Módulo dañado",
-      "componente": "multimetro",
+      "componente": "hoja_diagnostico",
       "previas": {},
       "efectos": {},
       "competencia": "electronica-conectividad",
@@ -204,7 +187,7 @@
         "herramienta": "llave_ajustable"
       },
       "titulo": "Reconectar conductor",
-      "componente": "multimetro",
+      "componente": "conductor_banco",
       "previas": {},
       "efectos": {
         "resuelto": true,

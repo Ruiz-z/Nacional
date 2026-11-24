@@ -47,7 +47,10 @@ static func equipar(bus: Node3D, accion: String) -> bool:
 			bus.abrir_menu(mueble)
 			if not elegir(bus, "dejar") or objeto in almacen:
 				return false
-		bus.abrir_menu(taller.objetos[id])
+		var objeto: Node3D = taller.objetos[id]
+		if taller.mesa_banco != null and taller.mueble_de(id) == taller.mesa_banco:
+			objeto = taller.mesa_banco.piezas[id]
+		bus.abrir_menu(objeto)
 		if not elegir(bus, "tomar") or id not in taller.inventario.accesibles(bus.carrito_cerca()):
 			return false
 	if not herramienta.is_empty():
