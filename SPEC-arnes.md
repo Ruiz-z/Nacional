@@ -87,6 +87,8 @@ Los puntos de prueba van del lado de J2, después de los interruptores.
 - Las puntas son visibles: cables y pinzas negra y roja, un indicador "Punta negra / Punta roja" y avisos de apuntado por punta.
 - La orden tiene cuatro misiones: medir TP1 y TP2, anotar las lecturas, identificar la causa y reparar. Elige **Reconectar conductor** en el conductor del banco y confirma con el panel virtual o con el interruptor del banco físico.
 
+- (Cambio posterior) La causa de la falla ya no se anota en la hoja: se responde en la pregunta de cierre de la orden. La hoja solo guarda las lecturas de TP1 y TP2, y el banco tiene tres misiones: medir, anotar las lecturas y reparar. El error `lectura-mal-interpretada` se registra al cierre cuando las lecturas son correctas y la causa elegida no.
+
 ## Decisiones
 - Se construyen el banco **virtual y el físico**; el virtual es el respaldo.
 - El banco físico usa un **Arduino Uno R3 aparte**, sin tocar el panel de torque.
