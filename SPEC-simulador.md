@@ -68,6 +68,7 @@ Escena en Godot de un bus eléctrico donde el técnico inspecciona, diagnostica 
 - RF-31: CUANDO se ejecuta una acción, EL SISTEMA muestra un aviso central con su resultado y anima la escena en ese momento.
 - RF-32: EL SISTEMA ofrece órdenes de servicio, una por escenario con su `zona`, y activa solo la falla de la orden elegida; las demás piezas se pueden inspeccionar sin falla.
 - RF-33: EL SISTEMA incluye las zonas gabinete lateral, faros, motor eléctrico de tracción y cabina interior, accesibles caminando; la cabina se alcanza por la puerta de pasajeros.
+- RF-34: CUANDO ocurre un error, un rechazo o un aviso importante (falta una herramienta o pieza, acción no aplicada, error del técnico, falta crítica), EL SISTEMA lo muestra en una tarjeta modal con título, explicación y botón **OK** que no se cierra sola; mientras está abierta, la práctica queda en pausa y al cerrarla se recupera el control. Los avisos informativos breves (por ejemplo "Compuerta abierta") siguen siendo temporales.
 
 ## Requisitos no funcionales
 - Godot 4.7.2; modo escritorio; español.
