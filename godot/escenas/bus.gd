@@ -2,6 +2,18 @@ extends Node3D
 
 signal decision_tomada(decision: Dictionary)
 
+const FondoTarjeta = preload("res://escenas/fondo_tarjeta.gd")
+const INDICIOS := {
+	"inspeccionado": "Sector inspeccionado",
+	"indicio_confirmado": "Indicio de aislamiento confirmado",
+	"sintomas_revisados": "Síntomas de red revisados",
+	"resuelto": "Falla resuelta",
+}
+const PROBLEMAS := {
+	"tornillo_roto": "Pieza dañada",
+	"sector_equivocado": "Sector equivocado",
+	"indicio_descartado": "Indicio descartado",
+}
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Practica = preload("res://logica/simulador/practica.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
@@ -17,10 +29,14 @@ var resultados_guardados := false
 var pausa_visible := false
 @onready var resumen := $Interfaz/Lateral/Resumen
 @onready var lateral := $Interfaz/Lateral
-@onready var panel := $Interfaz/PanelVirtual
+@onready var panel := $AlineacionPanel/PanelVirtual
 
 
 func _ready() -> void:
+	$Interfaz.add_theme_stylebox_override("panel", lateral.get_theme_stylebox("panel", "PanelContainer"))
+	FondoTarjeta.aplicar(panel, 16)
+	lateral.get_node("Accion").item_selected.connect(func(_indice: int):
+		actualizar_accion_visible())
 	if conexion_panel != null:
 		panel.conexion = conexion_panel
 		panel.conexion.protocolo.reiniciar_fuente("virtual")
@@ -32,10 +48,10 @@ func _ready() -> void:
 	motor = Motor.new(datos)
 	ultimo_ms = Time.get_ticks_msec()
 	$Interfaz/Lateral/Inspeccionar.pressed.connect(func(): ejecutar("inspeccionar", "teclado"))
-	$Interfaz/Lateral/Inspeccionar.grab_focus()
+	enfocar_practica()
 	lateral.get_node("Causa").add_item("Marcar una causa")
 	for causa in datos.causas:
-		lateral.get_node("Causa").add_item(causa.replace("-", " "))
+		lateral.get_node("Causa").add_item(causa.replace("-", " ").capitalize())
 	lateral.get_node("Causa").item_selected.connect(func(indice: int):
 		motor.marcar_causa("" if indice == 0 else datos.causas[indice - 1]))
 	lateral.get_node("Continuar").pressed.connect(func():
@@ -56,13 +72,14 @@ func ejecutar(id: String, fuente: String) -> void:
 	var ahora := Time.get_ticks_msec()
 	var decision: Dictionary = motor.ejecutar(id, fuente, ahora - ultimo_ms)
 	ultimo_ms = ahora
-	if id == "inspeccionar" and decision.aplicada:
+	var primera_inspeccion: bool = id == "inspeccionar" and decision.aplicada and not inspeccionado
+	if primera_inspeccion:
 		inspeccionado = true
 	var mensajes := PackedStringArray()
 	if not decision.get("motivo", "").is_empty():
 		mensajes.append(decision.motivo)
 	for evento in decision.get("eventos", []):
-		mensajes.append("Problema: %s" % String(evento).replace("_", " "))
+		mensajes.append("Problema · %s" % PROBLEMAS.get(evento, datos.eventos[evento].descripcion))
 	if not mensajes.is_empty() and not decision.get("fuente", "").is_empty():
 		mensajes.append(decision.fuente)
 	lateral.get_node("Aviso").text = "\n".join(mensajes)
@@ -72,20 +89,38 @@ func ejecutar(id: String, fuente: String) -> void:
 		if not resultados_guardados:
 			lateral.get_node("Aviso").text += "\nNo se pudo guardar el resultado de la práctica."
 	mostrar_estado()
+	if primera_inspeccion:
+		enfocar_practica()
+	elif not motor.fin().is_empty() and resumen.get_node("Reflexion").visible:
+		resumen.get_node("Reflexion").grab_focus()
 	decision_tomada.emit(decision)
 
 
 func mostrar_estado() -> void:
-	var lineas := PackedStringArray([datos.titulo])
 	var estado: Dictionary = motor.estado()
-	for clave in estado:
-		lineas.append("%s: %s" % [clave.replace("_", " "), estado[clave]])
-	$Interfaz/Lateral/Estado.text = "\n".join(lineas)
+	var terminado: bool = not motor.fin().is_empty()
+	var lineas := PackedStringArray()
+	for clave in INDICIOS:
+		if estado.has(clave):
+			lineas.append("%s %s" % ["✓" if estado[clave] else "—", INDICIOS[clave]])
+	for clave in PROBLEMAS:
+		if estado.get(clave, false):
+			lineas.append("!  %s" % PROBLEMAS[clave])
+	lateral.get_node("Estado").text = datos.titulo.trim_prefix("[MUESTRA] ")
+	lateral.get_node("Muestra").visible = datos.get("muestra", false)
+	lateral.get_node("Objetivo").text = datos.descripcion.trim_prefix("[MUESTRA] ")
+	lateral.get_node("Indicios").text = "\n".join(lineas)
+	lateral.get_node("Aviso").visible = not lateral.get_node("Aviso").text.is_empty()
+	$Interfaz.offset_right = 592 if terminado else 396
+	lateral.get_node("Inspeccionar").visible = not terminado
+	for nombre in ["Tipo", "Estado", "ObjetivoTitulo", "Objetivo", "IndiciosTitulo", "Indicios", "Conexion"]:
+		lateral.get_node(nombre).visible = not terminado
+	lateral.get_node("Muestra").visible = not terminado and datos.get("muestra", false)
+	$Sector/Etiqueta.text = "Sector de práctica\n%s" % estado.get("sector", estado.get("modulo", ""))
 
 	panel.mostrar_leds({"energizado": estado.get("energizado"), "bloqueado": estado.get("bloqueo_puesto"),
 		"falla": motor.hay_problemas() or motor.fin() == "falta-critica"})
 	mostrar_acciones()
-	lateral.get_node("Inspeccionar").visible = motor.fin().is_empty()
 	resumen.mostrar(motor)
 
 
@@ -100,7 +135,11 @@ func reintentar() -> void:
 	lateral.get_node("Aviso").text = ""
 	ultimo_ms = Time.get_ticks_msec()
 	mostrar_estado()
-	lateral.get_node("Inspeccionar").grab_focus()
+	enfocar_practica()
+
+
+func enfocar_practica() -> void:
+	lateral.get_node("Causa" if inspeccionado else "Inspeccionar").grab_focus()
 
 
 func mostrar_acciones() -> void:
@@ -115,14 +154,22 @@ func mostrar_acciones() -> void:
 	var opciones := Practica.opciones(motor, datos)
 	for id in opciones:
 		var regla: Dictionary = opciones[id]
-		var texto: String = regla.descripcion
+		var texto: String = regla.descripcion.trim_prefix("[MUESTRA] ")
 		if regla.has("costo"):
-			texto += " · costo %s · tiempo %s · riesgo %s" % [regla.costo, regla.tiempo, regla.riesgo]
+			texto += " · costo %s · tiempo %s · riesgo %s" % [regla.costo.trim_prefix("[MUESTRA] "),
+				regla.tiempo.trim_prefix("[MUESTRA] "), regla.riesgo.trim_prefix("[MUESTRA] ")]
 		lista.add_item("%d. %s" % [lista.item_count, texto])
 		var indice := lista.item_count - 1
 		lista.set_item_metadata(indice, id)
+		lista.get_popup().set_item_tooltip(indice, texto)
 		if id == anterior:
 			lista.select(indice)
+	actualizar_accion_visible()
+
+
+func actualizar_accion_visible() -> void:
+	var lista: OptionButton = lateral.get_node("Accion")
+	lista.tooltip_text = lista.get_item_text(lista.selected) if lista.selected > 0 else ""
 
 
 func recibir_accion(accion: Dictionary) -> void:
@@ -135,9 +182,11 @@ func recibir_accion(accion: Dictionary) -> void:
 		"elegir-accion":
 			if lista.visible and int(accion.valor) in range(lista.item_count):
 				lista.select(int(accion.valor))
+				actualizar_accion_visible()
 				lista.grab_focus()
 		"cancelar":
 			lista.select(0)
+			actualizar_accion_visible()
 		"confirmar":
 			if lista.visible and lista.selected > 0:
 				ejecutar(lista.get_selected_metadata(), accion.fuente_entrada)
@@ -160,7 +209,7 @@ func actualizar_panel(ahora: int) -> void:
 		if pausa:
 			continuar.grab_focus()
 		elif motor != null and motor.fin().is_empty():
-			lateral.get_node("Inspeccionar").grab_focus()
+			enfocar_practica()
 	panel.visible = panel.conexion.fuente_panel() == "virtual" and not panel.conexion.pausado() \
 		and motor != null and motor.fin().is_empty()
 

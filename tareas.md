@@ -7,7 +7,7 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [x] T-02 S — Probar plugin SQLite en 4.7.2 (abrir, crear tabla, leer) — Hecho cuando: una prueba lo demuestra o se documenta el fallo y la alternativa.
 - [x] T-03 S — Escribir `datos/esquema` con las 7 tablas, creación y copia de respaldo (tablero RF-1) — Hecho cuando: prueba crea la BD vacía y restaura el respaldo.
 - [x] T-04 S — Redactar `docs/modelo-datos.md` desde el esquema — Hecho cuando: lista tablas y campos como el plan.
-- [ ] T-05 S+E — Prueba de humo serial de 30 min (plugin o puente Python) — Hecho cuando: un botón enciende un LED y se registra la decisión en `panel`.
+- [ ] T-05 S+E — Prueba de humo serial de 30 min (plugin o puente Python) — Hecho cuando: un botón enciende un LED y se registra la decisión en `panel`. — código listo, falta prueba en hardware
 
 ## 1. competencias
 - [x] T-06 S — Definir formato JSON del banco y 4 competencias con id (RF-1, 2) — Hecho cuando: archivo de ejemplo con campos comunes.
@@ -64,8 +64,8 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [x] T-51 S — Latido y detección de desconexión a 3 s (RF-8) — Hecho cuando: prueba pausa y cambia a virtual.
 - [ ] T-52 S — Panel virtual en pantalla con los mismos eventos y LEDs (RF-9) — Hecho cuando: demo manual de un escenario con ratón. — falta verificación manual
 - [x] T-53 S — Redactar `docs/protocolo-panel.md` (RF-15) — Hecho cuando: campos, versión y ejemplos.
-- [ ] T-54 E — Firmware: leer controles, filtrar rebotes, enviar JSON, latido (RF-16) — Hecho cuando: el emisor y el firmware producen líneas iguales.
-- [ ] T-55 E — Firmware: recibir estado de LEDs — Hecho cuando: los 3 LEDs responden al simulador.
+- [ ] T-54 E — Firmware: leer controles, filtrar rebotes, enviar JSON, latido (RF-16) — Hecho cuando: el emisor y el firmware producen líneas iguales. — código listo, falta prueba en hardware
+- [ ] T-55 E — Firmware: recibir estado de LEDs — Hecho cuando: los 3 LEDs responden al simulador. — código listo, falta prueba en hardware
 - [ ] T-56 E — Montar la maqueta y etiquetas — Hecho cuando: checklist manual de cada control.
 
 ## 5. simulador (escena)

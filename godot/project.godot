@@ -6,9 +6,19 @@ config/name="HackaTec 2026 - Reto Volvo"
 run/main_scene="res://escenas/menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
+[gui]
+
+theme/custom="res://escenas/tema.tres"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.070588, 0.086275, 0.105882, 1)
 
 [input]
 

@@ -2,21 +2,32 @@ extends VBoxContainer
 
 signal reintento_solicitado
 
+const FondoTarjeta = preload("res://escenas/fondo_tarjeta.gd")
+
 var motor: RefCounted
 
 
 func _ready() -> void:
+	if get_parent() == get_tree().root:
+		FondoTarjeta.aplicar(self, 16)
 	$Guardar.pressed.connect(func():
-		if motor.registrar_reflexion($Reflexion.text):
+		if motor != null and motor.registrar_reflexion($Reflexion.text):
 			mostrar(motor))
 	$Reintentar.pressed.connect(func(): reintento_solicitado.emit())
 
 
 func mostrar(actual: RefCounted) -> void:
 	motor = actual
-	var datos: Dictionary = motor.resumen()
-	visible = not datos.is_empty()
-	if not visible:
+	var datos: Dictionary = {} if motor == null else motor.resumen()
+	var disponible := not datos.is_empty()
+	visible = disponible or get_parent() == get_tree().root
+	$Vacio.visible = not disponible
+	$Detalle.visible = disponible
+	$Pregunta.visible = disponible
+	if not disponible:
+		$Guardar.hide()
+		$Reintentar.hide()
+		$Reflexion.hide()
 		$Reflexion.clear()
 		return
 	var reflexionado: bool = not datos.reflexion.is_empty()

@@ -6,11 +6,14 @@ signal escenario_solicitado(perfil: Dictionary)
 const Demo = preload("res://logica/flujo/modo_demo.gd")
 const Reloj = preload("res://logica/aprendizaje/reloj.gd")
 
+const FondoTarjeta = preload("res://escenas/fondo_tarjeta.gd")
+
 var base_real := "user://nacional.sqlite"
 var perfil := {}
 
 
 func _ready() -> void:
+	FondoTarjeta.aplicar(self, 16)
 	$Adelantar.pressed.connect(func(): actualizar(Demo.adelantar(base_real, 7)))
 	$Restablecer.pressed.connect(func(): actualizar(Demo.restablecer(base_real)))
 	$Tablero.pressed.connect(func(): tablero_solicitado.emit(perfil))

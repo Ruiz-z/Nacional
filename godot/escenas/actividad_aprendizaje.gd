@@ -13,21 +13,34 @@ var fuente_entrada := "interfaz"
 var inicio_ms := 0
 var guardado := false
 
-@onready var opciones := $Contenido/Opciones
-@onready var enviar := $Contenido/Enviar
-@onready var detalle := $Contenido/Detalle
-@onready var aviso := $Contenido/Aviso
+var titulo_preparado := ""
+@onready var contenido := $Margen/Centro/Tarjeta/Contenido
+@onready var opciones := contenido.get_node("Opciones")
+@onready var enviar := contenido.get_node("Enviar")
+@onready var detalle := contenido.get_node("Detalle")
+@onready var aviso := contenido.get_node("Aviso")
+@onready var fuente := contenido.get_node("Fuente")
+@onready var pregunta_visible := contenido.get_node("Pregunta")
+@onready var progreso := contenido.get_node("Progreso")
+@onready var reiniciar := contenido.get_node("Reiniciar")
 
 
 func _ready() -> void:
 	enviar.pressed.connect(confirmar)
-	$Contenido/Reiniciar.pressed.connect(func():
+	reiniciar.pressed.connect(func():
 		var inicio_anterior := inicio_ms
 		mostrar_item()
 		inicio_ms = inicio_anterior)
+	if not titulo_preparado.is_empty():
+		contenido.get_node("Titulo").text = titulo_preparado
+	if not actividad.perfil.has("id") or actividad.base.is_empty():
+		pregunta_visible.text = "Aún no hay una sesión activa"
+		detalle.text = "Vuelve al menú, elige un alias y abre esta actividad cuando se habilite."
+		return
 	if actividad.preparar(banco, ahora()):
 		mostrar_item()
 	else:
+		pregunta_visible.text = "Esta actividad aún no está disponible"
 		mostrar_avisos()
 
 
@@ -36,14 +49,19 @@ func mostrar_item() -> void:
 		opciones.remove_child(hijo)
 		hijo.queue_free()
 	detalle.text = ""
+	fuente.text = ""
 	seleccion.clear()
 	fuente_entrada = "interfaz"
 	mostrar_avisos()
 	var indice := actividad.intentos.size()
+	progreso.max_value = actividad.items.size()
+	progreso.value = mini(indice + 1, actividad.items.size())
+	progreso.show()
 	if indice == actividad.items.size():
 		item = {}
-		$Contenido/Reiniciar.hide()
-		$Contenido/Pregunta.text = "Respuestas completas."
+		contenido.get_node("Numero").text = "Actividad completada"
+		reiniciar.hide()
+		pregunta_visible.text = "Respuestas completas."
 		enviar.text = "Guardar y terminar"
 		enviar.show()
 		enviar.grab_focus()
@@ -52,18 +70,21 @@ func mostrar_item() -> void:
 	item = actividad.items[indice]
 	var leccion := actividad.leccion(indice)
 	if not leccion.is_empty():
-		detalle.text = "Microlección %d de %d · %d min\n%s\n%s%s\nFuente: %s\n\n" % [
+		detalle.text = "Microlección %d de %d · %d min\n%s\n%s%s" % [
 			actividad.numero_leccion(indice), actividad.plan.lecciones.size(), leccion.minutos,
 			Actividad.Banco.COMPETENCIAS[leccion.competencia],
-			"[MUESTRA] " if leccion.muestra else "", leccion.explicacion, citar(leccion.fuente)]
+			"[MUESTRA] " if leccion.muestra else "", leccion.explicacion]
+		detalle.text += "\n[color=#9aa7b4]Fuente de la microlección · %s[/color]" % citar(leccion.fuente)
 	if actividad.reloj_simulado:
-		detalle.text += "Reloj simulado\n"
-	detalle.text += "Ítem %d de %d · Fuente: %s" % [
-		indice + 1, actividad.items.size(), citar(item.fuente)]
+		fuente.text += "Reloj simulado\n"
+	fuente.text += "Fuente del ítem · %s" % citar(item.fuente)
+	progreso.tooltip_text = "Pregunta %d de %d" % [indice + 1, actividad.items.size()]
+	contenido.get_node("Numero").text = progreso.tooltip_text
+	contenido.get_node("Numero").show()
 	var pregunta: String
 	enviar.text = "Enviar respuesta"
 	enviar.visible = item.formato != "opcion-multiple"
-	$Contenido/Reiniciar.visible = enviar.visible
+	reiniciar.visible = enviar.visible
 	match item.formato:
 		"opcion-multiple":
 			pregunta = item.pregunta
@@ -79,7 +100,7 @@ func mostrar_item() -> void:
 			var panel := PanelVirtual.instantiate()
 			panel.accion_recibida.connect(recibir_panel)
 			opciones.add_child(panel)
-	$Contenido/Pregunta.text = ("[MUESTRA] " if item.get("muestra", false) else "") + pregunta
+	pregunta_visible.text = ("[MUESTRA] " if item.get("muestra", false) else "") + pregunta
 	var primero := opciones.get_child(0)
 	if primero is Button:
 		primero.grab_focus()
@@ -96,6 +117,8 @@ func mostrar_avisos() -> void:
 func agregar_opcion(texto: String, accion: Callable) -> void:
 	var boton := Button.new()
 	boton.text = texto
+	boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	boton.custom_minimum_size.y = 52
 	boton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	boton.pressed.connect(accion)
 	opciones.add_child(boton)
@@ -124,7 +147,7 @@ func confirmar() -> void:
 		return
 	guardado = true
 	enviar.hide()
-	$Contenido/Pregunta.text = "Paso guardado."
+	pregunta_visible.text = "Paso guardado."
 	var lineas := PackedStringArray()
 	for competencia in actividad.resultados:
 		var resultado: Dictionary = actividad.resultados[competencia]

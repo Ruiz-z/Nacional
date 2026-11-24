@@ -4,5 +4,5 @@
 
 [node name="Evaluacion" instance=ExtResource("1")]
 
-[node name="Titulo" parent="Contenido" index="0"]
+[node name="Titulo" parent="Margen/Centro/Tarjeta/Contenido" index="0"]
 text = "Evaluación"

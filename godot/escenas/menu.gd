@@ -23,7 +23,7 @@ var banco_aprendizaje := {}
 var conexion := Conexion.new()
 var pantalla: Node
 var botones := {}
-@onready var inicio := $Marco/Inicio
+@onready var inicio := $Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio
 
 
 func _ready() -> void:
@@ -41,11 +41,14 @@ func _ready() -> void:
 	for paso in Recorrido.PASOS:
 		var boton := Button.new()
 		boton.text = NOMBRES[paso]
+		boton.custom_minimum_size.y = 52
+		boton.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		boton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		boton.pressed.connect(abrir_paso.bind(paso))
 		inicio.get_node("Pasos").add_child(boton)
 		botones[paso] = boton
 	actualizar()
-	inicio.get_node("Demo").grab_focus()
+	enfocar_inicio()
 	if not disponible:
 		inicio.get_node("Aviso").text = "No se pudo abrir la base local."
 
@@ -73,6 +76,7 @@ func seleccionar_alias(alta: bool) -> void:
 	if seleccion.ok:
 		perfil = seleccion
 		actualizar()
+		enfocar_inicio()
 	else:
 		inicio.get_node("Aviso").text = seleccion.mensaje
 
@@ -80,12 +84,28 @@ func seleccionar_alias(alta: bool) -> void:
 func actualizar() -> void:
 	var estado := Recorrido.estado(base, perfil.get("id", 0), int(Time.get_unix_time_from_system()))
 	var siguiente: String = estado.get("siguiente", "alias")
-	inicio.get_node("Siguiente").text = "%s · Siguiente paso: %s" % [
-		perfil.get("alias", "Sin alias"), NOMBRES[siguiente]]
-	inicio.get_node("Aviso").text = estado.get("aviso", "")
+	inicio.get_node("Perfil").text = "Técnico · %s" % perfil.get("alias", "Sin alias")
+	inicio.get_node("Siguiente").text = "Siguiente paso · %s" % NOMBRES[siguiente]
+	var razon: String = estado.get("aviso", "")
+	inicio.get_node("Aviso").text = razon if not razon.is_empty() else (
+		"Elige o registra un alias para desbloquear el diagnóstico." if perfil.is_empty()
+		else "Completa %s para seguir avanzando." % NOMBRES[siguiente])
 	for paso in botones:
-		botones[paso].disabled = paso not in estado.get("habilitados", []) \
+		var boton: Button = botones[paso]
+		boton.disabled = paso not in estado.get("habilitados", []) \
 			and not (paso == "retest" and siguiente == "retest")
+		boton.theme_type_variation = &"Primario" if paso == siguiente and razon.is_empty() else &""
+		boton.tooltip_text = ("Selecciona un alias para empezar." if perfil.is_empty() else
+			"Paso pendiente de habilitar por el recorrido.") if boton.disabled else razon
+	inicio.get_node("Elegir").theme_type_variation = &"Primario" if siguiente == "alias" else &""
+
+
+func enfocar_inicio() -> void:
+	var siguiente: String = Recorrido.estado(base, perfil.get("id", 0),
+		int(Time.get_unix_time_from_system())).get("siguiente", "alias")
+	var boton: Control = botones.get(siguiente, inicio.get_node("Alias"))
+	if not (boton is Button and boton.disabled):
+		boton.grab_focus()
 
 
 func abrir_paso(paso: String) -> void:
@@ -105,7 +125,7 @@ func abrir_paso(paso: String) -> void:
 			actividad.actividad.paso = paso
 			actividad.banco = banco_aprendizaje
 			if paso in ["post", "retest"]:
-				actividad.get_node("Contenido/Titulo").text = NOMBRES[paso]
+				actividad.titulo_preparado = NOMBRES[paso]
 			actividad.finalizada.connect($Marco/Volver.grab_focus)
 			abrir(actividad)
 			if actividad.item.is_empty():
@@ -143,7 +163,8 @@ func abrir_bus(tecnico: Dictionary) -> void:
 	bus.tecnico = tecnico
 	abrir(bus)
 	var volver_bus := Button.new()
-	volver_bus.text = "Volver al menú"
+	volver_bus.text = "‹  Volver al menú"
+	volver_bus.custom_minimum_size.y = 52
 	volver_bus.pressed.connect(volver)
 	bus.lateral.add_child(volver_bus)
 	bus.lateral.move_child(volver_bus, 0)
@@ -154,6 +175,7 @@ func abrir(nueva: Node) -> void:
 	if is_instance_valid(pantalla):
 		$Marco.remove_child(pantalla)
 		pantalla.queue_free()
+	$Marco/EntradaInicio.hide()
 	inicio.hide()
 	pantalla = nueva
 	$Marco/Volver.show()
@@ -169,6 +191,7 @@ func volver() -> void:
 		pantalla = null
 	$Marco.show()
 	$Marco/Volver.hide()
+	$Marco/EntradaInicio.show()
 	inicio.show()
 	actualizar()
-	inicio.get_node("Demo").grab_focus()
+	enfocar_inicio()
