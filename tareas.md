@@ -198,3 +198,4 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-164 S — Error concreto → práctica de refuerzo con motivo visible en la ruta.
 - [ ] T-165 S — Evidencia y errores/oportunidades junto al dominio en el tablero.
 - [ ] T-166 H — Prueba en mesa con el ESP32 real: sano, alimentación abierta, señal abierta y desconexión a mitad de un intento; comparar multímetro, monitor serial y Godot.
+- [x] T-167 S — Ruta de aprendizaje como roadmap: camino numerado por competencia según el diagnóstico, con "Hoy" o "Después", barra de dominio, motivo y práctica sugerida (aprendizaje RF-21).

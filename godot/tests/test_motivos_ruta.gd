@@ -19,5 +19,5 @@ static func ejecutar() -> bool:
 	return m.size() == 4 \
 		and m[0].motivo == "Tuviste una falta crítica reciente." and m[0].refuerzo.is_empty() \
 		and m[1].motivo.contains("medir en el punto equivocado") and m[1].refuerzo == Ruta.REFUERZOS["punto-de-medicion-incorrecto"] \
-		and m[2].motivo == "Tu dominio es bajo (80 %)." \
+		and m[2].motivo == "Tu dominio es de 80 %." \
 		and m[3].motivo.begins_with("Respondiste bien en teoría")

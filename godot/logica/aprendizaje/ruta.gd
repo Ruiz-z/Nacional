@@ -76,7 +76,7 @@ static func motivos(orden: Array, dominios: Dictionary, intentos: Array, sesion:
 	var criticas := pendientes_criticas(intentos)
 	var resultado := []
 	for competencia in orden:
-		var motivo := "Tu dominio es bajo (%d %%)." % roundi(dominios.get(competencia, 0.0))
+		var motivo := "Tu dominio es de %d %%." % roundi(dominios.get(competencia, 0.0))
 		var refuerzo := ""
 		var conteo := {}
 		var brechas := 0
