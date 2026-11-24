@@ -42,6 +42,23 @@ El mensaje lleva la versión `v`, el identificador `led` y el estado absoluto `v
 {"v":1,"led":"falla","valor":1}
 ```
 
+## Banco de arnés (dispositivo opcional)
+
+Es un segundo Arduino Uno con su propio puerto serial a 115200 baudios y la misma versión `v` del contrato. Tiene secuencia `n`, latido y filtro de rebote independientes del panel, y su fuente se registra como `banco`.
+
+| Campo | Significado |
+|---|---|
+| `ctrl` | `nodo_p` (alimentación recibida) o `nodo_q` (señal recibida). |
+| `valor` | `1` si el nodo está a más de 2,5 V y `0` si no. Se envía al cambiar, con antirrebote de 50 ms, y con cada latido. |
+
+```json
+{"v":1,"ctrl":"nodo_p","valor":1,"n":0,"t":0}
+{"v":1,"ctrl":"nodo_q","valor":0,"n":1,"t":40}
+{"v":1,"ctrl":"hb"}
+```
+
+`nodo_p` y `nodo_q` son estado de sensor, no acciones del vocabulario de entrada. El simulador los interpreta como el estado de los interruptores S1 y S2 del banco: `nodo_p = 0` indica alimentación abierta y `nodo_q = 0` indica señal abierta. Si el latido falta 3 s, el simulador pasa a la falla virtual de la variante y lo indica.
+
 ## Emisor de prueba
 
 Desde la raíz, `godot --headless --no-header -s tools/emisor_eventos.gd` imprime una secuencia de controles en la salida estándar. `test_entrada_50.gd` reproduce esas líneas a través del parser y la capa de entrada, y usa las confirmaciones para ejecutar los pasos del escenario de aislamiento.

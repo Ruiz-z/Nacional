@@ -46,6 +46,7 @@ Semántica: el torque es un valor absoluto 0–100; la rueda y los gatillos ajus
 - Cada evento lleva número de secuencia `n`; `t` son milisegundos del microcontrolador. Perilla: `valor` de 0 a 100.
 - LEDs: `{"v":1,"led":"falla","valor":1}`.
 - Latido: `{"v":1,"ctrl":"hb"}` cada 1 s; sin latido por 3 s, el panel se considera desconectado.
+- **Banco de arnés (dispositivo opcional, `SPEC-arnes.md`):** es un segundo Arduino con su propio puerto serial y la misma versión `v` del contrato. Envía `{"v":1,"ctrl":"nodo_p","valor":1,"n":0,"t":0}` y `nodo_q` (valor `0` o `1`, estado de los nodos P y Q con umbral de 2,5 V y antirrebote de 50 ms), al cambiar y con el latido. Tiene su propia secuencia `n`, su propio latido de 3 s y la fuente `banco`. `nodo_p` y `nodo_q` son estado de sensor, no acciones del vocabulario: el simulador los toma como el estado de S1 y S2 del banco.
 
 ## Requisitos funcionales (EARS)
 - RF-1: EL SISTEMA define un vocabulario único de acciones que consume el simulador sin conocer la fuente.
@@ -66,6 +67,8 @@ Semántica: el torque es un valor absoluto 0–100; la rueda y los gatillos ajus
 - RF-16: EL FIRMWARE lee los controles, filtra rebotes y envía un JSON por evento a 115200 baudios, y recibe el estado de los LEDs.
 - RF-17: EL SISTEMA funciona sin conexión a internet y sin Wi-Fi ni Bluetooth.
 - RF-18: EL SISTEMA opera el panel solo a bajo voltaje por USB, sin conexión a sistemas reales del bus.
+- RF-19: DONDE exista el banco de arnés, EL SISTEMA recibe `nodo_p` y `nodo_q` de ese dispositivo con secuencia, latido y rebote propios, y registra `banco` como fuente.
+- RF-20: SI el banco se desconecta, ENTONCES EL SISTEMA pasa a la falla virtual de la variante sin detener el escenario y lo indica en pantalla.
 
 ## Requisitos no funcionales
 - Latencia del evento al efecto en pantalla perceptible como inmediata.
