@@ -36,18 +36,23 @@ Define el panel físico (maqueta con controles y LEDs), su protocolo JSON y el v
 
 El mapeo vive en un archivo de configuración, no en el código.
 
+Semántica: el torque es un valor absoluto 0–100; la rueda y los gatillos ajustan un valor virtual en pasos de 1. Los interruptores son estado; en teclado y control, la tecla o botón alterna el estado.
+
 ## Protocolo JSON (`docs/protocolo-panel.md`)
 - Una línea JSON por evento, versionada: `{"v":1,"ctrl":"torque","valor":42,"t":12345}`.
 - Panel → simulador: eventos de controles. Simulador → panel: estado de LEDs.
 - USB serial a 115200 baudios. Alternativa si falla el plugin serial de Godot: puente en Python que reenvía por UDP local.
 - Cambiar el contrato exige actualizar esta spec primero.
+- Cada evento lleva número de secuencia `n`; `t` son milisegundos del microcontrolador. Perilla: `valor` de 0 a 100.
+- LEDs: `{"v":1,"led":"falla","valor":1}`.
+- Latido: `{"v":1,"ctrl":"hb"}` cada 1 s; sin latido por 3 s, el panel se considera desconectado.
 
 ## Requisitos funcionales (EARS)
 - RF-1: EL SISTEMA define un vocabulario único de acciones que consume el simulador sin conocer la fuente.
 - RF-2: EL SISTEMA mapea teclado y ratón, Pro Controller y panel a ese vocabulario según un archivo de configuración.
 - RF-3: CUANDO llegan acciones de dos fuentes a la vez, EL SISTEMA usa la última y registra la fuente de cada evento (`panel`, `virtual`, `teclado`, `control`).
 - RF-4: EL SISTEMA recibe eventos del panel como líneas JSON versionadas.
-- RF-5: SI llega JSON malformado, versión desconocida, control inexistente o evento duplicado, ENTONCES EL SISTEMA lo ignora y lo registra sin detener el escenario.
+- RF-5: SI llega JSON malformado, versión desconocida, control inexistente o evento con número de secuencia `n` repetido, ENTONCES EL SISTEMA lo ignora y lo registra sin detener el escenario.
 - RF-6: EL SISTEMA filtra eventos repetidos del mismo control en menos de 50 ms.
 - RF-7: EL SISTEMA envía al panel el estado de los LEDs (energizado, bloqueado, falla) por el mismo canal.
 - RF-8: MIENTRAS no lleguen eventos del puerto serial, EL SISTEMA usa el panel virtual y lo indica en pantalla.

@@ -32,7 +32,7 @@ Muestra el avance, dominio, errores y retención de cada técnico, con trazabili
 9. Avance de la ruta: micro-lecciones completadas frente a pendientes.
 
 ## Requisitos funcionales (EARS)
-- RF-1: EL SISTEMA guarda los resultados en una base SQLite local con técnico (alias), competencia, ítem, evento, fuente y versión de contenido.
+- RF-1: EL SISTEMA define el esquema único de la base SQLite local (en `docs/modelo-datos.md`) y guarda en ella técnico (alias), competencia, ítem, respuesta, tiempo, resultado, tipo de error, evento, fuente y versión de contenido; `aprendizaje` y `simulador` escriben mediante ese esquema.
 - RF-2: CUANDO `aprendizaje` o `simulador` entregan resultados, EL SISTEMA los guarda sin recalcular dominio ni ruta.
 - RF-3: EL SISTEMA ofrece la vista del técnico y la vista del instructor con cambio desde un menú.
 - RF-4: EL SISTEMA muestra los 9 indicadores de la lista según la vista.
@@ -64,7 +64,7 @@ Muestra el avance, dominio, errores y retención de cada técnico, con trazabili
 
 ## Casos límite
 - Técnico sin sesiones: vistas vacías con mensaje claro, sin errores.
-- Base de datos corrupta o ausente: se crea una nueva y se avisa.
+- Base de datos ausente: se crea una nueva y se avisa. Corrupta: se restaura la copia de respaldo automática; si no hay, se aísla el registro dañado y se avisa. Nunca se borran los datos de los demás técnicos.
 - Indicador sin datos (por ejemplo, retest pendiente): se muestra "pendiente", no cero.
 - Dos técnicos con el mismo alias: se rechaza.
 - Exportación con muchos datos: no bloquea la interfaz.

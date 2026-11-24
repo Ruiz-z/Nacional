@@ -44,3 +44,6 @@ Requisitos transversales: operación offline, trazabilidad de resultados, conten
 - Panel: microcontrolador (ESP32 sin probar) y cuántos botones, interruptores, perillas y LEDs.
 - Rúbrica real de evaluación y material técnico de Volvo (preguntar a los organizadores).
 - Plugin serial de Godot vs. puente Python (prueba de 30 min).
+
+## Actualización
+- Módulo `flujo` (Spec 007): depende de aprendizaje, simulador, tablero. `entrada` está dentro de `panel`. Orden: competencias → aprendizaje+simulador → panel → tablero → flujo → entrega.

@@ -52,10 +52,10 @@ Escena en Godot de un bus eléctrico donde el técnico inspecciona, diagnostica 
 - RF-16: CUANDO el técnico marca una causa en pantalla y ejecuta una acción en el panel, EL SISTEMA compara ambas y envía a `aprendizaje` la brecha `diagnostico-vs-accion` si no coinciden.
 - RF-17: EL SISTEMA puntúa cada escenario de 0 a 100: parte de 100 y resta por tipo de error; una recuperación correcta devuelve parte de los puntos.
 - RF-18: AL terminar, EL SISTEMA muestra un resumen con línea de tiempo de decisiones, aciertos y errores, ruta ideal con fuente y brechas.
-- RF-19: EL SISTEMA permite reintentar desde el punto donde falló y, al reintentar, presenta una variante del escenario.
+- RF-19: EL SISTEMA permite reintentar desde el punto donde falló y, al reintentar, presenta una variante del escenario (misma falla con ubicación o valores distintos; una variante por escenario).
 - RF-20: ANTES de mostrar la solución, EL SISTEMA pregunta "¿qué harías distinto?" y registra la elección.
 - RF-21: EL SISTEMA muestra la comparación entre el intento anterior y el actual (errores, tiempo, puntos).
-- RF-22: EL SISTEMA entrega a `aprendizaje` y `tablero` por escenario: resultados por competencia, errores, faltas, brechas, tiempo por acción, fuente de entrada (`panel`, `virtual` o `teclado`) y versión del contenido.
+- RF-22: EL SISTEMA entrega a `aprendizaje` y `tablero` por escenario: resultados por competencia, errores, faltas, brechas, tiempo por acción, fuente de entrada (`panel`, `virtual`, `teclado` o `control`) y versión del contenido.
 - RF-23: EL SISTEMA funciona sin conexión a internet.
 - RF-24: CUANDO no hay panel físico, EL SISTEMA calcula la brecha con el panel virtual y registra la fuente de entrada.
 
@@ -69,7 +69,7 @@ Escena en Godot de un bus eléctrico donde el técnico inspecciona, diagnostica 
 - Control no conectado: teclado y ratón.
 - Acción repetida en el mismo estado: respuesta coherente sin romper el estado.
 - Estado imposible o evento circular: se detecta al validar el JSON.
-- Panel que envía eventos duplicados o fuera de orden: se ignoran y se registran.
+- Panel que envía eventos duplicados o con número de secuencia repetido o perdido: se ignoran y se registran. El orden incorrecto de acciones del técnico sí se evalúa (`panel` RF-10/11).
 - Reintento tras falta crítica: reinicia desde el punto seguro.
 
 ## Fuera de alcance

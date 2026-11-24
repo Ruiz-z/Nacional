@@ -14,8 +14,11 @@ Calcula el dominio por competencia, aplica el diagnóstico inicial, arma la ruta
 - H3: Como instructor quiero ver ganancia, retención y recurrencia de errores para saber si el entrenamiento funciona.
 
 ## Modelo de dominio
-- Dominio 0–100 por competencia = promedio ponderado de los últimos 10 intentos; el peso sube con la dificultad.
-- Falta crítica: −15 directo. Brecha diagnóstico-vs-acción: −5.
+- Valor de un intento: pregunta = 100 si es correcta y 0 si no; escenario o caso = su puntaje 0–100 (`simulador` RF-17).
+- Peso de un intento: fácil 1, media 2, difícil 3; las tareas prácticas multiplican por 2.
+- Dominio 0–100 por competencia = promedio ponderado de los últimos 10 intentos; limitado a 0–100.
+- Pre, post y retest son instantáneas: el dominio de cada uno se calcula solo con los ítems de esa evaluación. La ganancia es indicativa porque el diagnóstico tiene pocos ítems por competencia, y se declara.
+- Falta crítica: se registra como un intento de valor 0 y peso 3. Brecha diagnóstico-vs-acción: intento de valor 0 y peso 1. Ambos entran a la ventana de 10 intentos.
 - Niveles: Novato (<40), Básico (40–69), Competente (70–89), Experto (≥90).
 - Competencia aprobada: nivel Competente o superior y sin falta crítica reciente.
 - Confianza por competencia: `baja` (solo teoría) o `alta` (teoría y práctica).
@@ -31,16 +34,16 @@ Calcula el dominio por competencia, aplica el diagnóstico inicial, arma la ruta
 - RF-8: CUANDO se arma la ruta, EL SISTEMA ordena las competencias por (100 − dominio) × peso de seguridad (2 para `seguridad-alto-voltaje`, 1 para las demás).
 - RF-9: EL SISTEMA ofrece sesiones de 3 micro-lecciones (3 a 5 min) sobre las dos competencias de mayor prioridad, cada una con una explicación corta con fuente y 2 ítems de práctica.
 - RF-10: AL terminar una sesión, EL SISTEMA recalcula dominio y ruta.
-- RF-11: CUANDO ocurre una falta crítica, EL SISTEMA coloca esa competencia en primer lugar de la ruta hasta que se repita correctamente.
+- RF-11: CUANDO ocurre una falta crítica, EL SISTEMA coloca esa competencia en primer lugar de la ruta hasta que el técnico acierte un ítem de esa competencia; "falta crítica reciente" son las últimas 3 sesiones. Prioridad: falta crítica, luego dos brechas (RF-18), luego la fórmula del RF-8; el empate lo gana el menor dominio.
 - RF-12: EL SISTEMA aplica repetición espaciada Leitner de 3 cajas: el ítem fallado entra a la caja 1; acertar sube de caja; fallar vuelve a la 1; intervalos 1, 3 y 7 días.
-- RF-13: CUANDO se pulsa "adelantar reloj", EL SISTEMA avanza el tiempo simulado y muestra que es simulado.
+- RF-13: CUANDO se pulsa "adelantar reloj", EL SISTEMA avanza el tiempo simulado y muestra que es simulado. El botón está en el menú de demo, el reloj se guarda entre ejecuciones y "Restablecer demo" lo reinicia.
 - RF-14: DONDE el banco lo permita, EL SISTEMA presenta una variante del ítem repetido.
-- RF-15: EL SISTEMA aplica pre-test (diagnóstico), post-test (8 teóricas + 2 prácticas con ítems distintos) y retest diferido simulado a 7 días (mismo formato, ítems ya vistos).
-- RF-16: EL SISTEMA calcula ganancia = dominio post − dominio pre, y retención = dominio retest ÷ dominio post × 100, por competencia.
-- RF-17: CUANDO el técnico marca una causa o acción en pantalla y ejecuta otra en el panel, EL SISTEMA registra una brecha `diagnostico-vs-accion` con competencia y caso, y resta 5 puntos al dominio.
+- RF-15: EL SISTEMA aplica pre-test (diagnóstico), post-test (8 teóricas + 2 prácticas con ítems distintos) y retest diferido simulado a 7 días (mismo formato, con los ítems del post-test). La práctica de la ruta puede repetir ítems por Leitner; pre y post no.
+- RF-16: EL SISTEMA calcula ganancia = dominio post − dominio pre, y retención = dominio retest ÷ dominio post × 100, por competencia, con tope de 100. SI el dominio post es 0, ENTONCES la retención es "no calculable".
+- RF-17: CUANDO `simulador` envía una brecha `diagnostico-vs-accion`, EL SISTEMA la registra con competencia y caso, y la cuenta como un intento de valor 0 y peso 1.
 - RF-18: SI hay dos brechas en la misma competencia en una sesión, ENTONCES EL SISTEMA la sube al primer lugar de la ruta.
 - RF-19: EL SISTEMA registra por cada evento: alias del técnico, competencia, ítem, respuesta, tiempo, resultado, tipo de error y versión del contenido.
-- RF-20: EL SISTEMA entrega a `tablero` dominio, nivel, confianza, ganancia, retención, conteo de brechas y errores recurrentes por competencia.
+- RF-20: EL SISTEMA entrega a `tablero` dominio, nivel, confianza, ganancia, retención, conteo de brechas, errores recurrentes (mismo tipo 3 o más veces), faltas críticas con fecha, tiempo promedio por acción y avance de la ruta por competencia.
 - RF-21: EL SISTEMA funciona sin conexión a internet.
 
 ## Requisitos no funcionales
@@ -53,7 +56,7 @@ Calcula el dominio por competencia, aplica el diagnóstico inicial, arma la ruta
 - Competencia sin práctica disponible (2 y 4): confianza `baja`.
 - Banco sin ítems suficientes para post-test o retest: se avisa y se permite reutilizar ítems marcando que no son equivalentes.
 - Reloj adelantado hacia atrás: no permitido.
-- Registro corrupto: error claro, sin pérdida de los demás técnicos.
+- Registro corrupto: error claro, se aísla el registro dañado y se restaura la copia de respaldo; no se pierden los demás técnicos.
 
 ## Fuera de alcance
 - Contenido de ítems y fuentes (`competencias`).
