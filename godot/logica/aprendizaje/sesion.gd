@@ -44,3 +44,23 @@ static func cerrar(plan: Dictionary, respuestas: Array, historial: Array, numero
 	for competencia in resultados:
 		dominios[competencia] = resultados[competencia].dominio
 	return {"dominios": dominios, "ruta": Ruta.ordenar(dominios, intentos, numero)}
+
+
+static func catalogo(banco: Dictionary) -> Array:
+	var lecciones := []
+	for competencia in Banco.COMPETENCIAS:
+		var preguntas: Array = banco.items.filter(func(item: Dictionary) -> bool:
+			return item.competencia == competencia and item.formato == "opcion-multiple")
+		if preguntas.size() < 2:
+			continue
+		for indice in range(2):
+			var inicio := (indice * 3) % preguntas.size()
+			var ejemplo: Dictionary = preguntas[inicio]
+			var primero := (inicio + 1) % preguntas.size()
+			var segundo := (inicio + 2) % preguntas.size()
+			lecciones.append({"competencia": competencia, "minutos": 3,
+				"explicacion": ejemplo.get("explicacion", "%s\n%s" % [
+					ejemplo.pregunta, ejemplo.opciones[int(ejemplo.correcta)]]),
+				"fuente": ejemplo.fuente, "muestra": ejemplo.get("muestra", false),
+				"items": [preguntas[primero], preguntas[segundo]]})
+	return lecciones

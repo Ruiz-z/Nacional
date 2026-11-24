@@ -6,7 +6,7 @@ const Escenario = preload("res://logica/simulador/escenario.gd")
 const Practica = preload("res://logica/simulador/practica.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
 
-@export_file("*.json") var archivo := "../contenido/escenarios/aislamiento.json"
+@export_file("*.json") var archivo := Escenario.AISLAMIENTO
 var motor: RefCounted
 var datos: Dictionary
 var ultimo_ms: int
@@ -24,7 +24,7 @@ func _ready() -> void:
 	if conexion_panel != null:
 		panel.conexion = conexion_panel
 		panel.conexion.protocolo.reiniciar_fuente("virtual")
-	var carga := Escenario.cargar(ProjectSettings.globalize_path("res://").path_join(archivo))
+	var carga := Escenario.cargar(archivo)
 	datos = carga.get("escenario", {})
 	if datos.is_empty():
 		$Interfaz/Lateral/Estado.text = str(carga)

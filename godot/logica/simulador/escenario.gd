@@ -1,9 +1,13 @@
 extends RefCounted
 
+const RutasContenido = preload("res://logica/rutas_contenido.gd")
+
+const AISLAMIENTO := "escenarios/aislamiento.json"
 const Banco = preload("res://logica/competencias/banco.gd")
 
 
 static func cargar(ruta: String) -> Dictionary:
+	ruta = RutasContenido.resolver(ruta)
 	var archivo := FileAccess.open(ruta, FileAccess.READ)
 	if archivo == null:
 		return error(ruta, "archivo", "No se pudo abrir.")

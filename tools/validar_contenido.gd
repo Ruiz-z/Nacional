@@ -11,6 +11,8 @@ func _initialize() -> void:
 		return
 
 	var ruta := "contenido/banco.json" if argumentos.is_empty() else argumentos[0]
+	if not ruta.is_absolute_path():
+		ruta = DirAccess.open(".").get_current_dir().path_join(ruta)
 	var resultado := Banco.cargar(ruta)
 	for aviso in resultado.avisos:
 		print(aviso)

@@ -3,12 +3,15 @@ extends RefCounted
 const Acceso = preload("res://logica/datos/acceso_sqlite.gd")
 const Dominio = preload("res://logica/aprendizaje/dominio.gd")
 
-const INSERTAR := """
+const COLUMNAS := """
 	INSERT INTO intento (tecnico, competencia, item, formato, dificultad, respuesta,
 		valor, peso, resultado, tipo_error, tiempo_ms, fuente_entrada, momento,
 		reloj_sim, version_contenido)
-	VALUES ((SELECT id FROM tecnico WHERE alias = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 """
+const VALORES := "(SELECT id FROM tecnico WHERE alias = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+const INSERTAR := COLUMNAS + "VALUES (" + VALORES + ");"
+const INSERTAR_SI_AVANZO := COLUMNAS + "SELECT " + VALORES + " WHERE changes() = 1;"
+
 
 static func guardar(base: String, alias: String, intento: Dictionary,
 		consultar: Callable = Acceso.consultar) -> bool:

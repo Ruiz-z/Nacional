@@ -4,6 +4,7 @@ const Esquema = preload("res://logica/datos/esquema.gd")
 const Acceso = preload("res://logica/datos/acceso_sqlite.gd")
 const Reloj = preload("res://logica/aprendizaje/reloj.gd")
 const Leitner = preload("res://logica/aprendizaje/leitner.gd")
+const Registro = preload("res://logica/aprendizaje/registro.gd")
 const PASOS := ["diagnostico", "ruta", "escenario", "post", "retest", "tablero"]
 
 static func estado(base: String, tecnico: int, ahora_real: int,
@@ -48,7 +49,8 @@ static func estado(base: String, tecnico: int, ahora_real: int,
 
 # La ruta contiene las microlecciones pendientes al terminar el paso.
 static func cerrar_paso(base: String, respaldo: String, tecnico: int, paso: String, ruta: Array,
-		completadas: int, ahora_real: int, consultar: Callable = Acceso.consultar) -> Dictionary:
+		completadas: int, ahora_real: int, consultar: Callable = Acceso.consultar,
+		intentos: Array = []) -> Dictionary:
 	var resultado := {"guardado": false, "respaldo": false}
 	var indice := PASOS.find(paso)
 	if indice < 0 or indice == PASOS.size() - 1 or completadas < 0:
@@ -58,17 +60,34 @@ static func cerrar_paso(base: String, respaldo: String, tecnico: int, paso: Stri
 		return resultado
 
 	var siguiente: String = PASOS[indice + 1]
-	var filas: Variant = consultar.call(base, """
+	var sql := """
 		INSERT INTO progreso (tecnico, paso_actual, ruta, microlecciones_hechas)
 		SELECT id, ?, ?, ? FROM tecnico WHERE id = ?
-			AND (EXISTS (SELECT 1 FROM progreso WHERE tecnico = ?) OR ? = 'diagnostico')
+			AND coalesce((SELECT paso_actual FROM progreso WHERE tecnico = ?), 'diagnostico') = ?
 		ON CONFLICT(tecnico) DO UPDATE SET paso_actual = excluded.paso_actual,
-			ruta = excluded.ruta, microlecciones_hechas = excluded.microlecciones_hechas
-		WHERE progreso.paso_actual = ?
-		RETURNING tecnico;
-	""", [siguiente, JSON.stringify(ruta), completadas, tecnico, tecnico, paso, paso])
-	if filas == null or filas.is_empty():
+			ruta = excluded.ruta, microlecciones_hechas = excluded.microlecciones_hechas;
+	"""
+	var parametros := [siguiente, JSON.stringify(ruta), completadas, tecnico, tecnico, paso]
+	# changes() enlaza las inserciones al único avance permitido para el técnico.
+	for intento in intentos:
+		if intento.is_empty():
+			return resultado
+		sql += Registro.INSERTAR_SI_AVANZO
+		parametros.append_array(intento)
+	var filas: Variant = consultar.call(base, "BEGIN IMMEDIATE;" + sql +
+		"COMMIT; SELECT changes() AS guardado;", parametros)
+	if filas == null or filas.is_empty() or filas[0].guardado != 1:
 		return resultado
 	resultado.guardado = true
 	resultado.respaldo = Esquema.respaldar(base, respaldo, consultar)
 	return resultado
+
+
+static func cerrar_escenario(base: String, tecnico: int, fin: String, ahora: int) -> Dictionary:
+	if fin != "resuelto":
+		return {}
+	var actual := estado(base, tecnico, ahora)
+	if actual.get("siguiente") != "escenario":
+		return {}
+	return cerrar_paso(base, base + ".respaldo.sqlite", tecnico, "escenario",
+		actual.ruta, actual.microlecciones_hechas, ahora)

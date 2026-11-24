@@ -5,11 +5,35 @@ const Leitner = preload("res://logica/aprendizaje/leitner.gd")
 
 static func post(banco: Dictionary, ids_pre: Array) -> Dictionary:
 	var plan := {"items": [], "avisos": [], "equivalente": true}
+	for cupo in cupos():
+		agregar_post(plan, banco.items, cupo[0], cupo[1], cupo[2], ids_pre)
+	return plan
+
+
+static func cupos() -> Array:
+	var previstos := []
 	for competencia in Banco.COMPETENCIAS:
 		for dificultad in ["media", "dificil"]:
-			agregar_post(plan, banco.items, competencia, "opcion-multiple", dificultad, ids_pre)
-	agregar_post(plan, banco.items, "seguridad-alto-voltaje", "accion-panel", "", ids_pre)
-	agregar_post(plan, banco.items, "diagnostico-fallas", "caso-diagnostico", "", ids_pre)
+			previstos.append([competencia, "opcion-multiple", dificultad])
+	previstos.append(["seguridad-alto-voltaje", "accion-panel", ""])
+	previstos.append(["diagnostico-fallas", "caso-diagnostico", ""])
+	return previstos
+
+
+static func reconstruir_post(filas: Array, ids_pre: Array) -> Dictionary:
+	var plan := {"items": [], "equivalente": filas.size() == cupos().size()}
+	var previstos := cupos()
+	var usados := ids_pre.duplicate()
+	for indice in range(filas.size()):
+		var fila: Dictionary = filas[indice]
+		plan.items.append({"id": fila.item, "version": fila.version_contenido,
+			"competencia": fila.competencia, "formato": fila.formato, "dificultad": fila.dificultad})
+		if indice < previstos.size():
+			var cupo: Array = previstos[indice]
+			if fila.item in usados or fila.competencia != cupo[0] or fila.formato != cupo[1] \
+					or (not cupo[2].is_empty() and fila.dificultad != cupo[2]):
+				plan.equivalente = false
+		usados.append(fila.item)
 	return plan
 
 

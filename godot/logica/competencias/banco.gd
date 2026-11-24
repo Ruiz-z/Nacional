@@ -1,5 +1,7 @@
 extends RefCounted
 
+const RutasContenido = preload("../rutas_contenido.gd")
+
 const COMPETENCIAS := {
 	"seguridad-alto-voltaje": "Seguridad de alto voltaje",
 	"sistema-electrico-bateria": "Sistema eléctrico y batería",
@@ -20,7 +22,8 @@ const FUENTES_PERMITIDAS := [
 ]
 
 
-static func cargar(ruta: String) -> Dictionary:
+static func cargar(ruta: String = "banco.json") -> Dictionary:
+	ruta = RutasContenido.resolver(ruta)
 	var archivo := FileAccess.open(ruta, FileAccess.READ)
 	if archivo == null:
 		return {"items": [], "avisos": [], "errores": ["%s: no se pudo abrir el banco." % ruta]}

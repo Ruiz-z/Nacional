@@ -2,6 +2,8 @@ extends Control
 
 signal paso_solicitado(paso: String, perfil: Dictionary)
 
+const Banco = preload("res://logica/competencias/banco.gd")
+const Escenario = preload("res://logica/simulador/escenario.gd")
 const Alias = preload("res://logica/flujo/alias.gd")
 const Recorrido = preload("res://logica/flujo/recorrido.gd")
 const Esquema = preload("res://logica/datos/esquema.gd")
@@ -9,11 +11,15 @@ const Conexion = preload("res://logica/entrada/conexion_panel.gd")
 const Tablero = preload("res://escenas/tablero.tscn")
 const Bus = preload("res://escenas/bus.tscn")
 const Demo = preload("res://escenas/modo_demo.tscn")
+const Diagnostico = preload("res://escenas/diagnostico.tscn")
+const Ruta = preload("res://escenas/ruta.tscn")
+const Evaluacion = preload("res://escenas/evaluacion.tscn")
 const NOMBRES := {"alias": "Elegir alias", "diagnostico": "Diagnóstico", "ruta": "Ruta",
 	"escenario": "Escenario", "post": "Post-test", "retest": "Retest", "tablero": "Tablero"}
 
 var base := "user://nacional.sqlite"
 var perfil := {}
+var banco_aprendizaje := {}
 var conexion := Conexion.new()
 var pantalla: Node
 var botones := {}
@@ -21,6 +27,9 @@ var botones := {}
 
 
 func _ready() -> void:
+	if "--verificar-contenido" in OS.get_cmdline_user_args():
+		verificar_contenido()
+		return
 	var disponible := Esquema.crear(base)
 	inicio.get_node("Alta").disabled = not disponible
 	inicio.get_node("Elegir").disabled = not disponible
@@ -39,6 +48,18 @@ func _ready() -> void:
 	inicio.get_node("Demo").grab_focus()
 	if not disponible:
 		inicio.get_node("Aviso").text = "No se pudo abrir la base local."
+
+
+func verificar_contenido() -> void:
+	var banco := Banco.cargar()
+	var escenario := Escenario.cargar(Escenario.AISLAMIENTO)
+	if not banco.errores.is_empty() or banco.items.is_empty() or not escenario.errores.is_empty():
+		printerr("No se pudo verificar el contenido. Banco: ", banco.errores,
+			" · Escenario: ", escenario.errores)
+		get_tree().quit(1)
+		return
+	print("OK: banco (", banco.items.size(), " ítems) y escenario ", escenario.escenario.id)
+	get_tree().quit(0)
 
 
 func _process(_delta: float) -> void:
@@ -63,7 +84,8 @@ func actualizar() -> void:
 		perfil.get("alias", "Sin alias"), NOMBRES[siguiente]]
 	inicio.get_node("Aviso").text = estado.get("aviso", "")
 	for paso in botones:
-		botones[paso].disabled = paso not in estado.get("habilitados", [])
+		botones[paso].disabled = paso not in estado.get("habilitados", []) \
+			and not (paso == "retest" and siguiente == "retest")
 
 
 func abrir_paso(paso: String) -> void:
@@ -74,9 +96,20 @@ func abrir_paso(paso: String) -> void:
 			abrir_bus(perfil.merged({"base": base}))
 		"tablero":
 			abrir_tablero({"base": base, "alias": perfil.alias})
-		_:
+		"diagnostico", "ruta", "post", "retest":
 			paso_solicitado.emit(paso, perfil.duplicate())
-			inicio.get_node("Aviso").text = "La pantalla de %s está pendiente." % NOMBRES[paso]
+			var recurso := {"diagnostico": Diagnostico, "ruta": Ruta}.get(paso, Evaluacion) as PackedScene
+			var actividad := recurso.instantiate()
+			actividad.actividad.base = base
+			actividad.actividad.perfil = perfil
+			actividad.actividad.paso = paso
+			actividad.banco = banco_aprendizaje
+			if paso in ["post", "retest"]:
+				actividad.get_node("Contenido/Titulo").text = NOMBRES[paso]
+			actividad.finalizada.connect($Marco/Volver.grab_focus)
+			abrir(actividad)
+			if actividad.item.is_empty():
+				$Marco/Volver.grab_focus()
 
 
 func abrir_demo() -> void:
@@ -96,6 +129,16 @@ func abrir_tablero(tecnico: Dictionary) -> void:
 
 func abrir_bus(tecnico: Dictionary) -> void:
 	var bus := Bus.instantiate()
+	if tecnico.base == base:
+		bus.decision_tomada.connect(func(_decision: Dictionary):
+			if bus.resultados_guardados:
+				var cierre := Recorrido.cerrar_escenario(base, tecnico.id, bus.motor.fin(),
+					int(Time.get_unix_time_from_system()))
+				if not cierre.is_empty():
+					if not cierre.guardado:
+						bus.lateral.get_node("Aviso").text += "\nNo se pudo guardar el avance."
+					elif not cierre.respaldo:
+						bus.lateral.get_node("Aviso").text += "\nSe guardó el avance, pero falta el respaldo.")
 	bus.conexion_panel = conexion
 	bus.tecnico = tecnico
 	abrir(bus)
@@ -121,6 +164,7 @@ func abrir(nueva: Node) -> void:
 
 func volver() -> void:
 	if is_instance_valid(pantalla):
+		$Marco.remove_child(pantalla)
 		pantalla.queue_free()
 		pantalla = null
 	$Marco.show()

@@ -1,5 +1,6 @@
 extends RefCounted
 
+const RutasContenido = preload("res://logica/rutas_contenido.gd")
 const Banco = preload("res://logica/competencias/banco.gd")
 const INACTIVO := {"disponible": false, "texto": "Asistente no disponible", "cita": ""}
 const SIN_RESPALDO := {"disponible": true, "texto": "no tengo esa información", "cita": ""}
@@ -15,7 +16,7 @@ var _fuentes: Array[Dictionary] = []
 func indexar(documentos: Array) -> bool:
 	var fuentes: Array[Dictionary] = []
 	for documento in documentos:
-		var archivo := FileAccess.open(documento.ruta, FileAccess.READ)
+		var archivo := FileAccess.open(RutasContenido.resolver(documento.ruta), FileAccess.READ)
 		var cita: String = documento.cita.strip_edges()
 		if archivo == null or cita.is_empty():
 			return false

@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://escenas/actividad_aprendizaje.gd" id="1"]
+
+[node name="ActividadAprendizaje" type="ScrollContainer"]
+horizontal_scroll_mode = 0
+follow_focus = true
+script = ExtResource("1")
+
+[node name="Contenido" type="VBoxContainer" parent="."]
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="Titulo" type="Label" parent="Contenido"]
+theme_override_font_sizes/font_size = 26
+
+[node name="Aviso" type="Label" parent="Contenido"]
+visible = false
+autowrap_mode = 3
+
+[node name="Detalle" type="Label" parent="Contenido"]
+autowrap_mode = 3
+
+[node name="Pregunta" type="Label" parent="Contenido"]
+autowrap_mode = 3
+
+[node name="Opciones" type="VBoxContainer" parent="Contenido"]
+
+[node name="Enviar" type="Button" parent="Contenido"]
+visible = false
+
+[node name="Reiniciar" type="Button" parent="Contenido"]
+visible = false
+text = "Borrar respuesta"
