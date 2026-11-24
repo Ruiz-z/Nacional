@@ -10,12 +10,12 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [ ] T-05 S+E — Prueba de humo serial de 30 min (plugin o puente Python) — Hecho cuando: un botón enciende un LED y se registra la decisión en `panel`.
 
 ## 1. competencias
-- [ ] T-06 S — Definir formato JSON del banco y 4 competencias con id (RF-1, 2) — Hecho cuando: archivo de ejemplo con campos comunes.
-- [ ] T-07 S — Cargador y validador: competencia, formato, fuente, versión, id duplicado, JSON corrupto (RF-3, 4) — Hecho cuando: pruebas rechazan cada caso con id y archivo.
-- [ ] T-08 S — Lista de fuentes permitidas y fuente `[MUESTRA]` (RF-4, 5) — Hecho cuando: prueba acepta `[MUESTRA]` solo en ítems no de seguridad.
-- [ ] T-09 S — Validador de `caso-diagnostico` (ruta ideal, tipos de error) y `accion-panel` (RF-10, 11) — Hecho cuando: un caso sin ruta ideal se rechaza.
-- [ ] T-10 S — Consulta por competencia y dificultad (RF-12, 13) — Hecho cuando: solo devuelve ítems válidos y expone la fuente.
-- [ ] T-11 S — `tools/validar_contenido` desde la terminal (RF-14) — Hecho cuando: imprime errores o "OK".
+- [x] T-06 S — Definir formato JSON del banco y 4 competencias con id (RF-1, 2) — Hecho cuando: archivo de ejemplo con campos comunes.
+- [x] T-07 S — Cargador y validador: competencia, formato, fuente, versión, id duplicado, JSON corrupto (RF-3, 4) — Hecho cuando: pruebas rechazan cada caso con id y archivo.
+- [x] T-08 S — Lista de fuentes permitidas y fuente `[MUESTRA]` (RF-4, 5) — Hecho cuando: prueba acepta `[MUESTRA]` solo en ítems no de seguridad.
+- [x] T-09 S — Validador de `caso-diagnostico` (ruta ideal, tipos de error) y `accion-panel` (RF-10, 11) — Hecho cuando: un caso sin ruta ideal se rechaza.
+- [x] T-10 S — Consulta por competencia y dificultad (RF-12, 13) — Hecho cuando: solo devuelve ítems válidos y expone la fuente.
+- [x] T-11 S — `tools/validar_contenido` desde la terminal (RF-14) — Hecho cuando: imprime errores o "OK".
 - [ ] T-12 S+E — Redactar 8 ítems de `seguridad-alto-voltaje` con fuente — Hecho cuando: pasan el validador.
 - [ ] T-13 S+E — Redactar 8 ítems de `sistema-electrico-bateria` — Hecho cuando: pasan el validador.
 - [ ] T-14 S+E — Redactar 8 ítems de `diagnostico-fallas` — Hecho cuando: pasan el validador.

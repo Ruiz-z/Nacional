@@ -1,0 +1,23 @@
+{
+  "competencias": [
+    {"id": "seguridad-alto-voltaje", "nombre": "Seguridad de alto voltaje"},
+    {"id": "sistema-electrico-bateria", "nombre": "Sistema eléctrico y batería"},
+    {"id": "diagnostico-fallas", "nombre": "Diagnóstico de fallas"},
+    {"id": "electronica-conectividad", "nombre": "Electrónica y conectividad"}
+  ],
+  "items": [
+    {
+      "id": "bateria-muestra-01",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "muestra": true,
+      "version": "1",
+      "pregunta": "¿Qué valor muestra el indicador de carga simulado si marca 50 %?",
+      "opciones": ["La mitad de la carga", "Carga completa", "Carga agotada"],
+      "correcta": 0
+    }
+  ]
+}
