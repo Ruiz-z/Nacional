@@ -24,20 +24,20 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [ ] T-17 S+E — Verificación cruzada de los ítems de seguridad contra su fuente — Hecho cuando: marca de revisión en cada ítem.
 
 ## 2. aprendizaje
-- [ ] T-18 S — Dominio: valor, peso por dificultad, práctica ×2, ventana de 10, tope 0–100 (RF-1, 3) — Hecho cuando: pruebas con valores calculados a mano.
-- [ ] T-19 S — Niveles y umbrales (RF-2) — Hecho cuando: 39, 40, 69, 70, 89, 90 caen en su nivel.
-- [ ] T-20 S — Falta crítica y brecha como intentos de valor 0 (peso 3 y 1) — Hecho cuando: prueba muestra el efecto sobre el dominio.
-- [ ] T-21 S — Diagnóstico: 8 preguntas, 2 prácticas y reemplazo por fácil (RF-4, 5) — Hecho cuando: prueba cubre acierto y fallo de la media.
-- [ ] T-22 S — Resultado del diagnóstico: dominio, nivel y confianza (RF-6) — Hecho cuando: confianza `baja` en competencias sin práctica.
-- [ ] T-23 S — Ruta: orden por (100−dominio)×peso, prioridad crítica, 2 brechas y desempate (RF-8, 11, 18) — Hecho cuando: pruebas de cada regla.
-- [ ] T-24 S — Sesión de 3 micro-lecciones y recálculo (RF-9, 10) — Hecho cuando: prueba de sesión completa.
-- [ ] T-25 S — Leitner de 3 cajas (1, 3 y 7 días) (RF-12) — Hecho cuando: pruebas de subida, bajada y vencimiento.
-- [ ] T-26 S — Reloj simulado: adelantar, persistir, no ir atrás, restablecer (RF-13) — Hecho cuando: prueba rechaza retroceso.
-- [ ] T-27 S — Variante de ítem repetido (RF-14) — Hecho cuando: prueba entrega variante si existe.
-- [ ] T-28 S — Pre, post y retest sin repetir ítems entre pre y post (RF-7, 15) — Hecho cuando: prueba de no solapamiento y aviso si faltan ítems.
-- [ ] T-29 S — Ganancia y retención con tope y "no calculable" (RF-16) — Hecho cuando: pruebas con post = 0 y retención > 100.
-- [ ] T-30 S — Registro de eventos con todos los campos (RF-19) — Hecho cuando: fila en `intento` con los campos del plan.
-- [ ] T-31 S — Indicadores hacia `tablero` (RF-20) — Hecho cuando: errores recurrentes con regla de 3 o más.
+- [x] T-18 S — Dominio: valor, peso por dificultad, práctica ×2, ventana de 10, tope 0–100 (RF-1, 3) — Hecho cuando: pruebas con valores calculados a mano.
+- [x] T-19 S — Niveles y umbrales (RF-2) — Hecho cuando: 39, 40, 69, 70, 89, 90 caen en su nivel.
+- [x] T-20 S — Falta crítica y brecha como intentos de valor 0 (peso 3 y 1) — Hecho cuando: prueba muestra el efecto sobre el dominio.
+- [x] T-21 S — Diagnóstico: 8 preguntas, 2 prácticas y reemplazo por fácil (RF-4, 5) — Hecho cuando: prueba cubre acierto y fallo de la media.
+- [x] T-22 S — Resultado del diagnóstico: dominio, nivel y confianza (RF-6) — Hecho cuando: confianza `baja` en competencias sin práctica.
+- [x] T-23 S — Ruta: orden por (100−dominio)×peso, prioridad crítica, 2 brechas y desempate (RF-8, 11, 18) — Hecho cuando: pruebas de cada regla.
+- [x] T-24 S — Sesión de 3 micro-lecciones y recálculo (RF-9, 10) — Hecho cuando: prueba de sesión completa.
+- [x] T-25 S — Leitner de 3 cajas (1, 3 y 7 días) (RF-12) — Hecho cuando: pruebas de subida, bajada y vencimiento.
+- [x] T-26 S — Reloj simulado: adelantar, persistir, no ir atrás, restablecer (RF-13) — Hecho cuando: prueba rechaza retroceso.
+- [x] T-27 S — Variante de ítem repetido (RF-14) — Hecho cuando: prueba entrega variante si existe.
+- [x] T-28 S — Pre, post y retest sin repetir ítems entre pre y post (RF-7, 15) — Hecho cuando: prueba de no solapamiento y aviso si faltan ítems.
+- [x] T-29 S — Ganancia y retención con tope y "no calculable" (RF-16) — Hecho cuando: pruebas con post = 0 y retención > 100.
+- [x] T-30 S — Registro de eventos con todos los campos (RF-19) — Hecho cuando: fila en `intento` con los campos del plan.
+- [x] T-31 S — Indicadores hacia `tablero` (RF-20) — Hecho cuando: errores recurrentes con regla de 3 o más.
 
 ## 3. simulador (motor)
 - [ ] T-32 S — Formato JSON de escenario y validador con archivo y campo (RF-1, 2) — Hecho cuando: pruebas de campos faltantes y estado imposible.
