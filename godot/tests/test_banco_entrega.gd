@@ -17,11 +17,10 @@ static func comprobar(base: String) -> bool:
 		return false
 	var escenario: Dictionary = Escenario.cargar("escenarios/modulo_auxiliar.json").escenario
 	var motor := Motor.new(escenario)
-	for id in ["medir_tp2", "diagnosticar_senal", "medir_tp1", "reportar_tp1_0",
-			"reportar_tp2_5", "diagnosticar_modulo"]:
-		motor.ejecutar(id, "teclado", 10)
-	motor.ejecutar("reconectar", "virtual", 10)
-	var conteo := {"medicion": 1, "interpretacion": 1}
+	for id in escenario.ruta_ideal:
+		motor.ejecutar(id, "virtual" if id == "reconectar" else "teclado", 10)
+	motor.registrar_diagnostico("modulo", "teclado", 10)
+	var conteo := {"medicion": 0, "interpretacion": 1}
 	if motor.resumen().errores_arnes != conteo or not Practica.guardar(base, 1, "T-Arnés", motor, 0):
 		return false
 	var perfil := Consultas.tecnico(base, "T-Arnés", Base.consultar)
@@ -29,8 +28,11 @@ static func comprobar(base: String) -> bool:
 	for intento in perfil.intentos:
 		if intento.tipo_error != null:
 			errores.append(intento.tipo_error)
-	return perfil.errores_arnes == conteo \
-		and errores == ["punto-de-medicion-incorrecto", "lectura-mal-interpretada"] \
+	var cierres: Array = perfil.eventos.filter(func(evento: Dictionary) -> bool:
+		return evento.accion == "diagnostico_final")
+	return cierres.size() == 1 and cierres[0].tipo_error == "lectura-mal-interpretada" \
+		and cierres[0].causa_elegida == "modulo" and perfil.errores_arnes == conteo \
+		and errores == ["lectura-mal-interpretada", "causa-equivocada"] \
 		and Dominio.calcular(perfil.intentos) == motor.puntaje() \
-		and perfil.eventos[0].punto_medido == "tp2" and perfil.eventos[0].lectura_mostrada == 5.0 \
-		and perfil.eventos[3]["lectura-reportada"] == "≈0 V" and perfil.eventos[3].fuente_falla == "virtual"
+		and perfil.eventos[0].punto_medido == "tp1" and perfil.eventos[0].lectura_mostrada == 0.0 \
+		and perfil.eventos[2]["lectura-reportada"] == "≈0 V" and perfil.eventos[2].fuente_falla == "virtual"

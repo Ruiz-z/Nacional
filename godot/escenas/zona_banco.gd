@@ -67,7 +67,7 @@ func _ready() -> void:
 		Vector3(0.19, 0.947, -0.68), Vector3(0.32, 0.055, 0.29), Color("#765039"))
 	caja(hoja, Vector3(0, 0.029, 0), Vector3(0.28, 0.012, 0.25), Color("#f6efdb"))
 	caja(hoja, Vector3(-0.122, 0.041, 0), Vector3(0.04, 0.017, 0.12), ACERO)
-	for renglon in range(3):
+	for renglon in range(2):
 		caja(hoja, Vector3(-0.065 + 0.048 * renglon, 0.036, 0), Vector3(0.004, 0.003, 0.17), Color("#808a8a"))
 	var conductor := pieza(self, "conductor_banco", "Conductor del arnés",
 		Vector3(0.09, 1.075, 0.065), Vector3(0.13, 0.15, 0.17), Color("#438fa9"))

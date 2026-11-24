@@ -75,7 +75,7 @@ static func recorrer_banco(bus: Node3D, arbol: SceneTree) -> bool:
 	if not comprobar_ayuda(bus, "Anota las lecturas en la hoja"):
 		return false
 	bus.abrir_menu(bus.zona_activa.piezas.hoja_diagnostico)
-	for numero in [1, 5, 7]:
+	for numero in [1, 5]:
 		Taller.tecla(bus, numero)
 	bus.hoja.guardar.pressed.emit()
 	if not comprobar_ayuda(bus, REPARAR) or bus.flashcard.visible:

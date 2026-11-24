@@ -149,6 +149,8 @@ func _input(evento: InputEvent) -> void:
 
 
 func nombre_accion(id: String) -> String:
+	if id == "diagnostico_final":
+		return "Diagnóstico final"
 	var acciones: Dictionary = escenario.get("acciones", {})
 	var recuperaciones: Dictionary = escenario.get("recuperaciones", {})
 	var regla: Dictionary = acciones.get(id, recuperaciones.get(id, {}))

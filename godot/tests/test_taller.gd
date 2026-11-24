@@ -160,7 +160,7 @@ static func probar_carrito(bus: Node3D, arbol: SceneTree, eventos: Array[Diction
 		return "El menú del carrito no empuñó un objeto de la bandeja."
 	for numero in range(1, 9):
 		Acciones.tecla(bus, numero)
-		if taller.mano != ids[numero - 1] or bus.jugador.id_mano != taller.mano 				or taller.espacios_hud[numero - 1].modulate != taller.GUIA:
+		if taller.mano != ids[numero - 1] or bus.jugador.id_mano != taller.mano 				or taller.espacios_hud[numero - 1].modulate != taller.COLOR_MANO:
 			return "El número %d no empuñó o resaltó el objeto." % numero
 	bus.jugador.ubicar(taller.carrito.global_position + Vector3.BACK * 3.1)
 	bus.actualizar_inventario()

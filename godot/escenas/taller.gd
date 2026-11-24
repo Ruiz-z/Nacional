@@ -16,7 +16,9 @@ const REPUESTOS := [
 const ROJO := Color("#9f302d")
 const CAUCHO := Color("#232830")
 const AMARILLO := Color("#e5a936")
-const GUIA := Color("#54f5e3")
+const GUIA := Color("#3FA9F5")
+const COLOR_MANO := Color("#54f5e3")
+const GUIA_TEXTO := Color("#9BD8FF")
 const LIMITE_SUPERFICIE := 6
 
 var inventario := Inventario.new()
@@ -31,7 +33,15 @@ var objetivo := ""
 var pieza_guia: Node3D
 var baliza: MeshInstance3D
 var contorno := StandardMaterial3D.new()
-var flecha: Label
+var contorno_cercano: StandardMaterial3D
+var flecha: Control
+var distancia_guia: Label
+var direccion_guia := Vector2.ZERO
+var mueble_guia: Node3D
+var mallas_guia: Array[MeshInstance3D] = []
+var espacio_guia := 0
+var tecla_guia: Label
+var recuadro_guia := StyleBoxFlat.new()
 var hud: HBoxContainer
 var espacios_hud: Array[Label] = []
 var superficies := {}
@@ -66,8 +76,23 @@ func _ready() -> void:
 		etiqueta(columna, grupo, 14)
 		for indice in Inventario.CAPACIDAD:
 			espacios_hud.append(etiqueta(columna, "", 14))
-	flecha = etiqueta(interfaz, "▲", 32)
-	flecha.modulate = GUIA
+	var columna_tecla := VBoxContainer.new()
+	hud.add_child(columna_tecla)
+	tecla_guia = etiqueta(columna_tecla, "", 14)
+	tecla_guia.modulate = GUIA_TEXTO
+	tecla_guia.hide()
+	recuadro_guia.bg_color = Color("#182c40")
+	recuadro_guia.border_color = GUIA
+	recuadro_guia.set_border_width_all(1)
+	recuadro_guia.content_margin_left = 4
+	recuadro_guia.content_margin_right = 4
+	flecha = Control.new()
+	flecha.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	interfaz.add_child(flecha)
+	distancia_guia = etiqueta(flecha, "", 14)
+	distancia_guia.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	distancia_guia.modulate = GUIA_TEXTO
+	flecha.draw.connect(dibujar_flecha)
 	flecha.hide()
 
 
@@ -441,7 +466,7 @@ func actualizar_hud(cerca_carrito: bool, visible_hud: bool) -> void:
 	if not cerca_carrito and mano in inventario.carrito:
 		mano = ""
 	hud.visible = visible_hud
-	var firma := [mano, inventario.cinturon, inventario.carrito, cerca_carrito]
+	var firma := [mano, inventario.cinturon, inventario.carrito, cerca_carrito, espacio_guia]
 	if firma == ultimo_inventario:
 		return
 	ultimo_inventario = firma.duplicate(true)
@@ -451,7 +476,14 @@ func actualizar_hud(cerca_carrito: bool, visible_hud: bool) -> void:
 		etiqueta_espacio.text = "%d %s" % [numero, Inventario.CATALOGO.get(id, {}).get("nombre", "—")]
 		etiqueta_espacio.modulate = Color("#98a2ad") if numero > 4 and not cerca_carrito else Color.WHITE
 		if not id.is_empty() and id == mano:
-			etiqueta_espacio.modulate = GUIA
+			etiqueta_espacio.modulate = COLOR_MANO
+		if numero == espacio_guia:
+			etiqueta_espacio.modulate = GUIA_TEXTO
+			etiqueta_espacio.add_theme_stylebox_override("normal", recuadro_guia)
+		else:
+			etiqueta_espacio.remove_theme_stylebox_override("normal")
+	tecla_guia.visible = espacio_guia > 0
+	tecla_guia.text = "Pulsa %d" % espacio_guia
 
 
 func nombres(ids: Array[String]) -> String:
@@ -462,7 +494,7 @@ func nombres(ids: Array[String]) -> String:
 
 
 func crear_guia() -> void:
-	baliza = estanteria.cilindro(self, Vector3.ZERO, 0.28, 2.1, Color(GUIA, 0.25), 16)
+	baliza = estanteria.cilindro(self, Vector3.ZERO, 0.28, 2.1, Color(GUIA, 0.10), 16)
 	var material := baliza.material_override as StandardMaterial3D
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -472,7 +504,13 @@ func crear_guia() -> void:
 	contorno.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	contorno.cull_mode = BaseMaterial3D.CULL_FRONT
 	contorno.grow = true
-	contorno.grow_amount = 0.005
+	contorno.grow_amount = 0.014
+	contorno.emission_enabled = true
+	contorno.emission = GUIA
+	contorno_cercano = contorno.duplicate() as StandardMaterial3D
+	contorno_cercano.no_depth_test = true
+	contorno_cercano.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	contorno_cercano.albedo_color = Color(GUIA, 0.14)
 	caducidad = Timer.new()
 	caducidad.one_shot = true
 	caducidad.wait_time = 30.0
@@ -488,62 +526,124 @@ func ubicacion(id: String) -> String:
 	return ubicaciones[mueble_de(id)]
 
 
-func senalar(id: String, pieza: Node3D = null) -> void:
-	if id == "multimetro" and mesa_banco != null and mueble_de(id) == mesa_banco:
-		pieza = mesa_banco.piezas.multimetro
-	apagar_guia()
-	objetivo = id
-	pieza_guia = pieza if pieza != null else objetos[id]
-	var forma := pieza_guia.get_node_or_null("Forma") if pieza == null else pieza_guia
-	for malla in forma.find_children("*", "MeshInstance3D", true, false):
-		malla.material_overlay = contorno
+func fila_cajon(id: String) -> int:
+	if not cajones_abiertos and mueble_de(id) == caja_roja:
+		return cajones.find(objetos[id].get_parent())
+	return -1
+
+
+func instruccion_tomar(id: String) -> String:
+	var fila := fila_cajon(id)
+	if fila < 0:
+		return "Toma " + Inventario.CATALOGO[id].nombre
+	var detalle := "de abajo" if fila == 0 else ("de arriba" if fila == cajones.size() - 1 else "del medio")
+	return "Abre el cajón %s · %s" % [detalle, Inventario.CATALOGO[id].nombre]
+
+
+func senalar(id: String, pieza: Node3D = null, manual := true, columna := true) -> void:
+	var mueble: Node3D
+	var fila := -1
 	if pieza == null:
-		var mueble := mueble_de(id)
-		baliza.position = to_local(mueble.global_position) + Vector3.UP * (alturas[mueble] + 1.02)
-	else:
-		baliza.position = to_local(pieza.global_position) + Vector3.UP * 1.02
-	baliza.show()
-	caducidad.start()
+		mueble = mueble_de(id)
+		fila = fila_cajon(id)
+		if fila >= 0:
+			pieza = caja_roja.piezas["cajon_taller_%d" % fila]
+		elif mueble == mesa_banco:
+			pieza = mesa_banco.piezas[id]
+		else:
+			pieza = objetos[id]
+	if objetivo != id or pieza_guia != pieza or mueble_guia != mueble:
+		apagar_guia()
+		objetivo = id
+		pieza_guia = pieza
+		mueble_guia = mueble
+		var forma := pieza.get_node_or_null("Forma")
+		if fila >= 0:
+			mallas_guia.append(cajones[fila].get_node("Cajon%d" % fila))
+			mallas_guia.append(cajones[fila].get_node("Tirador%d" % fila))
+		else:
+			for malla in (forma if forma != null else pieza).find_children("*", "MeshInstance3D", true, false):
+				if malla.visible:
+					mallas_guia.append(malla)
+		for malla in mallas_guia:
+			malla.material_overlay = contorno
+	if manual:
+		caducidad.start()
+	var material := baliza.material_override as StandardMaterial3D
+	var reforzada := not caducidad.is_stopped()
+	var color := Color(GUIA, 0.34 if reforzada else 0.10)
+	if material.albedo_color != color:
+		material.albedo_color = color
+	baliza.visible = columna or reforzada
+	colocar_baliza()
+
+
+func colocar_baliza() -> void:
+	var base := pieza_guia.global_position
+	if mueble_guia != null:
+		base = mueble_guia.global_position + Vector3.UP * alturas[mueble_guia]
+	baliza.global_position = base + Vector3.UP * 1.05
+
+
+func senalar_espacio(numero: int, manual: bool) -> void:
+	if espacio_guia != numero:
+		apagar_guia()
+		espacio_guia = numero
+	if manual:
+		caducidad.start()
 
 
 func apagar_guia() -> void:
-	if is_instance_valid(pieza_guia):
-		var forma := pieza_guia.get_node_or_null("Forma")
-		if forma == null:
-			forma = pieza_guia
-		for malla in forma.find_children("*", "MeshInstance3D", true, false):
+	for malla in mallas_guia:
+		if is_instance_valid(malla):
 			malla.material_overlay = null
+	mallas_guia.clear()
 	pieza_guia = null
+	mueble_guia = null
 	objetivo = ""
+	espacio_guia = 0
 	baliza.hide()
 	flecha.hide()
 	caducidad.stop()
 
 
 func actualizar_flecha(camara: Camera3D, mostrar: bool) -> void:
-	if pieza_guia == null or not mostrar:
+	if pieza_guia == null:
 		flecha.hide()
 		return
-	if objetos.has(objetivo) and pieza_guia.zona == carrito:
-		baliza.position = to_local(carrito.global_position) + Vector3.UP * (alturas[carrito] + 1.02)
 	var punto := pieza_guia.global_position
-	if not pieza_guia.visible:
-		punto = baliza.global_position - Vector3.UP
+	var distancia := camara.global_position.distance_to(punto)
+	var contorno_visible: Material = contorno_cercano if distancia < 3.0 else null
+	if contorno.next_pass != contorno_visible:
+		contorno.next_pass = contorno_visible
+	if not mostrar:
+		flecha.hide()
+		return
+	colocar_baliza()
 	var rect := camara.get_viewport().get_visible_rect()
-	if not camara.is_position_behind(punto) and rect.has_point(camara.unproject_position(punto)):
+	var detras := camara.is_position_behind(punto)
+	var proyectado := camara.unproject_position(punto)
+	if not detras and rect.has_point(proyectado):
 		flecha.hide()
 		return
 	var local := camara.to_local(punto)
-	var direccion := Vector2(local.x, -local.y)
-	if direccion.length_squared() < 0.0001:
-		direccion = Vector2.DOWN
-	direccion = direccion.normalized()
-	var margen := (rect.size / 2.0 - Vector2(65, 80)).max(Vector2.ONE)
-	var distancia := minf(margen.x / maxf(absf(direccion.x), 0.001), margen.y / maxf(absf(direccion.y), 0.001))
-	flecha.pivot_offset = flecha.size / 2.0
-	flecha.position = rect.get_center() + direccion * distancia - flecha.pivot_offset
-	flecha.rotation = direccion.angle() + PI / 2.0
+	var direccion := Vector2(local.x, -local.y) if detras else proyectado - rect.get_center()
+	direccion_guia = direccion.normalized() if direccion.length_squared() > 0.0001 else Vector2.RIGHT
+	var margen := (rect.size / 2.0 - Vector2(35, 48)).max(Vector2.ONE)
+	var borde := minf(margen.x / maxf(absf(direccion_guia.x), 0.001),
+		margen.y / maxf(absf(direccion_guia.y), 0.001))
+	flecha.position = rect.get_center() + direccion_guia * borde
+	distancia_guia.text = "%d m" % roundi(distancia)
+	distancia_guia.size = Vector2(56, 20)
+	distancia_guia.position = -direccion_guia * 26.0 - distancia_guia.size / 2.0
+	flecha.queue_redraw()
 	flecha.show()
+
+
+func dibujar_flecha() -> void:
+	var lado := direccion_guia.orthogonal() * 10.0
+	var base := -direccion_guia * 8.0
+	flecha.draw_colored_polygon(PackedVector2Array([direccion_guia * 14.0, base + lado, base - lado]), GUIA)
 
 
 func mover_carrito(jugador: Vector3, delta: float) -> void:

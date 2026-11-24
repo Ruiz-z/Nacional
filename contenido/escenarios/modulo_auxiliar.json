@@ -2,7 +2,7 @@
   "id": "modulo_auxiliar",
   "version": "1",
   "titulo": "[MUESTRA] Módulo auxiliar sin respuesta",
-  "descripcion": "[MUESTRA] Mide TP1 y TP2. Guarda las dos lecturas y confirma la causa de la falla.",
+  "descripcion": "[MUESTRA] Mide TP1 y TP2. Guarda las lecturas y reconecta el conductor.",
   "briefing": {
     "sintoma": "El módulo auxiliar no responde.",
     "objetivo": "Averigua si falla la alimentación o la señal.",
@@ -33,8 +33,7 @@
     {"clave": "tp1_reportado", "etiqueta": "Lectura de TP1 reportada"},
     {"clave": "tp2_reportado", "etiqueta": "Lectura de TP2 reportada"},
     {"claves": ["tp1_medido", "tp2_medido"], "mision": "Mide TP1 y TP2 con el multímetro", "ayuda": "Toma el multímetro de la mesa. Coloca la punta negra en TP0 y mide con la roja."},
-    {"claves": ["tp1_reportado", "tp2_reportado"], "mision": "Anota las lecturas en la hoja", "ayuda": "Abre la hoja de diagnóstico y selecciona las dos lecturas."},
-    {"clave": "diagnostico_registrado", "etiqueta": "Diagnóstico registrado", "mision": "Identifica la causa de la falla", "ayuda": "Elige la causa que indiquen tus lecturas y guarda la hoja."},
+    {"claves": ["tp1_reportado", "tp2_reportado"], "mision": "Anota las lecturas en la hoja", "ayuda": "Abre la hoja de diagnóstico y guarda las dos lecturas."},
     {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Repara: reconecta el conductor", "ayuda": "Elige Reconectar conductor en el banco. Confirma en el panel."}
   ],
   "estado": {
@@ -146,42 +145,6 @@
       "descripcion": "[MUESTRA] Registra Otra en TP2.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
-    "diagnosticar_alimentacion": {
-      "titulo": "Falla de alimentación",
-      "componente": "hoja_diagnostico",
-      "previas": {},
-      "efectos": {},
-      "competencia": "electronica-conectividad",
-      "criticidad": "normal",
-      "tipo_error": "",
-      "causa": "alimentacion",
-      "descripcion": "[MUESTRA] Confirma el diagnóstico: Falla de alimentación.",
-      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
-    },
-    "diagnosticar_senal": {
-      "titulo": "Falla de señal",
-      "componente": "hoja_diagnostico",
-      "previas": {},
-      "efectos": {},
-      "competencia": "electronica-conectividad",
-      "criticidad": "normal",
-      "tipo_error": "",
-      "causa": "senal",
-      "descripcion": "[MUESTRA] Confirma el diagnóstico: Falla de señal.",
-      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
-    },
-    "diagnosticar_modulo": {
-      "titulo": "Módulo dañado",
-      "componente": "hoja_diagnostico",
-      "previas": {},
-      "efectos": {},
-      "competencia": "electronica-conectividad",
-      "criticidad": "normal",
-      "tipo_error": "",
-      "causa": "modulo",
-      "descripcion": "[MUESTRA] Confirma el diagnóstico: Módulo dañado.",
-      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
-    },
     "reconectar": {
       "requiere": {
         "herramienta": "llave_ajustable"
@@ -216,10 +179,10 @@
     "medir_tp2",
     "reportar_tp1_0",
     "reportar_tp2_5",
-    "diagnosticar_alimentacion",
     "reconectar"
   ],
   "variante": {
+    "causa_correcta": "senal",
     "estado": {
       "s1_abierto": false,
       "s2_abierto": true
@@ -229,7 +192,6 @@
       "medir_tp2",
       "reportar_tp1_5",
       "reportar_tp2_0",
-      "diagnosticar_senal",
       "reconectar"
     ]
   }

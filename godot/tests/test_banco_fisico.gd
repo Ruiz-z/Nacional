@@ -77,7 +77,7 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	if not bus.zona_activa.estado_banco.text.contains("Fuente: banco físico"):
 		return false
 	bus.abrir_menu(bus.zona_activa.piezas.hoja_diagnostico)
-	for numero in [1, 5, 7]:
+	for numero in [1, 5]:
 		Taller.tecla(bus, numero)
 	for boton in [JOY_BUTTON_DPAD_DOWN, JOY_BUTTON_A]:
 		var evento := InputEventJoypadButton.new()
@@ -91,7 +91,7 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 		return false
 	bus.ejecutar("reconectar", "virtual")
 	if not bus.flashcard.visible or not bus.motor.fin().is_empty() \
-			or not bus.motor.mediciones.error_diagnostico.is_empty():
+			or bus.motor.mediciones.reportadas != {"tp1": "0", "tp2": "5"}:
 		return false
 	bus.flashcard.ok.pressed.emit()
 	bus.abrir_menu(bus.zona_activa.piezas.conductor_banco)

@@ -109,6 +109,9 @@ static func campo_invalido(datos: Dictionary) -> String:
 		return "ruta_ideal"
 	if datos.variante.has("ruta_ideal") and not ruta_valida(datos.variante.ruta_ideal, datos.acciones):
 		return "variante.ruta_ideal"
+	if datos.variante.has("causa_correcta") and (not datos.has("causa_correcta")
+			or datos.variante.causa_correcta not in datos.causas):
+		return "variante.causa_correcta"
 	var cambio: Variant = datos.variante.get("estado")
 	if not asignacion_valida(cambio, datos.estado) or cambio.is_empty() \
 			or cumple(datos.estado, cambio) \

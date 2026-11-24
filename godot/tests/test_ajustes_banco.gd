@@ -10,6 +10,13 @@ static func ejecutar() -> bool:
 		return false
 	if not Escenario.indicios_validos(datos):
 		return false
+	var misiones: Array = datos.indicios.filter(func(indicio: Dictionary) -> bool: return indicio.has("mision"))
+	if misiones.map(func(indicio: Dictionary) -> String: return indicio.mision) != [
+		"Mide TP1 y TP2 con el multímetro", "Anota las lecturas en la hoja", "Repara: reconecta el conductor"]:
+		return false
+	if datos.briefing.como != [
+		"Toma el multímetro de la mesa, mide TP1 y TP2 contra TP0, anota las lecturas en la hoja y repara."]:
+		return false
 	var mision: Dictionary = datos.indicios[4]
 	if Escenario.mision_cumplida(mision, {"tp1_medido": true}) \
 			or not Escenario.mision_cumplida(mision, {"tp1_medido": true, "tp2_medido": true}):

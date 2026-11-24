@@ -4,7 +4,6 @@ signal guardada(acciones: Array, fuente: String)
 signal cancelada
 
 const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
-const MenuVisual = preload("res://escenas/menu_pieza.gd")
 
 var bloques: Array[ButtonGroup] = []
 var opciones: Array[Button] = []
@@ -34,10 +33,6 @@ func _ready() -> void:
 	contenido.add_child(titulo)
 	for punto: String in Mediciones.PUNTOS:
 		agregar_bloque(contenido, "Lectura de " + punto.to_upper(), "reportar_" + punto + "_", Mediciones.OPCIONES)
-	var causas := {}
-	for causa in ["alimentacion", "senal", "modulo"]:
-		causas[causa] = MenuVisual.nombre_causa(causa)
-	agregar_bloque(contenido, "Causa de la falla", "diagnosticar_", causas)
 	aviso = Label.new()
 	aviso.add_theme_color_override("font_color", Color("#ffe1a1"))
 	contenido.add_child(aviso)
@@ -77,9 +72,9 @@ func agregar_bloque(contenido: VBoxContainer, titulo: String, prefijo: String, v
 		opciones.append(opcion)
 
 
-func abrir(reportadas: Dictionary, causa: String) -> void:
+func abrir(reportadas: Dictionary) -> void:
 	var previas := ["reportar_tp1_" + reportadas.get("tp1", ""),
-		"reportar_tp2_" + reportadas.get("tp2", ""), "diagnosticar_" + causa]
+		"reportar_tp2_" + reportadas.get("tp2", "")]
 	for opcion in opciones:
 		opcion.set_pressed_no_signal(opcion.get_meta("accion") in previas)
 	aviso.text = ""
@@ -94,7 +89,7 @@ func enviar(fuente: String) -> void:
 		var opcion := grupo.get_pressed_button()
 		if opcion == null:
 			var indice := acciones.size()
-			aviso.text = ["Elige la lectura de TP1.", "Elige la lectura de TP2.", "Elige la causa de la falla."][indice]
+			aviso.text = "Elige la lectura de %s." % Mediciones.PUNTOS[indice].to_upper()
 			opciones[indice * 3].grab_focus()
 			return
 		acciones.append(opcion.get_meta("accion"))
@@ -108,7 +103,7 @@ func _input(evento: InputEvent) -> void:
 	var foco := controles.find(get_viewport().gui_get_focus_owner())
 	var paso := 0
 	if evento is InputEventKey:
-		if evento.keycode >= KEY_1 and evento.keycode <= KEY_9:
+		if evento.keycode >= KEY_1 and evento.keycode < KEY_1 + opciones.size():
 			var opcion := opciones[evento.keycode - KEY_1]
 			opcion.button_pressed = true
 			opcion.grab_focus()
@@ -139,9 +134,9 @@ func _input(evento: InputEvent) -> void:
 		return
 	if paso != 0:
 		var destino := posmod(foco + paso, controles.size())
-		if paso == 3 and foco >= 6:
+		if paso == 3 and foco >= opciones.size() - 3:
 			destino = opciones.size()
 		elif paso == -3 and foco >= opciones.size():
-			destino = 6
+			destino = opciones.size() - 3
 		controles[destino].grab_focus()
 	get_viewport().set_input_as_handled()

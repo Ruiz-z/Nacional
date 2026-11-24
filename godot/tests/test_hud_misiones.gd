@@ -25,7 +25,7 @@ static func ejecutar() -> bool:
 
 static func recorrer(bus: Node3D, arbol: SceneTree) -> bool:
 	var hud: Control = bus.hud_mision
-	if hud.contador.text != "MISIÓN 1 DE 6" or hud.titulo.text != "Inspecciona la tapa del motor" 			or not fila(hud, "Toma Destornillador", false) or hud.progreso != [false, false, false, false, false, false]:
+	if hud.contador.text != "MISIÓN 1 DE 6" or hud.titulo.text != "Inspecciona la tapa del motor" 			or not fila(hud, "Abre el cajón de arriba · Destornillador", false) or hud.progreso != [false, false, false, false, false, false]:
 		return false
 	bus.taller.cambiar_cajones(true, true)
 	bus.abrir_menu(bus.taller.objetos.destornillador)

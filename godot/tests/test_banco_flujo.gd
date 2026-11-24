@@ -57,7 +57,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 		if bus.jugador.pantalla_multimetro.text != ("5.0 V" if variante else "0.0 V"):
 			return "La lectura de TP1 debe aparecer en el multímetro de mano."
 		Taller.cerrar_exitos(bus)
-		if bus.hud_mision.progreso != [false, false, false, false]:
+		if bus.hud_mision.progreso != [false, false, false]:
 			return "Medir un borne no debe cumplir la misión compuesta."
 		if not apuntar_y_pulsar(bus, "tp2") or not zona.pinzas.tp2.visible \
 				or not zona.pinzas.tp0.visible or zona.pinzas.tp1.visible:
@@ -66,23 +66,29 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 				or bus.indicador_puntas.text != "Punta negra: TP0 · Punta roja: TP2":
 			return "Falta la lectura en la mano o el indicador de puntas."
 		Taller.cerrar_exitos(bus)
-		if bus.hud_mision.progreso != [true, false, false, false]:
+		if bus.hud_mision.progreso != [true, false, false]:
 			return "Medir los dos bornes debe cumplir la misión compuesta."
 		if not apuntar_y_pulsar(bus, "mesa_banco") or not Taller.elegir(bus, "dejar") \
 				or not zona.piezas.multimetro.visible or zona.pinzas.tp0.visible or zona.pinzas.tp2.visible:
 			return "Dejar el multímetro debe devolverlo a la mesa y retirar las pinzas."
 		if not apuntar_y_pulsar(bus, "hoja_diagnostico") or not bus.hoja.visible:
 			return "El clic debe abrir la hoja."
+		if bus.hoja.bloques.size() != 2 or bus.hoja.opciones.size() != 6:
+			return "La hoja debe mostrar solo las seis opciones de lectura."
 		await arbol.process_frame
 		pulsar(bus.hoja.guardar)
 		if bus.hoja.aviso.text != "Elige la lectura de TP1." or not bus.motor.mediciones.reportadas.is_empty():
 			return "Una hoja incompleta debe mostrar el bloque pendiente sin guardar."
-		for opcion in ([1, 3, 7] if variante else [0, 4, 6]):
-			pulsar(bus.hoja.opciones[opcion])
+		pulsar(bus.hoja.opciones[1 if variante else 0])
 		pulsar(bus.hoja.guardar)
-		if bus.hoja.visible or not bus.motor.mediciones.error_diagnostico.is_empty() \
-				or bus.hud_mision.progreso != [true, true, true, false]:
-			return "Guardar la hoja debe registrar ambas lecturas y la causa."
+		if bus.hoja.aviso.text != "Elige la lectura de TP2." or not bus.motor.mediciones.reportadas.is_empty():
+			return "Guardar debe exigir también la lectura de TP2."
+		pulsar(bus.hoja.opciones[3 if variante else 4])
+		pulsar(bus.hoja.guardar)
+		var lecturas := {"tp1": "5", "tp2": "0"} if variante else {"tp1": "0", "tp2": "5"}
+		if bus.hoja.visible or bus.motor.mediciones.reportadas != lecturas \
+				or bus.hud_mision.progreso != [true, true, false]:
+			return "Guardar la hoja debe registrar ambas lecturas."
 		if not Taller.equipar(bus, "medir_tp1") or not Taller.equipar(bus, "reconectar") \
 				or not apuntar_y_pulsar(bus, "conductor_banco"):
 			return "El conductor debe abrir el menú de reparación."
@@ -94,7 +100,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 		pulsar(bus.panel.get_node("Confirmar"))
 		if bus.motor.fin() != "resuelto" or bus.motor.puntaje() != 100 or bus.interior.falla_auxiliar:
 			return "La confirmación del panel debe cerrar la falla."
-		if not Taller.cerrar_orden(bus):
+		if not Taller.cerrar_orden(bus, 2 if variante else 1):
 			return "Debe aparecer el cierre de la orden."
 		bus.reintentar()
 	return ""

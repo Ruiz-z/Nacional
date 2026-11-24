@@ -10,6 +10,7 @@ extends SceneTree
 # Cierre: [ancho alto] cierre [correcto|incorrecto] [--verificar]
 # Misiones: [ancho alto] mision [motor|faros|neumatico] [--verificar]
 # Inventario: [ancho alto] inventario [--verificar]
+# Guía automática: [ancho alto] guia-objeto|guia-inventario [--verificar]
 # Taller: [ancho alto] taller|baliza|elevador|elevador-guia|bajos [--verificar]
 # Banco: [ancho alto] banco-mesa|banco-puntas|hoja|orden [--verificar]
 # Alias del banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
@@ -48,10 +49,10 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito", "mision", "banco-mesa", "banco-puntas", "hoja", "orden"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "guia-objeto", "guia-inventario", "cierre", "resumen", "resumen-critico", "exito", "mision", "banco-mesa", "banco-puntas", "hoja", "orden"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
-	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito", "mision"]
+	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "guia-objeto", "guia-inventario", "cierre", "resumen", "resumen-critico", "exito", "mision"]
 	var zona := ""
 	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
@@ -129,9 +130,9 @@ func capturar() -> void:
 	elif vista == "mision":
 		var archivo := "neumatico_pinchado" if orden_mision == "neumatico" else orden_mision
 		escena.archivo = "escenarios/%s.json" % archivo
-	elif vista in ["baliza", "cierre", "resumen"]:
+	elif vista in ["baliza", "cierre", "resumen", "guia-objeto"]:
 		escena.archivo = "escenarios/faros.json"
-	elif vista in ["inventario", "exito"]:
+	elif vista in ["inventario", "exito", "guia-inventario"]:
 		escena.archivo = "escenarios/motor.json"
 	if not zona.is_empty():
 		if zona != "interior":
@@ -156,6 +157,10 @@ func capturar() -> void:
 		elif vista in ["cierre", "inventario", "resumen", "resumen-critico", "exito"]:
 			if not preparar_orden(escena, vista, respuesta):
 				fallar("La orden no corresponde a la vista solicitada.")
+				return
+		elif vista in ["guia-objeto", "guia-inventario"]:
+			if not preparar_guia(escena, vista):
+				fallar("El estado de la guía automática no corresponde a la vista.")
 				return
 		elif vista_taller:
 			if not preparar_taller(escena, vista):
@@ -363,7 +368,10 @@ func capturar() -> void:
 		if not vp.get_visible_rect().encloses(guardar.get_parent().get_global_rect()):
 			fallar("Los botones de la hoja quedan recortados.")
 			return
-	if vista == "inventario":
+	if vista == "guia-objeto" and not escena.taller.flecha.visible:
+		fallar("La flecha debe aparecer junto al borde del encuadre.")
+		return
+	if vista in ["inventario", "guia-inventario"]:
 		if not vp.get_visible_rect().encloses(escena.taller.hud.get_global_rect()):
 			fallar("El inventario debe caber en el encuadre.")
 			return
@@ -381,6 +389,41 @@ func capturar() -> void:
 		return
 	print("Guardado ", args[1], " ", img.get_size())
 	quit(0)
+
+
+func preparar_guia(escena: Node3D, vista: String) -> bool:
+	escena.jugador.set_physics_process(false)
+	escena.get_node("PistaControles").hide()
+	var taller: Node3D = escena.taller
+	if vista == "guia-objeto":
+		for id in ["inspeccionar", "medir_continuidad"]:
+			if not Acciones.equipar(escena, id):
+				return false
+			escena.ejecutar(id, "virtual")
+			Acciones.cerrar_exitos(escena)
+		Acciones.tecla(escena, taller.espacio_de("destornillador"))
+		var foco: Vector3 = taller.objetos.foco.global_position
+		escena.jugador.ubicar(Vector3(foco.x + 1.2, 0.12, foco.z + 5.4))
+		escena.apuntar_jugador(foco)
+		var camara: Camera3D = escena.jugador.camara
+		var giro: float = escena.jugador.rotation.y
+		var dentro := 0.0
+		var fuera := PI / 2.0
+		# Deja el centro del foco justo fuera del borde y la estantería a la vista.
+		for intento in 16:
+			var distancia := (dentro + fuera) * 0.5
+			escena.jugador.rotation.y = giro - distancia
+			if camara.is_position_behind(foco) or camara.unproject_position(foco).x < -1.0:
+				fuera = distancia
+			else:
+				dentro = distancia
+		escena.jugador.rotation.y = giro - fuera
+		return taller.pieza_guia == taller.objetos.foco and taller.baliza.visible
+	if not Acciones.equipar(escena, "inspeccionar"):
+		return false
+	Acciones.tecla(escena, 4)
+	escena.ubicar_jugador("tapa_motor")
+	return taller.espacio_guia == 1 and taller.tecla_guia.text == "Pulsa 1"
 
 
 func preparar_mision(escena: Node3D, orden: String) -> bool:
@@ -527,6 +570,8 @@ func preparar_taller(escena: Node3D, vista: String) -> bool:
 	var posicion := Vector3(-5.35, 0.35, -3.4)
 	var foco := Vector3(-5.35, 1.24, -8.02)
 	if vista == "baliza":
+		escena.guia_automatica = false
+		escena.taller.apagar_guia()
 		posicion = Vector3(-6.0, 0.35, -4.85)
 		foco = taller.estanteria.global_position + Vector3.UP * 1.85
 		escena.abrir_menu(taller.objetos.destornillador)

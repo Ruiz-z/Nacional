@@ -30,6 +30,7 @@ var _reflexion := ""
 var _reflexion_omitida := false
 var _diagnostico_final := {}
 var _causa_banco := ""
+var _lecturas_correctas := false
 
 
 func _init(escenario: Dictionary, lector_banco: Callable = Mediciones.leer_variante,
@@ -151,7 +152,9 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 			if mediciones != null:
 				if id == "reconectar" and not lectura_previa.is_empty():
 					_causa_banco = Mediciones.causa_de_lectura(lectura_previa)
-				decision.merge(mediciones.aplicar(id, _estado, regla.causa, lectura_previa), true)
+				decision.merge(mediciones.aplicar(id, _estado, lectura_previa), true)
+				if id == "reconectar":
+					_lecturas_correctas = decision.tipo_error.is_empty()
 				decision["fuente_falla"] = mediciones.fuente
 				if decision.motivo.is_empty():
 					decision.motivo = Mediciones.MOTIVOS.get(decision.tipo_error, "")
@@ -305,6 +308,9 @@ func reintentar() -> RefCounted:
 		variante.variante.estado = _escenario.estado.duplicate()
 		variante.ruta_ideal = _escenario.variante.get("ruta_ideal", _escenario.ruta_ideal)
 		variante.variante.ruta_ideal = _escenario.ruta_ideal
+		if _escenario.variante.has("causa_correcta"):
+			variante.causa_correcta = _escenario.variante.causa_correcta
+			variante.variante.causa_correcta = _escenario.causa_correcta
 		var nuevo_banco := get_script().new(variante, mediciones.leer, mediciones.fuente) as RefCounted
 		nuevo_banco._intento_anterior = metricas()
 		nuevo_banco.enviar_brecha = enviar_brecha
@@ -352,20 +358,29 @@ func pendiente_diagnostico() -> bool:
 
 
 func registrar_diagnostico(causa: String, fuente_entrada: String, tiempo_ms: int) -> Dictionary:
-	if not pendiente_diagnostico() or causa not in _escenario.causas 			or fuente_entrada not in ENTRADAS or tiempo_ms < 0:
+	if not pendiente_diagnostico() or causa not in _escenario.causas \
+			or fuente_entrada not in ENTRADAS or tiempo_ms < 0:
 		return {}
-	var real: String = _escenario.causa_correcta
-	if mediciones != null and not _causa_banco.is_empty():
-		real = _causa_banco
-	elif mediciones != null:
-		for id in _escenario.ruta_ideal:
-			if id.begins_with("diagnosticar_"):
-				real = _escenario.acciones[id].causa
-				break
+	var real: String = _causa_banco if not _causa_banco.is_empty() else _escenario.causa_correcta
 	_diagnostico_final = {"elegida": causa, "real": real, "correcto": causa == real,
 		"explicacion": _escenario.explicacion_causa[real], "fuente": _escenario.fuente,
 		"fuente_entrada": fuente_entrada, "tiempo_ms": tiempo_ms}
+	if _lecturas_correctas and causa != real:
+		var competencia: String = _escenario.acciones[_escenario.ruta_ideal[0]].competencia
+		var decision := evento_diagnostico(Mediciones.INTERPRETACION)
+		decision.merge({"competencia": competencia,
+			"motivo": Mediciones.MOTIVOS[Mediciones.INTERPRETACION], "recuperacion": false, "eventos": []})
+		puntuar(decision)
+		_decisiones.append(decision)
 	return _diagnostico_final.duplicate()
+
+
+func evento_diagnostico(tipo_error: String) -> Dictionary:
+	return {"accion": "diagnostico_final", "estado_antes": estado(), "estado_despues": estado(),
+		"causa_elegida": _diagnostico_final.elegida, "fuente_entrada": _diagnostico_final.fuente_entrada,
+		"tiempo_ms": _diagnostico_final.tiempo_ms, "fuente": _diagnostico_final.fuente,
+		"criticidad": "normal" if tipo_error.is_empty() else "leve",
+		"tipo_error": tipo_error, "aplicada": true}
 
 
 func resumen() -> Dictionary:
@@ -456,10 +471,10 @@ func resultados(reloj_sim: String) -> Dictionary:
 			"tipo_error": null if cierre.correcto else tipo_error,
 			"tiempo_ms": cierre.tiempo_ms, "fuente_entrada": cierre.fuente_entrada}, true)
 		intentos.append(intento)
-		eventos.append({"accion": "diagnostico_final", "escenario": _escenario.id, "reloj_sim": reloj_sim,
-			"estado_antes": estado(), "estado_despues": estado(), "causa_elegida": cierre.elegida,
-			"fuente_entrada": cierre.fuente_entrada, "tiempo_ms": cierre.tiempo_ms, "fuente": cierre.fuente,
-			"criticidad": "normal" if cierre.correcto else "leve", "tipo_error": tipo_error, "aplicada": true})
+		if not _lecturas_correctas or cierre.correcto:
+			var evento := evento_diagnostico(tipo_error)
+			evento.merge({"escenario": _escenario.id, "reloj_sim": reloj_sim})
+			eventos.append(evento)
 	return {"escenario": _escenario.id, "version_contenido": _escenario.version, "fin": _fin,
 		"puntaje": _puntaje, "por_competencia": por_competencia, "intentos": intentos,
 		"eventos": eventos, "errores": eventos.filter(es_error), "faltas": faltas(),

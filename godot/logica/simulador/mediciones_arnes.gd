@@ -3,14 +3,14 @@ extends RefCounted
 const Banco = preload("res://logica/simulador/banco_arnes.gd")
 const PUNTOS := ["tp1", "tp2"]
 const AVISO_NEGRA := "La punta negra va en TP0."
-const INDICIOS := ["tp1_medido", "tp2_medido", "tp1_reportado", "tp2_reportado", "diagnostico_registrado"]
+const INDICIOS := ["tp1_medido", "tp2_medido", "tp1_reportado", "tp2_reportado"]
 const OPCIONES := {"0": "≈0 V", "5": "≈5 V", "otra": "Otra"}
 const ERRORES_MEDICION := ["punto-de-medicion-incorrecto", "valor-fuera-de-rango", "paso-omitido"]
 const INTERPRETACION := "lectura-mal-interpretada"
 const MOTIVOS := {
 	"punto-de-medicion-incorrecto": "Mediste en otro punto. Revisa TP1 y TP2 con la punta negra en TP0.",
 	"valor-fuera-de-rango": "La lectura que anotaste no coincide. Compárala con el multímetro.",
-	"paso-omitido": "Faltó medir antes de reparar. Revisa TP1 y TP2.",
+	"paso-omitido": "Mide TP1 y TP2 y guarda ambas lecturas antes de reparar.",
 	INTERPRETACION: "La causa elegida no coincide con tus lecturas. Compáralas antes de elegir otra causa.",
 }
 
@@ -20,8 +20,6 @@ var fuente: String
 var leer: Callable
 var medidas := {}
 var reportadas := {}
-var diagnostico := ""
-var error_diagnostico := ""
 var punta_negra := ""
 var punta_roja := ""
 var pantalla := "—"
@@ -43,16 +41,13 @@ static func indicio_de_accion(id: String) -> String:
 		"medir", "reportar":
 			if campos.size() >= 2 and campos[1] in PUNTOS:
 				return campos[1] + ("_medido" if campos[0] == "medir" else "_reportado")
-		"diagnosticar":
-			return "diagnostico_registrado"
 	return ""
 
 
 func indicios() -> Dictionary:
 	var evidencia := reportadas if fuente == "banco" else medidas
 	return {"tp1_medido": evidencia.has("tp1"), "tp2_medido": evidencia.has("tp2"),
-		"tp1_reportado": reportadas.has("tp1"), "tp2_reportado": reportadas.has("tp2"),
-		"diagnostico_registrado": not diagnostico.is_empty()}
+		"tp1_reportado": reportadas.has("tp1"), "tp2_reportado": reportadas.has("tp2")}
 
 
 func puntas() -> Array[String]:
@@ -100,7 +95,7 @@ func tocar(punto: String) -> String:
 	return ""
 
 
-func aplicar(id: String, estado: Dictionary, causa: String, lectura_previa: Dictionary = {}) -> Dictionary:
+func aplicar(id: String, estado: Dictionary, lectura_previa: Dictionary = {}) -> Dictionary:
 	var campos := id.split("_")
 	match campos[0]:
 		"medir":
@@ -116,18 +111,8 @@ func aplicar(id: String, estado: Dictionary, causa: String, lectura_previa: Dict
 				return {}
 			reportadas[campos[1]] = campos[2]
 			return {"punto_reportado": campos[1], "lectura-reportada": OPCIONES[campos[2]]}
-		"diagnosticar":
-			diagnostico = causa
-			error_diagnostico = evaluar(estado)
-			return {"causa_elegida": causa, "tipo_error": error_diagnostico}
 		"reconectar":
-			var error := evaluar(estado, lectura_previa)
-			if medidas.is_empty() and (fuente != "banco" or reportadas.is_empty()):
-				error = "paso-omitido"
-			elif diagnostico.is_empty() and error.is_empty():
-				error = "paso-omitido"
-				return {"tipo_error": error, "motivo": "Faltó elegir la causa. Confirma tu diagnóstico antes de reparar."}
-			return {"tipo_error": "" if error == error_diagnostico else error}
+			return {"tipo_error": evaluar(estado, lectura_previa)}
 	return {}
 
 
@@ -136,20 +121,16 @@ static func causa_de_lectura(tensiones: Dictionary) -> String:
 
 
 func evaluar(estado: Dictionary, lectura_previa: Dictionary = {}) -> String:
-	var tensiones: Dictionary = leer.call(estado) if lectura_previa.is_empty() else lectura_previa
 	var evidencia := reportadas if fuente == "banco" else medidas
-	var causa := causa_de_lectura(tensiones)
-	var punto_falla := "tp1" if causa == "alimentacion" else "tp2"
-	if not evidencia.has(punto_falla):
-		return "punto-de-medicion-incorrecto"
+	if not evidencia.has_all(PUNTOS) or not reportadas.has_all(PUNTOS):
+		return "paso-omitido"
+	var tensiones: Dictionary = leer.call(estado) if lectura_previa.is_empty() else lectura_previa
 	for punto in PUNTOS:
-		var opcion: String = reportadas.get(punto, "")
-		if opcion not in ["0", "5"] or not evidencia.has(punto) \
+		var opcion: String = reportadas[punto]
+		if opcion not in ["0", "5"] \
 				or (fuente != "banco" and not Banco.coincide(opcion.to_float(), medidas[punto])) \
 				or not Banco.coincide(opcion.to_float(), tensiones[punto]):
 			return "valor-fuera-de-rango"
-	if not diagnostico.is_empty() and diagnostico != causa:
-		return INTERPRETACION
 	return ""
 
 
