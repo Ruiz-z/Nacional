@@ -16,11 +16,11 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [x] T-09 S — Validador de `caso-diagnostico` (ruta ideal, tipos de error) y `accion-panel` (RF-10, 11) — Hecho cuando: un caso sin ruta ideal se rechaza.
 - [x] T-10 S — Consulta por competencia y dificultad (RF-12, 13) — Hecho cuando: solo devuelve ítems válidos y expone la fuente.
 - [x] T-11 S — `tools/validar_contenido` desde la terminal (RF-14) — Hecho cuando: imprime errores o "OK".
-- [ ] T-12 S+E — Redactar 8 ítems de `seguridad-alto-voltaje` con fuente — Hecho cuando: pasan el validador.
-- [ ] T-13 S+E — Redactar 8 ítems de `sistema-electrico-bateria` — Hecho cuando: pasan el validador.
-- [ ] T-14 S+E — Redactar 8 ítems de `diagnostico-fallas` — Hecho cuando: pasan el validador.
-- [ ] T-15 S+E — Redactar 8 ítems de `electronica-conectividad` — Hecho cuando: pasan el validador.
-- [ ] T-16 S+E — Redactar 2 `caso-diagnostico` y 3 `accion-panel` — Hecho cuando: pasan el validador.
+- [x] T-12 S+E — Redactar 8 ítems de `seguridad-alto-voltaje` con fuente — Hecho cuando: pasan el validador.
+- [x] T-13 S+E — Redactar 8 ítems de `sistema-electrico-bateria` — Hecho cuando: pasan el validador.
+- [x] T-14 S+E — Redactar 8 ítems de `diagnostico-fallas` — Hecho cuando: pasan el validador.
+- [x] T-15 S+E — Redactar 8 ítems de `electronica-conectividad` — Hecho cuando: pasan el validador.
+- [x] T-16 S+E — Redactar 2 `caso-diagnostico` y 3 `accion-panel` — Hecho cuando: pasan el validador.
 - [ ] T-17 S+E — Verificación cruzada de los ítems de seguridad contra su fuente — Hecho cuando: marca de revisión en cada ítem.
 
 ## 2. aprendizaje
@@ -98,7 +98,7 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [x] T-77 S — Propuesta de escalabilidad con diagrama actual y objetivo (RF-2) — Hecho cuando: tres fases y riesgos.
 - [x] T-78 S — Nota de privacidad y contenido (RF-3) — Hecho cuando: declara alias, datos locales, fuentes y marcas.
 - [x] T-79 S — Guion de demo con plan B (RF-4) — Hecho cuando: 5 minutos medidos.
-- [ ] T-80 S — Exportar ejecutables Windows y Linux (RF-6) — Hecho cuando: corre en Linux; Windows probado o declarado no probado.
+- [ ] T-80 (exporta y arranca en Linux; falta ruta de contenido, T-88; Windows sin probar) S — Exportar ejecutables Windows y Linux (RF-6) — Hecho cuando: corre en Linux; Windows probado o declarado no probado.
 - [x] T-81 S — Lista de dependencias y versiones (RF-8) — Hecho cuando: incluida en el paquete.
 - [ ] T-82 S+E — Prueba de usabilidad con 2 ajenos y correcciones (RF-10, 11) — Hecho cuando: hallazgos con severidad y corregidos.
 - [ ] T-83 S+E — Checklist de los 6 entregables (RF-12) — Hecho cuando: sin pendientes.
@@ -111,3 +111,4 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [ ] T-85 S — Pantalla de diagnóstico: 8 preguntas y 2 tareas prácticas, con reemplazo por fácil (aprendizaje RF-4, 5, 6) — Hecho cuando: prueba de humo recorre el diagnóstico y guarda los intentos.
 - [ ] T-86 S — Pantalla de ruta y micro-lecciones: sesión de 3, fuente visible y recálculo (aprendizaje RF-8 a 10) — Hecho cuando: prueba de humo completa una sesión.
 - [ ] T-87 S — Pantalla de evaluación post-test y retest, con aviso si falta adelantar el reloj (aprendizaje RF-15; flujo RF-2, 3) — Hecho cuando: prueba de humo recorre post-test y retest con reloj adelantado.
+- [ ] T-88 S — Que el ejecutable exportado encuentre `contenido/` (junto al ejecutable o dentro del paquete) en vez de depender de la carpeta de trabajo — Hecho cuando: el binario de `build/linux/` ejecutado desde otra carpeta carga el banco y un escenario.
