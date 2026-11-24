@@ -35,6 +35,7 @@ func _ready() -> void:
 	inicio.get_node("Elegir").disabled = not disponible
 	inicio.get_node("Alta").pressed.connect(func(): seleccionar_alias(true))
 	inicio.get_node("Elegir").pressed.connect(func(): seleccionar_alias(false))
+	inicio.get_node("Alias").placeholder_text = "Ejemplo: T-0001"
 	inicio.get_node("Alias").text_submitted.connect(func(_texto: String): seleccionar_alias(false))
 	inicio.get_node("Demo").pressed.connect(abrir_demo)
 	$Marco/Volver.pressed.connect(volver)
