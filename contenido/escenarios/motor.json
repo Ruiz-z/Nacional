@@ -2,7 +2,7 @@
   "id": "motor",
   "version": "1",
   "titulo": "[MUESTRA] Alerta de temperatura del motor de tracción",
-  "descripcion": "[MUESTRA] Revisa el enfriamiento simulado del motor eléctrico. La referencia pública describe un motor de hasta 200 kW, transmisión automática de 2 velocidades y un ESS de 600 V con control automático de temperatura y BMS. Fuente: Volvo Buses, BZR Low Entry Eléctrico (página pública).",
+  "descripcion": "[MUESTRA] Revisa el circuito de refrigerante del motor. La ficha describe un motor de hasta 200 kW y una transmisión automática de 2 velocidades. El ESS de 600 V tiene control automático de temperatura y BMS. Fuente: Volvo Buses, BZR Low Entry Eléctrico (página pública).",
   "fuente": "Volvo Buses, BZR Low Entry Eléctrico (página pública)",
   "muestra": true,
   "zona": "motor",
@@ -14,14 +14,14 @@
   ],
   "causa_correcta": "abrazadera-floja",
   "explicacion_causa": {
-    "abrazadera-floja": "[MUESTRA] La abrazadera floja explica la alerta y el indicio en el circuito de refrigeración.",
-    "lectura-inconsistente": "[MUESTRA] La revisión física sí muestra un problema en el circuito de refrigeración."
+    "abrazadera-floja": "[MUESTRA] La alerta de temperatura se debe a la abrazadera floja del circuito de refrigerante.",
+    "lectura-inconsistente": "[MUESTRA] La revisión muestra un problema en el circuito de refrigerante."
   },
   "indicios": [
     {"clave": "inspeccionado", "etiqueta": "Tapa del motor inspeccionada", "ayuda": "Inspecciona la tapa del motor."},
     {"clave": "refrigerante_revisado", "etiqueta": "Circuito de refrigerante revisado", "ayuda": "Revisa el refrigerante en la bomba."},
     {"clave": "temperatura_medida", "etiqueta": "Temperatura medida", "ayuda": "Mide la temperatura en el monitor."},
-    {"clave": "bloqueo_confirmado", "etiqueta": "Bloqueo y etiquetado confirmados", "ayuda": "Activa Bloqueo y Etiquetado en el panel. Luego elige Bloquear y etiquetar en el inversor y confirma en el panel."},
+    {"clave": "bloqueo_confirmado", "etiqueta": "Bloqueo y etiquetado confirmados", "ayuda": "Activa Bloqueo y Etiquetado en el panel. Elige Bloquear y etiquetar en el inversor. Confirma en el panel."},
     {"clave": "abrazadera_ajustada", "etiqueta": "Abrazadera ajustada", "ayuda": "Elige Ajustar la abrazadera y confirma en el panel."},
     {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar la solución en el monitor de temperatura y confirma en el panel."}
   ],
@@ -62,7 +62,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Abrir la tapa del motor eléctrico",
+      "descripcion": "[MUESTRA] Abre la tapa del motor.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "revisar_refrigerante": {
@@ -82,7 +82,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Revisar el circuito de refrigerante simulado",
+      "descripcion": "[MUESTRA] Revisa el circuito de refrigerante.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "medir_temperatura": {
@@ -100,7 +100,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Leer temperatura: [MUESTRA] por encima del umbral simulado",
+      "descripcion": "[MUESTRA] La temperatura supera el límite del ejercicio [MUESTRA].",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "tocar_cables_naranja_sin_bloqueo": {
@@ -118,10 +118,10 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Revisar cables naranja del ESS de 600 V",
+      "descripcion": "[MUESTRA] Revisa los cables naranja del ESS de 600 V.",
       "fuente": "Volvo Buses, BZR Low Entry Eléctrico (página pública)",
       "seguridad_panel": "critica",
-      "explicacion_seguridad": "Falta crítica: se intentó tocar los cables naranja sin bloqueo y etiquetado activos. El ESS de referencia es de 600 V. Fuente: Volvo Buses, BZR Low Entry Eléctrico (página pública)."
+      "explicacion_seguridad": "Intentaste tocar los cables naranja sin activar Bloqueo y Etiquetado. Activa ambos en el panel antes de volver a intentarlo. El ESS de referencia es de 600 V. Fuente: Volvo Buses, BZR Low Entry Eléctrico (página pública)."
     },
     "bloquear_y_etiquetar": {
       "requiere": {
@@ -140,7 +140,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Activar bloqueo y etiquetado en el panel y confirmar",
+      "descripcion": "[MUESTRA] Activa Bloqueo y Etiquetado. Confirma en el panel.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "seguridad_panel": "previa",
       "explicacion_seguridad": "Activa ambos interruptores del panel y vuelve a confirmar."
@@ -165,7 +165,7 @@
       "criticidad": "leve",
       "tipo_error": "valor-fuera-de-rango",
       "causa": "",
-      "descripcion": "[MUESTRA] Aplicar apriete fuera del rango [MUESTRA]",
+      "descripcion": "[MUESTRA] Si aprietas fuera del rango del panel, dañas la abrazadera [MUESTRA].",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "seguridad_panel": "previa",
       "explicacion_seguridad": "Activa bloqueo y etiquetado en el panel."
@@ -189,7 +189,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "abrazadera-floja",
-      "descripcion": "[MUESTRA] Ajustar la abrazadera dentro del rango [MUESTRA]",
+      "descripcion": "[MUESTRA] Ajusta la abrazadera dentro del rango del panel [MUESTRA].",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "seguridad_panel": "previa",
       "explicacion_seguridad": "Activa bloqueo y etiquetado en el panel."
@@ -213,7 +213,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Confirmar que la alerta de temperatura se apagó",
+      "descripcion": "[MUESTRA] Comprueba que se apagó la alerta de temperatura.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     }
   },
@@ -224,7 +224,7 @@
       },
       "efectos": {},
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
-      "descripcion": "[MUESTRA] La abrazadera se dañó por apriete fuera de rango [MUESTRA].",
+      "descripcion": "[MUESTRA] Apretaste fuera del rango y dañaste la abrazadera. Cámbiala antes de volver a apretar [MUESTRA].",
       "recuperaciones": [
         "reponer_abrazadera"
       ]
@@ -248,7 +248,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Reponer la abrazadera de la maqueta",
+      "descripcion": "[MUESTRA] Coloca la abrazadera de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "seguridad_panel": "previa",
       "explicacion_seguridad": "Activa bloqueo y etiquetado en el panel.",
@@ -273,7 +273,7 @@
   ],
   "variante": {
     "estado": {
-      "aviso": "Alerta intermitente de temperatura"
+      "aviso": "La alerta de temperatura aparece y se apaga."
     }
   }
 }

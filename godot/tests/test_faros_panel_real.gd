@@ -50,7 +50,7 @@ static func recorrer(bus: Node3D, variante: String, arbol: SceneTree) -> bool:
 		"confirmacion_anticipada":
 			if not await paso(bus, "rele_faros", "confirmar_solucion", arbol, false) \
 					or not bus.flashcard.visible or bus.flashcard.titulo.text != "Aún no puedes hacerlo" \
-					or bus.flashcard.cuerpo.text != "Falta: Foco izquierdo repuesto" \
+					or bus.flashcard.cuerpo.text != "Antes de seguir, revisa lo que falta: Foco izquierdo repuesto. Elige Cambiar el foco en el faro izquierdo. Confirma en el panel." \
 					or not comprobar_indicios(bus, 2):
 				return false
 			bus.flashcard.ok.pressed.emit()
@@ -86,7 +86,7 @@ static func paso(bus: Node3D, pieza: String, id: String, arbol: SceneTree, aplic
 
 
 static func comprobar_indicios(bus: Node3D, completados: int) -> bool:
-	var lineas := PackedStringArray()
+	var lineas := PackedStringArray(["Ejemplo didáctico", "Pasos"])
 	for indice in range(INDICIOS.size()):
 		lineas.append(("[x] " if indice < completados else "[ ] ") + INDICIOS[indice])
 	return bus.lateral.get_node("Indicios").text == "\n".join(lineas)

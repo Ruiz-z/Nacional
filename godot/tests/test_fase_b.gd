@@ -133,7 +133,7 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 			or falta.fuente != Motor.FUENTE_ELEVADOR or not falta.motivo.contains("soportes"):
 		return false
 	if not bus.flashcard.visible or bus.flashcard.titulo.text != "Falta crítica" \
-			or not bus.flashcard.fuente.text.contains(Motor.FUENTE_ELEVADOR) or bus.resumen.visible:
+			or bus.flashcard.fuente.text != "Fuente: ejemplo didáctico, sin fuente oficial" or bus.resumen.visible:
 		return false
 	bus.flashcard.ok.pressed.emit()
 	if not bus.resumen.visible:

@@ -64,17 +64,17 @@ func faltas() -> Array:
 func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dictionary = {},
 		lectura_previa: Dictionary = {}) -> Dictionary:
 	if not _fin.is_empty():
-		return rechazo("El escenario ya terminó.")
+		return rechazo("La práctica ya terminó. Abre otra orden o vuelve a intentarla.")
 	if fuente_entrada not in ENTRADAS or tiempo_ms < 0:
-		return rechazo("La fuente de entrada o el tiempo no es válido.")
+		return rechazo("No se recibió el paso. Intenta de nuevo.")
 	var recuperacion: bool = _escenario.recuperaciones.has(id)
 	var reglas: Dictionary = recuperaciones_disponibles() if recuperacion else _escenario.acciones
 	var regla: Dictionary = reglas.get(id, {})
 	if regla.is_empty():
-		return rechazo("La acción no está disponible.")
+		return rechazo("Ese paso aún no está disponible. Revisa la ayuda de la orden.")
 	if fuente_entrada == "banco" and (mediciones == null or id != "reconectar"
 			or mediciones.fuente != "banco" or lectura_previa.is_empty()):
-		return rechazo("Falta la verificación del banco.")
+		return rechazo("No se pudo comprobar la reparación. Revisa la conexión del banco.")
 	if mediciones != null and regla.get("requiere_panel", false):
 		if mediciones.fuente == "banco" and fuente_entrada != "banco":
 			return rechazo("Cierra el conductor abierto en el banco físico.")
@@ -97,8 +97,7 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 		if _estado[campo] != regla.previas[campo]:
 			faltantes[campo] = regla.previas[campo]
 	if not faltantes.is_empty():
-		var campo: String = faltantes.keys()[0]
-		decision.motivo = "Se requiere %s = %s." % [campo, faltantes[campo]]
+		decision.motivo = "Intentaste hacer este paso antes de tiempo. Revisa el siguiente paso de la orden."
 	var seguridad: String = regla.get("seguridad_panel", "")
 	if not seguridad.is_empty() and not (controles.get("bloqueo", false) == true
 			and controles.get("etiquetado", false) == true):
@@ -111,7 +110,7 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 		decision.criticidad = "critica"
 		decision.tipo_error = "accion-insegura"
 		decision.fuente = FUENTE_ELEVADOR
-		decision.motivo = "Falta crítica: se intentó trabajar en los bajos sin ambos soportes trabados. " + FUENTE_ELEVADOR
+		decision.motivo = "Intentaste trabajar en los bajos sin trabar ambos soportes. Trábalos antes de volver a trabajar ahí. " + FUENTE_ELEVADOR
 	if decision.criticidad == "critica":
 		_fin = "falta-critica"
 		_puntaje = 0
@@ -131,11 +130,11 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 			if not error.is_empty():
 				decision.tipo_error = error.tipo_error
 				decision.criticidad = "leve"
-				decision.motivo = "[MUESTRA] Torque fuera del rango de la escala del panel."
+				decision.motivo = "[MUESTRA] El apriete quedó fuera de rango. Ajusta la perilla al rango del panel."
 				efectos = rango.efectos_fuera
 		var cambio := activar_eventos(_estado, _estado.merged(efectos, true))
 		if cambio.is_empty():
-			decision.motivo = "La acción produciría un estado imposible."
+			decision.motivo = "No puedes hacer ese paso así. Revisa el orden de los pasos y vuelve a intentarlo."
 		else:
 			if mediciones != null:
 				if id == "reconectar" and not lectura_previa.is_empty():

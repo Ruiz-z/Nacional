@@ -1297,7 +1297,7 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_outline_color = Color(0.04, 0.06, 0.08, 1)
 theme_override_constants/outline_size = 5
-text = "Números 1 a 8: elegir herramienta · Tab · Cursor libre\n← / →, rueda o L / R · Elegir objeto     G / Y · Guía"
+text = "1 a 8 · Elige una herramienta    Tab · Libera el cursor\n← / →, rueda o L / R · Elige un objeto    G / Y · Abre la ayuda"
 
 [node name="Mira" type="Label" parent="."]
 anchor_left = 0.5

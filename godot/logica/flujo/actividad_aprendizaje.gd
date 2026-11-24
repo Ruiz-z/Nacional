@@ -35,12 +35,12 @@ func preparar(banco: Dictionary, ahora: int) -> bool:
 		banco = Banco.cargar()
 	var reloj := Reloj.estado(base, perfil.id, ahora)
 	if reloj.is_empty():
-		avisos.append("No se pudo leer el reloj.")
+		avisos.append("No se pudo consultar la hora. Vuelve al menú e inténtalo otra vez.")
 		return false
 	reloj_simulado = reloj.simulado
 	var filas: Variant = Registro.leer(base, perfil.alias)
 	if filas == null:
-		avisos.append("No se pudieron leer los intentos anteriores.")
+		avisos.append("No se pudieron abrir tus intentos anteriores. Vuelve al menú e inténtalo otra vez.")
 		return false
 	historial = filas
 	ruta = estado.ruta
@@ -57,7 +57,7 @@ func preparar(banco: Dictionary, ahora: int) -> bool:
 		"retest":
 			var post := historial.filter(func(fila: Dictionary) -> bool: return fila.momento == "post")
 			if post.is_empty():
-				avisos.append("No se pudo recuperar el post-test.")
+				avisos.append("No se pudo abrir tu evaluación anterior. Vuelve al menú e inténtalo otra vez.")
 				return false
 			var ultima_fecha: String = post.map(func(fila: Dictionary) -> String: return fila.reloj_sim).max()
 			var fecha := Time.get_unix_time_from_datetime_string(ultima_fecha.trim_suffix("Z"))
@@ -67,11 +67,10 @@ func preparar(banco: Dictionary, ahora: int) -> bool:
 		items = plan.items
 	avisos.assign(plan.avisos)
 	if not plan.get("equivalente", true):
-		avisos.push_front("Evaluación con ítems no equivalentes.")
+		avisos.push_front("Las preguntas cambiaron. Tómalo en cuenta al comparar tus resultados.")
 	var cantidad := 6 if paso == "ruta" else Evaluacion.cupos().size()
 	if items.size() != cantidad:
-		avisos.append("El banco aún no permite completar este paso.")
-		avisos.append_array(banco.get("errores", []))
+		avisos.append("Faltan preguntas para abrir esta actividad. Vuelve al menú y elige otra actividad.")
 		return false
 	return true
 

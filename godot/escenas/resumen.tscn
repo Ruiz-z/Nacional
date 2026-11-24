@@ -22,7 +22,7 @@ text = "Resumen de práctica"
 [node name="Vacio" type="Label" parent="."]
 autowrap_mode = 3
 theme_type_variation = &"Chip"
-text = "Aquí podrás revisar tus decisiones y comparar intentos al terminar una práctica."
+text = "Termina una práctica para revisar tus decisiones y comparar intentos."
 
 [node name="Detalle" type="RichTextLabel" parent="."]
 visible = false
@@ -40,13 +40,13 @@ custom_minimum_size = Vector2(0, 52)
 
 [node name="Guardar" type="Button" parent="."]
 custom_minimum_size = Vector2(0, 52)
-text = "Guardar reflexión y ver ruta ideal"
+text = "Guardar respuesta y ver los pasos"
 autowrap_mode = 3
 visible = false
 theme_type_variation = &"Primario"
 
 [node name="Reintentar" type="Button" parent="."]
 custom_minimum_size = Vector2(0, 52)
-text = "Reintentar con variante"
+text = "Volver a intentar con otra falla"
 visible = false
 theme_type_variation = &"Primario"

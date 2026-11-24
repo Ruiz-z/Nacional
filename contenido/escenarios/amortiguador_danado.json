@@ -2,7 +2,7 @@
   "id": "amortiguador_danado",
   "version": "1",
   "titulo": "[MUESTRA] Amortiguador dañado",
-  "descripcion": "[MUESTRA] La carrocería se inclina y se oye ruido en el eje trasero derecho.",
+  "descripcion": "[MUESTRA] La carrocería se inclina. Se oye un golpeteo del lado trasero derecho.",
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "bajos",
@@ -13,27 +13,27 @@
   ],
   "causa_correcta": "Amortiguador dañado",
   "explicacion_causa": {
-    "Amortiguador dañado": "[MUESTRA] La inspección de la pieza revela el daño en el amortiguador."
+    "Amortiguador dañado": "[MUESTRA] Al revisar el amortiguador trasero derecho, encontraste el daño."
   },
   "indicios": [
     {
       "clave": "revisar_amortiguador",
       "etiqueta": "Revisar inclinación y ruido",
-      "ayuda": "Inspecciona el amortiguador trasero derecho para relacionar la inclinación y el ruido."
+      "ayuda": "Revisa si el amortiguador trasero derecho explica la inclinación y el golpeteo."
     },
     {
       "clave": "reponer_amortiguador",
       "etiqueta": "Reponer el amortiguador",
-      "ayuda": "Lleva el amortiguador de repuesto y confirma la reposición en el panel."
+      "ayuda": "Lleva el amortiguador de repuesto. Confirma el cambio en el panel."
     },
     {
       "clave": "resuelto",
       "etiqueta": "Cerrar la orden",
-      "ayuda": "Destraba ambos soportes, despeja los bajos, baja el autobús y cierra la orden en la consola."
+      "ayuda": "Destraba ambos soportes y despeja los bajos. Baja el autobús y cierra la orden en la consola."
     }
   ],
   "estado": {
-    "aviso": "La carrocería se inclina y se oye ruido en el eje trasero derecho.",
+    "aviso": "La carrocería se inclina. Se oye un golpeteo del lado trasero derecho.",
     "revisar_amortiguador": false,
     "reponer_amortiguador": false,
     "resuelto": false
@@ -56,7 +56,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Inclinación y golpeteo asociados al amortiguador trasero derecho",
+      "descripcion": "[MUESTRA] El amortiguador trasero derecho está dañado. La carrocería se inclina y golpetea.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false
     },
@@ -74,7 +74,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "Amortiguador dañado",
-      "descripcion": "[MUESTRA] Reponer el amortiguador",
+      "descripcion": "[MUESTRA] Coloca el amortiguador de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -98,7 +98,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Cerrar la orden",
+      "descripcion": "[MUESTRA] Cierra la orden desde la consola.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false
     }
@@ -118,7 +118,7 @@
   ],
   "variante": {
     "estado": {
-      "aviso": "La inclinación y el ruido aparecen al mover la carrocería en la revisión."
+      "aviso": "Cuando mueves la carrocería, se inclina y se oye un golpeteo."
     }
   }
 }

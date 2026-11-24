@@ -105,10 +105,10 @@ func lectura_pieza(componente: String) -> String:
 		"motor_traccion":
 			return "Motor de hasta 200 kW · Transmisión automática de 2 velocidades\n" + FUENTE
 		"inversor_motor":
-			return "ESS de 600 V · BMS que supervisa el estado de las baterías\n" + FUENTE
+			return "ESS de 600 V · BMS que vigila las baterías\n" + FUENTE
 		"monitor_temperatura":
 			return "[MUESTRA] %s\nESS con control automático de temperatura\n%s" % [
 				aviso if not aviso.is_empty() else lectura, FUENTE]
 		"abrazadera_motor":
-			return "[MUESTRA] Rango de apriete simulado"
+			return "[MUESTRA] Rango de apriete del panel"
 	return super.lectura_pieza(componente)

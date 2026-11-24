@@ -27,6 +27,11 @@ size_flags_horizontal = 3
 [node name="Estado" type="Label" parent="Centro/Tarjeta/Contenido/Cabecera"]
 size_flags_vertical = 4
 
+[node name="Marca" type="Label" parent="Centro/Tarjeta/Contenido"]
+visible = false
+theme_type_variation = &"Secundario"
+theme_override_font_sizes/font_size = 14
+
 [node name="Lectura" type="Label" parent="Centro/Tarjeta/Contenido"]
 theme_type_variation = &"Metadato"
 autowrap_mode = 3
@@ -56,7 +61,7 @@ text = "Acciones"
 theme_override_font_sizes/font_size = 18
 
 [node name="SinAcciones" type="Label" parent="Centro/Tarjeta/Contenido"]
-text = "No hay acciones disponibles para esta pieza."
+text = "Por ahora no puedes hacer nada con esta pieza."
 theme_type_variation = &"Secundario"
 
 [node name="Lista" type="ScrollContainer" parent="Centro/Tarjeta/Contenido"]

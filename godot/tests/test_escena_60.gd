@@ -31,7 +31,7 @@ static func ejecutar() -> bool:
 	correcto = correcto and resumen.visible and not resumen.get_node("Reintentar").visible
 	resumen.get_node("Reflexion").text = "Revisaría el aviso"
 	resumen.get_node("Guardar").pressed.emit()
-	correcto = correcto and resumen.get_node("Detalle").text.contains("Ruta ideal")
+	correcto = correcto and resumen.get_node("Detalle").text.contains("Pasos para resolver la falla")
 	resumen.get_node("Reintentar").pressed.emit()
 	correcto = correcto and not resumen.visible and bus.motor.fin().is_empty() \
 		and gabinete.abierta == bus.motor.estado().inspeccionado \

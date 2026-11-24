@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const TextoLimpio = preload("res://logica/texto_limpio.gd")
+
 signal abierta
 signal confirmada(aviso: Dictionary)
 signal terminada
@@ -61,11 +63,16 @@ func mostrar_primera() -> void:
 	chip.add_theme_stylebox_override("normal", fondo)
 	chip.add_theme_color_override("font_color", estilo[2])
 	chip.text = estilo[0]
-	titulo.text = aviso.titulo if not aviso.titulo.is_empty() else estilo[0].capitalize()
-	cuerpo.text = aviso.texto
-	donde.text = "Dónde está: " + aviso.donde
+	titulo.text = TextoLimpio.limpiar(aviso.titulo).texto if not aviso.titulo.is_empty() else estilo[0].capitalize()
+	cuerpo.text = TextoLimpio.limpiar(aviso.texto).texto
+	var textos := [aviso.titulo, aviso.texto, aviso.donde, aviso.fuente, aviso.get("marca", "")]
+	textos.append_array(aviso.get("opciones", []))
+	var marca: String = TextoLimpio.limpiar("\n".join(textos)).etiqueta
+	%Marca.text = marca
+	%Marca.visible = not marca.is_empty()
+	donde.text = "Dónde está: " + TextoLimpio.limpiar(aviso.donde).texto
 	donde.visible = not aviso.donde.is_empty()
-	fuente.text = "Fuente: " + aviso.fuente
+	fuente.text = "Fuente: " + TextoLimpio.fuente(aviso.fuente)
 	fuente.visible = not aviso.fuente.is_empty()
 	mostrar_contador()
 	for boton in opciones:
@@ -76,7 +83,7 @@ func mostrar_primera() -> void:
 	for numero in nombres.size():
 		var boton := Button.new()
 		boton.custom_minimum_size.y = 44
-		boton.text = "%d · %s" % [numero + 1, nombres[numero]]
+		boton.text = "%d · %s" % [numero + 1, TextoLimpio.limpiar(nombres[numero]).texto]
 		boton.pressed.connect(func(): opcion_elegida.emit(numero, "teclado"))
 		ok.get_parent().add_child(boton)
 		opciones.append(boton)

@@ -62,9 +62,9 @@ func mostrar(listado: Dictionary) -> void:
 	var aviso := $Centro/Columna/Aviso
 	aviso.text = ""
 	if listado.ordenes.is_empty():
-		aviso.text = "No hay órdenes de servicio disponibles."
+		aviso.text = "No hay órdenes disponibles. Vuelve al menú y elige otra actividad."
 	elif not listado.errores.is_empty():
-		aviso.text = "Algunas órdenes no se pudieron cargar."
+		aviso.text = "Algunas órdenes no abrieron. Elige una de la lista."
 	aviso.visible = not aviso.text.is_empty()
 
 
@@ -72,7 +72,7 @@ func crear_tarjeta(orden: Dictionary, etiqueta: String) -> Button:
 	var tarjeta := Button.new()
 	tarjeta.theme_type_variation = &"BotonOrden"
 	tarjeta.text = "%s\n%s · Dificultad %s\n%s" % [
-		orden.titulo, ZONAS.get(orden.zona, orden.zona),
+		orden.titulo + ("\n" + orden.marca if not orden.get("marca", "").is_empty() else ""), ZONAS.get(orden.zona, orden.zona),
 		DIFICULTADES.get(orden.dificultad, orden.dificultad), orden.competencia]
 	tarjeta.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	tarjeta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

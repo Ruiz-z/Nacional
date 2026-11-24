@@ -68,7 +68,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 		return "Falta la opción de cambiar el foco."
 	if bus.accion_pendiente != "" or eventos.size() != 2 or bus.motor.puntaje() != puntaje \
 			or not bus.flashcard.visible or bus.flashcard.titulo.text != "Te falta algo" \
-			or bus.flashcard.cuerpo.text != "Necesitas: Foco de repuesto" \
+			or bus.flashcard.cuerpo.text != "Toma lo que te falta: Foco de repuesto" \
 			or bus.flashcard.donde.text != "Dónde está: la estantería de piezas, a la izquierda de la mesa":
 		return "El rechazo por inventario no explicó el faltante o afectó la orden."
 	if taller.baliza.visible:
@@ -161,7 +161,7 @@ static func probar_carrito(bus: Node3D, arbol: SceneTree, eventos: Array[Diction
 	bus.jugador.ubicar(taller.carrito.global_position + Vector3.BACK * 3.1)
 	bus.actualizar_inventario()
 	Acciones.tecla(bus, 5)
-	if not taller.mano.is_empty() or bus.resultado.text != "El carrito está lejos" 			or taller.espacios_hud[4].modulate == Color.WHITE:
+	if not taller.mano.is_empty() or bus.resultado.text != "El carrito está lejos. Acércate para tomar lo que necesitas." 			or taller.espacios_hud[4].modulate == Color.WHITE:
 		return "El carrito lejano sigue disponible en el HUD."
 	Acciones.tecla(bus, 2)
 	if taller.mano != "multimetro":
@@ -265,7 +265,7 @@ static func probar_herramienta(bus: Node3D) -> bool:
 		return false
 	Acciones.tecla(bus, 4)
 	bus.ejecutar("inspeccionar", "teclado")
-	if not bus.flashcard.visible or bus.flashcard.cola[0].tipo != "aviso" 			or bus.flashcard.cuerpo.text != "Toma la herramienta en la mano: presiona 1." 			or bus.motor.puntaje() != 100 or bus.motor.estado() != antes:
+	if not bus.flashcard.visible or bus.flashcard.cola[0].tipo != "aviso" 			or bus.flashcard.cuerpo.text != "Presiona 1 para tomar la herramienta." 			or bus.motor.puntaje() != 100 or bus.motor.estado() != antes:
 		return false
 	bus.flashcard.confirmar()
 	if not Acciones.equipar(bus, "revisar_refrigerante"):
@@ -275,7 +275,7 @@ static func probar_herramienta(bus: Node3D) -> bool:
 		if decision.tipo_error == "herramienta-equivocada":
 			errores.append(decision))
 	bus.ejecutar("inspeccionar", "teclado")
-	if bus.flashcard.titulo.text != "Herramienta equivocada" 			or bus.flashcard.cuerpo.text != "Tienes en la mano: Lámpara. Para esto necesitas: Destornillador." 			or bus.motor.puntaje() != 96 or bus.motor.estado() != antes or errores.size() != 1 			or errores[0].aplicada or errores[0].criticidad != "leve":
+	if bus.flashcard.titulo.text != "Herramienta equivocada" 			or bus.flashcard.cuerpo.text != "Traes esta herramienta: Lámpara. Cámbiala por esta: Destornillador." 			or bus.motor.puntaje() != 96 or bus.motor.estado() != antes or errores.size() != 1 			or errores[0].aplicada or errores[0].criticidad != "leve":
 		return false
 	bus.flashcard.confirmar()
 	return true
@@ -329,7 +329,7 @@ static func comprobar_cierre(bus: Node3D, base: String, caso: Array) -> bool:
 		evento.button_index = JOY_BUTTON_A
 		evento.pressed = true
 		bus.get_viewport().push_input(evento, true)
-	if bus.flashcard.titulo.text != caso[0].capitalize() 			or not bus.flashcard.cuerpo.text.contains("Causa real: Foco dañado") 			or not bus.flashcard.fuente.text.contains(bus.datos.fuente) or not bus.resultados_guardados:
+	if bus.flashcard.titulo.text != caso[0].capitalize() 			or not bus.flashcard.cuerpo.text.contains("Causa real: Foco dañado") 			or bus.flashcard.fuente.text != "Fuente: ejemplo didáctico, sin fuente oficial" or not bus.resultados_guardados:
 		return false
 	bus.flashcard.confirmar()
 	if not bus.resumen.visible or not bus.resumen.get_node("Detalle").text.contains("Diagnóstico final: " + caso[0].capitalize()):

@@ -63,7 +63,7 @@ func accesibles(cerca := false) -> Array[String]:
 
 func tomar(id: String, cerca := false) -> String:
 	if not CATALOGO.has(id):
-		return "Objeto desconocido."
+		return "Ese objeto no está disponible. Elige otro."
 	if id in cinturon or id in carrito:
 		return "Ya llevas %s." % CATALOGO[id].nombre
 	var carga: int = CATALOGO[id].espacio
@@ -72,14 +72,14 @@ func tomar(id: String, cerca := false) -> String:
 	elif cerca and espacio(carrito) + carga <= CAPACIDAD:
 		carrito.append(id)
 	else:
-		return "No hay espacio en el cinturón ni en el carrito cercano." if cerca \
+		return "El cinturón y el carrito están llenos. Deja un objeto para hacer espacio." if cerca \
 			else "No hay espacio en el cinturón. Acércate al carrito o deja un objeto."
 	return ""
 
 
 func dejar(id: String, cerca := false) -> String:
 	if id not in accesibles(cerca):
-		return "El objeto no está a tu alcance."
+		return "No alcanzas ese objeto. Acércate para tomarlo."
 	cinturon.erase(id)
 	carrito.erase(id)
 	return ""

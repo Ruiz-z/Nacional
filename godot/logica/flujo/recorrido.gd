@@ -34,14 +34,14 @@ static func estado(base: String, tecnico: int, ahora_real: int,
 		if reloj.is_empty():
 			return {}
 		if datos.ultimo_post == null:
-			resultado["aviso"] = "Falta registrar el post-test."
+			resultado["aviso"] = "Completa la evaluación antes de repetirla."
 			return resultado
 		var fecha := Time.get_unix_time_from_datetime_string(datos.ultimo_post.trim_suffix("Z"))
 		var faltan: int = fecha + 7 * Leitner.SEGUNDOS_DIA - reloj.instante
 		if faltan > 0:
 			var dias := ceili(float(faltan) / Leitner.SEGUNDOS_DIA)
 			resultado["dias_para_retest"] = dias
-			resultado["aviso"] = "El retest estará disponible en %d día(s)." % dias
+			resultado["aviso"] = "Vuelve en %d %s para repetir la evaluación." % [dias, "día" if dias == 1 else "días"]
 			return resultado
 	habilitados.append(paso)
 	return resultado

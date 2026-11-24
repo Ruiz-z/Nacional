@@ -13,7 +13,7 @@
   ],
   "causa_correcta": "Freno desgastado",
   "explicacion_causa": {
-    "Freno desgastado": "[MUESTRA] La medición confirma el desgaste de las pastillas del freno."
+    "Freno desgastado": "[MUESTRA] La medición muestra que las pastillas ya están desgastadas."
   },
   "indicios": [
     {
@@ -24,12 +24,12 @@
     {
       "clave": "reponer_pastillas",
       "etiqueta": "Reponer las pastillas",
-      "ayuda": "Lleva pastillas de repuesto y confirma la reposición en el panel."
+      "ayuda": "Lleva las pastillas de repuesto. Confirma el cambio en el panel."
     },
     {
       "clave": "resuelto",
       "etiqueta": "Cerrar la orden",
-      "ayuda": "Destraba ambos soportes, despeja los bajos, baja el autobús y cierra la orden en la consola."
+      "ayuda": "Destraba ambos soportes y despeja los bajos. Baja el autobús y cierra la orden en la consola."
     }
   ],
   "estado": {
@@ -53,7 +53,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Pastillas por debajo del espesor de servicio de la maqueta",
+      "descripcion": "[MUESTRA] Las pastillas están por debajo del espesor de servicio del ejercicio.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
@@ -74,7 +74,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "Freno desgastado",
-      "descripcion": "[MUESTRA] Reponer las pastillas",
+      "descripcion": "[MUESTRA] Coloca las pastillas de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -98,7 +98,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Cerrar la orden",
+      "descripcion": "[MUESTRA] Cierra la orden desde la consola.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false
     },
@@ -111,7 +111,7 @@
       "criticidad": "leve",
       "tipo_error": "punto-de-medicion-incorrecto",
       "causa": "",
-      "descripcion": "[MUESTRA] Estas pastillas están en buen estado. El indicio corresponde al freno delantero derecho.",
+      "descripcion": "[MUESTRA] Estas pastillas están bien. Mide las del freno delantero derecho.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
@@ -134,7 +134,7 @@
   ],
   "variante": {
     "estado": {
-      "aviso": "El roce se detectó durante la revisión del freno delantero derecho."
+      "aviso": "El freno delantero derecho roza durante la revisión."
     }
   }
 }

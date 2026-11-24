@@ -51,6 +51,12 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
+[node name="Marca" type="Label" parent="Margen/Centro/Tarjeta/Contenido"]
+visible = false
+layout_mode = 2
+theme_type_variation = &"Secundario"
+theme_override_font_sizes/font_size = 14
+
 [node name="Pregunta" type="Label" parent="Margen/Centro/Tarjeta/Contenido"]
 autowrap_mode = 3
 theme_type_variation = &"Seccion"

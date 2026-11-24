@@ -1,5 +1,7 @@
 extends Control
 
+const TextoLimpio = preload("res://logica/texto_limpio.gd")
+
 signal paso_solicitado(paso: String, perfil: Dictionary)
 
 const Banco = preload("res://logica/competencias/banco.gd")
@@ -15,8 +17,8 @@ const Demo = preload("res://escenas/modo_demo.tscn")
 const Diagnostico = preload("res://escenas/diagnostico.tscn")
 const Ruta = preload("res://escenas/ruta.tscn")
 const Evaluacion = preload("res://escenas/evaluacion.tscn")
-const NOMBRES := {"alias": "Elegir alias", "diagnostico": "Diagnóstico", "ruta": "Ruta",
-	"escenario": "Escenario", "post": "Post-test", "retest": "Retest", "tablero": "Tablero"}
+const NOMBRES := {"alias": "Elegir alias", "diagnostico": "Diagnóstico", "ruta": "Ruta de aprendizaje",
+	"escenario": "Práctica", "post": "Evaluación", "retest": "Repetir la evaluación", "tablero": "Tablero"}
 
 var base := "user://nacional.sqlite"
 var perfil := {}
@@ -49,7 +51,7 @@ func _ready() -> void:
 	actualizar()
 	enfocar_inicio()
 	if not disponible:
-		inicio.get_node("Aviso").text = "No se pudo abrir la base local."
+		inicio.get_node("Aviso").text = "No se pudo abrir tu progreso. Cierra el juego y ábrelo de nuevo."
 
 
 func preparar_inicio(disponible: bool) -> void:
@@ -65,8 +67,8 @@ func preparar_inicio(disponible: bool) -> void:
 	recorrido.get_node("Demo").pressed.connect(abrir_demo)
 	var fichas := columna.get_node("Destacados/Tarjetas")
 	for datos in [
-		["diagnostico", "Diagnóstico", "Identifica tus fortalezas y áreas de mejora."],
-		["ruta", "Ruta adaptativa", "Sigue una ruta basada en tu diagnóstico."],
+		["diagnostico", "Diagnóstico", "Contesta preguntas para saber qué necesitas practicar."],
+		["ruta", "Ruta de aprendizaje", "Repasa los temas que te faltan según tu diagnóstico."],
 		["escenario", "Práctica en el taller", "Resuelve fallas en el autobús eléctrico."]
 	]:
 		var tarjeta := crear_tarjeta(datos[0], datos[1], datos[2], true)
@@ -212,13 +214,13 @@ func seleccionar_alias(alta: bool) -> void:
 func actualizar() -> void:
 	var estado := Recorrido.estado(base, perfil.get("id", 0), int(Time.get_unix_time_from_system()))
 	var siguiente: String = estado.get("siguiente", "alias")
-	barra.get_node("Perfil").text = "Técnico · %s" % perfil.get("alias", "Sin alias")
+	barra.get_node("Perfil").text = "Técnico · %s" % TextoLimpio.linea(perfil.get("alias", "Sin alias"))
 	inicio.get_node("Siguiente").text = "Siguiente paso · %s" % NOMBRES[siguiente]
 	var razon: String = estado.get("aviso", "")
 	inicio.get_node("Aviso").text = razon if not razon.is_empty() else (
-		"Elige o registra un alias para desbloquear el diagnóstico." if perfil.is_empty()
-		else "Completa %s para seguir avanzando. Escenario está disponible como práctica libre y no cambia tu avance." % NOMBRES[siguiente]
-			if siguiente != "escenario" else "Completa %s para seguir avanzando." % NOMBRES[siguiente])
+		"Entra con tu alias para empezar el diagnóstico." if perfil.is_empty()
+		else "Sigue con esta actividad: %s. También puedes abrir una práctica libre." % NOMBRES[siguiente]
+			if siguiente != "escenario" else "Sigue con esta actividad: %s." % NOMBRES[siguiente])
 	for paso in botones:
 		var boton: Button = botones[paso]
 		boton.disabled = paso not in estado.get("habilitados", []) \
@@ -239,7 +241,7 @@ func actualizar() -> void:
 			destacados[paso].disabled = boton.disabled
 			destacados[paso].get_node("Contenido").modulate.a = 0.72 if boton.disabled else 1.0
 		boton.tooltip_text = ("Selecciona un alias para empezar." if perfil.is_empty() else
-			"Paso pendiente de habilitar por el recorrido.") if boton.disabled else razon
+			"Completa el paso anterior para abrir esta actividad.") if boton.disabled else razon
 
 
 func enfocar_inicio() -> void:
@@ -308,7 +310,7 @@ func abrir_bus(tecnico: Dictionary, archivo: String = Escenario.AISLAMIENTO) -> 
 				int(Time.get_unix_time_from_system()))
 			if not cierre.is_empty():
 				if not cierre.guardado:
-					bus.lateral.get_node("Aviso").text += "\nNo se pudo guardar el avance."
+					bus.lateral.get_node("Aviso").text += "\nNo se guardó tu avance. Vuelve a intentar la práctica."
 				elif not cierre.respaldo:
 					bus.lateral.get_node("Aviso").text += "\nSe guardó el avance, pero falta el respaldo.")
 	bus.conexion_panel = conexion

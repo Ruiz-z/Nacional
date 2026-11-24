@@ -13,7 +13,7 @@
   ],
   "causa_correcta": "Fuga en la suspensión neumática",
   "explicacion_causa": {
-    "Fuga en la suspensión neumática": "[MUESTRA] La fuga en la bolsa explica la pérdida de presión de la suspensión."
+    "Fuga en la suspensión neumática": "[MUESTRA] La bolsa de aire pierde presión por la fuga."
   },
   "indicios": [
     {
@@ -29,12 +29,12 @@
     {
       "clave": "reponer_bolsa",
       "etiqueta": "Reponer la bolsa de aire",
-      "ayuda": "Lleva la bolsa de aire de repuesto y confirma la reposición en el panel."
+      "ayuda": "Lleva la bolsa de aire de repuesto. Confirma el cambio en el panel."
     },
     {
       "clave": "resuelto",
       "etiqueta": "Cerrar la orden",
-      "ayuda": "Destraba ambos soportes, despeja los bajos, baja el autobús y cierra la orden en la consola."
+      "ayuda": "Destraba ambos soportes y despeja los bajos. Baja el autobús y cierra la orden en la consola."
     }
   ],
   "estado": {
@@ -59,7 +59,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Presión baja en la bolsa de aire trasera derecha",
+      "descripcion": "[MUESTRA] La bolsa de aire trasera derecha tiene poca presión.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
@@ -83,7 +83,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Fuga localizada en un pliegue de la bolsa de aire",
+      "descripcion": "[MUESTRA] La bolsa de aire pierde aire por un pliegue.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false
     },
@@ -101,7 +101,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "Fuga en la suspensión neumática",
-      "descripcion": "[MUESTRA] Reponer la bolsa de aire",
+      "descripcion": "[MUESTRA] Coloca la bolsa de aire de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -125,7 +125,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Cerrar la orden",
+      "descripcion": "[MUESTRA] Cierra la orden desde la consola.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false
     }
@@ -146,7 +146,7 @@
   ],
   "variante": {
     "estado": {
-      "aviso": "Con el autobús estacionado, el lado trasero derecho desciende."
+      "aviso": "El lado trasero derecho baja mientras el autobús está estacionado."
     }
   }
 }

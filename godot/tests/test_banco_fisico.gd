@@ -54,7 +54,7 @@ static func protocolo_y_respaldo(lineas: PackedStringArray) -> bool:
 	fuente.actualizar(5999)
 	var lectura := fuente.leer(variante)
 	if fuente.fuente() != "virtual" or fuente.conexion.pausado() or lectura.tp2 != 0.0 \
-			or lectura.aviso != "Banco desconectado · falla virtual":
+			or lectura.aviso != "Se desconectó el banco físico. Sigue con el banco en pantalla.":
 		return false
 	fuente.recibir(LATIDO, 6000)
 	fuente.recibir(alto_p, 6000)
@@ -79,7 +79,7 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	bus.ejecutar("reportar_tp1_0", "teclado")
 	bus.ejecutar("reportar_tp2_5", "teclado")
 	bus.ejecutar("diagnosticar_alimentacion", "teclado")
-	if not bus.lateral.get_node("Siguiente").text.ends_with("cierra el conductor abierto en el banco físico."):
+	if not bus.lateral.get_node("Siguiente").text.ends_with("Cierra el conductor abierto en el banco físico."):
 		return false
 	if not Taller.equipar(bus, "reconectar"):
 		return false
@@ -97,7 +97,7 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 			or not bus.accion_pendiente.is_empty():
 		return false
 	var hud: Label = bus.lateral.get_node("Indicios")
-	if hud.text != "\n".join(["[x] TP1 medido", "[x] TP2 medido",
+	if hud.text != "\n".join(["Ejemplo didáctico", "Pasos", "[x] TP1 medido", "[x] TP2 medido",
 			"[x] Lectura de TP1 reportada", "[x] Lectura de TP2 reportada",
 			"[x] Diagnóstico registrado", "[x] Falla resuelta"]):
 		return false
@@ -110,6 +110,6 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	bus.reintentar()
 	bus.fuente_banco.conexion.iniciar_fisica(ahora - 3000)
 	bus._process(0.0)
-	return bus.zona_activa.estado_banco.text.contains("Banco desconectado · falla virtual") \
+	return bus.zona_activa.estado_banco.text.contains("Se desconectó el banco físico. Sigue con el banco en pantalla.") \
 		and bus.motor.mediciones.fuente == "virtual" and bus.motor.estado().s2_abierto \
 		and not bus.pausa_visible and bus.motor.fin().is_empty()

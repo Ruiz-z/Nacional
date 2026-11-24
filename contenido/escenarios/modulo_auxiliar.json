@@ -2,7 +2,7 @@
   "id": "modulo_auxiliar",
   "version": "1",
   "titulo": "[MUESTRA] Módulo auxiliar sin respuesta",
-  "descripcion": "[MUESTRA] Mide en el banco virtual, registra ambas lecturas y diagnostica la falla.",
+  "descripcion": "[MUESTRA] Mide TP1 y TP2. Guarda las dos lecturas y confirma la causa de la falla.",
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "banco",
@@ -15,17 +15,17 @@
   ],
   "causa_correcta": "alimentacion",
   "explicacion_causa": {
-    "alimentacion": "[MUESTRA] La lectura del punto de alimentación indica una interrupción del circuito.",
-    "senal": "[MUESTRA] La alimentación está presente, pero falta la señal esperada en su punto de prueba.",
-    "modulo": "[MUESTRA] Las lecturas distinguen una interrupción del arnés de una avería interna del módulo."
+    "alimentacion": "[MUESTRA] La lectura del punto de alimentación muestra que el circuito está abierto.",
+    "senal": "[MUESTRA] Hay alimentación. En el punto de prueba falta la señal esperada.",
+    "modulo": "[MUESTRA] Las lecturas te ayudan a distinguir si la falla está en el arnés o dentro del módulo."
   },
   "indicios": [
     {"clave": "tp1_medido", "etiqueta": "TP1 medido", "ayuda": "Mide TP1 con referencia en TP0."},
     {"clave": "tp2_medido", "etiqueta": "TP2 medido", "ayuda": "Mide TP2 con referencia en TP0."},
     {"clave": "tp1_reportado", "etiqueta": "Lectura de TP1 reportada", "ayuda": "Abre el multímetro y reporta la lectura de TP1."},
     {"clave": "tp2_reportado", "etiqueta": "Lectura de TP2 reportada", "ayuda": "Abre el multímetro y reporta la lectura de TP2."},
-    {"clave": "diagnostico_registrado", "etiqueta": "Diagnóstico registrado", "ayuda": "Registra el diagnóstico en el multímetro según tus lecturas."},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Repara: abre el multímetro, elige Reconectar conductor y confirma en el panel."}
+    {"clave": "diagnostico_registrado", "etiqueta": "Diagnóstico registrado", "ayuda": "Abre el multímetro y elige la causa que indiquen tus lecturas."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Abre el multímetro y elige Reconectar conductor. Confirma en el panel."}
   ],
   "estado": {
     "s1_abierto": true,
@@ -215,7 +215,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Reconecta el conductor de la maqueta con el panel.",
+      "descripcion": "[MUESTRA] Usa el panel para reconectar el conductor.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true
     }

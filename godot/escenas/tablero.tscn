@@ -22,7 +22,7 @@ text = "Tablero de progreso"
 [node name="Subtitulo" type="Label" parent="."]
 autowrap_mode = 3
 theme_type_variation = &"Secundario"
-text = "Dominio, errores y evolución por competencia."
+text = "Revisa tu progreso y tus errores por tema."
 
 [node name="Vistas" type="HBoxContainer" parent="."]
 
@@ -36,7 +36,7 @@ text = "Vista del instructor"
 
 [node name="Ayuda" type="Button" parent="Vistas"]
 custom_minimum_size = Vector2(0, 52)
-text = "Fórmulas de los indicadores"
+text = "Cómo se calcula tu progreso"
 toggle_mode = true
 
 [node name="Alias" type="OptionButton" parent="."]

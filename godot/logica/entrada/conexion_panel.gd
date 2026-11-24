@@ -38,7 +38,7 @@ func desconectar() -> void:
 	_fuente_panel = "virtual"
 	_pausado = _fuente_fisica == "panel"
 	_aviso = "Panel desconectado. Continúa con el panel virtual." if _pausado \
-		else "Banco desconectado · falla virtual"
+		else "Se desconectó el banco físico. Sigue con el banco en pantalla."
 
 
 func recibir(linea: String, fuente: String, ahora_ms: int) -> Dictionary:

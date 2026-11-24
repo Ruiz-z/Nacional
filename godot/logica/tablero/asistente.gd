@@ -1,9 +1,11 @@
 extends RefCounted
 
+const TextoLimpio = preload("res://logica/texto_limpio.gd")
+
 const RutasContenido = preload("res://logica/rutas_contenido.gd")
 const Banco = preload("res://logica/competencias/banco.gd")
-const INACTIVO := {"disponible": false, "texto": "Asistente no disponible", "cita": ""}
-const SIN_RESPALDO := {"disponible": true, "texto": "no tengo esa información", "cita": ""}
+const INACTIVO := {"disponible": false, "texto": "El asistente no está disponible. Intenta de nuevo más tarde.", "cita": ""}
+const SIN_RESPALDO := {"disponible": true, "texto": "No encontré esa información en las fuentes del taller.", "cita": ""}
 const INSTRUCCION := """Usa solo las fuentes recuperadas y el historial con alias.
 Si hay respaldo, devuelve el índice entero de la fuente en «fuente» y una cita textual
 que responda la pregunta en «fragmento». Si falta respaldo, devuelve un diccionario vacío.
@@ -56,7 +58,9 @@ func responder(pregunta: String, modelo: Callable, perfil: Dictionary = {}) -> D
 	fragmento = fragmento.strip_edges()
 	if fragmento.is_empty() or not fuentes[indice].texto.contains(fragmento):
 		return SIN_RESPALDO.duplicate()
-	return {"disponible": true, "texto": fragmento, "cita": fuentes[indice].cita}
+	var marca: String = TextoLimpio.limpiar(fragmento + "\n" + fuentes[indice].cita).etiqueta
+	return {"disponible": true, "texto": TextoLimpio.limpiar(fragmento).texto,
+		"cita": TextoLimpio.fuente(fuentes[indice].cita), "etiqueta": marca}
 
 
 func recuperar(pregunta: String) -> Array[Dictionary]:

@@ -1,5 +1,7 @@
 extends ScrollContainer
 
+const TextoLimpio = preload("res://logica/texto_limpio.gd")
+
 signal finalizada
 
 const Actividad = preload("res://logica/flujo/actividad_aprendizaje.gd")
@@ -34,8 +36,8 @@ func _ready() -> void:
 	if not titulo_preparado.is_empty():
 		contenido.get_node("Titulo").text = titulo_preparado
 	if not actividad.perfil.has("id") or actividad.base.is_empty():
-		pregunta_visible.text = "Aún no hay una sesión activa"
-		detalle.text = "Vuelve al menú, elige un alias y abre esta actividad cuando se habilite."
+		pregunta_visible.text = "Primero entra con tu alias"
+		detalle.text = "Vuelve al menú y entra con tu alias."
 		return
 	if actividad.preparar(banco, ahora()):
 		mostrar_item()
@@ -50,6 +52,7 @@ func mostrar_item() -> void:
 		hijo.queue_free()
 	detalle.text = ""
 	fuente.text = ""
+	contenido.get_node("Marca").hide()
 	seleccion.clear()
 	fuente_entrada = "interfaz"
 	mostrar_avisos()
@@ -70,14 +73,14 @@ func mostrar_item() -> void:
 	item = actividad.items[indice]
 	var leccion := actividad.leccion(indice)
 	if not leccion.is_empty():
-		detalle.text = "Microlección %d de %d · %d min\n%s\n%s%s" % [
+		detalle.text = "Lección corta %d de %d · %d min\n%s\n%s%s" % [
 			actividad.numero_leccion(indice), actividad.plan.lecciones.size(), leccion.minutos,
 			Actividad.Banco.COMPETENCIAS[leccion.competencia],
-			"[MUESTRA] " if leccion.muestra else "", leccion.explicacion]
-		detalle.text += "\n[color=#9aa7b4]Fuente de la microlección · %s[/color]" % citar(leccion.fuente)
+			"Ejemplo didáctico\n" if leccion.muestra else "", TextoLimpio.limpiar(leccion.explicacion).texto]
+		detalle.text += "\n[color=#9aa7b4]Fuente de la lección: %s[/color]" % citar(leccion.fuente)
 	if actividad.reloj_simulado:
 		fuente.text += "Reloj simulado\n"
-	fuente.text += "Fuente del ítem · %s" % citar(item.fuente)
+	fuente.text += "Fuente: %s" % citar(item.fuente)
 	progreso.tooltip_text = "Pregunta %d de %d" % [indice + 1, actividad.items.size()]
 	contenido.get_node("Numero").text = progreso.tooltip_text
 	contenido.get_node("Numero").show()
@@ -91,7 +94,7 @@ func mostrar_item() -> void:
 			for numero in range(item.opciones.size()):
 				agregar_opcion(item.opciones[numero], responder.bind(numero))
 		"caso-diagnostico":
-			pregunta = "%s\n%s\nSelecciona los pasos en el orden en que los ejecutarías." % [
+			pregunta = "%s\n%s\nElige los pasos en el orden en que los harías." % [
 				item.codigo_falla, "\n".join(item.sintomas)]
 			for paso in item.pasos:
 				agregar_opcion(paso.accion, agregar_paso.bind(paso))
@@ -100,7 +103,14 @@ func mostrar_item() -> void:
 			var panel := PanelVirtual.instantiate()
 			panel.accion_recibida.connect(recibir_panel)
 			opciones.add_child(panel)
-	pregunta_visible.text = ("[MUESTRA] " if item.get("muestra", false) else "") + pregunta
+	var pregunta_limpia := TextoLimpio.limpiar(pregunta)
+	pregunta_visible.text = pregunta_limpia.texto
+	var marca: String = pregunta_limpia.etiqueta
+	if marca.is_empty() and item.get("muestra", false):
+		marca = "Ejemplo didáctico"
+	var etiqueta: Label = contenido.get_node("Marca")
+	etiqueta.text = marca
+	etiqueta.visible = not marca.is_empty()
 	var primero := opciones.get_child(0)
 	if primero is Button:
 		primero.grab_focus()
@@ -116,7 +126,7 @@ func mostrar_avisos() -> void:
 
 func agregar_opcion(texto: String, accion: Callable) -> void:
 	var boton := Button.new()
-	boton.text = texto
+	boton.text = TextoLimpio.linea(texto)
 	boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	boton.custom_minimum_size.y = 52
 	boton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -126,7 +136,7 @@ func agregar_opcion(texto: String, accion: Callable) -> void:
 
 func agregar_paso(paso: Dictionary) -> void:
 	seleccion.append(paso.id)
-	detalle.text += "\n%d. %s" % [seleccion.size(), paso.resultado]
+	detalle.text += "\n%d. %s" % [seleccion.size(), TextoLimpio.linea(paso.resultado)]
 
 
 func recibir_panel(evento: Dictionary) -> void:
@@ -142,7 +152,7 @@ func confirmar() -> void:
 		return
 	var cierre := actividad.guardar(ahora())
 	if not cierre.get("guardado", false):
-		aviso.text = "No se pudo guardar el paso. Intenta nuevamente."
+		aviso.text = "No se guardó tu avance. Pulsa Guardar y terminar otra vez."
 		aviso.show()
 		return
 	guardado = true
@@ -154,12 +164,12 @@ func confirmar() -> void:
 		lineas.append("%s · %.1f %% · %s · Confianza %s" % [
 			Actividad.Banco.COMPETENCIAS[competencia], resultado.dominio, resultado.nivel, resultado.confianza])
 	if actividad.paso == "ruta":
-		lineas.append("Prioridad actualizada")
+		lineas.append("Temas para repasar")
 		for competencia in actividad.ruta:
 			lineas.append(Actividad.Banco.COMPETENCIAS[competencia])
 	detalle.text = "\n".join(lineas)
 	if not cierre.respaldo:
-		actividad.avisos.append("El paso se guardó, pero no se pudo crear el respaldo.")
+		actividad.avisos.append("Tu avance quedó guardado. Falló la copia de respaldo.")
 		mostrar_avisos()
 	finalizada.emit()
 
@@ -168,17 +178,17 @@ func responder(respuesta: Variant) -> void:
 	if actividad.responder(respuesta, Time.get_ticks_msec() - inicio_ms, fuente_entrada, ahora()):
 		mostrar_item()
 	else:
-		aviso.text = "No se pudo leer el reloj. Intenta nuevamente."
+		aviso.text = "No se pudo consultar la hora. Envía tu respuesta otra vez."
 		aviso.show()
 
 
 func citar(fuente: Variant) -> String:
 	if fuente is String:
-		return fuente
+		return TextoLimpio.fuente(fuente)
 	var datos := PackedStringArray()
 	for campo in ["origen", "titulo", "seccion", "pagina", "referencia", "url"]:
 		if fuente.has(campo):
-			datos.append(str(fuente[campo]))
+			datos.append(TextoLimpio.fuente(str(fuente[campo])))
 	return " · ".join(datos)
 
 

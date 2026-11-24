@@ -310,7 +310,7 @@ func objetos_en(mueble: Node3D) -> Array[String]:
 
 func dejar(id: String, cerca_carrito: bool, mueble: Node3D = mesa) -> String:
 	if mueble == caja_roja and Inventario.CATALOGO.get(id, {}).get("tipo") != "herramienta":
-		return "La caja roja solo guarda herramientas."
+		return "La caja roja es para herramientas. Deja este objeto en otro mueble."
 	var ranura := 0
 	if mueble != caja_roja:
 		var ocupadas := []
@@ -320,7 +320,7 @@ func dejar(id: String, cerca_carrito: bool, mueble: Node3D = mesa) -> String:
 		while ranura in ocupadas:
 			ranura += 1
 		if ranura >= LIMITE_SUPERFICIE:
-			return "No hay espacio libre sobre el mueble."
+			return "El mueble está lleno. Busca otro lugar para dejar el objeto."
 	var aviso := inventario.dejar(id, cerca_carrito)
 	if not aviso.is_empty():
 		return aviso

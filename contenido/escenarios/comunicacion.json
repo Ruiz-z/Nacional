@@ -2,12 +2,12 @@
   "id": "comunicacion",
   "version": "1",
   "titulo": "[MUESTRA] Falla de comunicación en la red",
-  "descripcion": "[MUESTRA] Identifica la causa del aviso a partir de los síntomas del bus virtual.",
+  "descripcion": "[MUESTRA] Un módulo dejó de aparecer en la red. Revisa los síntomas para saber por qué.",
   "sintomas": [
-    "[MUESTRA] Un módulo virtual deja de aparecer en la vista de red.",
-    "[MUESTRA] Los demás módulos virtuales siguen visibles."
+    "[MUESTRA] Falta un módulo en la vista de red.",
+    "[MUESTRA] Los demás módulos siguen apareciendo en el monitor."
   ],
-  "codigo_falla": "[MUESTRA] Aviso genérico de comunicación",
+  "codigo_falla": "[MUESTRA] Aviso de comunicación",
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "cabina",
@@ -19,8 +19,8 @@
   ],
   "causa_correcta": "modulo-sin-comunicacion",
   "explicacion_causa": {
-    "modulo-sin-comunicacion": "[MUESTRA] El módulo afectado dejó de comunicarse con la red.",
-    "otro-modulo": "[MUESTRA] Los síntomas señalan al módulo sin comunicación, no a otro módulo de la red."
+    "modulo-sin-comunicacion": "[MUESTRA] El módulo dejó de enviar datos a la red.",
+    "otro-modulo": "[MUESTRA] El monitor muestra cuál módulo dejó de comunicarse."
   },
   "indicios": [
     {"clave": "sintomas_revisados", "etiqueta": "Síntomas de red revisados", "ayuda": "Abre el monitor y elige Revisar los síntomas."},
@@ -53,7 +53,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Revisar los síntomas de la red virtual.",
+      "descripcion": "[MUESTRA] Abre el monitor y revisa qué módulos aparecen.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "seleccionar_otro_modulo": {
@@ -70,7 +70,7 @@
       "criticidad": "leve",
       "tipo_error": "causa-equivocada",
       "causa": "otro-modulo",
-      "descripcion": "[MUESTRA] Seleccionar un módulo ajeno al aviso.",
+      "descripcion": "[MUESTRA] Elegiste otro módulo. Revisa cuál dejó de aparecer en el monitor.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_diagnostico": {
@@ -90,7 +90,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "modulo-sin-comunicacion",
-      "descripcion": "[MUESTRA] Confirmar el diagnóstico del módulo ausente.",
+      "descripcion": "[MUESTRA] Confirma cuál módulo dejó de aparecer en la red.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     }
   },

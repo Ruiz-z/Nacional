@@ -1,5 +1,7 @@
 extends RefCounted
 
+const TextoLimpio = preload("res://logica/texto_limpio.gd")
+
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const RutasContenido = preload("res://logica/rutas_contenido.gd")
 const Banco = preload("res://logica/competencias/banco.gd")
@@ -22,7 +24,8 @@ static func listar(ruta := "escenarios") -> Dictionary:
 			continue
 		var datos: Dictionary = carga.escenario
 		var accion: Dictionary = datos.acciones[datos.ruta_ideal[-1]]
-		resultado.ordenes.append({"archivo": archivo, "titulo": datos.titulo.trim_prefix("[MUESTRA]").strip_edges(),
+		resultado.ordenes.append({"archivo": archivo, "titulo": TextoLimpio.limpiar(datos.titulo).texto,
+			"marca": TextoLimpio.limpiar(datos.titulo).etiqueta,
 			"zona": datos.zona, "grupo_funcion": datos.grupo_funcion, "dificultad": datos.dificultad,
 			"competencia": Banco.COMPETENCIAS[accion.competencia]})
 	return resultado

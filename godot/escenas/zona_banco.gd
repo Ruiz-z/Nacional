@@ -68,7 +68,7 @@ func mostrar_multimetro(lectura: String, aviso: String, fuente: String) -> void:
 
 
 func etiqueta_fuente(fuente: String) -> String:
-	return "banco físico" if fuente == "banco" else fuente
+	return "banco físico" if fuente == "banco" else "banco en pantalla"
 
 
 func lectura_pieza(_componente: String) -> String:

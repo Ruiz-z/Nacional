@@ -28,11 +28,11 @@ static func ejecutar() -> bool:
 	var modelo := ModeloFalso.new()
 	var respuesta: Dictionary = asistente.responder("¿CÁRGA?", modelo.generar,
 		{"alias": "T-01", "nombre": "dato ajeno"})
-	if respuesta.texto != "El indicador muestra la carga simulada." or respuesta.cita != "[MUESTRA] Indicadores, p. 1":
+	if respuesta.texto != "El indicador muestra la carga simulada." or respuesta.cita != "Indicadores, p. 1" or respuesta.etiqueta != "Ejemplo didáctico":
 		return false
 	respuesta = asistente.responder("¿Qué descarga? NEAR *", modelo.generar)
-	if respuesta.texto != "no tengo esa información" or modelo.llamadas != 1:
+	if respuesta.texto != "No encontré esa información en las fuentes del taller." or modelo.llamadas != 1:
 		return false
 	modelo.inventar = true
 	respuesta = asistente.responder("carga", modelo.generar)
-	return respuesta.texto == "no tengo esa información" and respuesta.cita.is_empty()
+	return respuesta.texto == "No encontré esa información en las fuentes del taller." and respuesta.cita.is_empty()

@@ -5,20 +5,20 @@ const Acceso = preload("res://logica/datos/acceso_sqlite.gd")
 static func alta(base: String, entrada: String, consultar: Callable = Acceso.consultar) -> Dictionary:
 	var alias := normalizar(entrada)
 	if alias.is_empty():
-		return error("Usa un alias como T-0001: la letra T, un guion y de 2 a 8 dígitos (sin nombres).")
+		return error("Escribe T, un guion y entre 2 y 8 dígitos. Por ejemplo, T-0001.")
 	var filas: Variant = consultar.call(base, """
 		INSERT INTO tecnico(alias) VALUES (?)
 		ON CONFLICT(alias) DO NOTHING RETURNING id, alias;
 	""", [alias])
 	if filas is Array and filas.is_empty():
-		return error("Ese alias ya está registrado.")
+		return error("Ese alias ya existe. Pulsa Entrar con alias o escribe otro.")
 	return perfil(filas)
 
 
 static func elegir(base: String, entrada: String, consultar: Callable = Acceso.consultar) -> Dictionary:
 	var alias := normalizar(entrada)
 	if alias.is_empty():
-		return error("Usa un alias como T-0001: la letra T, un guion y de 2 a 8 dígitos (sin nombres).")
+		return error("Escribe T, un guion y entre 2 y 8 dígitos. Por ejemplo, T-0001.")
 	return perfil(consultar.call(base, "SELECT id, alias FROM tecnico WHERE alias = ? AND demo = 0;", [alias]))
 
 
@@ -30,9 +30,9 @@ static func normalizar(entrada: String) -> String:
 
 static func perfil(filas: Variant) -> Dictionary:
 	if filas == null:
-		return error("No se pudo consultar la base de técnicos.")
+		return error("No se pudo buscar tu alias. Intenta de nuevo.")
 	if filas.is_empty():
-		return error("Ese alias no está registrado.")
+		return error("Ese alias aún no existe. Regístralo o escribe otro.")
 	return {"ok": true, "id": int(filas[0].id), "alias": filas[0].alias}
 
 

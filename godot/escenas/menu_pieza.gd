@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const TextoLimpio = preload("res://logica/texto_limpio.gd")
+
 signal elegida(indice: int, fuente: String)
 signal causa_marcada(causa: String)
 signal cierre_solicitado
@@ -18,9 +20,14 @@ const CAUSAS := {
 	"modulo-sin-comunicacion": "Módulo sin comunicación",
 	"otro-modulo": "Otro módulo",
 	"foco-danado": "Foco dañado",
-	"alimentacion": "Alimentación",
-	"senal": "Señal",
-	"modulo": "Módulo",
+	"fusible-abierto": "Fusible abierto",
+	"aislamiento-degradado": "Aislamiento degradado",
+	"aviso-inconsistente": "Aviso que no coincide con la lectura",
+	"abrazadera-floja": "Abrazadera floja",
+	"lectura-inconsistente": "Lectura que no coincide con la revisión",
+	"alimentacion": "Falla de alimentación",
+	"senal": "Falla de señal",
+	"modulo": "Módulo dañado",
 }
 
 var entradas: Array[Dictionary] = []
@@ -43,19 +50,23 @@ func _ready() -> void:
 
 
 static func nombre_causa(id: String) -> String:
-	return CAUSAS.get(id, id.left(1).to_upper() + id.substr(1).replace("-", " "))
+	return TextoLimpio.limpiar(CAUSAS.get(id, id.left(1).to_upper() + id.substr(1).replace("-", " "))).texto
 
 
 func abrir(titulo: String, lectura: String, opciones: Array[Dictionary],
 		ids_causa: Array, marcada: String, estado: Dictionary, reportadas: Dictionary = {}, banco := false, mueble := false) -> void:
 	entradas = opciones
 	preparar_lecturas(reportadas, banco)
-	contenido.get_node("Cabecera/Titulo").text = titulo
+	contenido.get_node("Cabecera/Titulo").text = TextoLimpio.linea(titulo)
 	var chip_estado: Label = contenido.get_node("Cabecera/Estado")
-	chip_estado.text = estado.texto
+	chip_estado.text = TextoLimpio.linea(estado.texto)
 	estilo_chip(chip_estado, estado.color)
-	contenido.get_node("Lectura").text = lectura
-	contenido.get_node("Lectura").visible = not lectura.is_empty()
+	var lectura_limpia := TextoLimpio.limpiar(lectura)
+	contenido.get_node("Lectura").text = lectura_limpia.texto
+	contenido.get_node("Lectura").visible = not lectura_limpia.texto.is_empty()
+	var marca: Label = contenido.get_node("Marca")
+	marca.text = lectura_limpia.etiqueta
+	marca.visible = not marca.text.is_empty()
 	for boton in causas + botones:
 		boton.get_parent().remove_child(boton)
 		boton.queue_free()
@@ -100,7 +111,7 @@ func preparar_lecturas(reportadas: Dictionary, banco: bool) -> void:
 	if not banco:
 		return
 	var titulo := Label.new()
-	titulo.text = "Lecturas reportadas"
+	titulo.text = "Lecturas anotadas"
 	filas_lecturas.add_child(titulo)
 	for punto: String in Mediciones.PUNTOS:
 		var fila := HBoxContainer.new()
@@ -132,7 +143,7 @@ func agregar_accion(indice: int, entrada: Dictionary, compacto := false) -> void
 	if compacto:
 		boton.text = "%d · %s" % [indice + 1, entrada.titulo]
 		if entrada.requiere_panel:
-			boton.text += " · Confirma en panel"
+			boton.text += " · Confirma en el panel"
 		boton.custom_minimum_size.y = 36
 		return
 
@@ -179,10 +190,12 @@ func agregar_accion(indice: int, entrada: Dictionary, compacto := false) -> void
 	etiquetas.add_theme_constant_override("h_separation", 4)
 	etiquetas.add_theme_constant_override("v_separation", 4)
 	fila.add_child(etiquetas)
+	if not entrada.get("marca", "").is_empty():
+		agregar_chip(etiquetas, entrada.marca, "gris")
 	if entrada.ejecucion == "confirmar en panel":
-		agregar_chip(etiquetas, "Confirma en panel", "azul")
+		agregar_chip(etiquetas, "Confirma en el panel", "azul")
 	else:
-		agregar_chip(etiquetas, "Inmediata", "gris")
+		agregar_chip(etiquetas, "Al elegirla", "gris")
 	for campo in ["costo", "tiempo", "riesgo"]:
 		if entrada[campo] != "—":
 			var alto: bool = campo == "riesgo" and entrada.riesgo.to_lower().begins_with("alt")

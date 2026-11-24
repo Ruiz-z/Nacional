@@ -1,5 +1,7 @@
 extends Node3D
 
+const TextoLimpio = preload("res://logica/texto_limpio.gd")
+
 signal decision_tomada(decision: Dictionary)
 signal resultados_registrados
 signal salida_solicitada
@@ -7,11 +9,11 @@ signal salida_solicitada
 const ANCHO_HUD := 352.0
 const FondoTarjeta = preload("res://escenas/fondo_tarjeta.gd")
 const INDICIOS := {
-	"inspeccionado": "Sector inspeccionado",
+	"inspeccionado": "Gabinete inspeccionado",
 	"continuidad_medida": "Continuidad medida",
 	"refrigerante_revisado": "Circuito de refrigerante revisado",
 	"temperatura_medida": "Temperatura medida",
-	"indicio_confirmado": "Indicio de aislamiento confirmado",
+	"indicio_confirmado": "Aislamiento revisado",
 	"sintomas_revisados": "Síntomas de red revisados",
 	"resuelto": "Falla resuelta",
 }
@@ -23,26 +25,26 @@ const PREVIAS := {
 	"pieza_danada": "Abrazadera dañada repuesta",
 	"alerta_temperatura": "Alerta de temperatura eliminada",
 	"tornillo_roto": "Tornillo repuesto",
-	"sector_equivocado": "Sector correcto recuperado",
-	"indicio_descartado": "Indicio recuperado",
+	"sector_equivocado": "Gabinete correcto",
+	"indicio_descartado": "Lectura recuperada",
 }
 const PROBLEMAS := {
 	"tornillo_roto": "Pieza dañada",
 	"fusible_quemado": "Fusible quemado",
 	"pieza_danada": "Abrazadera dañada",
 	"alerta_temperatura": "Alerta de temperatura",
-	"sector_equivocado": "Sector equivocado",
-	"indicio_descartado": "Indicio descartado",
+	"sector_equivocado": "Gabinete equivocado",
+	"indicio_descartado": "Lectura descartada",
 }
 const RESULTADOS := {
 	"inspeccionar": "Compuerta abierta",
-	"evaluar_indicio": "Indicio de aislamiento confirmado",
+	"evaluar_indicio": "Aislamiento revisado",
 	"revisar_sintomas": "Síntomas de la red revisados",
 	"confirmar_solucion": "Falla resuelta",
 	"confirmar_diagnostico": "Diagnóstico confirmado",
 	"reponer_pieza": "Tornillo repuesto",
-	"volver_al_sector": "Sector correcto recuperado",
-	"recuperar_indicio": "Indicio recuperado",
+	"volver_al_sector": "Gabinete correcto",
+	"recuperar_indicio": "Lectura recuperada",
 }
 const Inventario = preload("res://logica/simulador/inventario.gd")
 const Escenario = preload("res://logica/simulador/escenario.gd")
@@ -126,7 +128,8 @@ func _ready() -> void:
 	var carga := Escenario.cargar(archivo)
 	datos = carga.get("escenario", {})
 	if datos.is_empty():
-		$Interfaz/Lateral/Estado.text = str(carga)
+		push_warning(str(carga.errores))
+		$Interfaz/Lateral/Estado.text = "No se abrió la orden. Vuelve al menú y elige otra."
 		return
 	indicios = INDICIOS
 	if datos.has("indicios"):
@@ -138,7 +141,7 @@ func _ready() -> void:
 		motor = Motor.new(datos, fuente_banco.leer)
 		if "--banco-fisico" in OS.get_cmdline_user_args():
 			if _udp_banco.bind(FuenteBanco.PUERTO_UDP, "127.0.0.1") != OK:
-				lateral.get_node("Aviso").text = "No se pudo abrir el enlace del banco · falla virtual"
+				lateral.get_node("Aviso").text = "No se conectó el banco físico. Continúa con el banco en pantalla."
 	else:
 		motor = Motor.new(datos)
 	ultimo_ms = Time.get_ticks_msec()
@@ -286,7 +289,7 @@ func finalizar_orden() -> void:
 	if motor.pendiente_diagnostico():
 		inicio_cierre = Time.get_ticks_msec()
 		flashcard.encolar({"tipo": "cierre", "titulo": "¿Qué causó la falla?", "texto": "",
-			"fuente": "", "donde": "", "objeto": "", "opciones": datos.causas.map(MenuVisual.nombre_causa)})
+			"fuente": "", "marca": datos.titulo, "donde": "", "objeto": "", "opciones": datos.causas.map(MenuVisual.nombre_causa)})
 		return
 	guardar_resultados()
 
@@ -298,7 +301,7 @@ func guardar_resultados() -> void:
 		if resultados_guardados:
 			resultados_registrados.emit()
 		else:
-			lateral.get_node("Aviso").text = "No se pudo guardar el resultado de la práctica."
+			lateral.get_node("Aviso").text = "No se guardó el resultado. Vuelve a intentar la práctica."
 
 
 func responder_cierre(indice: int, fuente: String) -> void:
@@ -311,7 +314,7 @@ func responder_cierre(indice: int, fuente: String) -> void:
 	var tipo := "correcto" if cierre.correcto else "incorrecto"
 	flashcard.mostrar_respuesta({"tipo": tipo, "titulo": tipo.capitalize(), "donde": "", "objeto": "",
 		"texto": "Causa real: %s\n%s" % [MenuVisual.nombre_causa(cierre.real), cierre.explicacion],
-		"fuente": cierre.fuente})
+		"fuente": cierre.fuente, "marca": datos.titulo})
 	guardar_resultados()
 
 
@@ -345,7 +348,7 @@ func comprobar_inventario(id: String, fuente := "teclado", solo_guia := false) -
 		requisito_pendiente = id
 		if menu_pieza.visible:
 			cerrar_menu()
-		avisar_objeto("Necesitas: " + taller.nombres(faltantes), "falta", "Te falta algo", faltantes[0])
+		avisar_objeto("Toma lo que te falta: " + taller.nombres(faltantes), "falta", "Te falta algo", faltantes[0])
 		return false
 	if equipada:
 		return true
@@ -355,7 +358,7 @@ func comprobar_inventario(id: String, fuente := "teclado", solo_guia := false) -
 	var nombre: String = Inventario.CATALOGO[herramienta].nombre
 	var mano: Dictionary = Inventario.objeto(taller.mano)
 	if not solo_guia and taller.mano != herramienta and mano.get("tipo") == "herramienta" 			and (cerca or taller.mano in taller.inventario.cinturon):
-		var texto := "Tienes en la mano: %s. Para esto necesitas: %s." % [mano.nombre, nombre]
+		var texto := "Traes esta herramienta: %s. Cámbiala por esta: %s." % [mano.nombre, nombre]
 		var ahora := Time.get_ticks_msec()
 		var decision: Dictionary = motor.registrar_herramienta_equivocada(id, fuente, ahora - ultimo_ms, texto)
 		ultimo_ms = ahora
@@ -367,7 +370,7 @@ func comprobar_inventario(id: String, fuente := "teclado", solo_guia := false) -
 		avisar_objeto("El carrito está lejos. Acércate y presiona %d para tomar %s." % [numero, nombre],
 			"aviso", "Toma la herramienta en la mano", herramienta)
 	else:
-		avisar("Toma la herramienta en la mano: presiona %d." % numero,
+		avisar("Presiona %d para tomar la herramienta." % numero,
 			"aviso", "Selecciona " + nombre)
 	return false
 
@@ -398,7 +401,7 @@ func actualizar_inventario() -> void:
 
 
 func mostrar_resultado(decision: Dictionary) -> void:
-	var texto: String = decision.get("motivo", "").trim_prefix("[MUESTRA] ")
+	var texto: String = decision.get("motivo", "")
 	var fuente: String = decision.get("fuente", "")
 	if decision.get("criticidad") == "critica":
 		texto = texto.trim_suffix(" " + fuente)
@@ -413,7 +416,7 @@ func mostrar_resultado(decision: Dictionary) -> void:
 		consecuencia = "Pieza dañada: tornillo roto"
 	elif not eventos.is_empty():
 		var evento: String = eventos[0]
-		consecuencia = PROBLEMAS.get(evento, datos.eventos[evento].descripcion.trim_prefix("[MUESTRA] "))
+		consecuencia = PROBLEMAS.get(evento, datos.eventos[evento].descripcion)
 	var tipo_error: String = decision.get("tipo_error", "")
 	if not tipo_error.is_empty():
 		var titulos := {
@@ -429,19 +432,19 @@ func mostrar_resultado(decision: Dictionary) -> void:
 		}
 		if not consecuencia.is_empty():
 			texto = consecuencia if texto.is_empty() else texto + "\n" + consecuencia
-		avisar(texto, "error", titulos.get(tipo_error, "Error del técnico"), "", fuente)
+		avisar(texto, "error", titulos.get(tipo_error, "Revisa este paso"), "", fuente)
 		return
 	if not decision.get("aplicada", false):
-		avisar(texto, "aviso", "Acción no aplicada")
+		avisar(texto, "aviso", "No puedes hacer ese paso")
 		return
 	if not consecuencia.is_empty():
-		avisar(consecuencia, "aviso", "Cambió el estado del autobús", "", fuente)
+		avisar(consecuencia, "aviso", "Revisa el autobús", "", fuente)
 		return
 	if decision.has("punto_medido"):
 		texto = "Medición registrada: %s = %.1f V" % [
 			decision.punto_medido.to_upper(), decision.lectura_mostrada]
 	elif decision.has("lectura-reportada"):
-		texto = "Lecturas reportadas guardadas"
+		texto = "Lecturas anotadas"
 	elif texto.is_empty():
 		var id: String = decision.get("accion", "")
 		if id == "inspeccionar" and zona_activa != $Sector:
@@ -458,7 +461,7 @@ func mostrar_resultado(decision: Dictionary) -> void:
 	else:
 		var ayuda := siguiente_ayuda(progreso_indicios(motor.estado()))
 		if not ayuda.is_empty():
-			texto = texto.trim_suffix(".") + ". Ahora " + ayuda.left(1).to_lower() + ayuda.substr(1)
+			texto = texto.trim_suffix(".") + ". " + ayuda
 	if decision.has("lectura-reportada"):
 		avisar_temporal(texto, true)
 	else:
@@ -476,8 +479,10 @@ func aviso_previas(faltantes: Dictionary) -> String:
 		# La reposición del foco también enciende el faro izquierdo.
 		if clave == "faro_izquierdo" and faltantes.get("foco_repuesto") == true:
 			continue
-		etiquetas.append(PREVIAS.get(clave, "%s = %s" % [clave.capitalize(), faltantes[clave]]))
-	return "Falta: " + ", ".join(etiquetas)
+		etiquetas.append(PREVIAS.get(clave, "revisa los pasos de la orden"))
+	var ayuda := siguiente_ayuda(progreso_indicios(motor.estado()))
+	var aviso := "Antes de seguir, revisa lo que falta: " + ", ".join(etiquetas) + "."
+	return aviso if ayuda.is_empty() else aviso + " " + ayuda
 
 
 func avisar(texto: String, tipo := "info", titulo := "", donde := "", fuente := "") -> void:
@@ -495,7 +500,7 @@ func avisar_objeto(texto: String, tipo: String, titulo: String, objeto: String) 
 
 
 func avisar_temporal(texto: String, sobre_menu := false, segundos := 2.0) -> void:
-	resultado.text = texto
+	resultado.text = TextoLimpio.linea(texto)
 	resultado.visible = not flashcard.visible and (sobre_menu or not menu_pieza.visible)
 	duracion_aviso.start(segundos)
 
@@ -518,7 +523,7 @@ func reanudar_tras_flashcard() -> void:
 		if flashcard.visible:
 			return
 		actualizar_hud()
-		resumen.mostrar(motor)
+		resumen.mostrar(motor, datos)
 		if resumen.get_node("Reflexion").visible:
 			resumen.get_node("Reflexion").grab_focus()
 		return
@@ -547,8 +552,8 @@ func siguiente_ayuda(progreso: Dictionary) -> String:
 			var ayuda: String = indicio.get("ayuda", "")
 			if not ayuda.is_empty() and indicio.clave == "resuelto" \
 					and zona_activa == $Banco and fuente_banco.fuente() == "banco":
-				return ("Repara: abre el multímetro, elige Reconectar conductor "
-					+ "y cierra el conductor abierto en el banco físico.")
+				return ("Abre el multímetro y elige Reconectar conductor. "
+					+ "Cierra el conductor abierto en el banco físico.")
 			return ayuda
 	return ""
 
@@ -561,11 +566,15 @@ func mostrar_estado(inmediato := false) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var lineas := PackedStringArray()
 	var progreso := progreso_indicios(estado)
+	var marca: String = TextoLimpio.limpiar(datos.titulo).etiqueta
+	if not marca.is_empty():
+		lineas.append(marca)
+	lineas.append("Pasos")
 	for clave in indicios:
 		if progreso.has(clave):
-			lineas.append("%s %s" % ["[x]" if progreso[clave] else "[ ]", indicios[clave]])
+			lineas.append("%s %s" % ["[x]" if progreso[clave] else "[ ]", TextoLimpio.limpiar(indicios[clave]).texto])
 	var orden: Label = lateral.get_node("Estado")
-	orden.text = datos.titulo.trim_prefix("[MUESTRA] ")
+	orden.text = TextoLimpio.limpiar(datos.titulo).texto
 	orden.tooltip_text = orden.text
 	var falla: bool = motor.hay_problemas() or motor.fin() == "falta-critica"
 	# La captura cambia el encuadre. Las acciones conservan el Tween para mostrar fallos de apertura.
@@ -580,7 +589,7 @@ func mostrar_estado(inmediato := false) -> void:
 	actualizar_leds()
 	actualizar_hud()
 	if not flashcard.visible:
-		resumen.mostrar(motor)
+		resumen.mostrar(motor, datos)
 
 
 func actualizar_ayuda() -> void:
@@ -590,7 +599,7 @@ func actualizar_ayuda() -> void:
 	var ayuda := siguiente_ayuda(progreso)
 	if zona_activa == $Bajos and not Escenario.cumple(estado, datos.acciones.cerrar_orden.previas):
 		if not $Elevador.arriba:
-			ayuda = "Toma las calzas de la caja roja y sube el autobús desde la consola."
+			ayuda = "Toma las calzas de la caja roja. Sube el autobús desde la consola."
 		elif not $Elevador.seguro():
 			ayuda = "Traba ambos soportes antes de trabajar en los bajos."
 	if not terminado and not ayuda.is_empty():
@@ -607,8 +616,8 @@ func actualizar_ayuda() -> void:
 				herramienta = requisitos(id).get("herramienta", "")
 				break
 		if not herramienta.is_empty() and taller.mano != herramienta:
-			ayuda = "Toma en la mano: %s. %s" % [Inventario.CATALOGO[herramienta].nombre, ayuda]
-	lateral.get_node("Siguiente").text = "" if ayuda.is_empty() else "Siguiente: " + ayuda
+			ayuda = "Toma esta herramienta: %s. %s" % [Inventario.CATALOGO[herramienta].nombre, ayuda]
+	lateral.get_node("Siguiente").text = "" if ayuda.is_empty() else "Siguiente paso\n" + TextoLimpio.linea(ayuda)
 
 
 func actualizar_leds() -> void:
@@ -1101,7 +1110,7 @@ func _input(evento: InputEvent) -> void:
 				salida_hasta = 0
 				salida_solicitada.emit()
 			else:
-				avisar("Esc de nuevo para salir")
+				avisar("Presiona Esc otra vez para salir")
 				salida_hasta = ahora + 2000
 			return
 		if evento.keycode == KEY_H and motor.fin().is_empty():
@@ -1165,7 +1174,7 @@ func entrada_inventario(evento: InputEvent) -> bool:
 		if evento.keycode >= KEY_1 and evento.keycode <= KEY_8:
 			var numero: int = evento.keycode - KEY_1 + 1
 			if numero > 4 and not carrito_cerca():
-				avisar_temporal("El carrito está lejos")
+				avisar_temporal("El carrito está lejos. Acércate para tomar lo que necesitas.")
 			else:
 				taller.mano = taller.objeto_en_espacio(numero)
 				actualizar_inventario()

@@ -4,7 +4,7 @@ const Taller = preload("res://tests/acciones_taller.gd")
 
 const Bus = preload("res://escenas/bus.tscn")
 const Protocolo = preload("res://logica/entrada/protocolo.gd")
-const REPARAR := "Repara: abre el multímetro, elige Reconectar conductor y confirma en el panel."
+const REPARAR := "Abre el multímetro y elige Reconectar conductor. Confirma en el panel."
 const CONFIRMAR_FAROS := "Elige Confirmar la solución en el relé y confirma en el panel."
 
 
@@ -19,7 +19,7 @@ static func ejecutar() -> bool:
 
 static func probar_ordenes(arbol: SceneTree) -> bool:
 	var inicio := {
-		"aislamiento": "Inspecciona la compuerta del gabinete.",
+		"aislamiento": "Abre la compuerta del gabinete.",
 		"comunicacion": "Abre el monitor y elige Revisar los síntomas.",
 		"faros": "Inspecciona la caja de fusibles.",
 		"modulo_auxiliar": "Mide TP1 con referencia en TP0.",
@@ -46,7 +46,7 @@ static func recorrer_faros(bus: Node3D, arbol: SceneTree) -> bool:
 	if not elegir(bus, "caja_fusibles", "inspeccionar") \
 			or not comprobar_ayuda(bus, "Mide la continuidad en el conector de los faros.") \
 			or not elegir(bus, "conector_faros", "medir_continuidad") \
-			or not comprobar_ayuda(bus, "Cambia el foco del faro izquierdo y confirma en el panel.") \
+			or not comprobar_ayuda(bus, "Elige Cambiar el foco en el faro izquierdo. Confirma en el panel.") \
 			or not Taller.equipar(bus, "cambiar_foco_correcto") \
 			or not elegir(bus, "faro_izquierdo", "cambiar_foco_correcto"):
 		return false
@@ -73,12 +73,12 @@ static func recorrer_banco(bus: Node3D, arbol: SceneTree) -> bool:
 	for lectura: Button in bus.menu_pieza.lecturas:
 		if lectura.get_meta("accion") in ["reportar_tp1_0", "reportar_tp2_5"]:
 			lectura.pressed.emit()
-	if not comprobar_ayuda(bus, "Registra el diagnóstico en el multímetro según tus lecturas.") \
+	if not comprobar_ayuda(bus, "Abre el multímetro y elige la causa que indiquen tus lecturas.") \
 			or not elegir(bus, "multimetro", "diagnosticar_alimentacion") \
 			or not comprobar_ayuda(bus, REPARAR) \
 			or not bus.resultado.visible \
-			or bus.resultado.text != ("Diagnóstico registrado. Ahora repara: abre el multímetro, "
-				+ "elige Reconectar conductor y confirma en el panel.") \
+			or bus.resultado.text != ("Diagnóstico registrado. Abre el multímetro y "
+				+ "elige Reconectar conductor. Confirma en el panel.") \
 			or not elegir(bus, "multimetro", "reconectar"):
 		return false
 	return await confirmar(bus, arbol, "reconectar") and comprobar_resuelto(bus)
@@ -125,7 +125,7 @@ static func confirmar(bus: Node3D, arbol: SceneTree, id: String) -> bool:
 
 static func comprobar_ayuda(bus: Node3D, texto: String) -> bool:
 	var ayuda := bus.lateral.get_node_or_null("Siguiente") as Label
-	return ayuda != null and ayuda.is_visible_in_tree() and ayuda.text.begins_with("Siguiente: ") and ayuda.text.ends_with(texto)
+	return ayuda != null and ayuda.is_visible_in_tree() and ayuda.text.begins_with("Siguiente paso\n") and ayuda.text.ends_with(texto)
 
 
 static func comprobar_resuelto(bus: Node3D) -> bool:

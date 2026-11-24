@@ -13,7 +13,7 @@
   ],
   "causa_correcta": "Neumático pinchado",
   "explicacion_causa": {
-    "Neumático pinchado": "[MUESTRA] El pinchazo explica la pérdida de presión del neumático."
+    "Neumático pinchado": "[MUESTRA] El neumático pierde presión por el pinchazo."
   },
   "indicios": [
     {
@@ -29,37 +29,37 @@
     {
       "clave": "cambiar_rueda",
       "etiqueta": "Cambiar la rueda",
-      "ayuda": "Lleva el neumático de repuesto y confirma el cambio de rueda en el panel."
+      "ayuda": "Lleva el neumático de repuesto. Confirma el cambio de rueda en el panel."
     },
     {
       "clave": "apretar_tuerca_1",
       "etiqueta": "Apretar tuerca 1",
-      "ayuda": "Empieza el apriete en cruz por la tuerca 1 de la rueda delantera derecha. El orden es 1, 3, 5, 2, 4. Usa la perilla con el rango indicado [MUESTRA]."
+      "ayuda": "Empieza por la tuerca 1 de la rueda delantera derecha. Sigue en cruz: 1, 3, 5, 2, 4. Ajusta la perilla al rango marcado [MUESTRA]."
     },
     {
       "clave": "apretar_tuerca_3",
       "etiqueta": "Apretar tuerca 3",
-      "ayuda": "Selecciona la tuerca 3 de la rueda delantera derecha y aplica el torque [MUESTRA] con la perilla (40–60 en la escala del panel)."
+      "ayuda": "Elige la tuerca 3 de la rueda delantera derecha. Ajusta la perilla de 40 a 60 en la escala del panel [MUESTRA]."
     },
     {
       "clave": "apretar_tuerca_5",
       "etiqueta": "Apretar tuerca 5",
-      "ayuda": "Selecciona la tuerca 5 de la rueda delantera derecha y aplica el torque [MUESTRA] con la perilla (40–60 en la escala del panel)."
+      "ayuda": "Elige la tuerca 5 de la rueda delantera derecha. Ajusta la perilla de 40 a 60 en la escala del panel [MUESTRA]."
     },
     {
       "clave": "apretar_tuerca_2",
       "etiqueta": "Apretar tuerca 2",
-      "ayuda": "Selecciona la tuerca 2 de la rueda delantera derecha y aplica el torque [MUESTRA] con la perilla (40–60 en la escala del panel)."
+      "ayuda": "Elige la tuerca 2 de la rueda delantera derecha. Ajusta la perilla de 40 a 60 en la escala del panel [MUESTRA]."
     },
     {
       "clave": "apretar_tuerca_4",
       "etiqueta": "Apretar tuerca 4",
-      "ayuda": "Selecciona la tuerca 4 de la rueda delantera derecha y aplica el torque [MUESTRA] con la perilla (40–60 en la escala del panel)."
+      "ayuda": "Elige la tuerca 4 de la rueda delantera derecha. Ajusta la perilla de 40 a 60 en la escala del panel [MUESTRA]."
     },
     {
       "clave": "resuelto",
       "etiqueta": "Cerrar la orden",
-      "ayuda": "Destraba ambos soportes, despeja los bajos, baja el autobús y cierra la orden en la consola."
+      "ayuda": "Destraba ambos soportes y despeja los bajos. Baja el autobús y cierra la orden en la consola."
     }
   ],
   "estado": {
@@ -94,7 +94,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Presión baja en el neumático delantero derecho",
+      "descripcion": "[MUESTRA] El neumático delantero derecho tiene poca presión.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
@@ -118,7 +118,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Pinchazo localizado en la banda de rodadura",
+      "descripcion": "[MUESTRA] El pinchazo está en la banda de rodadura.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false
     },
@@ -136,7 +136,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "Neumático pinchado",
-      "descripcion": "[MUESTRA] Cambiar la rueda",
+      "descripcion": "[MUESTRA] Coloca la rueda de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -161,7 +161,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "Neumático pinchado",
-      "descripcion": "[MUESTRA] Apretar tuerca 1",
+      "descripcion": "[MUESTRA] Aprieta la tuerca 1.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -190,7 +190,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "Neumático pinchado",
-      "descripcion": "[MUESTRA] Apretar tuerca 3",
+      "descripcion": "[MUESTRA] Aprieta la tuerca 3.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -219,7 +219,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "Neumático pinchado",
-      "descripcion": "[MUESTRA] Apretar tuerca 5",
+      "descripcion": "[MUESTRA] Aprieta la tuerca 5.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -248,7 +248,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "Neumático pinchado",
-      "descripcion": "[MUESTRA] Apretar tuerca 2",
+      "descripcion": "[MUESTRA] Aprieta la tuerca 2.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -277,7 +277,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "Neumático pinchado",
-      "descripcion": "[MUESTRA] Apretar tuerca 4",
+      "descripcion": "[MUESTRA] Aprieta la tuerca 4.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -305,7 +305,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Cerrar la orden",
+      "descripcion": "[MUESTRA] Cierra la orden desde la consola.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false
     },
@@ -318,7 +318,7 @@
       "criticidad": "leve",
       "tipo_error": "punto-de-medicion-incorrecto",
       "causa": "",
-      "descripcion": "[MUESTRA] Esta rueda está en buen estado. El indicio corresponde a la delantera derecha.",
+      "descripcion": "[MUESTRA] Esta rueda está bien. Revisa la delantera derecha.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": false,
       "requiere": {
@@ -333,7 +333,7 @@
       },
       "efectos": {},
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
-      "descripcion": "[MUESTRA] Tuerca 1 dañada por torque fuera de rango. Repón la tuerca y vuelve a apretar.",
+      "descripcion": "[MUESTRA] Apretaste fuera del rango y dañaste la tuerca 1. Cámbiala y vuelve a apretar.",
       "recuperaciones": [
         "reponer_tuerca_1"
       ]
@@ -344,7 +344,7 @@
       },
       "efectos": {},
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
-      "descripcion": "[MUESTRA] Tuerca 3 dañada por torque fuera de rango. Repón la tuerca y vuelve a apretar.",
+      "descripcion": "[MUESTRA] Apretaste fuera del rango y dañaste la tuerca 3. Cámbiala y vuelve a apretar.",
       "recuperaciones": [
         "reponer_tuerca_3"
       ]
@@ -355,7 +355,7 @@
       },
       "efectos": {},
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
-      "descripcion": "[MUESTRA] Tuerca 5 dañada por torque fuera de rango. Repón la tuerca y vuelve a apretar.",
+      "descripcion": "[MUESTRA] Apretaste fuera del rango y dañaste la tuerca 5. Cámbiala y vuelve a apretar.",
       "recuperaciones": [
         "reponer_tuerca_5"
       ]
@@ -366,7 +366,7 @@
       },
       "efectos": {},
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
-      "descripcion": "[MUESTRA] Tuerca 2 dañada por torque fuera de rango. Repón la tuerca y vuelve a apretar.",
+      "descripcion": "[MUESTRA] Apretaste fuera del rango y dañaste la tuerca 2. Cámbiala y vuelve a apretar.",
       "recuperaciones": [
         "reponer_tuerca_2"
       ]
@@ -377,7 +377,7 @@
       },
       "efectos": {},
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
-      "descripcion": "[MUESTRA] Tuerca 4 dañada por torque fuera de rango. Repón la tuerca y vuelve a apretar.",
+      "descripcion": "[MUESTRA] Apretaste fuera del rango y dañaste la tuerca 4. Cámbiala y vuelve a apretar.",
       "recuperaciones": [
         "reponer_tuerca_4"
       ]
@@ -397,7 +397,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Reponer tuerca dañada",
+      "descripcion": "[MUESTRA] Coloca una tuerca de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -423,7 +423,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Reponer tuerca dañada",
+      "descripcion": "[MUESTRA] Coloca una tuerca de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -449,7 +449,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Reponer tuerca dañada",
+      "descripcion": "[MUESTRA] Coloca una tuerca de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -475,7 +475,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Reponer tuerca dañada",
+      "descripcion": "[MUESTRA] Coloca una tuerca de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -501,7 +501,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Reponer tuerca dañada",
+      "descripcion": "[MUESTRA] Coloca una tuerca de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "requiere_panel": true,
       "requiere": {
@@ -534,7 +534,7 @@
   ],
   "variante": {
     "estado": {
-      "aviso": "La pérdida de presión apareció durante la revisión previa a la salida."
+      "aviso": "El neumático perdió presión durante la revisión antes de salir."
     }
   }
 }

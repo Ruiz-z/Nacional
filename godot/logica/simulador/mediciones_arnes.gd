@@ -7,10 +7,10 @@ const OPCIONES := {"0": "≈0 V", "5": "≈5 V", "otra": "Otra"}
 const ERRORES_MEDICION := ["punto-de-medicion-incorrecto", "valor-fuera-de-rango", "paso-omitido"]
 const INTERPRETACION := "lectura-mal-interpretada"
 const MOTIVOS := {
-	"punto-de-medicion-incorrecto": "Mide el punto que distingue la falla.",
-	"valor-fuera-de-rango": "Revisa las lecturas reportadas y compáralas con el multímetro.",
-	"paso-omitido": "Se omitió una medición antes de reparar.",
-	INTERPRETACION: "Las lecturas reportadas no respaldan la causa elegida.",
+	"punto-de-medicion-incorrecto": "Mediste en otro punto. Revisa TP1 y TP2 con la punta negra en TP0.",
+	"valor-fuera-de-rango": "La lectura que anotaste no coincide. Compárala con el multímetro.",
+	"paso-omitido": "Faltó medir antes de reparar. Revisa TP1 y TP2.",
+	INTERPRETACION: "La causa elegida no coincide con tus lecturas. Compáralas antes de elegir otra causa.",
 }
 
 # El lector recibe el estado de la práctica y devuelve tp1, tp2 y aviso.
@@ -87,7 +87,7 @@ func aplicar(id: String, estado: Dictionary, causa: String, lectura_previa: Dict
 				error = "paso-omitido"
 			elif diagnostico.is_empty() and error.is_empty():
 				error = "paso-omitido"
-				return {"tipo_error": error, "motivo": "Se omitió el diagnóstico antes de reparar."}
+				return {"tipo_error": error, "motivo": "Faltó elegir la causa. Confirma tu diagnóstico antes de reparar."}
 			return {"tipo_error": "" if error == error_diagnostico else error}
 	return {}
 

@@ -1,5 +1,7 @@
 extends RefCounted
 
+const TextoLimpio = preload("res://logica/texto_limpio.gd")
+
 const Practica = preload("res://logica/simulador/practica.gd")
 
 
@@ -13,12 +15,14 @@ static func entradas(motor: RefCounted, escenario: Dictionary, componente: Strin
 		var requiere_panel: bool = regla.get("requiere_panel", false)
 		resultado.append({
 			"id": id,
-			"titulo": regla.get("titulo", regla.descripcion).trim_prefix("[MUESTRA] "),
-			"descripcion": regla.descripcion.trim_prefix("[MUESTRA] "),
+			"marca": TextoLimpio.limpiar("\n".join([regla.get("titulo", ""), regla.descripcion,
+				str(regla.get("costo", "")), str(regla.get("tiempo", "")), str(regla.get("riesgo", ""))])).etiqueta,
+			"titulo": TextoLimpio.limpiar(regla.get("titulo", regla.descripcion)).texto,
+			"descripcion": TextoLimpio.limpiar(regla.descripcion).texto,
 			"ejecucion": "confirmar en panel" if requiere_panel else "inmediata",
-			"costo": str(regla.get("costo", "—")).trim_prefix("[MUESTRA] "),
-			"tiempo": str(regla.get("tiempo", "—")).trim_prefix("[MUESTRA] "),
-			"riesgo": str(regla.get("riesgo", "—")).trim_prefix("[MUESTRA] "),
+			"costo": TextoLimpio.limpiar(str(regla.get("costo", "—"))).texto,
+			"tiempo": TextoLimpio.limpiar(str(regla.get("tiempo", "—"))).texto,
+			"riesgo": TextoLimpio.limpiar(str(regla.get("riesgo", "—"))).texto,
 			"requiere_panel": requiere_panel,
 		})
 	return resultado

@@ -116,5 +116,5 @@ func lectura_pieza(componente: String) -> String:
 	match componente:
 		"monitor": return "[MUESTRA] " + pantalla.text
 		"cables": return "[MUESTRA] Módulo de red bajo el tablero."
-		"fusibles_cabina": return "[MUESTRA] Fusibles de los circuitos de cabina."
+		"fusibles_cabina": return "[MUESTRA] Aquí están los fusibles de la cabina."
 	return ""

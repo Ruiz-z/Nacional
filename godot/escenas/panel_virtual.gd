@@ -23,7 +23,7 @@ func _ready() -> void:
 		FondoTarjeta.aplicar(self, 16)
 	$Torque.draw.connect(dibujar_zona)
 	$Lectura.draw.connect(dibujar_perilla)
-	$Zona.text = "Zona segura simulada · %d–%d" % [ZONA_MINIMA, ZONA_MAXIMA]
+	$Zona.text = "Rango de ejemplo · %d–%d" % [ZONA_MINIMA, ZONA_MAXIMA]
 	for led in [$Energizado, $Bloqueado, $Falla]:
 		led.draw.connect(dibujar_led.bind(led))
 	$Bloqueo.toggled.connect(func(activo: bool): emitir("bloqueo", int(activo)))

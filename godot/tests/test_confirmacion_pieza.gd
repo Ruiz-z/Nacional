@@ -19,7 +19,7 @@ static func ejecutar() -> bool:
 	correcto = correcto and bus.get_node("Interfaz").visible
 	tecla(raiz, KEY_1)
 	correcto = correcto and sector.abierta and not bus.menu_pieza.visible \
-		and bus.resultado.text == "Compuerta abierta. Ahora abre el monitor y elige Evaluar el indicio." \
+		and bus.resultado.text == "Compuerta abierta. Abre el monitor y elige Revisar el aislamiento." \
 		and not bus.duracion_aviso.is_stopped()
 	correcto = correcto and Taller.equipar(bus, "evaluar_indicio")
 	bus.abrir_menu(sector.piezas.monitor)
@@ -52,7 +52,7 @@ static func ejecutar() -> bool:
 	var salidas: Array[bool] = []
 	bus.salida_solicitada.connect(func(): salidas.append(true))
 	tecla(raiz, KEY_ESCAPE)
-	correcto = correcto and salidas.is_empty() and bus.resultado.text == "Esc de nuevo para salir"
+	correcto = correcto and salidas.is_empty() and bus.resultado.text == "Presiona Esc otra vez para salir"
 	tecla(raiz, KEY_ESCAPE)
 	correcto = correcto and salidas.size() == 1
 	bus.free()

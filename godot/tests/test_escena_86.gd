@@ -18,9 +18,9 @@ static func comprobar(base: String) -> bool:
 	var correcto: bool = avance.guardado and menu.pantalla != null
 	if correcto:
 		var pantalla: Node = menu.pantalla
-		correcto = pantalla.detalle.text.contains("Microlección 1 de 3") \
+		correcto = pantalla.detalle.text.contains("Lección corta 1 de 3") \
 			and pantalla.detalle.text.contains("Fuente de prueba") \
-			and Pantallas.responder(pantalla, 6) and pantalla.detalle.text.contains("Prioridad actualizada")
+			and Pantallas.responder(pantalla, 6) and pantalla.detalle.text.contains("Temas para repasar")
 	var estado := Recorrido.estado(base, menu.perfil.id, ahora)
 	var filas: Variant = Registro.leer(base, "T-85")
 	menu.free()

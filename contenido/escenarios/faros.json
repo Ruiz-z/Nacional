@@ -14,13 +14,13 @@
   ],
   "causa_correcta": "foco-danado",
   "explicacion_causa": {
-    "foco-danado": "[MUESTRA] La prueba de continuidad distingue el foco dañado del fusible.",
-    "fusible-abierto": "[MUESTRA] El fusible abierto no explica la falla inicial del foco."
+    "foco-danado": "[MUESTRA] La prueba de continuidad muestra que la falla está en el foco.",
+    "fusible-abierto": "[MUESTRA] El problema inicial estaba en el foco izquierdo."
   },
   "indicios": [
     {"clave": "inspeccionado", "etiqueta": "Caja de fusibles inspeccionada", "ayuda": "Inspecciona la caja de fusibles."},
     {"clave": "continuidad_medida", "etiqueta": "Continuidad medida", "ayuda": "Mide la continuidad en el conector de los faros."},
-    {"clave": "foco_repuesto", "etiqueta": "Foco izquierdo repuesto", "ayuda": "Cambia el foco del faro izquierdo y confirma en el panel."},
+    {"clave": "foco_repuesto", "etiqueta": "Foco izquierdo repuesto", "ayuda": "Elige Cambiar el foco en el faro izquierdo. Confirma en el panel."},
     {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar la solución en el relé y confirma en el panel."}
   ],
   "estado": {
@@ -56,7 +56,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Abrir la caja de fusibles",
+      "descripcion": "[MUESTRA] Abre la caja de fusibles.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "medir_continuidad": {
@@ -76,7 +76,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Medir continuidad con el multímetro",
+      "descripcion": "[MUESTRA] Mide la continuidad con el multímetro.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "cambiar_foco_sin_desconectar": {
@@ -96,7 +96,7 @@
       "criticidad": "leve",
       "tipo_error": "accion-insegura",
       "causa": "",
-      "descripcion": "[MUESTRA] Cambiar foco sin desconectar: salta una chispa",
+      "descripcion": "[MUESTRA] Saltó una chispa. Desconecta el circuito antes de cambiar el foco.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reponer_fusible_equivocado": {
@@ -116,12 +116,12 @@
       "criticidad": "leve",
       "tipo_error": "valor-fuera-de-rango",
       "causa": "",
-      "descripcion": "[MUESTRA] Instalar un fusible equivocado",
+      "descripcion": "[MUESTRA] Elegiste otro fusible. Repón el fusible correcto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "cambiar_foco_correcto": {
       "requiere": {"herramienta": "destornillador", "piezas": ["foco"]},
-      "titulo": "Desconectar y cambiar el foco",
+      "titulo": "Cambiar el foco",
       "requiere_panel": true,
       "componente": "faro_izquierdo",
       "previas": {
@@ -137,7 +137,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "foco-danado",
-      "descripcion": "[MUESTRA] Desconectar el circuito simulado y cambiar el foco correcto",
+      "descripcion": "[MUESTRA] Desconecta el circuito y cambia el foco del faro izquierdo.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_solucion": {
@@ -161,7 +161,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Confirmar que ambos faros encienden",
+      "descripcion": "[MUESTRA] Comprueba que enciendan los dos faros.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     }
   },
@@ -175,7 +175,7 @@
         "faro_derecho": false
       },
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
-      "descripcion": "[MUESTRA] El fusible se quemó y ambos faros se apagaron.",
+      "descripcion": "[MUESTRA] Se quemó el fusible y se apagaron los dos faros. Repón el fusible.",
       "recuperaciones": [
         "reponer_fusible"
       ]
@@ -200,7 +200,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Reponer el fusible de la maqueta",
+      "descripcion": "[MUESTRA] Coloca un fusible de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "costo": "[MUESTRA] bajo",
       "tiempo": "[MUESTRA] breve",

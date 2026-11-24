@@ -51,6 +51,13 @@ unique_name_in_owner = true
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
 
+[node name="Marca" type="Label" parent="Fondo/Centro/Tarjeta/Contenido"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"Secundario"
+theme_override_font_sizes/font_size = 14
+
 [node name="Fuente" type="Label" parent="Fondo/Centro/Tarjeta/Contenido"]
 unique_name_in_owner = true
 theme_type_variation = &"Secundario"
@@ -62,4 +69,4 @@ custom_minimum_size = Vector2(124, 52)
 size_flags_horizontal = 8
 theme_type_variation = &"Primario"
 theme_override_font_sizes/font_size = 18
-text = "OK"
+text = "Entendido"

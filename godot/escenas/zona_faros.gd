@@ -87,5 +87,5 @@ func lectura_pieza(componente: String) -> String:
 	if lentes.has(componente):
 		return "Faro encendido" if lentes[componente].material_override.emission_enabled else "Faro apagado"
 	if componente == "conector_faros" and continuidad:
-		return "[MUESTRA] Circuito identificado. Compara ambos faros."
+		return "[MUESTRA] Ya mediste la continuidad. Compara los dos faros."
 	return super.lectura_pieza(componente)

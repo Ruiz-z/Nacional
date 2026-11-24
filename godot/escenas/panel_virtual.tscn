@@ -44,7 +44,7 @@ ticks_on_borders = true
 tick_count = 6
 
 [node name="Zona" type="Label" parent="."]
-tooltip_text = "Rango de ejemplo del caso de prueba RF-49 del panel virtual."
+tooltip_text = "Rango de ejemplo para el apriete."
 autowrap_mode = 3
 theme_type_variation = &"Secundario"
 
