@@ -144,5 +144,5 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-112 S — Resumen y entrega a `aprendizaje` y `tablero` con errores de medición separados de los de interpretación (RF-15) — Hecho cuando: indicador visible en el tablero con datos `[DEMO]`.
 - [x] T-113 S+E — Actualizar `SPEC-panel.md` y `docs/protocolo-panel.md` con los controles `nodo_p` y `nodo_q` (RF-14, protocolo) — Hecho cuando: contrato versionado y aprobado antes de tocar el firmware.
 - [ ] T-114 E — Firmware de A1 y A2 con umbral y antirrebote, y su prueba de PC (RF-14) — Hecho cuando: las líneas generadas coinciden con los ejemplos del protocolo.
-- [ ] T-115 S — Detección del cierre de S1 o S2 como verificación de la reparación y paso al virtual si se desconecta (RF-14, 18) — Hecho cuando: prueba con el emisor de eventos.
-- [ ] T-116 S+E — `docs/banco-arnes.md` con diagrama, materiales y prueba de aceptación, y recorrido manual con las dos variantes (RF-19, criterios) — Hecho cuando: el recorrido completo pasa con el banco virtual y, si existe, con el físico.
+- [x] T-115 S — Detección del cierre de S1 o S2 como verificación de la reparación y paso al virtual si se desconecta (RF-14, 18) — Hecho cuando: prueba con el emisor de eventos.
+- [x] T-116 S+E — `docs/banco-arnes.md` con diagrama, materiales y prueba de aceptación, y recorrido manual con las dos variantes (RF-19, criterios) — Hecho cuando: el recorrido completo pasa con el banco virtual y, si existe, con el físico.

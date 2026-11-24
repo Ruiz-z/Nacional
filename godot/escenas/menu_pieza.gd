@@ -209,13 +209,14 @@ func estilo_chip(etiqueta: Label, color: String, tam := 13) -> void:
 	etiqueta.add_theme_font_size_override("font_size", tam)
 
 
-func esperar_panel() -> void:
+func esperar_panel(banco_fisico := false) -> void:
 	lista.hide()
 	filas_lecturas.hide()
 	diagnostico.hide()
 	contenido.get_node("AccionesTitulo").hide()
 	var aviso: Label = contenido.get_node("Pendiente")
-	aviso.text = "Acción lista: confirma en el panel (Enter o botón Confirmar)"
+	aviso.text = "Cierra el conductor abierto en el banco físico." if banco_fisico \
+		else "Acción lista: confirma en el panel (Enter o botón Confirmar)"
 	aviso.show()
 	cerrar_boton.grab_focus()
 

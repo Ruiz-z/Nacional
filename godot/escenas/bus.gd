@@ -35,6 +35,7 @@ const RESULTADOS := {
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Practica = preload("res://logica/simulador/practica.gd")
 const MenuPieza = preload("res://logica/simulador/menu_pieza.gd")
+const FuenteBanco = preload("res://logica/simulador/fuente_banco.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
 const Interactuable = preload("res://escenas/interactuable.gd")
 
@@ -46,6 +47,8 @@ var accion_pendiente := ""
 var causa_marcada := ""
 var pieza_apuntada: Interactuable
 var conexion_panel: RefCounted
+var fuente_banco := FuenteBanco.new()
+var _udp_banco := PacketPeerUDP.new()
 var tecnico := {}
 var resultados_guardados := false
 var pausa_visible := false
@@ -94,7 +97,13 @@ func _ready() -> void:
 		$Interfaz/Lateral/Estado.text = str(carga)
 		return
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	motor = Motor.new(datos)
+	if datos.zona == "banco":
+		motor = Motor.new(datos, fuente_banco.leer)
+		if "--banco-fisico" in OS.get_cmdline_user_args():
+			if _udp_banco.bind(FuenteBanco.PUERTO_UDP, "127.0.0.1") != OK:
+				lateral.get_node("Aviso").text = "No se pudo abrir el enlace del banco · falla virtual"
+	else:
+		motor = Motor.new(datos)
 	ultimo_ms = Time.get_ticks_msec()
 	menu_pieza.elegida.connect(elegir_accion)
 	menu_pieza.cierre_solicitado.connect(cerrar_menu)
@@ -177,12 +186,12 @@ func navegar(destino: String) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
-func ejecutar(id: String, fuente: String) -> void:
-	if motor == null or panel.conexion.pausado():
+func ejecutar(id: String, fuente: String, lectura_previa: Dictionary = {}) -> void:
+	if motor == null or (panel.conexion.pausado() and fuente != "banco"):
 		return
 	var ahora := Time.get_ticks_msec()
 	sincronizar_fuente_seguridad()
-	var decision: Dictionary = motor.ejecutar(id, fuente, ahora - ultimo_ms, controles_seguridad())
+	var decision: Dictionary = motor.ejecutar(id, fuente, ahora - ultimo_ms, controles_seguridad(), lectura_previa)
 	ultimo_ms = ahora
 	mostrar_resultado(decision)
 	jugador.mostrar_herramienta(id if decision.get("aplicada", false) else "")
@@ -206,6 +215,11 @@ func mostrar_resultado(decision: Dictionary) -> void:
 		texto = PROBLEMAS.get(evento, datos.eventos[evento].descripcion.trim_prefix("[MUESTRA] "))
 	elif not decision.get("aplicada", false) and texto.begins_with("Se requiere "):
 		texto = "Acción no aplicada. Revisa los indicios y completa los pasos previos."
+	elif decision.has("punto_medido"):
+		texto = "Medición registrada: %s = %.1f V" % [
+			decision.punto_medido.to_upper(), decision.lectura_mostrada]
+	elif decision.has("lectura-reportada"):
+		texto = "Lecturas reportadas guardadas"
 	elif texto.is_empty():
 		var id: String = decision.get("accion", "")
 		if id == "inspeccionar" and zona_activa != $Sector:
@@ -216,12 +230,12 @@ func mostrar_resultado(decision: Dictionary) -> void:
 			texto = "Conductor reconectado"
 		else:
 			texto = RESULTADOS.get(id, "Acción completada")
-	avisar(texto)
+	avisar(texto, decision.has("lectura-reportada"))
 
 
-func avisar(texto: String) -> void:
+func avisar(texto: String, sobre_menu := false) -> void:
 	resultado.text = texto
-	resultado.visible = not menu_pieza.visible
+	resultado.visible = sobre_menu or not menu_pieza.visible
 	duracion_aviso.start()
 
 
@@ -244,7 +258,7 @@ func mostrar_estado(inmediato := false) -> void:
 	if zona_activa == $Banco:
 		actualizar_banco()
 		interior.mostrar_modulo_auxiliar(estado.resuelto)
-		lineas.append("Banco %s · TP0 primero, luego TP1 o TP2." % motor.mediciones.fuente)
+		lineas.append("Fuente: %s · TP0 primero, luego TP1 o TP2." % $Banco.etiqueta_fuente(motor.mediciones.fuente))
 	lateral.get_node("Indicios").text = "\n".join(lineas)
 	actualizar_leds()
 	actualizar_hud()
@@ -372,7 +386,7 @@ func elegir_accion(indice: int, fuente: String) -> void:
 		if panel.conexion.fuente_panel() == "virtual":
 			panel_oculto = false
 			actualizar_panel(Time.get_ticks_msec())
-		menu_pieza.esperar_panel()
+		menu_pieza.esperar_panel(entrada.id == "reconectar" and fuente_banco.fuente() == "banco")
 		jugador.mostrar_herramienta(entrada.id)
 	else:
 		cerrar_menu()
@@ -410,6 +424,8 @@ func recibir_accion(accion: Dictionary) -> void:
 				cerrar_menu()
 		"confirmar":
 			if not accion_pendiente.is_empty():
+				if accion_pendiente == "reconectar" and fuente_banco.fuente() == "banco":
+					return
 				if zona_activa == $Banco and accion.fuente_entrada in ["teclado", "control"]:
 					if panel.conexion.fuente_panel() == "virtual":
 						panel.emitir("confirmar", 1)
@@ -436,8 +452,40 @@ func actualizar_banco() -> void:
 	$Banco.mostrar_multimetro(mediciones.pantalla, lectura.aviso, mediciones.fuente)
 
 
+func recibir_banco(linea: String, ahora: int) -> void:
+	var lectura_previa := fuente_banco.recibir(linea, ahora)
+	sincronizar_banco()
+	if not lectura_previa.is_empty() and motor.fin().is_empty():
+		cerrar_menu()
+		ejecutar("reconectar", "banco", lectura_previa)
+
+
+func sincronizar_banco() -> void:
+	if motor.mediciones.fuente != fuente_banco.fuente():
+		motor.mediciones.fuente = fuente_banco.fuente()
+		if accion_pendiente == "reconectar":
+			menu_pieza.esperar_panel(motor.mediciones.fuente == "banco")
+		mostrar_estado()
+	else:
+		actualizar_banco()
+
+
 func _process(_delta: float) -> void:
-	actualizar_panel(Time.get_ticks_msec())
+	var ahora := Time.get_ticks_msec()
+	actualizar_panel(ahora)
+	if zona_activa != $Banco:
+		return
+	var fuente_anterior := fuente_banco.fuente()
+	var aviso_anterior: String = fuente_banco.conexion.aviso()
+	fuente_banco.actualizar(ahora)
+	if fuente_anterior != fuente_banco.fuente() or aviso_anterior != fuente_banco.conexion.aviso():
+		sincronizar_banco()
+	if aviso_anterior != fuente_banco.conexion.aviso() and not fuente_banco.conexion.aviso().is_empty():
+		avisar(fuente_banco.conexion.aviso(), true)
+	if not _udp_banco.is_bound():
+		return
+	for indice in range(mini(_udp_banco.get_available_packet_count(), 64)):
+		recibir_banco(_udp_banco.get_packet().get_string_from_utf8(), ahora)
 
 
 func _physics_process(_delta: float) -> void:
@@ -455,6 +503,7 @@ func _physics_process(_delta: float) -> void:
 
 
 func _exit_tree() -> void:
+	_udp_banco.close()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 

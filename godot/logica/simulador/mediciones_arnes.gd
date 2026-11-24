@@ -53,7 +53,7 @@ func tocar(punto: String) -> String:
 	return ""
 
 
-func aplicar(id: String, estado: Dictionary, causa: String) -> Dictionary:
+func aplicar(id: String, estado: Dictionary, causa: String, lectura_previa: Dictionary = {}) -> Dictionary:
 	var campos := id.split("_")
 	match campos[0]:
 		"medir":
@@ -74,8 +74,8 @@ func aplicar(id: String, estado: Dictionary, causa: String) -> Dictionary:
 			error_diagnostico = evaluar(estado)
 			return {"causa_elegida": causa, "tipo_error": error_diagnostico}
 		"reconectar":
-			var error := evaluar(estado)
-			if medidas.is_empty():
+			var error := evaluar(estado, lectura_previa)
+			if medidas.is_empty() and (fuente != "banco" or reportadas.is_empty()):
 				error = "paso-omitido"
 			elif diagnostico.is_empty() and error.is_empty():
 				error = "paso-omitido"
@@ -84,16 +84,17 @@ func aplicar(id: String, estado: Dictionary, causa: String) -> Dictionary:
 	return {}
 
 
-func evaluar(estado: Dictionary) -> String:
-	var tensiones: Dictionary = leer.call(estado)
+func evaluar(estado: Dictionary, lectura_previa: Dictionary = {}) -> String:
+	var tensiones: Dictionary = leer.call(estado) if lectura_previa.is_empty() else lectura_previa
+	var evidencia := reportadas if fuente == "banco" else medidas
 	var alimentacion := Banco.coincide(tensiones.tp1, 0.0)
 	var punto_falla := "tp1" if alimentacion else "tp2"
-	if not medidas.has(punto_falla):
+	if not evidencia.has(punto_falla):
 		return "punto-de-medicion-incorrecto"
 	for punto in PUNTOS:
 		var opcion: String = reportadas.get(punto, "")
-		if opcion not in ["0", "5"] or not medidas.has(punto) \
-				or not Banco.coincide(opcion.to_float(), medidas[punto]) \
+		if opcion not in ["0", "5"] or not evidencia.has(punto) \
+				or (fuente != "banco" and not Banco.coincide(opcion.to_float(), medidas[punto])) \
 				or not Banco.coincide(opcion.to_float(), tensiones[punto]):
 			return "valor-fuera-de-rango"
 	if not diagnostico.is_empty() and diagnostico != ("alimentacion" if alimentacion else "senal"):

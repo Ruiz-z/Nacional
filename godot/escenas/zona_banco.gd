@@ -64,7 +64,11 @@ func reflejar_estado(_estado: Dictionary, _falla: bool, _inmediato := false) -> 
 
 func mostrar_multimetro(lectura: String, aviso: String, fuente: String) -> void:
 	pantalla.text = lectura
-	estado_banco.text = "%s · Fuente: %s" % [aviso, fuente]
+	estado_banco.text = "%s · Fuente: %s" % [aviso, etiqueta_fuente(fuente)]
+
+
+func etiqueta_fuente(fuente: String) -> String:
+	return "banco físico" if fuente == "banco" else fuente
 
 
 func lectura_pieza(_componente: String) -> String:

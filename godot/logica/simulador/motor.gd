@@ -2,7 +2,7 @@ extends RefCounted
 
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
-const ENTRADAS := ["panel", "virtual", "teclado", "control"]
+const ENTRADAS := ["panel", "virtual", "teclado", "control", "banco"]
 
 # Estas cifras son reglas del juego, independientes de los valores del escenario.
 const PENALIZACIONES := {"paso-innecesario": 4, "orden-incorrecto": 8,
@@ -57,7 +57,8 @@ func faltas() -> Array:
 	return _faltas.duplicate(true)
 
 
-func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dictionary = {}) -> Dictionary:
+func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dictionary = {},
+		lectura_previa: Dictionary = {}) -> Dictionary:
 	if not _fin.is_empty():
 		return rechazo("El escenario ya terminó.")
 	if fuente_entrada not in ENTRADAS or tiempo_ms < 0:
@@ -67,8 +68,14 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 	var regla: Dictionary = reglas.get(id, {})
 	if regla.is_empty():
 		return rechazo("La acción no está disponible.")
-	if mediciones != null and regla.get("requiere_panel", false) and fuente_entrada not in ["panel", "virtual"]:
-		return rechazo("Confirma la reparación en el panel.")
+	if fuente_entrada == "banco" and (mediciones == null or id != "reconectar"
+			or mediciones.fuente != "banco" or lectura_previa.is_empty()):
+		return rechazo("Falta la verificación del banco.")
+	if mediciones != null and regla.get("requiere_panel", false):
+		if mediciones.fuente == "banco" and fuente_entrada != "banco":
+			return rechazo("Cierra el conductor abierto en el banco físico.")
+		if fuente_entrada not in ["panel", "virtual", "banco"]:
+			return rechazo("Confirma la reparación en el panel.")
 	var decision := {"accion": id, "estado_antes": estado(), "fuente_entrada": fuente_entrada,
 		"tiempo_ms": tiempo_ms, "competencia": regla.competencia, "fuente": regla.fuente,
 		"criticidad": regla.criticidad, "tipo_error": regla.tipo_error, "aplicada": false,
@@ -95,7 +102,7 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 			decision.motivo = "La acción produciría un estado imposible."
 		else:
 			if mediciones != null:
-				decision.merge(mediciones.aplicar(id, _estado, regla.causa), true)
+				decision.merge(mediciones.aplicar(id, _estado, regla.causa, lectura_previa), true)
 				decision["fuente_falla"] = mediciones.fuente
 				if decision.motivo.is_empty():
 					decision.motivo = Mediciones.MOTIVOS.get(decision.tipo_error, "")
