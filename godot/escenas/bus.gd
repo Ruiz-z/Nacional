@@ -31,6 +31,7 @@ var resultados_guardados := false
 var pausa_visible := false
 var hud_colapsado := false
 var panel_oculto := false
+var modo_captura := false
 @onready var jugador := $Jugador
 @onready var alcance: RayCast3D = $Jugador/Camara/Alcance
 @onready var resumen := $Interfaz/Lateral/Resumen
@@ -122,7 +123,7 @@ func mostrar_estado() -> void:
 	lateral.get_node("Objetivo").text = datos.descripcion.trim_prefix("[MUESTRA] ")
 	lateral.get_node("Indicios").text = "\n".join(lineas)
 	var falla: bool = motor.hay_problemas() or motor.fin() == "falta-critica"
-	$Sector.reflejar_estado(estado, falla)
+	$Sector.reflejar_estado(estado, falla, modo_captura)
 	panel.mostrar_leds({"energizado": estado.get("energizado"), "bloqueado": estado.get("bloqueo_puesto"),
 		"falla": falla})
 	actualizar_hud()
@@ -133,7 +134,7 @@ func mostrar_estado() -> void:
 func actualizar_hud() -> void:
 	var terminado: bool = motor != null and not motor.fin().is_empty()
 	var detalle := not terminado and not hud_colapsado
-	$Interfaz.offset_right = 476.0 if terminado else 250.0
+	$Interfaz.offset_right = 476.0 if terminado else 312.0
 	lateral.get_node("AlternarHud").visible = not terminado
 	lateral.get_node("AlternarHud").text = "Mostrar HUD" if hud_colapsado else "Ocultar HUD"
 	for nombre in ["Estado", "Objetivo", "IndiciosTitulo", "Indicios", "Conexion"]:
@@ -201,6 +202,7 @@ func actualizar_accion_visible() -> void:
 	var lista: OptionButton = lateral.get_node("Accion")
 	var detalle: Label = lateral.get_node("DetalleAccion")
 	detalle.text = lista.get_item_text(lista.selected) if lista.selected > 0 else ""
+	jugador.mostrar_herramienta(str(lista.get_selected_metadata()) if lista.visible and lista.selected > 0 and not pausa_visible else "")
 	detalle.visible = lista.visible and not detalle.text.is_empty()
 	lateral.get_node("ConfirmarAccion").disabled = pausa_visible or lista.selected <= 0
 
@@ -229,7 +231,7 @@ func _process(_delta: float) -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	var caminando: bool = jugador.activo and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	var caminando: bool = jugador.activo and (modo_captura or Input.mouse_mode == Input.MOUSE_MODE_CAPTURED)
 	var objetivo := alcance.get_collider() as Interactuable if caminando else null
 	if objetivo != pieza_apuntada:
 		if is_instance_valid(pieza_apuntada):
@@ -238,7 +240,8 @@ func _physics_process(_delta: float) -> void:
 		if objetivo != null:
 			objetivo.resaltar(true)
 	$Mira.visible = caminando
-	$Apuntado.text = "Clic / A · %s" % objetivo.nombre if objetivo != null else ""
+	$Apuntado.visible = objetivo != null
+	$Apuntado/Fondo/Nombre.text = "Clic / A · %s" % objetivo.nombre if objetivo != null else ""
 
 
 func _exit_tree() -> void:

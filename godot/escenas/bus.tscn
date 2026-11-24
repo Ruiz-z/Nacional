@@ -75,9 +75,18 @@ emission_energy_multiplier = 0.55
 render_priority = 1
 transparency = 1
 shading_mode = 0
-no_depth_test = true
-billboard_mode = 1
 albedo_color = Color(0.025, 0.032, 0.04, 0.84)
+
+[sub_resource type="StyleBoxFlat" id="FondoApuntado"]
+content_margin_left = 12.0
+content_margin_top = 5.0
+content_margin_right = 12.0
+content_margin_bottom = 5.0
+bg_color = Color(0.025, 0.032, 0.04, 0.78)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
 
 [sub_resource type="QuadMesh" id="PlacaPeligro"]
 size = Vector2(2.10, 0.65)
@@ -166,7 +175,7 @@ scale = Vector3(1.18, 1.18, 1.18)
 rotation_degrees = Vector3(0, -90, 0)
 
 [node name="Sector" type="Node3D" parent="."]
-position = Vector3(1.257, 1.41, 0.08)
+position = Vector3(1.25, 0.9, 0.08)
 script = ExtResource("Gabinete")
 
 [node name="Taller" type="Node3D" parent="."]
@@ -1128,31 +1137,15 @@ rotation_degrees = Vector3(41, 0, 0)
 cast_shadow = 0
 
 [node name="AvisoVoltaje" type="Node3D" parent="."]
-position = Vector3(4.0, 0, 5.4)
-
-[node name="Base" type="MeshInstance3D" parent="AvisoVoltaje"]
-position = Vector3(0, 0.05, 0)
-scale = Vector3(0.62, 0.1, 0.47)
-mesh = SubResource("Caja")
-material_override = SubResource("Negro")
-
-[node name="Soporte" type="MeshInstance3D" parent="AvisoVoltaje"]
-position = Vector3(0, 0.48, 0)
-scale = Vector3(0.065, 0.91, 0.065)
-mesh = SubResource("Caja")
-material_override = SubResource("Acero")
+position = Vector3(2.1, 1.65, -10.83)
+scale = Vector3(0.35, 0.35, 0.35)
 
 [node name="Fondo" type="MeshInstance3D" parent="AvisoVoltaje"]
-position = Vector3(0, 1.02, 0)
 mesh = SubResource("PlacaPeligro")
 cast_shadow = 0
 
 [node name="Etiqueta" type="Label3D" parent="AvisoVoltaje"]
-position = Vector3(0, 1.02, 0)
-billboard = 1
-no_depth_test = true
-render_priority = 3
-outline_render_priority = 2
+position = Vector3(0, 0, 0.025)
 pixel_size = 0.009
 font_size = 28
 outline_size = 4
@@ -1163,7 +1156,7 @@ text = "PELIGRO\nALTO VOLTAJE"
 anchor_bottom = 1.0
 offset_left = 12.0
 offset_top = 12.0
-offset_right = 250.0
+offset_right = 312.0
 offset_bottom = -12.0
 horizontal_scroll_mode = 0
 follow_focus = true
@@ -1177,7 +1170,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 24.0
-offset_top = 54.0
+offset_top = 86.0
 offset_right = -12.0
 offset_bottom = -24.0
 mouse_filter = 2
@@ -1208,7 +1201,8 @@ offset_bottom = 48.0
 [node name="Estado" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Titulo"
 text = ""
-autowrap_mode = 3
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 24
 
 [node name="Muestra" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Metadato"
@@ -1218,7 +1212,8 @@ autowrap_mode = 3
 [node name="Objetivo" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Secundario"
 text = ""
-autowrap_mode = 3
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 16
 
 [node name="IndiciosTitulo" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Seccion"
@@ -1228,7 +1223,8 @@ autowrap_mode = 3
 [node name="Indicios" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Secundario"
 text = ""
-autowrap_mode = 3
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 16
 
 [node name="Conexion" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Chip"
@@ -1300,15 +1296,22 @@ theme_override_colors/font_outline_color = Color(0.04, 0.06, 0.08, 1)
 theme_override_constants/outline_size = 5
 text = "+"
 
-[node name="Apuntado" type="Label" parent="."]
+[node name="Apuntado" type="CenterContainer" parent="."]
+visible = false
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -180.0
-offset_right = 180.0
-offset_top = 25.0
-horizontal_alignment = 1
+offset_left = -170.0
+offset_right = 170.0
+offset_top = 24.0
 mouse_filter = 2
-theme_override_colors/font_outline_color = Color(0.04, 0.06, 0.08, 1)
-theme_override_constants/outline_size = 6
+
+[node name="Fondo" type="PanelContainer" parent="Apuntado"]
+mouse_filter = 2
+theme_override_styles/panel = SubResource("FondoApuntado")
+
+[node name="Nombre" type="Label" parent="Apuntado/Fondo"]
+mouse_filter = 2
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1

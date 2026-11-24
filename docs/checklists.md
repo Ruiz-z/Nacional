@@ -38,12 +38,14 @@ for alto in 720 1080; do
     godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn \
       "../build/capturas/${vista}-${alto}.png" "$ancho" "$alto" "$@"
   }
-  captura entrada 5.2 0 7.8 28
-  captura cerrado 3.25 0 0.08 90
-  captura abierto 3.25 0 0.42 90 abierto
-  captura danado 3.25 0 0.42 90 danado
+  captura entrada 6.75 0 0.12 90 0 entrada
+  captura cerrado 3.10 0 0.08 90 -26 cerrado
+  captura abierto 3.10 0 0.31 90 -19 abierto
+  captura danado 3.10 0 0.31 90 -19 danado
 done
 ```
+
+Las coordenadas indican la posición de los pies en metros y los ángulos de giro e inclinación en grados. Los ojos quedan a 1,70 m. La entrada deja 5,50 m hasta el casco y despeja los paneles laterales para encuadrar el autobús completo. Las otras tres vistas quedan a 1,60 m del frente del gabinete. Para comprobar el encuadre, la bisagra, el daño y el presupuesto de triángulos por consola, agrega `--headless` antes de `--path` y `--verificar` al final de los argumentos del script.
 
 - [ ] En ambas resoluciones, comprobar el encuadre desde la entrada, la compuerta cerrada y el monitor con el gabinete abierto. En la captura de daño, comprobar también el tornillo roto y el LED rojo.
 
