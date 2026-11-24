@@ -69,22 +69,28 @@ static func recorrer_banco(bus: Node3D, arbol: SceneTree) -> bool:
 		return false
 	for borne in ["tp0", "tp1", "tp0", "tp2"]:
 		bus.tocar_borne(borne, "teclado")
+		if bus.flashcard.visible:
+			bus.flashcard.confirmar()
 	bus.abrir_menu(bus.zona_activa.piezas["multimetro"])
 	for lectura: Button in bus.menu_pieza.lecturas:
 		if lectura.get_meta("accion") in ["reportar_tp1_0", "reportar_tp2_5"]:
 			lectura.pressed.emit()
+			Taller.cerrar_exitos(bus)
 	if not comprobar_ayuda(bus, "Abre el multímetro y elige la causa que indiquen tus lecturas.") \
 			or not elegir(bus, "multimetro", "diagnosticar_alimentacion") \
 			or not comprobar_ayuda(bus, REPARAR) \
-			or not bus.resultado.visible \
-			or bus.resultado.text != ("Diagnóstico registrado. Abre el multímetro y "
-				+ "elige Reconectar conductor. Confirma en el panel.") \
-			or not elegir(bus, "multimetro", "reconectar"):
+			or not bus.flashcard.visible \
+			or bus.flashcard.cuerpo.text != ("Diagnóstico registrado.\nSiguiente: Abre el multímetro y "
+				+ "elige Reconectar conductor. Confirma en el panel."):
+		return false
+	Taller.cerrar_exitos(bus)
+	if not elegir(bus, "multimetro", "reconectar"):
 		return false
 	return await confirmar(bus, arbol, "reconectar") and comprobar_resuelto(bus)
 
 
 static func elegir(bus: Node3D, pieza: String, id: String) -> bool:
+	Taller.cerrar_exitos(bus)
 	if not bus.menu_pieza.visible:
 		if not Taller.equipar(bus, id):
 			return false

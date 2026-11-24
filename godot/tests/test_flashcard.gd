@@ -24,11 +24,11 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> bool:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	var modo_previo := Input.mouse_mode
 	var reloj: int = bus.ultimo_ms
-	bus.avisar("Primera", "aviso")
-	bus.avisar("Primera", "aviso")
+	bus.avisar("Primera", "exito")
 	bus.avisar("Segunda", "error")
+	bus.avisar("Primera", "exito")
+	bus.avisar("Tercera", "aviso")
 	bus.avisar("Segunda", "error")
-	bus.avisar("Tercera", "falta")
 	if bus.jugador.activo or Input.mouse_mode != Input.MOUSE_MODE_VISIBLE \
 			or visor.gui_get_focus_owner() != tarjeta.ok or tarjeta.contador.text != "1 de 3":
 		return false
@@ -47,7 +47,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> bool:
 	Engine.time_scale = 10.0
 	await arbol.create_timer(10.1).timeout
 	Engine.time_scale = escala
-	if not tarjeta.visible or tarjeta.cuerpo.text != "Primera" or bus.ultimo_ms != reloj:
+	if not tarjeta.visible or tarjeta.cuerpo.text != "Primera" or tarjeta.chip.text != "BIEN HECHO" or bus.ultimo_ms != reloj:
 		return false
 	Clic.clic(visor, tarjeta.ok.get_global_rect().get_center())
 	if tarjeta.cuerpo.text != "Segunda" or tarjeta.contador.text != "2 de 3" or bus.jugador.activo:
@@ -63,7 +63,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> bool:
 
 	bus.abrir_menu(bus.zona_activa.piezas[bus.zona_activa.acceso])
 	var foco := visor.gui_get_focus_owner()
-	bus.avisar("Control", "aviso")
+	bus.avisar("Control", "exito")
 	pulsar_control(visor, JOY_BUTTON_A)
 	if tarjeta.visible or not bus.menu_pieza.visible or bus.jugador.activo \
 			or Input.mouse_mode != Input.MOUSE_MODE_VISIBLE or visor.gui_get_focus_owner() != foco:
@@ -74,7 +74,22 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> bool:
 		return false
 	bus.avisar("Cancelar con control", "aviso")
 	pulsar_control(visor, JOY_BUTTON_B)
-	return not tarjeta.visible and bus.menu_pieza.visible
+	if tarjeta.visible or not bus.menu_pieza.visible:
+		return false
+	bus.cerrar_menu()
+	bus.avisar("Siguiente paso confirmado", "exito")
+	pulsar_tecla(visor, KEY_ENTER)
+	if tarjeta.visible:
+		return false
+	bus.avisar_temporal("Tapa cerrada")
+	if not bus.resultado.visible or bus.duracion_aviso.wait_time < 3.0:
+		return false
+	await arbol.create_timer(2.8).timeout
+	if not bus.resultado.visible:
+		return false
+	await bus.duracion_aviso.timeout
+	await arbol.process_frame
+	return not bus.resultado.visible
 
 
 static func pulsar_tecla(visor: Viewport, tecla: Key) -> void:

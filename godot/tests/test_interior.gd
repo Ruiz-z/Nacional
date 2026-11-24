@@ -33,9 +33,9 @@ static func comprobar_navegacion(bus: Node3D, arbol: SceneTree) -> bool:
 	bus.alcance.force_raycast_update()
 	if bus.alcance.get_collider() != bus.puerta_pasajeros:
 		return false
-	bus.avisar("Resultado de prueba")
+	bus.avisar_temporal("Compuerta abierta")
 	bus.abrir_menu(bus.puerta_pasajeros)
-	if bus.resultado.visible or bus.menu_pieza.entradas.size() != 1:
+	if not bus.resultado.visible or bus.menu_pieza.entradas.size() != 1:
 		return false
 	bus.elegir_accion(0, "teclado")
 	if not bus.negro.visible or jugador.activo or jugador.global_position != retorno:

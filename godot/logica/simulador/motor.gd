@@ -27,6 +27,7 @@ var _punto_seguro := 0
 var _progreso_previo: Array = []
 var _intento_anterior := {}
 var _reflexion := ""
+var _reflexion_omitida := false
 var _diagnostico_final := {}
 var _causa_banco := ""
 
@@ -326,11 +327,12 @@ func reintentar() -> RefCounted:
 	return nuevo
 
 
-func registrar_reflexion(eleccion: String) -> bool:
+func registrar_reflexion(eleccion: String, omitir := false) -> bool:
 	var texto := eleccion.strip_edges()
-	if _fin.is_empty() or texto.is_empty() or not _reflexion.is_empty():
+	if _fin.is_empty() or (texto.is_empty() and not omitir) or _reflexion_omitida or not _reflexion.is_empty():
 		return false
-	_reflexion = texto
+	_reflexion = "" if omitir else texto
+	_reflexion_omitida = omitir
 	return true
 
 
@@ -362,10 +364,11 @@ func resumen() -> Dictionary:
 		"aciertos": _decisiones.filter(es_acierto).duplicate(true),
 		"errores": _decisiones.filter(es_error).duplicate(true),
 		"brechas": brechas(), "diagnostico_final": _diagnostico_final.duplicate(), "pregunta": "¿Qué harías distinto?", "reflexion": _reflexion,
+		"reflexion_omitida": _reflexion_omitida,
 		"comparacion": {"anterior": _intento_anterior.duplicate(), "actual": metricas()}}
 	if mediciones != null:
 		resultado["errores_arnes"] = Mediciones.contar_errores(resultado.errores)
-	if not _reflexion.is_empty():
+	if _reflexion_omitida or not _reflexion.is_empty():
 		resultado["ruta_ideal"] = []
 		for id in _escenario.ruta_ideal:
 			var regla: Dictionary = _escenario.acciones[id]

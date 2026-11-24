@@ -8,6 +8,7 @@ signal terminada
 signal opcion_elegida(indice: int, fuente: String)
 
 const TIPOS := {
+	"exito": ["BIEN HECHO", Color("#215040"), Color("#c7f9dd")],
 	"cierre": ["CIERRE DE LA ORDEN", Color("#124747"), Color("#b5fffc")],
 	"correcto": ["CORRECTO", Color("#215040"), Color("#c7f9dd")],
 	"incorrecto": ["INCORRECTO", Color("#592d34"), Color("#ffdedf")],
@@ -44,7 +45,7 @@ func ajustar_ancho() -> void:
 
 func encolar(aviso: Dictionary) -> void:
 	if not cola.is_empty():
-		if cola.back() != aviso:
+		if aviso not in cola:
 			cola.append(aviso)
 			mostrar_contador()
 		return

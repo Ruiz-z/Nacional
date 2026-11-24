@@ -44,6 +44,7 @@ static func comprobar(bus: Node3D, componente: String, nombre: String) -> bool:
 	bus.abrir_menu(interna)
 	if bus.menu_pieza.visible or not acceso(bus, "Inspeccionar", false) or not zona.abierta:
 		return false
+	Taller.cerrar_exitos(bus)
 	if not acceso(bus, "Cerrar " + nombre):
 		return false
 	bus.mostrar_estado(true)

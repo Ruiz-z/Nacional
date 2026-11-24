@@ -19,7 +19,13 @@ static func tecla(bus: Node3D, numero: int) -> void:
 	bus.get_viewport().push_input(evento, true)
 
 
+static func cerrar_exitos(bus: Node3D) -> void:
+	while bus.flashcard.visible and bus.flashcard.cola[0].tipo == "exito":
+		bus.flashcard.ok.pressed.emit()
+
+
 static func equipar(bus: Node3D, accion: String) -> bool:
+	cerrar_exitos(bus)
 	var requiere: Dictionary = bus.requisitos(accion)
 	var herramienta: String = requiere.get("herramienta", "")
 	var necesarios: Array = requiere.get("piezas", []).duplicate()
@@ -50,6 +56,7 @@ static func equipar(bus: Node3D, accion: String) -> bool:
 
 
 static func cerrar_orden(bus: Node3D, numero := 1) -> bool:
+	cerrar_exitos(bus)
 	if not bus.flashcard.visible or bus.flashcard.opciones.is_empty():
 		return false
 	tecla(bus, numero)

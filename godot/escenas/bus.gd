@@ -96,7 +96,7 @@ var pieza_menu: Interactuable
 @onready var zonas := {"gabinete": $Sector, "cabina": interior, "faros": $Faros, "motor": $Motor, "banco": $Banco, "bajos": $Bajos}
 @onready var jugador := $Jugador
 @onready var alcance: RayCast3D = $Jugador/Camara/Alcance
-@onready var resumen := $Interfaz/Lateral/Resumen
+@onready var resumen := $Resumen
 @onready var lateral := $Interfaz/Lateral
 @onready var menu_pieza := $MenuPieza
 @onready var flashcard := $Flashcard
@@ -151,7 +151,9 @@ func _ready() -> void:
 	menu_pieza.causa_marcada.connect(func(causa: String):
 		if motor.marcar_causa(causa):
 			causa_marcada = causa)
-	duracion_aviso.timeout.connect(resultado.hide)
+	duracion_aviso.timeout.connect(func():
+		salida_hasta = 0
+		resultado.hide())
 	flashcard.abierta.connect(pausar_por_flashcard)
 	flashcard.confirmada.connect(func(aviso: Dictionary):
 		if not aviso.objeto.is_empty():
@@ -176,6 +178,7 @@ func _ready() -> void:
 	if datos.zona == "motor":
 		panel.get_node("Bloqueo").toggled.connect(func(_activo: bool): actualizar_leds())
 	resumen.reintento_solicitado.connect(reintentar)
+	resumen.salida_solicitada.connect(func(): salida_solicitada.emit())
 	lateral.minimum_size_changed.connect(actualizar_hud)
 	mostrar_estado(true)
 	actualizar_panel(ultimo_ms)
@@ -278,8 +281,6 @@ func ejecutar(id: String, fuente: String, lectura_previa: Dictionary = {}) -> vo
 	if not motor.pendiente_diagnostico() or not flashcard.visible:
 		finalizar_orden()
 	mostrar_estado()
-	if not flashcard.visible and not motor.fin().is_empty() and resumen.get_node("Reflexion").visible:
-		resumen.get_node("Reflexion").grab_focus()
 	decision_tomada.emit(decision)
 
 
@@ -461,11 +462,19 @@ func mostrar_resultado(decision: Dictionary) -> void:
 	else:
 		var ayuda := siguiente_ayuda(progreso_indicios(motor.estado()))
 		if not ayuda.is_empty():
-			texto = texto.trim_suffix(".") + ". " + ayuda
-	if decision.has("lectura-reportada"):
-		avisar_temporal(texto, true)
-	else:
-		avisar(texto)
+			texto = texto.trim_suffix(".") + ".\nSiguiente: " + ayuda
+	if motor.fin().is_empty() and confirmacion_breve(texto):
+		avisar_temporal(texto)
+		return
+	var accion: String = decision.accion
+	var titulo := "Paso completado"
+	if motor.fin() == "resuelto":
+		titulo = "Orden resuelta"
+	elif accion.begins_with("medir_") or decision.has("lectura-reportada"):
+		titulo = "Medición registrada"
+	elif accion.begins_with("diagnosticar_") or accion == "confirmar_diagnostico":
+		titulo = "Diagnóstico registrado"
+	avisar(texto, "exito", titulo)
 
 
 func aviso_previas(faltantes: Dictionary) -> String:
@@ -486,11 +495,8 @@ func aviso_previas(faltantes: Dictionary) -> String:
 
 
 func avisar(texto: String, tipo := "info", titulo := "", donde := "", fuente := "") -> void:
-	if tipo == "info":
-		avisar_temporal(texto)
-	else:
-		flashcard.encolar({"texto": texto, "tipo": tipo, "titulo": titulo,
-			"donde": donde, "fuente": fuente, "objeto": ""})
+	flashcard.encolar({"texto": texto, "tipo": tipo, "titulo": titulo,
+		"donde": donde, "fuente": fuente, "objeto": ""})
 
 
 func avisar_objeto(texto: String, tipo: String, titulo: String, objeto: String) -> void:
@@ -499,13 +505,23 @@ func avisar_objeto(texto: String, tipo: String, titulo: String, objeto: String) 
 		"donde": taller.ubicacion(objeto), "fuente": "", "objeto": objeto})
 
 
-func avisar_temporal(texto: String, sobre_menu := false, segundos := 2.0) -> void:
+func confirmacion_breve(texto: String) -> bool:
+	var limpio: String = TextoLimpio.limpiar(texto).texto.to_lower()
+	var palabras := limpio.replace("\n", " ").split(" ", false)
+	return not palabras.is_empty() and palabras.size() <= 2 \
+		and not limpio.contains("ahora") and not limpio.contains("siguiente") \
+		and palabras[0].trim_suffix(":") not in ["luego", "después", "continúa"]
+
+
+func avisar_temporal(texto: String) -> void:
+	salida_hasta = 0
 	resultado.text = TextoLimpio.linea(texto)
-	resultado.visible = not flashcard.visible and (sobre_menu or not menu_pieza.visible)
-	duracion_aviso.start(segundos)
+	resultado.visible = not flashcard.visible and not resumen.visible
+	duracion_aviso.start()
 
 
 func pausar_por_flashcard() -> void:
+	salida_hasta = 0
 	inicio_flashcard = Time.get_ticks_msec()
 	activo_antes_flashcard = jugador.activo
 	navegando_antes_flashcard = navegando
@@ -523,9 +539,7 @@ func reanudar_tras_flashcard() -> void:
 		if flashcard.visible:
 			return
 		actualizar_hud()
-		resumen.mostrar(motor, datos)
-		if resumen.get_node("Reflexion").visible:
-			resumen.get_node("Reflexion").grab_focus()
+		resumen.mostrar(motor, datos, lateral.get_node("Aviso").text)
 		return
 	actualizar_panel(Time.get_ticks_msec())
 	if pausa_visible:
@@ -589,7 +603,7 @@ func mostrar_estado(inmediato := false) -> void:
 	actualizar_leds()
 	actualizar_hud()
 	if not flashcard.visible:
-		resumen.mostrar(motor, datos)
+		resumen.mostrar(motor, datos, lateral.get_node("Aviso").text)
 
 
 func actualizar_ayuda() -> void:
@@ -751,8 +765,9 @@ func abrir_menu(pieza: Interactuable) -> void:
 		opciones.append(MenuPieza.navegacion(id, "%s %s" % [verbo, zona.nombre_acceso]))
 		lectura = zona.lectura_pieza(pieza.componente)
 		zona_menu = zona
-	salida_hasta = 0
-	resultado.hide()
+	if salida_hasta != 0:
+		salida_hasta = 0
+		resultado.hide()
 	var banco := zona_activa == $Banco and pieza.zona == $Banco and pieza.componente == "multimetro"
 	var reportadas: Dictionary = motor.mediciones.reportadas if banco else {}
 	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada, estado_pieza(pieza), reportadas, banco, mueble != null)
@@ -829,8 +844,8 @@ func elegir_accion(indice: int, fuente: String) -> void:
 		menu_pieza.esperar_panel(entrada.id == "reconectar" and fuente_banco.fuente() == "banco")
 		var torque: Dictionary = datos.acciones.get(entrada.id, {}).get("torque", {})
 		if not torque.is_empty():
-			avisar_temporal("Ajusta la perilla a %d–%d en la escala del panel [MUESTRA]." %
-				[torque.minimo, torque.maximo], true, 5.0)
+			avisar("Ajusta la perilla a %d–%d en la escala del panel [MUESTRA]." %
+				[torque.minimo, torque.maximo], "info", "Ajusta el torque")
 	else:
 		cerrar_menu()
 		ejecutar(entrada.id, fuente)
@@ -970,9 +985,7 @@ func tocar_borne(punto: String, fuente: String) -> void:
 	else:
 		actualizar_banco()
 		var aviso: String = motor.mediciones.aviso_puntas
-		if aviso == "Coloca la punta roja.":
-			avisar(aviso)
-		elif not aviso.is_empty():
+		if not aviso.is_empty():
 			avisar(aviso, "aviso", "Revisa las puntas")
 
 
@@ -1013,8 +1026,9 @@ func _process(_delta: float) -> void:
 	fuente_banco.actualizar(ahora)
 	if fuente_anterior != fuente_banco.fuente() or aviso_anterior != fuente_banco.conexion.aviso():
 		sincronizar_banco()
-	if aviso_anterior != fuente_banco.conexion.aviso() and not fuente_banco.conexion.aviso().is_empty():
-		avisar_temporal(fuente_banco.conexion.aviso(), true)
+	if motor.fin().is_empty() and aviso_anterior != fuente_banco.conexion.aviso() \
+			and not fuente_banco.conexion.aviso().is_empty():
+		avisar(fuente_banco.conexion.aviso(), "aviso", "Conexión del banco")
 	if not _udp_banco.is_bound():
 		return
 	for indice in range(mini(_udp_banco.get_available_packet_count(), 64)):
@@ -1058,7 +1072,7 @@ func actualizar_panel(ahora: int) -> void:
 		var continuar: Button = lateral.get_node("Continuar")
 		continuar.visible = pausa
 		actualizar_hud()
-		if pausa:
+		if pausa and not resumen.visible:
 			continuar.grab_focus()
 	$AlternarPanel.visible = panel.conexion.fuente_panel() == "virtual" and not pausa \
 		and motor != null and motor.fin().is_empty()
@@ -1100,18 +1114,18 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 
 func _input(evento: InputEvent) -> void:
-	if flashcard.visible or navegando or motor == null or not evento.is_pressed() or evento.is_echo():
+	if flashcard.visible or resumen.visible or navegando or motor == null or not evento.is_pressed() or evento.is_echo():
 		return
 	if evento is InputEventKey:
-		if evento.keycode == KEY_ESCAPE and not menu_pieza.visible:
+		if evento.keycode == KEY_ESCAPE and not menu_pieza.visible and motor.fin().is_empty():
 			var ahora := Time.get_ticks_msec()
 			get_viewport().set_input_as_handled()
 			if ahora < salida_hasta:
 				salida_hasta = 0
 				salida_solicitada.emit()
 			else:
-				avisar("Presiona Esc otra vez para salir")
-				salida_hasta = ahora + 2000
+				avisar_temporal("Presiona Esc otra vez para salir")
+				salida_hasta = ahora + int(duracion_aviso.wait_time * 1000)
 			return
 		if evento.keycode == KEY_H and motor.fin().is_empty():
 			hud_oculto = not hud_oculto
@@ -1174,7 +1188,7 @@ func entrada_inventario(evento: InputEvent) -> bool:
 		if evento.keycode >= KEY_1 and evento.keycode <= KEY_8:
 			var numero: int = evento.keycode - KEY_1 + 1
 			if numero > 4 and not carrito_cerca():
-				avisar_temporal("El carrito está lejos. Acércate para tomar lo que necesitas.")
+				avisar("El carrito está lejos. Acércate para tomar lo que necesitas.", "aviso", "Acércate al carrito")
 			else:
 				taller.mano = taller.objeto_en_espacio(numero)
 				actualizar_inventario()

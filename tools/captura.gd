@@ -5,6 +5,7 @@ extends SceneTree
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
 # Flashcard: [ancho alto] flashcard falta|aviso|error|critico [--verificar]
+# Resumen y éxito en caja de fusibles: [ancho alto] resumen|exito [--verificar]
 # Cierre: [ancho alto] cierre [correcto|incorrecto] [--verificar]
 # Inventario y título largo: [ancho alto] inventario [--verificar]
 # Taller: [ancho alto] taller|baliza|elevador|bajos [--verificar]
@@ -37,10 +38,10 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "bajos", "inventario", "cierre"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "bajos", "inventario", "cierre", "resumen", "exito"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
-	var vista_taller := vista in ["taller", "baliza", "elevador", "bajos", "inventario", "cierre"]
+	var vista_taller := vista in ["taller", "baliza", "elevador", "bajos", "inventario", "cierre", "resumen", "exito"]
 	var zona := ""
 	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
@@ -112,7 +113,7 @@ func capturar() -> void:
 		escena.modo_captura = true
 	if vista in ["elevador", "bajos"]:
 		escena.archivo = "escenarios/neumatico_pinchado.json"
-	elif vista in ["baliza", "cierre"]:
+	elif vista in ["baliza", "cierre", "resumen", "exito"]:
 		escena.archivo = "escenarios/faros.json"
 	elif vista == "inventario":
 		escena.archivo = "escenarios/motor.json"
@@ -130,7 +131,7 @@ func capturar() -> void:
 			if not preparar_elevador(escena, vista):
 				fallar("El elevador o su encuadre no corresponde a la vista.")
 				return
-		elif vista in ["cierre", "inventario"]:
+		elif vista in ["cierre", "inventario", "resumen", "exito"]:
 			if not preparar_orden(escena, vista, respuesta):
 				fallar("La orden no corresponde a la vista solicitada.")
 				return
@@ -164,6 +165,7 @@ func capturar() -> void:
 				sector.animacion.pause()
 			else:
 				await sector.animacion.finished
+			Acciones.cerrar_exitos(escena)
 		if vista == "danado":
 			if not Acciones.equipar(escena, "forzar_pieza"):
 				fallar("No se pudo empuñar la llave ajustable.")
@@ -202,6 +204,8 @@ func capturar() -> void:
 						fallar("La mira no alcanza %s." % punto.to_upper())
 						return
 					escena.recibir_accion(escena.panel.entrada.traducir("teclado", "clic", 1))
+					if escena.flashcard.visible:
+						escena.flashcard.confirmar()
 			escena.apuntar_jugador(sector.piezas[sector.acceso].global_position)
 			var lectura := "0.0 V" if vista == "midiendo" else "—"
 			if sector.pantalla.text != lectura or not comprobar_pieza(escena, sector.acceso):
@@ -300,8 +304,11 @@ func capturar() -> void:
 			or not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect())):
 		fallar("La tarjeta no se abrió o queda recortada.")
 		return
-	if vista == "cierre" and not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect()):
+	if vista in ["cierre", "exito"] and not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect()):
 		fallar("El cierre de la orden queda recortado.")
+		return
+	if vista == "resumen" and not vp.get_visible_rect().encloses(escena.resumen.get_node("%Acciones").get_global_rect()):
+		fallar("Las acciones del resumen quedan recortadas.")
 		return
 	if vista == "inventario":
 		var titulo: Label = escena.lateral.get_node("Estado")
@@ -327,11 +334,19 @@ func capturar() -> void:
 func preparar_orden(escena: Node3D, vista: String, respuesta: String) -> bool:
 	escena.jugador.set_physics_process(false)
 	escena.ubicar_jugador(escena.zona_activa.acceso)
-	if vista == "cierre":
+	if vista == "exito":
+		if not Acciones.equipar(escena, "inspeccionar"):
+			return false
+		escena.ejecutar("inspeccionar", "teclado")
+		return escena.flashcard.visible and escena.flashcard.cola[0].tipo == "exito"
+	if vista in ["cierre", "resumen"]:
 		for id in escena.datos.ruta_ideal:
 			if not Acciones.equipar(escena, id):
 				return false
 			escena.ejecutar(id, "virtual")
+		Acciones.cerrar_exitos(escena)
+		if vista == "resumen":
+			return Acciones.cerrar_orden(escena) and escena.motor.fin() == "resuelto"
 		if not escena.flashcard.visible or escena.flashcard.opciones.size() != 2:
 			return false
 		if not respuesta.is_empty():

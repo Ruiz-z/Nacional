@@ -77,7 +77,9 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	if not Taller.equipar(bus, "reportar_tp1_0"):
 		return false
 	bus.ejecutar("reportar_tp1_0", "teclado")
+	Taller.cerrar_exitos(bus)
 	bus.ejecutar("reportar_tp2_5", "teclado")
+	Taller.cerrar_exitos(bus)
 	bus.ejecutar("diagnosticar_alimentacion", "teclado")
 	if not bus.lateral.get_node("Siguiente").text.ends_with("Cierra el conductor abierto en el banco físico."):
 		return false

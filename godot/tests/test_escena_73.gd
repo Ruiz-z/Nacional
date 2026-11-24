@@ -1,6 +1,7 @@
 extends RefCounted
 
 const Base = preload("res://tests/base_tablero.gd")
+const Taller = preload("res://tests/acciones_taller.gd")
 const Menu = preload("res://escenas/menu.tscn")
 
 static func ejecutar() -> bool:
@@ -37,6 +38,17 @@ static func comprobar(base: String) -> bool:
 	esc.pressed = true
 	raiz.push_input(esc)
 	correcto = correcto and is_instance_valid(menu.pantalla) and not menu.inicio.visible
+	raiz.push_input(esc)
+	correcto = correcto and menu.pantalla == null and menu.inicio.visible
+	menu.conexion.reanudar()
+	menu.abrir_bus(menu.perfil.merged({"base": base}))
+	var bus: Node3D = menu.pantalla
+	for id in bus.datos.ruta_ideal:
+		if not Taller.equipar(bus, id):
+			correcto = false
+			break
+		bus.ejecutar(id, "virtual")
+	correcto = correcto and Taller.cerrar_orden(bus) and bus.resumen.visible
 	raiz.push_input(esc)
 	correcto = correcto and menu.pantalla == null and menu.inicio.visible
 	menu.free()

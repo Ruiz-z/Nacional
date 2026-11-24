@@ -135,6 +135,17 @@ size = Vector3(37, 7.75, 0.24)
 [sub_resource type="BoxShape3D" id="ColisionPuerta"]
 size = Vector3(0.02, 1.126, 0.742)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aviso"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(0.04, 0.08, 0.11, 0.92)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_left = 12
+corner_radius_bottom_right = 12
+
 [node name="Bus" type="Node3D"]
 script = ExtResource("1")
 
@@ -1280,9 +1291,6 @@ custom_minimum_size = Vector2(0, 56)
 focus_mode = 2
 theme_override_font_sizes/normal_font_size = 16
 
-[node name="Resumen" parent="Interfaz/Lateral" instance=ExtResource("3")]
-visible = false
-
 [node name="PistaControles" type="Label" parent="."]
 anchor_left = 0.5
 anchor_right = 0.5
@@ -1335,6 +1343,9 @@ mouse_filter = 2
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 
+[node name="Resumen" parent="." instance=ExtResource("3")]
+visible = false
+
 [node name="MenuPieza" parent="." instance=ExtResource("MenuPieza")]
 
 [node name="Flashcard" parent="." instance=ExtResource("Flashcard")]
@@ -1346,17 +1357,17 @@ layer = 3
 visible = false
 anchor_left = 0.25
 anchor_right = 0.75
-offset_top = 40.0
-offset_bottom = 40.0
+offset_top = 24.0
+offset_bottom = 24.0
 mouse_filter = 2
-theme_override_font_sizes/font_size = 26
-theme_override_colors/font_outline_color = Color(0.04, 0.06, 0.08, 1)
-theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_aviso")
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="Duracion" type="Timer" parent="AvisoCentral"]
-wait_time = 2.0
+wait_time = 3.0
 one_shot = true
 
 [node name="Fundido" type="CanvasLayer" parent="."]

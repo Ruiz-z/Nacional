@@ -136,7 +136,7 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 			or bus.flashcard.fuente.text != "Fuente: ejemplo didáctico, sin fuente oficial" or bus.resumen.visible:
 		return false
 	bus.flashcard.ok.pressed.emit()
-	if not bus.resumen.visible:
+	if not bus.resumen.visible or Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
 		return false
 	bus.reintentar()
 	decisiones.clear()
@@ -169,12 +169,14 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 		return false
 	bus.panel.get_node("Confirmar").pressed.emit()
 	var primer_envio := Time.get_ticks_msec()
+	Taller.cerrar_exitos(bus)
 	if "neumatico" in bus.taller.inventario.accesibles():
 		return false
 	bus.taller.tomar("llave_torque", false)
 	var tuerca: StaticBody3D = bajos.piezas.tuerca_delantero_derecho_1
 	if not elegir(bus, tuerca, "apretar_tuerca_1"):
 		return false
+	bus.flashcard.ok.pressed.emit()
 	bus.panel.get_node("Torque").value = 85
 	bus.panel.get_node("AplicarTorque").pressed.emit()
 	var primer_torque := Time.get_ticks_msec()
@@ -196,17 +198,21 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 		return false
 	while Time.get_ticks_msec() - primer_torque < 60:
 		await arbol.process_frame
+	bus.flashcard.ok.pressed.emit()
 	bus.panel.get_node("Torque").value = 50
 	bus.panel.get_node("AplicarTorque").pressed.emit()
 	if not decisiones[-1].tipo_error.is_empty() or not bus.motor.estado().apretar_tuerca_1:
 		return false
 	for numero in [3, 5, 2, 4]:
+		Taller.cerrar_exitos(bus)
 		var id := "apretar_tuerca_%d" % numero
 		if not elegir(bus, bajos.piezas["tuerca_delantero_derecho_%d" % numero], id):
 			return false
+		bus.flashcard.ok.pressed.emit()
 		bus.recibir_accion({"accion": "confirmar", "fuente_entrada": "virtual", "valor": 1})
 		if not bus.motor.estado()[id]:
 			return false
+	Taller.cerrar_exitos(bus)
 	if not elegir(bus, consola, "descender_bus") or elevador.en_movimiento():
 		return false
 	bus.flashcard.ok.pressed.emit()
@@ -216,6 +222,7 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 		if not elegir(bus, elevador.piezas[soporte], "destrabar_soporte"):
 			return false
 	bus.jugador.ubicar(Vector3.ZERO)
+	Taller.cerrar_exitos(bus)
 	if not elegir(bus, consola, "descender_bus") or elevador.en_movimiento():
 		return false
 	bus.jugador.ubicar(Vector3(-4, 0, 0))

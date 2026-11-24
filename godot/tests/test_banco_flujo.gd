@@ -36,7 +36,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	await arbol.physics_frame
 	await arbol.physics_frame
 	for paso in [["tp1", "—", "La punta negra va en TP0."],
-			["tp0", "—", "Polaridad invertida. Empieza en TP0."], ["tp0", "—", ""], ["tp0", "0.0 V", ""]]:
+			["tp0", "—", "Polaridad invertida. Empieza en TP0."], ["tp0", "—", "Coloca la punta roja."], ["tp0", "0.0 V", ""]]:
 		if not apuntar_y_pulsar(bus, paso[0]) or zona.pantalla.text != paso[1]:
 			return "No se manejaron las puntas invertidas o TP0 contra TP0."
 		if bus.flashcard.visible != (not paso[2].is_empty()):
@@ -50,8 +50,13 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	for paso in [["tp0", "—"], ["tp1", "0.0 V"], ["tp0", "—"], ["tp2", "5.0 V"]]:
 		if not apuntar_y_pulsar(bus, paso[0]) or zona.pantalla.text != paso[1]:
 			return "El clic en %s no produjo la lectura esperada." % paso[0]
-	if bus.resultado.text != "Medición registrada: TP2 = 5.0 V. Abre el multímetro y reporta la lectura de TP1.":
-		return "El aviso central no muestra el punto y la tensión."
+		if paso[0] == "tp0" and bus.flashcard.visible:
+			bus.flashcard.confirmar()
+		if paso[0] == "tp1":
+			Taller.cerrar_exitos(bus)
+	if bus.flashcard.cuerpo.text != "Medición registrada: TP2 = 5.0 V.\nSiguiente: Abre el multímetro y reporta la lectura de TP1.":
+		return "La tarjeta no muestra el punto y la tensión."
+	Taller.cerrar_exitos(bus)
 	if not bus.jugador.herramientas.multimetro.visible:
 		return "El jugador no tiene el multímetro en la mano."
 	if not apuntar_y_pulsar(bus, "multimetro") or not bus.menu_pieza.visible:
@@ -59,12 +64,14 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	await arbol.process_frame
 	await arbol.process_frame
 	var menu: CanvasLayer = bus.menu_pieza
-	for indice in [0, 4]:
-		pulsar(menu.lecturas[indice])
+	pulsar(menu.lecturas[0])
+	Taller.cerrar_exitos(bus)
+	pulsar(menu.lecturas[4])
 	if bus.motor.mediciones.reportadas != {"tp1": "0", "tp2": "5"}:
 		return "Los botones de lectura no guardaron ambas opciones."
-	if bus.resultado.text != ("Lecturas anotadas. Abre el multímetro y elige la causa que indiquen tus lecturas.") or not bus.resultado.visible:
+	if bus.flashcard.cuerpo.text != ("Lecturas anotadas.\nSiguiente: Abre el multímetro y elige la causa que indiquen tus lecturas.") or not bus.flashcard.visible:
 		return "El registro no muestra su confirmación."
+	Taller.cerrar_exitos(bus)
 	pulsar(menu.botones[0])
 	if bus.motor.mediciones.diagnostico != "alimentacion" or not bus.motor.mediciones.error_diagnostico.is_empty():
 		return "El diagnóstico correcto no se registró."

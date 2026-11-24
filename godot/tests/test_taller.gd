@@ -57,6 +57,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	if not Acciones.equipar(bus, "medir_continuidad"):
 		return "No se pudo empuñar el multímetro."
 	bus.ejecutar("medir_continuidad", "teclado")
+	Acciones.cerrar_exitos(bus)
 	Acciones.tecla(bus, 2)
 	if not apuntar(bus, caja) or not await elegir(bus, "dejar", arbol) 			or "multimetro" in taller.inventario.cinturon 			or taller.objetos.multimetro.get_parent() != taller.origenes.multimetro.padre 			or taller.objetos.multimetro.position != taller.origenes.multimetro.posicion:
 		return "El multímetro no volvió a su cajón."
@@ -123,6 +124,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 			or "foco" in taller.inventario.cinturon or "destornillador" not in taller.inventario.cinturon \
 			or foco.zona != taller.estanteria:
 		return "El panel no consumió la pieza y conservó la herramienta."
+	Acciones.cerrar_exitos(bus)
 	return await probar_carrito(bus, arbol, eventos)
 
 
@@ -161,8 +163,9 @@ static func probar_carrito(bus: Node3D, arbol: SceneTree, eventos: Array[Diction
 	bus.jugador.ubicar(taller.carrito.global_position + Vector3.BACK * 3.1)
 	bus.actualizar_inventario()
 	Acciones.tecla(bus, 5)
-	if not taller.mano.is_empty() or bus.resultado.text != "El carrito está lejos. Acércate para tomar lo que necesitas." 			or taller.espacios_hud[4].modulate == Color.WHITE:
+	if not taller.mano.is_empty() or bus.flashcard.cuerpo.text != "El carrito está lejos. Acércate para tomar lo que necesitas." 			or taller.espacios_hud[4].modulate == Color.WHITE:
 		return "El carrito lejano sigue disponible en el HUD."
+	bus.flashcard.confirmar()
 	Acciones.tecla(bus, 2)
 	if taller.mano != "multimetro":
 		return "El cinturón dejó de funcionar al alejarse."
@@ -319,6 +322,7 @@ static func comprobar_cierre(bus: Node3D, base: String, caso: Array) -> bool:
 		if not Acciones.equipar(bus, accion):
 			return false
 		bus.ejecutar(accion, "virtual")
+	Acciones.cerrar_exitos(bus)
 	if not bus.flashcard.visible or bus.flashcard.titulo.text != "¿Qué causó la falla?" 			or bus.flashcard.opciones.size() != 2 or bus.resultados_guardados or bus.resumen.visible:
 		return false
 	if caso[1] == 0:
@@ -332,7 +336,7 @@ static func comprobar_cierre(bus: Node3D, base: String, caso: Array) -> bool:
 	if bus.flashcard.titulo.text != caso[0].capitalize() 			or not bus.flashcard.cuerpo.text.contains("Causa real: Foco dañado") 			or bus.flashcard.fuente.text != "Fuente: ejemplo didáctico, sin fuente oficial" or not bus.resultados_guardados:
 		return false
 	bus.flashcard.confirmar()
-	if not bus.resumen.visible or not bus.resumen.get_node("Detalle").text.contains("Diagnóstico final: " + caso[0].capitalize()):
+	if not bus.resumen.visible or not bus.resumen.get_node("%Detalle").text.contains("Diagnóstico final: " + caso[0].capitalize()):
 		return false
 	var intentos: Array = Base.consultar(base,
 		"SELECT formato, valor, peso, tipo_error FROM intento WHERE tecnico = ? ORDER BY id;", [bus.tecnico.id])

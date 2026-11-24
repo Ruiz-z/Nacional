@@ -9,7 +9,6 @@ static func ejecutar() -> bool:
 	var bus := Bus.instantiate()
 	(Engine.get_main_loop() as SceneTree).root.add_child(bus)
 	var gabinete := bus.get_node("Sector")
-	var lateral := bus.get_node("Interfaz/Lateral")
 	var correcto: bool = not gabinete.abierta and elegir(bus, "compuerta", "inspeccionar")
 	correcto = correcto and gabinete.abierta and elegir(bus, "terminal", "forzar_pieza")
 	correcto = correcto and gabinete.fragmento.visible and gabinete.chispa.visible \
@@ -27,12 +26,12 @@ static func ejecutar() -> bool:
 	correcto = correcto and gabinete.lectura == "Verde" and elegir(bus, "bateria", "confirmar_solucion")
 	bus.recibir_accion({"accion": "confirmar", "fuente_entrada": "teclado"})
 	correcto = correcto and Taller.cerrar_orden(bus)
-	var resumen := lateral.get_node("Resumen")
-	correcto = correcto and resumen.visible and not resumen.get_node("Reintentar").visible
-	resumen.get_node("Reflexion").text = "Revisaría el aviso"
-	resumen.get_node("Guardar").pressed.emit()
-	correcto = correcto and resumen.get_node("Detalle").text.contains("Pasos para resolver la falla")
-	resumen.get_node("Reintentar").pressed.emit()
+	var resumen: Control = bus.resumen
+	correcto = correcto and resumen.visible and resumen.get_node("%Reintentar").visible
+	resumen.get_node("%Reflexion").text = "Revisaría el aviso"
+	resumen.get_node("%Guardar").pressed.emit()
+	correcto = correcto and resumen.get_node("%Ruta").text.contains("Pasos para resolver la falla")
+	resumen.get_node("%Reintentar").pressed.emit()
 	correcto = correcto and not resumen.visible and bus.motor.fin().is_empty() \
 		and gabinete.abierta == bus.motor.estado().inspeccionado \
 		and bus.taller.inventario.cinturon.is_empty() and not bus.taller.cajones_abiertos
