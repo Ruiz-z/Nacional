@@ -1,18 +1,23 @@
 extends VBoxContainer
 
+const TextoLimpio = preload("res://logica/texto_limpio.gd")
+
 const Consultas = preload("res://logica/tablero/consultas.gd")
+const Escenario = preload("res://logica/simulador/escenario.gd")
+const MenuPieza = preload("res://escenas/menu_pieza.gd")
 const Banco = preload("res://logica/competencias/banco.gd")
 const Vistas = preload("res://logica/tablero/vistas.gd")
 const COLORES_NIVEL := {
 	"Novato": Color("#d64545"),
 	"Básico": Color("#f2b705"),
-	"Competente": Color("#3b82c4"),
+	"Competente": Color("#1aa7a6"),
 	"Experto": Color("#3fae6a"),
 }
 
 var base := ""
 var alias_actual := ""
 var instructor := false
+var ordenes := {}
 @onready var datos := $Contenido/Datos
 @onready var lista := $Alias
 
@@ -34,7 +39,8 @@ func cambiar_vista(es_instructor: bool) -> void:
 	lista.clear()
 	if instructor and not base.is_empty():
 		for nombre in Vistas.aliases(base):
-			lista.add_item(nombre)
+			lista.add_item(TextoLimpio.limpiar(nombre).texto + (" · Demo" if nombre.begins_with(TextoLimpio.DEMO) else ""))
+			lista.set_item_metadata(lista.item_count - 1, nombre)
 	mostrar()
 
 
@@ -44,14 +50,14 @@ func mostrar() -> void:
 	if $Vistas/Ayuda.button_pressed:
 		linea(Vistas.AYUDA)
 		return
-	var nombre: String = lista.get_item_text(lista.selected) if instructor and lista.selected >= 0 else alias_actual
+	var nombre: String = lista.get_item_metadata(lista.selected) if instructor and lista.selected >= 0 else alias_actual
 	var perfil := Consultas.tecnico(base, nombre) if not base.is_empty() and not nombre.is_empty() else {}
 	if perfil.is_empty() or perfil.estado == "sin_sesiones":
 		if not perfil.is_empty():
 			linea(perfil.alias, &"Chip")
 		var indicadores := fila_indicadores()
-		indicador(indicadores, "Ganancia indicativa", "Pendiente", "Requiere diagnóstico y post-test")
-		indicador(indicadores, "Retención simulada", "Pendiente", "Requiere post-test y retest")
+		indicador(indicadores, "Ganancia indicativa", "Pendiente", "Completa el diagnóstico y la evaluación")
+		indicador(indicadores, "Retención simulada", "Pendiente", "Completa la evaluación y repítela")
 		indicador(indicadores, "Faltas críticas", "—", "Sin prácticas registradas")
 		var mensaje := tarjeta(datos)
 		linea("Aún no hay resultados para mostrar", &"Seccion", mensaje)
@@ -67,6 +73,13 @@ func mostrar() -> void:
 	indicador(indicadores, "Faltas críticas", str(perfil.faltas_criticas.conteo),
 		"Última · %s" % perfil.faltas_criticas.ultima if perfil.faltas_criticas.ultima != null else "Sin faltas registradas")
 	indicador(indicadores, "Brechas registradas", str(perfil.brechas.size()), "Diagnóstico frente a acción")
+	if not perfil.errores_arnes.is_empty():
+		linea("Banco de arnés", &"Seccion")
+		var fila_banco := fila_indicadores()
+		indicador(fila_banco, "Errores de medición", str(perfil.errores_arnes.medicion),
+			"Punto, lectura reportada o paso omitido")
+		indicador(fila_banco, "Errores de interpretación", str(perfil.errores_arnes.interpretacion),
+			"Causa elegida tras lecturas correctas")
 	linea("Dominio por competencia", &"Seccion")
 	var filas: Array[Array] = []
 	for competencia in perfil.competencias:
@@ -101,7 +114,8 @@ func mostrar() -> void:
 				str(valor.errores_recurrentes[error])])
 		for brecha in valor.detalle_brechas:
 			filas.append(["Brecha", nombre_competencia, "%s · %s → %s" % [
-				brecha.caso, brecha.causa_marcada, brecha.accion_ejecutada], "1"])
+				nombre_orden(brecha.caso), MenuPieza.nombre_causa(brecha.causa_marcada),
+				nombre_accion(brecha.caso, brecha.accion_ejecutada)], "1"])
 		if valor.brechas > valor.detalle_brechas.size():
 			filas.append(["Brecha", nombre_competencia, "Sin caso asociado",
 				str(valor.brechas - valor.detalle_brechas.size())])
@@ -117,7 +131,8 @@ func mostrar() -> void:
 		perfil.faltas_criticas.ultima if perfil.faltas_criticas.ultima != null else "pendiente"])
 	for escenario in perfil.tiempos_por_escenario:
 		for accion in perfil.tiempos_por_escenario[escenario]:
-			linea("%s · %s · promedio %.0f ms" % [escenario, accion, perfil.tiempos_por_escenario[escenario][accion]])
+			linea("%s · %s · promedio %.0f ms" % [nombre_orden(escenario),
+				nombre_accion(escenario, accion), perfil.tiempos_por_escenario[escenario][accion]])
 	var sesiones := Vistas.sesiones(perfil.intentos)
 	if instructor:
 		mostrar_historial(perfil, sesiones)
@@ -138,12 +153,36 @@ func mostrar_historial(perfil: Dictionary, sesiones: Array) -> void:
 	for sesion in sesiones:
 		mostrar_sesion(sesion)
 	for intento in perfil.intentos:
-		linea("%s · Ítem %s · Entrada %s · Versión %s" % [
+		linea("%s · Pregunta %s · Entrada %s · Versión %s" % [
 			intento.reloj_sim, intento.item, intento.fuente_entrada, intento.version_contenido])
 	for evento in perfil.eventos:
 		linea("%s · Evento %s · Entrada %s · Fuente %s · Versión %s" % [
-			evento.reloj_sim, evento.accion, evento.fuente_entrada, evento.get("fuente", "pendiente"),
+			evento.reloj_sim, nombre_accion(evento.get("escenario", ""), evento.accion), evento.fuente_entrada,
+			TextoLimpio.fuente(evento.get("fuente", "pendiente")),
 			evento.get("version_contenido", "pendiente")])
+
+
+func orden(id: String) -> Dictionary:
+	if id.is_empty() or not id.is_valid_identifier():
+		return {}
+	if not ordenes.has(id):
+		var datos_orden := Escenario.cargar("escenarios/%s.json" % id)
+		ordenes[id] = datos_orden.get("escenario", {})
+	return ordenes[id]
+
+
+func nombre_orden(id: String) -> String:
+	return TextoLimpio.limpiar(orden(id).get("titulo", "Orden de servicio")).texto
+
+
+func nombre_accion(id_orden: String, id_accion: String) -> String:
+	if id_accion == "diagnostico_final":
+		return "Diagnóstico final"
+	var datos_orden := orden(id_orden)
+	var acciones: Dictionary = datos_orden.get("acciones", {})
+	var recuperaciones: Dictionary = datos_orden.get("recuperaciones", {})
+	var regla: Dictionary = acciones.get(id_accion, recuperaciones.get(id_accion, {}))
+	return TextoLimpio.limpiar(regla.get("titulo", "Paso de la orden")).texto
 
 
 func mostrar_sesion(sesion: Dictionary) -> void:
@@ -178,7 +217,7 @@ func mostrar_tabla(filas: Array[Array]) -> void:
 	var interior := tarjeta(datos)
 	linea("Errores recurrentes y brechas", &"Seccion", interior)
 	if filas.is_empty():
-		linea("Aún no se han registrado errores recurrentes ni brechas.", &"Secundario", interior)
+		linea("Aquí verás errores que repitas y diferencias entre tu diagnóstico y lo que hiciste.", &"Secundario", interior)
 		return
 	var tabla := GridContainer.new()
 	tabla.columns = 4
@@ -195,7 +234,7 @@ func mostrar_tabla(filas: Array[Array]) -> void:
 func linea(texto: String, estilo: StringName = &"", padre: Control = null) -> void:
 	var etiqueta := Label.new()
 	etiqueta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	etiqueta.text = texto
+	etiqueta.text = TextoLimpio.linea(texto)
 	etiqueta.theme_type_variation = estilo
 	etiqueta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	(datos if padre == null else padre).add_child(etiqueta)

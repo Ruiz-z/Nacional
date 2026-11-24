@@ -1,5 +1,7 @@
 extends VBoxContainer
 
+const TextoLimpio = preload("res://logica/texto_limpio.gd")
+
 signal tablero_solicitado(perfil: Dictionary)
 signal escenario_solicitado(perfil: Dictionary)
 
@@ -26,8 +28,8 @@ func _ready() -> void:
 func actualizar(correcto: bool) -> void:
 	perfil = Demo.abrir(base_real)
 	var reloj := {} if perfil.is_empty() else Reloj.estado(perfil.base, perfil.id, int(Time.get_unix_time_from_system()))
-	$Estado.text = "No se pudo abrir la demo." if reloj.is_empty() else "%s · Reloj simulado: +%d días" % [
-		perfil.alias, reloj.desplazamiento_dias]
-	$Aviso.text = "" if correcto else "No se pudo actualizar la demo."
+	$Estado.text = "No se abrió la demo. Vuelve al menú e inténtalo otra vez." if reloj.is_empty() else "%s · Reloj simulado: +%d días" % [
+		TextoLimpio.linea(perfil.alias), reloj.desplazamiento_dias]
+	$Aviso.text = "" if correcto else "No se guardaron los cambios de la demo. Intenta de nuevo."
 	for boton in [$Adelantar, $Restablecer, $Tablero, $Escenario]:
 		boton.disabled = reloj.is_empty()

@@ -1,0 +1,15 @@
+# Guía de texto del taller
+- Háblale de tú a quien juega.
+- Da instrucciones en imperativo. Escribe «Abre la caja de fusibles».
+- Escribe una idea por frase y procura usar como máximo 18 palabras.
+- Usa palabras de taller mexicano, como foco, tuerca, llave y fusible.
+- Usa el mismo nombre para cada pieza, herramienta y acción en todas las pantallas.
+- Pon los títulos de acción en infinitivo. Escribe «Medir continuidad».
+- Llama «Pasos» a la lista que guía la práctica.
+- Quita muletillas, listas forzadas, signos de exclamación, guiones largos y punto y coma.
+- Si algo falla, di qué pasó y qué puede hacer la persona para seguir.
+- Deja los nombres internos y los detalles de programación fuera de la pantalla.
+- Conserva las marcas `[MUESTRA]` y `[DEMO]` en los datos que las usan.
+- Muestra «Ejemplo didáctico» o «Demo» en una etiqueta aparte.
+- Cita la fuente real. Para una muestra sin fuente oficial, escribe «Fuente: ejemplo didáctico, sin fuente oficial».
+- Conserva el significado técnico. Usa sólo cifras y procedimientos que ya estén respaldados.

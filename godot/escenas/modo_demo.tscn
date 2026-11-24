@@ -22,7 +22,7 @@ text = "Modo demo"
 [node name="Descripcion" type="Label" parent="."]
 autowrap_mode = 3
 theme_type_variation = &"Secundario"
-text = "Explora el tablero con un técnico ficticio o abre una práctica en el bus virtual."
+text = "Abre una práctica o mira un historial de ejemplo."
 
 [node name="Estado" type="Label" parent="."]
 size_flags_horizontal = 0
@@ -45,7 +45,7 @@ text = "Reloj de la demostración"
 [node name="Explicacion" type="Label" parent="."]
 autowrap_mode = 3
 theme_type_variation = &"Secundario"
-text = "Adelanta el reloj para mostrar cómo se revisa la retención."
+text = "Adelanta el reloj para repetir la evaluación y ver qué recuerdas."
 
 [node name="Adelantar" type="Button" parent="."]
 custom_minimum_size = Vector2(0, 52)

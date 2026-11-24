@@ -12,6 +12,6 @@ static func comprobar(base: String) -> bool:
 	if demo == null or not demo.precargar(base, Base.consultar) or not demo.precargar(base, Base.consultar):
 		return false
 	var datos := Consultas.tecnico(base, demo.ALIAS, Base.consultar)
-	return datos.demo and datos.intentos.size() == 3 and datos.intentos[0].momento == "pre" \
+	return datos.errores_arnes == {"medicion": 1, "interpretacion": 1} and datos.demo and datos.intentos.size() == 3 and datos.intentos[0].momento == "pre" \
 		and datos.intentos[1].momento == "post" and datos.intentos[2].momento == "retest" \
 		and datos.intentos[2].reloj_sim > datos.intentos[1].reloj_sim

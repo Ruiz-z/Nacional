@@ -17,6 +17,6 @@ static func comprobar(base: String) -> bool:
 	if not alta.ok or alta.alias != "T-042" or alta.id <= 0:
 		return false
 	var repetido: Dictionary = alias.alta(base, "T-042", Base.consultar)
-	return not repetido.ok and repetido.mensaje.contains("registrado") \
+	return not repetido.ok and repetido.mensaje.contains("ya existe") \
 		and alias.elegir(base, "t-042", Base.consultar) == alta \
 		and not alias.elegir(base, "T-050", Base.consultar).ok

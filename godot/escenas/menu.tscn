@@ -2,6 +2,15 @@
 
 [ext_resource type="Script" path="res://escenas/menu.gd" id="1"]
 
+[sub_resource type="StyleBoxEmpty" id="SinFondo"]
+
+[sub_resource type="Gradient" id="Sombra"]
+colors = PackedColorArray(0.0549, 0.10196, 0.13333, 0.88, 0.0549, 0.10196, 0.13333, 0.55)
+
+[sub_resource type="GradientTexture2D" id="Degradado"]
+gradient = SubResource("Sombra")
+fill_to = Vector2(1, 0)
+
 [node name="Menu" type="Control"]
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,10 +25,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-offset_left = 24.0
-offset_right = -24.0
-offset_top = 16.0
-offset_bottom = -16.0
 theme_override_constants/separation = 24
 
 [node name="Volver" type="Button" parent="Marco"]
@@ -33,67 +38,204 @@ size_flags_vertical = 3
 horizontal_scroll_mode = 0
 follow_focus = true
 
-[node name="Centro" type="CenterContainer" parent="Marco/EntradaInicio"]
+[node name="Columna" type="VBoxContainer" parent="Marco/EntradaInicio"]
 size_flags_horizontal = 3
-size_flags_vertical = 3
+theme_override_constants/separation = 0
 
-[node name="Columna" type="VBoxContainer" parent="Marco/EntradaInicio/Centro"]
-custom_minimum_size = Vector2(760, 0)
+[node name="Barra" type="Control" parent="Marco/EntradaInicio/Columna"]
+custom_minimum_size = Vector2(0, 72)
+
+[node name="Fondo" type="ColorRect" parent="Marco/EntradaInicio/Columna/Barra"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.0549, 0.10196, 0.13333, 1)
+
+[node name="Margen" type="MarginContainer" parent="Marco/EntradaInicio/Columna/Barra"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+
+[node name="Fila" type="HBoxContainer" parent="Marco/EntradaInicio/Columna/Barra/Margen"]
 theme_override_constants/separation = 12
 
-[node name="Titulo" type="Label" parent="Marco/EntradaInicio/Centro/Columna"]
-autowrap_mode = 3
-theme_type_variation = &"Titulo"
-text = "Entrenamiento de taller"
+[node name="Logo" type="Control" parent="Marco/EntradaInicio/Columna/Barra/Margen/Fila"]
+custom_minimum_size = Vector2(38, 38)
+size_flags_vertical = 4
+mouse_filter = 2
 
-[node name="Subtitulo" type="Label" parent="Marco/EntradaInicio/Centro/Columna"]
-autowrap_mode = 3
-theme_type_variation = &"Secundario"
-text = "Diagnostica fallas y practica en un bus eléctrico virtual."
-
-[node name="Tarjeta" type="PanelContainer" parent="Marco/EntradaInicio/Centro/Columna"]
-
-[node name="Inicio" type="VBoxContainer" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta"]
-theme_override_constants/separation = 8
-
-[node name="Perfil" type="Label" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio"]
-autowrap_mode = 3
+[node name="Marca" type="Label" parent="Marco/EntradaInicio/Columna/Barra/Margen/Fila"]
 theme_type_variation = &"Seccion"
-text = "Técnico · Sin alias"
+text = "TÉCNICOS DEL MAÑANA"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
 
-[node name="Siguiente" type="Label" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio"]
-size_flags_horizontal = 0
+[node name="Perfil" type="Label" parent="Marco/EntradaInicio/Columna/Barra/Margen/Fila"]
 theme_type_variation = &"Chip"
+text = "Técnico · Sin alias"
+size_flags_vertical = 4
+text_overrun_behavior = 3
+custom_minimum_size = Vector2(180, 0)
 
-[node name="Entrada" type="Label" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio"]
+[node name="Entrada" type="Label" parent="Marco/EntradaInicio/Columna/Barra/Margen/Fila"]
+theme_type_variation = &"Chip"
+text = "Panel virtual"
+size_flags_vertical = 4
+
+[node name="Hero" type="PanelContainer" parent="Marco/EntradaInicio/Columna"]
+clip_contents = true
+theme_override_styles/panel = SubResource("SinFondo")
+
+[node name="Foto" type="TextureRect" parent="Marco/EntradaInicio/Columna/Hero"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+show_behind_parent = true
+
+[node name="Sombra" type="TextureRect" parent="Marco/EntradaInicio/Columna/Hero"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = SubResource("Degradado")
+expand_mode = 1
+show_behind_parent = true
+
+[node name="Margen" type="MarginContainer" parent="Marco/EntradaInicio/Columna/Hero"]
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_bottom = 48
+
+[node name="Fila" type="HBoxContainer" parent="Marco/EntradaInicio/Columna/Hero/Margen"]
+theme_override_constants/separation = 28
+
+[node name="Texto" type="VBoxContainer" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila"]
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 10
+
+[node name="Etiqueta" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Texto"]
+theme_type_variation = &"Seccion"
+text = "ENTRENAMIENTO PARA TÉCNICOS DE AUTOBÚS"
+theme_override_colors/font_color = Color(0.10196, 0.65490, 0.65098, 1)
+theme_override_colors/font_outline_color = Color(0.0549, 0.10196, 0.13333, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 15
+
+[node name="Titulo" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Texto"]
+theme_type_variation = &"TituloHero"
+text = "Técnicos del Mañana"
 autowrap_mode = 3
-theme_type_variation = &"Secundario"
 
-[node name="EtiquetaAlias" type="Label" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio"]
+[node name="Acento" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Texto"]
+theme_type_variation = &"TituloHero"
+text = "Entrenamiento inteligente"
+theme_override_colors/font_color = Color(0.10196, 0.65490, 0.65098, 1)
+theme_override_colors/font_outline_color = Color(0.0549, 0.10196, 0.13333, 1)
+theme_override_constants/outline_size = 3
 autowrap_mode = 3
-theme_type_variation = &"Secundario"
-text = "Alias de técnico"
 
-[node name="Alias" type="LineEdit" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio"]
-custom_minimum_size = Vector2(0, 52)
-max_length = 64
+[node name="Subtitulo" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Texto"]
+text = "Practica el diagnóstico de fallas de un autobús eléctrico."
+autowrap_mode = 3
+theme_override_colors/font_color = Color(1, 1, 1, 0.8)
 
-[node name="Elegir" type="Button" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio"]
-custom_minimum_size = Vector2(0, 52)
+[node name="Acciones" type="HBoxContainer" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Texto"]
+theme_override_constants/separation = 12
+
+[node name="IrAlias" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Texto/Acciones"]
+custom_minimum_size = Vector2(0, 50)
 text = "Entrar con alias"
 theme_type_variation = &"Primario"
 
-[node name="Alta" type="Button" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio"]
-custom_minimum_size = Vector2(0, 52)
-text = "Registrar alias"
-
-[node name="Aviso" type="Label" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio"]
-autowrap_mode = 3
-theme_type_variation = &"Aviso"
-
-[node name="Pasos" type="GridContainer" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio"]
-columns = 3
-
-[node name="Demo" type="Button" parent="Marco/EntradaInicio/Centro/Columna/Tarjeta/Inicio"]
-custom_minimum_size = Vector2(0, 52)
+[node name="DemoHero" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Texto/Acciones"]
+custom_minimum_size = Vector2(0, 50)
 text = "Abrir modo demo"
+theme_type_variation = &"Contorno"
+
+[node name="Tarjeta" type="PanelContainer" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila"]
+theme_type_variation = &"TarjetaClara"
+custom_minimum_size = Vector2(342, 0)
+size_flags_vertical = 4
+
+[node name="Inicio" type="VBoxContainer" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta"]
+theme_override_constants/separation = 8
+
+[node name="Cabecera" type="PanelContainer" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+theme_type_variation = &"Cabecera"
+
+[node name="Titulo" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio/Cabecera"]
+theme_type_variation = &"Seccion"
+text = "Tu alias"
+
+[node name="EtiquetaAlias" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+theme_type_variation = &"DetalleClaro"
+text = "Alias de técnico"
+
+[node name="Alias" type="LineEdit" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+custom_minimum_size = Vector2(0, 48)
+max_length = 64
+accessibility_name = "Alias de técnico"
+
+[node name="Elegir" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+custom_minimum_size = Vector2(0, 50)
+text = "Entrar con alias"
+theme_type_variation = &"Primario"
+
+[node name="Alta" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+custom_minimum_size = Vector2(0, 50)
+text = "Registrar alias"
+theme_type_variation = &"BotonClaro"
+
+[node name="Aviso" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+theme_type_variation = &"DetalleClaro"
+autowrap_mode = 3
+
+[node name="Siguiente" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+theme_type_variation = &"Insignia"
+size_flags_horizontal = 0
+
+[node name="Destacados" type="MarginContainer" parent="Marco/EntradaInicio/Columna"]
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Tarjetas" type="HBoxContainer" parent="Marco/EntradaInicio/Columna/Destacados"]
+theme_override_constants/separation = 16
+
+[node name="Recorrido" type="PanelContainer" parent="Marco/EntradaInicio/Columna"]
+theme_override_styles/panel = SubResource("SinFondo")
+
+[node name="Fondo" type="ColorRect" parent="Marco/EntradaInicio/Columna/Recorrido"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.92549, 0.98039, 0.98039, 1)
+show_behind_parent = true
+
+[node name="Margen" type="MarginContainer" parent="Marco/EntradaInicio/Columna/Recorrido"]
+theme_override_constants/margin_top = 36
+theme_override_constants/margin_bottom = 36
+
+[node name="Contenido" type="VBoxContainer" parent="Marco/EntradaInicio/Columna/Recorrido/Margen"]
+theme_override_constants/separation = 16
+
+[node name="Titulo" type="Label" parent="Marco/EntradaInicio/Columna/Recorrido/Margen/Contenido"]
+theme_type_variation = &"TituloClaro"
+text = "Tu recorrido"
+
+[node name="Pasos" type="GridContainer" parent="Marco/EntradaInicio/Columna/Recorrido/Margen/Contenido"]
+columns = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+
+[node name="Demo" type="Button" parent="Marco/EntradaInicio/Columna/Recorrido/Margen/Contenido"]
+custom_minimum_size = Vector2(0, 50)
+text = "Abrir modo demo"
+theme_type_variation = &"Primario"
+size_flags_horizontal = 0

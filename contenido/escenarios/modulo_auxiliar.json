@@ -1,0 +1,198 @@
+{
+  "id": "modulo_auxiliar",
+  "version": "1",
+  "titulo": "[MUESTRA] Módulo auxiliar sin respuesta",
+  "descripcion": "[MUESTRA] Mide TP1 y TP2. Guarda las lecturas y reconecta el conductor.",
+  "briefing": {
+    "sintoma": "El módulo auxiliar no responde.",
+    "objetivo": "Averigua si falla la alimentación o la señal.",
+    "como": [
+      "Toma el multímetro de la mesa, mide TP1 y TP2 contra TP0, anota las lecturas en la hoja y repara."
+    ]
+  },
+  "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+  "muestra": true,
+  "ubicacion_inicial": {"multimetro": "mesa_banco"},
+  "zona": "banco",
+  "grupo_funcion": "FG3",
+  "dificultad": "dificil",
+  "causas": [
+    "alimentacion",
+    "senal",
+    "modulo"
+  ],
+  "causa_correcta": "alimentacion",
+  "explicacion_causa": {
+    "alimentacion": "[MUESTRA] La lectura del punto de alimentación muestra que el circuito está abierto.",
+    "senal": "[MUESTRA] Hay alimentación. En el punto de prueba falta la señal esperada.",
+    "modulo": "[MUESTRA] Las lecturas te ayudan a distinguir si la falla está en el arnés o dentro del módulo."
+  },
+  "indicios": [
+    {"clave": "tp1_medido", "etiqueta": "TP1 medido"},
+    {"clave": "tp2_medido", "etiqueta": "TP2 medido"},
+    {"clave": "tp1_reportado", "etiqueta": "Lectura de TP1 reportada"},
+    {"clave": "tp2_reportado", "etiqueta": "Lectura de TP2 reportada"},
+    {"claves": ["tp1_medido", "tp2_medido"], "mision": "Mide TP1 y TP2 con el multímetro", "ayuda": "Toma el multímetro de la mesa. Coloca la punta negra en TP0 y mide con la roja."},
+    {"claves": ["tp1_reportado", "tp2_reportado"], "mision": "Anota las lecturas en la hoja", "ayuda": "Abre la hoja de diagnóstico y guarda las dos lecturas."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Repara: reconecta el conductor", "ayuda": "Elige Reconectar conductor en el banco. Confirma en el panel."}
+  ],
+  "estado": {
+    "s1_abierto": true,
+    "s2_abierto": false,
+    "resuelto": false
+  },
+  "estados_imposibles": [],
+  "acciones": {
+    "medir_tp1": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
+      "titulo": "Medir TP1",
+      "componente": "tp1",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Coloca la punta negra en TP0 y la roja en TP1.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp1_0": {
+      "titulo": "≈0 V",
+      "componente": "hoja_diagnostico",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra ≈0 V en TP1.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp1_5": {
+      "titulo": "≈5 V",
+      "componente": "hoja_diagnostico",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra ≈5 V en TP1.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp1_otra": {
+      "titulo": "Otra",
+      "componente": "hoja_diagnostico",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra Otra en TP1.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "medir_tp2": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
+      "titulo": "Medir TP2",
+      "componente": "tp2",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Coloca la punta negra en TP0 y la roja en TP2.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp2_0": {
+      "titulo": "≈0 V",
+      "componente": "hoja_diagnostico",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra ≈0 V en TP2.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp2_5": {
+      "titulo": "≈5 V",
+      "componente": "hoja_diagnostico",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra ≈5 V en TP2.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp2_otra": {
+      "titulo": "Otra",
+      "componente": "hoja_diagnostico",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra Otra en TP2.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reconectar": {
+      "requiere": {
+        "herramienta": "llave_ajustable"
+      },
+      "titulo": "Reconectar conductor",
+      "componente": "conductor_banco",
+      "previas": {},
+      "efectos": {
+        "resuelto": true,
+        "s1_abierto": false,
+        "s2_abierto": false
+      },
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Usa el panel para reconectar el conductor.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true
+    }
+  },
+  "eventos": {},
+  "recuperaciones": {},
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 30
+  },
+  "ruta_ideal": [
+    "medir_tp1",
+    "medir_tp2",
+    "reportar_tp1_0",
+    "reportar_tp2_5",
+    "reconectar"
+  ],
+  "variante": {
+    "causa_correcta": "senal",
+    "estado": {
+      "s1_abierto": false,
+      "s2_abierto": true
+    },
+    "ruta_ideal": [
+      "medir_tp1",
+      "medir_tp2",
+      "reportar_tp1_5",
+      "reportar_tp2_0",
+      "reconectar"
+    ]
+  }
+}

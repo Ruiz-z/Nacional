@@ -8,7 +8,11 @@ const INSERTAR := """
 	SELECT payload ->> 'tecnico', value ->> 'escenario', value ->> 'accion',
 		value -> 'estado_antes',
 		json_object('estado', value -> 'estado_despues', 'tiempo_ms', value ->> 'tiempo_ms',
-			'fuente', value ->> 'fuente', 'version_contenido', payload ->> 'version_contenido'),
+			'fuente', value ->> 'fuente', 'version_contenido', payload ->> 'version_contenido',
+			'tipo_error', value ->> 'tipo_error', 'punto_medido', value ->> 'punto_medido',
+			'lectura_mostrada', value ->> 'lectura_mostrada', 'punto_reportado', value ->> 'punto_reportado',
+			'lectura-reportada', value ->> 'lectura-reportada', 'causa_elegida', value ->> 'causa_elegida',
+			'fuente_falla', value ->> 'fuente_falla'),
 		value ->> 'criticidad', value ->> 'fuente_entrada', value ->> 'reloj_sim'
 	FROM (SELECT ? AS payload), json_each(payload, '$.eventos');
 	INSERT INTO brecha (tecnico, competencia, caso, causa_marcada, accion_ejecutada, reloj_sim)
@@ -45,3 +49,7 @@ static func leer_metadatos(evento: Dictionary) -> void:
 		evento["tiempo_ms"] = datos.tiempo_ms
 		evento["fuente"] = datos.fuente
 		evento["version_contenido"] = datos.version_contenido
+		for campo in ["tipo_error", "punto_medido", "lectura_mostrada", "punto_reportado",
+				"lectura-reportada", "causa_elegida", "fuente_falla"]:
+			if datos.get(campo) != null:
+				evento[campo] = datos[campo]

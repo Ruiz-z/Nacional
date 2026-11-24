@@ -24,7 +24,7 @@ static func elegir(items: Array, formato: String) -> Dictionary:
 
 static func agregar(plan: Dictionary, item: Dictionary, descripcion: String) -> void:
 	if item.is_empty():
-		plan.avisos.append("Falta un ítem para %s." % descripcion)
+		plan.avisos.append("Falta una pregunta para %s." % descripcion)
 	else:
 		plan.items.append(item)
 
@@ -40,7 +40,7 @@ static func responder_media(plan: Dictionary, id: String, respuesta: int) -> boo
 		if respuesta != media.correcta:
 			var facil: Dictionary = plan.faciles[media.competencia]
 			if facil.is_empty():
-				plan.avisos.append("Falta una pregunta fácil para %s." % media.competencia)
+				plan.avisos.append("Falta una pregunta fácil para %s." % Banco.COMPETENCIAS.get(media.competencia, media.competencia))
 				return false
 			plan.items[indice + 1] = facil.duplicate(true)
 		return true

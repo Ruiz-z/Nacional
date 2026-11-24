@@ -1,5 +1,7 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://escenas/hud_mision.gd" id="hud_mision"]
+[ext_resource type="Script" path="res://escenas/interactuable.gd" id="Puerta"]
 [ext_resource type="Script" path="res://escenas/bus.gd" id="1"]
 [ext_resource type="PackedScene" path="res://escenas/panel_virtual.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://escenas/resumen.tscn" id="3"]
@@ -12,6 +14,20 @@
 [ext_resource type="Script" path="res://escenas/jugador.gd" id="Jugador"]
 
 [ext_resource type="Script" path="res://escenas/compartimento.gd" id="Gabinete"]
+
+[ext_resource type="Script" path="res://escenas/zona_faros.gd" id="Faros"]
+[ext_resource type="Script" path="res://escenas/zona_motor.gd" id="Motor"]
+
+[ext_resource type="PackedScene" path="res://escenas/interior.tscn" id="Interior"]
+[ext_resource type="PackedScene" path="res://escenas/menu_pieza.tscn" id="MenuPieza"]
+[ext_resource type="PackedScene" path="res://escenas/flashcard.tscn" id="Flashcard"]
+
+[ext_resource type="Script" path="res://escenas/zona_banco.gd" id="Banco"]
+
+[ext_resource type="Script" path="res://escenas/taller.gd" id="Taller"]
+
+[ext_resource type="Script" path="res://escenas/elevador.gd" id="Elevador"]
+[ext_resource type="Script" path="res://escenas/zona_bajos.gd" id="Bajos"]
 
 [sub_resource type="Environment" id="AmbienteTaller"]
 background_mode = 1
@@ -117,6 +133,20 @@ size = Vector3(0.24, 7.75, 34)
 [sub_resource type="BoxShape3D" id="ColisionEntrada"]
 size = Vector3(37, 7.75, 0.24)
 
+[sub_resource type="BoxShape3D" id="ColisionPuerta"]
+size = Vector3(0.02, 1.126, 0.742)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aviso"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(0.04, 0.08, 0.11, 0.92)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_left = 12
+corner_radius_bottom_right = 12
+
 [node name="Bus" type="Node3D"]
 script = ExtResource("1")
 
@@ -178,7 +208,44 @@ rotation_degrees = Vector3(0, -90, 0)
 position = Vector3(1.25, 0.9, 0.08)
 script = ExtResource("Gabinete")
 
+; BUS.fbx en mundo: extremo delantero z=5.635 y trasero z=-5.635.
+; Cristal de la puerta delantera (Windows), x [-1.181,-1.097],
+; y [1.393,2.519], z [4.418,5.160]. Acceso por el costado -X, centro z=4.789.
+[node name="PuertaPasajeros" type="StaticBody3D" parent="."]
+position = Vector3(-1.264, 1.956, 4.789)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("Puerta")
+
+[node name="Colision" type="CollisionShape3D" parent="PuertaPasajeros"]
+shape = SubResource("ColisionPuerta")
+
+[node name="Faros" type="Node3D" parent="."]
+position = Vector3(0, 0.961, 5.64)
+rotation_degrees = Vector3(0, -90, 0)
+script = ExtResource("Faros")
+
+[node name="Motor" type="Node3D" parent="."]
+position = Vector3(0, 1.15, -5.64)
+rotation_degrees = Vector3(0, 90, 0)
+script = ExtResource("Motor")
+
+[node name="Elevador" type="Node3D" parent="."]
+script = ExtResource("Elevador")
+
+[node name="Bajos" type="Node3D" parent="."]
+position = Vector3(0, -0.29, 0)
+script = ExtResource("Bajos")
+
+[node name="Interior" parent="." instance=ExtResource("Interior")]
+position = Vector3(100, 0, 0)
+
+[node name="Banco" type="Node3D" parent="."]
+position = Vector3(5.6, 0, -3.3)
+script = ExtResource("Banco")
+
 [node name="Taller" type="Node3D" parent="."]
+script = ExtResource("Taller")
 
 
 [node name="Piso" type="MeshInstance3D" parent="Taller"]
@@ -694,61 +761,37 @@ mesh = SubResource("Caja")
 material_override = SubResource("Negro")
 
 [node name="Cajon0" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.27, 0.37)
-scale = Vector3(1.23, 0.23, 0.052)
+position = Vector3(0, 0.39, 0.37)
+scale = Vector3(1.23, 0.44, 0.052)
 mesh = SubResource("Caja")
 material_override = SubResource("Rojo")
 
 [node name="Tirador0" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.332, 0.41)
+position = Vector3(0, 0.4520, 0.41)
 scale = Vector3(0.88, 0.027, 0.043)
 mesh = SubResource("Caja")
 material_override = SubResource("Metal")
 
 [node name="Cajon1" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.525, 0.37)
-scale = Vector3(1.23, 0.23, 0.052)
+position = Vector3(0, 0.855, 0.37)
+scale = Vector3(1.23, 0.44, 0.052)
 mesh = SubResource("Caja")
 material_override = SubResource("Rojo")
 
 [node name="Tirador1" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.587, 0.41)
+position = Vector3(0, 0.9170, 0.41)
 scale = Vector3(0.88, 0.027, 0.043)
 mesh = SubResource("Caja")
 material_override = SubResource("Metal")
 
 [node name="Cajon2" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.78, 0.37)
-scale = Vector3(1.23, 0.23, 0.052)
+position = Vector3(0, 1.3025, 0.37)
+scale = Vector3(1.23, 0.405, 0.052)
 mesh = SubResource("Caja")
 material_override = SubResource("Rojo")
 
 [node name="Tirador2" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.8420000000000001, 0.41)
-scale = Vector3(0.88, 0.027, 0.043)
-mesh = SubResource("Caja")
-material_override = SubResource("Metal")
-
-[node name="Cajon3" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 1.0350000000000001, 0.37)
-scale = Vector3(1.23, 0.23, 0.052)
-mesh = SubResource("Caja")
-material_override = SubResource("Rojo")
-
-[node name="Tirador3" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 1.0970000000000002, 0.41)
-scale = Vector3(0.88, 0.027, 0.043)
-mesh = SubResource("Caja")
-material_override = SubResource("Metal")
-
-[node name="Cajon4" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 1.29, 0.37)
-scale = Vector3(1.23, 0.23, 0.052)
-mesh = SubResource("Caja")
-material_override = SubResource("Rojo")
-
-[node name="Tirador4" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 1.352, 0.41)
+position = Vector3(0, 1.3645, 0.41)
 scale = Vector3(0.88, 0.027, 0.043)
 mesh = SubResource("Caja")
 material_override = SubResource("Metal")
@@ -1156,7 +1199,7 @@ text = "PELIGRO\nALTO VOLTAJE"
 anchor_bottom = 1.0
 offset_left = 12.0
 offset_top = 12.0
-offset_right = 312.0
+offset_right = 452.0
 offset_bottom = -12.0
 horizontal_scroll_mode = 0
 follow_focus = true
@@ -1183,13 +1226,6 @@ mouse_filter = 2
 custom_minimum_size = Vector2(232, 0)
 size_flags_vertical = 0
 
-[node name="Controles" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Secundario"
-autowrap_mode = 3
-text = "Tab · Cursor libre / caminar"
-
-[node name="AlternarHud" type="Button" parent="Interfaz/Lateral"]
-
 [node name="AlternarPanel" type="Button" parent="."]
 anchor_left = 1.0
 anchor_right = 1.0
@@ -1199,32 +1235,11 @@ offset_top = 12.0
 offset_bottom = 48.0
 
 [node name="Estado" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Titulo"
-text = ""
-autowrap_mode = 2
-theme_override_font_sizes/font_size = 24
-
-[node name="Muestra" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Metadato"
-text = "[MUESTRA] · Datos de práctica"
 autowrap_mode = 3
+theme_override_font_sizes/font_size = 15
 
-[node name="Objetivo" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Secundario"
-text = ""
-autowrap_mode = 2
-theme_override_font_sizes/font_size = 16
-
-[node name="IndiciosTitulo" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Seccion"
-text = "Indicios"
-autowrap_mode = 3
-
-[node name="Indicios" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Secundario"
-text = ""
-autowrap_mode = 2
-theme_override_font_sizes/font_size = 16
+[node name="Mision" type="VBoxContainer" parent="Interfaz/Lateral"]
+script = ExtResource("hud_mision")
 
 [node name="Conexion" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Chip"
@@ -1238,47 +1253,43 @@ autowrap_mode = 3
 theme_type_variation = &"Primario"
 visible = false
 
-[node name="Causa" type="OptionButton" parent="Interfaz/Lateral"]
-visible = false
-custom_minimum_size = Vector2(0, 52)
-fit_to_longest_item = false
-text_overrun_behavior = 3
-
-[node name="Pieza" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Seccion"
-autowrap_mode = 3
-visible = false
-
-[node name="LecturaPieza" type="Label" parent="Interfaz/Lateral"]
-visible = false
-autowrap_mode = 3
-theme_type_variation = &"Secundario"
-
-[node name="Accion" type="OptionButton" parent="Interfaz/Lateral"]
-visible = false
-custom_minimum_size = Vector2(0, 52)
-fit_to_longest_item = false
-text_overrun_behavior = 3
-
-[node name="DetalleAccion" type="Label" parent="Interfaz/Lateral"]
-visible = false
-autowrap_mode = 3
-theme_type_variation = &"Secundario"
-
-[node name="ConfirmarAccion" type="Button" parent="Interfaz/Lateral"]
-text = "Confirmar acción"
-custom_minimum_size = Vector2(0, 52)
-autowrap_mode = 3
-visible = false
-
 [node name="Aviso" type="RichTextLabel" parent="Interfaz/Lateral"]
 visible = false
 custom_minimum_size = Vector2(0, 56)
 focus_mode = 2
 theme_override_font_sizes/normal_font_size = 16
 
-[node name="Resumen" parent="Interfaz/Lateral" instance=ExtResource("3")]
-visible = false
+[node name="PistaControles" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -240.0
+offset_top = -77.0
+offset_right = 240.0
+offset_bottom = -12.0
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_outline_color = Color(0.04, 0.06, 0.08, 1)
+theme_override_constants/outline_size = 5
+text = "1 a 8 · Elige una herramienta    Tab · Libera el cursor\n← / →, rueda o L / R · Elige un objeto    G / Y · Refuerza la guía    V · Alterna la guía automática"
+
+[node name="PistaOrden" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -32.0
+offset_right = 160.0
+offset_bottom = -8.0
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_outline_color = Color(0.04, 0.06, 0.08, 1)
+theme_override_constants/outline_size = 5
+text = "O: ver la orden · Start"
 
 [node name="Mira" type="Label" parent="."]
 anchor_left = 0.5
@@ -1315,3 +1326,40 @@ theme_override_styles/panel = SubResource("FondoApuntado")
 mouse_filter = 2
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
+
+[node name="Resumen" parent="." instance=ExtResource("3")]
+visible = false
+
+[node name="MenuPieza" parent="." instance=ExtResource("MenuPieza")]
+
+[node name="Flashcard" parent="." instance=ExtResource("Flashcard")]
+
+[node name="AvisoCentral" type="CanvasLayer" parent="."]
+layer = 3
+
+[node name="Resultado" type="Label" parent="AvisoCentral"]
+visible = false
+anchor_left = 0.25
+anchor_right = 0.75
+offset_top = 24.0
+offset_bottom = 24.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_aviso")
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Duracion" type="Timer" parent="AvisoCentral"]
+wait_time = 3.0
+one_shot = true
+
+[node name="Fundido" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Negro" type="ColorRect" parent="Fundido"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

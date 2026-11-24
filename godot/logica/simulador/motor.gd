@@ -1,14 +1,18 @@
 extends RefCounted
 
 const Escenario = preload("res://logica/simulador/escenario.gd")
-const ENTRADAS := ["panel", "virtual", "teclado", "control"]
+const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
+const EvaluacionPanel = preload("res://logica/entrada/evaluacion_panel.gd")
+const FUENTE_ELEVADOR := "[MUESTRA] procedimiento didáctico, sin fuente oficial"
+const ENTRADAS := ["panel", "virtual", "teclado", "control", "banco"]
 
 # Estas cifras son reglas del juego, independientes de los valores del escenario.
-const PENALIZACIONES := {"paso-innecesario": 4, "orden-incorrecto": 8,
+const PENALIZACIONES := {"paso-innecesario": 4, "herramienta-equivocada": 4, "orden-incorrecto": 8,
 	"valor-fuera-de-rango": 10, "causa-equivocada": 12, "paso-omitido": 12,
-	"accion-insegura": 30}
+	"punto-de-medicion-incorrecto": 8, "lectura-mal-interpretada": 12, "accion-insegura": 30}
 
 var enviar_brecha: Callable
+var mediciones: Mediciones
 
 var _causa_marcada := ""
 var _brechas: Array = []
@@ -23,11 +27,18 @@ var _punto_seguro := 0
 var _progreso_previo: Array = []
 var _intento_anterior := {}
 var _reflexion := ""
+var _reflexion_omitida := false
+var _diagnostico_final := {}
+var _causa_banco := ""
+var _lecturas_correctas := false
 
 
-func _init(escenario: Dictionary) -> void:
+func _init(escenario: Dictionary, lector_banco: Callable = Mediciones.leer_variante,
+		fuente_banco := "virtual") -> void:
 	_escenario = escenario.duplicate(true)
 	_estado = _escenario.estado.duplicate()
+	if _escenario.get("zona") == "banco":
+		mediciones = Mediciones.new(lector_banco, fuente_banco)
 	var inicio := activar_eventos({}, _estado)
 	if inicio.is_empty():
 		_fin = "estado-invalido"
@@ -52,42 +63,110 @@ func faltas() -> Array:
 	return _faltas.duplicate(true)
 
 
-func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int) -> Dictionary:
+static func seguridad_confirmada(controles: Dictionary) -> bool:
+	return controles.get("bloqueo", false) == true and controles.get("etiquetado", false) == true
+
+
+func acciones_acertadas() -> Array[String]:
+	var acciones: Array[String] = []
+	for decision in _progreso_previo + _decisiones:
+		if es_acierto(decision) and decision.accion not in acciones:
+			acciones.append(decision.accion)
+	return acciones
+
+
+func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dictionary = {},
+		lectura_previa: Dictionary = {}) -> Dictionary:
 	if not _fin.is_empty():
-		return rechazo("El escenario ya terminó.")
+		return rechazo("La práctica ya terminó. Abre otra orden o vuelve a intentarla.")
 	if fuente_entrada not in ENTRADAS or tiempo_ms < 0:
-		return rechazo("La fuente de entrada o el tiempo no es válido.")
+		return rechazo("No se recibió el paso. Intenta de nuevo.")
 	var recuperacion: bool = _escenario.recuperaciones.has(id)
 	var reglas: Dictionary = recuperaciones_disponibles() if recuperacion else _escenario.acciones
 	var regla: Dictionary = reglas.get(id, {})
 	if regla.is_empty():
-		return rechazo("La acción no está disponible.")
+		return rechazo("Ese paso aún no está disponible. Revisa la ayuda de la orden.")
+	if fuente_entrada == "banco" and (mediciones == null or id != "reconectar"
+			or mediciones.fuente != "banco" or lectura_previa.is_empty()):
+		return rechazo("No se pudo comprobar la reparación. Revisa la conexión del banco.")
+	if mediciones != null and regla.get("requiere_panel", false):
+		if mediciones.fuente == "banco" and fuente_entrada != "banco":
+			return rechazo("Cierra el conductor abierto en el banco físico.")
+		if fuente_entrada not in ["panel", "virtual", "banco"]:
+			return rechazo("Confirma la reparación en el panel.")
+	var bajos: bool = _escenario.get("zona") == "bajos"
+	var bajo_autobus: bool = bajos and regla.componente != "consola_elevador"
+	var falta_elevador: bool = bajo_autobus and not controles.get("elevador_seguro", false)
+	if bajos and regla.get("requiere_panel", false) and not falta_elevador \
+			and fuente_entrada not in ["panel", "virtual"]:
+		return rechazo("Confirma la reparación en el panel.")
+	if regla.has("torque") and not falta_elevador and not Escenario.numero(controles.get("torque")):
+		return rechazo("Ajusta la perilla del panel para registrar el torque.")
 	var decision := {"accion": id, "estado_antes": estado(), "fuente_entrada": fuente_entrada,
 		"tiempo_ms": tiempo_ms, "competencia": regla.competencia, "fuente": regla.fuente,
 		"criticidad": regla.criticidad, "tipo_error": regla.tipo_error, "aplicada": false,
 		"motivo": "", "recuperacion": recuperacion, "eventos": []}
+	var faltantes := {}
 	for campo in regla.previas:
 		if _estado[campo] != regla.previas[campo]:
-			decision.motivo = "Se requiere %s = %s." % [campo, regla.previas[campo]]
-			break
-	if regla.criticidad == "critica":
+			faltantes[campo] = regla.previas[campo]
+	if not faltantes.is_empty():
+		decision.motivo = "Intentaste hacer este paso antes de tiempo. Revisa el siguiente paso de la orden."
+	var seguridad: String = regla.get("seguridad_panel", "")
+	if not seguridad.is_empty() and not seguridad_confirmada(controles):
+		faltantes.clear()
+		decision.motivo = regla.explicacion_seguridad
+		if seguridad == "critica":
+			decision.criticidad = "critica"
+			decision.tipo_error = "accion-insegura"
+	if falta_elevador:
+		decision.criticidad = "critica"
+		decision.tipo_error = "accion-insegura"
+		decision.fuente = FUENTE_ELEVADOR
+		decision.motivo = "Intentaste trabajar en los bajos sin trabar ambos soportes. Trábalos antes de volver a trabajar ahí. " + FUENTE_ELEVADOR
+	if decision.criticidad == "critica":
 		_fin = "falta-critica"
 		_puntaje = 0
-		decision.motivo = regla.descripcion
+		if seguridad != "critica" and not falta_elevador:
+			decision.motivo = regla.descripcion
+	elif not faltantes.is_empty():
+		decision.previas_faltantes = faltantes
+		if bajos and id == "cerrar_orden":
+			decision.tipo_error = "paso-omitido"
 	elif decision.motivo.is_empty():
-		var cambio := activar_eventos(_estado, _estado.merged(regla.efectos, true))
+		var efectos: Dictionary = regla.efectos
+		if regla.has("torque"):
+			var valor: float = controles.torque
+			var rango: Dictionary = regla.torque
+			var error := EvaluacionPanel.evaluar_torque(valor, rango.minimo, rango.maximo)
+			decision["torque_simulado"] = valor
+			if not error.is_empty():
+				decision.tipo_error = error.tipo_error
+				decision.criticidad = "leve"
+				decision.motivo = "[MUESTRA] El apriete quedó fuera de rango. Ajusta la perilla al rango del panel."
+				efectos = rango.efectos_fuera
+		var cambio := activar_eventos(_estado, _estado.merged(efectos, true))
 		if cambio.is_empty():
-			decision.motivo = "La acción produciría un estado imposible."
+			decision.motivo = "No puedes hacer ese paso así. Revisa el orden de los pasos y vuelve a intentarlo."
 		else:
+			if mediciones != null:
+				if id == "reconectar" and not lectura_previa.is_empty():
+					_causa_banco = Mediciones.causa_de_lectura(lectura_previa)
+				decision.merge(mediciones.aplicar(id, _estado, lectura_previa), true)
+				if id == "reconectar":
+					_lecturas_correctas = decision.tipo_error.is_empty()
+				decision["fuente_falla"] = mediciones.fuente
+				if decision.motivo.is_empty():
+					decision.motivo = Mediciones.MOTIVOS.get(decision.tipo_error, "")
 			_estado = cambio.estado
 			decision.eventos = cambio.eventos
 			decision.aplicada = true
 	if regla.criticidad == "leve" and decision.aplicada:
 		decision.motivo = regla.descripcion
-	elif not decision.aplicada and regla.criticidad != "critica" and decision.tipo_error.is_empty():
+	elif not decision.aplicada and decision.criticidad != "critica" and decision.tipo_error.is_empty():
 		decision.tipo_error = "orden-incorrecto"
 	decision.estado_despues = estado()
-	if regla.criticidad != "critica":
+	if decision.criticidad != "critica":
 		puntuar(decision)
 	_decisiones.append(decision)
 	if _fin == "falta-critica":
@@ -97,6 +176,20 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int) -> Dictionary:
 		if decision.aplicada and _fin.is_empty() and not hay_problemas():
 			_punto_seguro = _decisiones.size()
 	registrar_brecha(decision, regla.causa)
+	return decision.duplicate(true)
+
+
+func registrar_herramienta_equivocada(id: String, fuente_entrada: String, tiempo_ms: int, motivo: String) -> Dictionary:
+	var regla: Dictionary = _escenario.acciones.get(id, _escenario.recuperaciones.get(id, {}))
+	var competencia: String = _escenario.acciones[_escenario.ruta_ideal[0]].competencia
+	var decision := {"accion": id, "estado_antes": estado(), "estado_despues": estado(),
+		"fuente_entrada": fuente_entrada, "tiempo_ms": tiempo_ms,
+		"competencia": regla.get("competencia", competencia), "fuente": regla.get("fuente", _escenario.fuente),
+		"criticidad": "leve", "tipo_error": "herramienta-equivocada", "aplicada": false,
+		"motivo": motivo, "recuperacion": _escenario.recuperaciones.has(id), "eventos": []}
+	puntuar(decision)
+	_decisiones.append(decision)
+	actualizar_fin()
 	return decision.duplicate(true)
 
 
@@ -211,6 +304,17 @@ func reintentar() -> RefCounted:
 		return null
 	var variante := _escenario.duplicate(true)
 	variante.estado.merge(variante.variante.estado, true)
+	if mediciones != null:
+		variante.variante.estado = _escenario.estado.duplicate()
+		variante.ruta_ideal = _escenario.variante.get("ruta_ideal", _escenario.ruta_ideal)
+		variante.variante.ruta_ideal = _escenario.ruta_ideal
+		if _escenario.variante.has("causa_correcta"):
+			variante.causa_correcta = _escenario.variante.causa_correcta
+			variante.variante.causa_correcta = _escenario.causa_correcta
+		var nuevo_banco := get_script().new(variante, mediciones.leer, mediciones.fuente) as RefCounted
+		nuevo_banco._intento_anterior = metricas()
+		nuevo_banco.enviar_brecha = enviar_brecha
+		return nuevo_banco
 	var nuevo := get_script().new(variante) as RefCounted
 	if not nuevo.fin().is_empty() or nuevo.hay_problemas():
 		return null
@@ -219,6 +323,9 @@ func reintentar() -> RefCounted:
 	for decision in _progreso_previo + _decisiones.slice(0, _punto_seguro):
 		if not decision.aplicada:
 			continue
+		var reglas: Dictionary = variante.acciones if not decision.recuperacion else variante.recuperaciones
+		if variante.zona == "bajos" or reglas[decision.accion].has("seguridad_panel"):
+			break
 		var repetida: Dictionary = nuevo.ejecutar(decision.accion, decision.fuente_entrada, 0)
 		if not repetida.aplicada or not nuevo.fin().is_empty():
 			break
@@ -237,12 +344,43 @@ func reintentar() -> RefCounted:
 	return nuevo
 
 
-func registrar_reflexion(eleccion: String) -> bool:
+func registrar_reflexion(eleccion: String, omitir := false) -> bool:
 	var texto := eleccion.strip_edges()
-	if _fin.is_empty() or texto.is_empty() or not _reflexion.is_empty():
+	if _fin.is_empty() or (texto.is_empty() and not omitir) or _reflexion_omitida or not _reflexion.is_empty():
 		return false
-	_reflexion = texto
+	_reflexion = "" if omitir else texto
+	_reflexion_omitida = omitir
 	return true
+
+
+func pendiente_diagnostico() -> bool:
+	return _fin == "resuelto" and _escenario.has("causa_correcta") and _diagnostico_final.is_empty()
+
+
+func registrar_diagnostico(causa: String, fuente_entrada: String, tiempo_ms: int) -> Dictionary:
+	if not pendiente_diagnostico() or causa not in _escenario.causas \
+			or fuente_entrada not in ENTRADAS or tiempo_ms < 0:
+		return {}
+	var real: String = _causa_banco if not _causa_banco.is_empty() else _escenario.causa_correcta
+	_diagnostico_final = {"elegida": causa, "real": real, "correcto": causa == real,
+		"explicacion": _escenario.explicacion_causa[real], "fuente": _escenario.fuente,
+		"fuente_entrada": fuente_entrada, "tiempo_ms": tiempo_ms}
+	if _lecturas_correctas and causa != real:
+		var competencia: String = _escenario.acciones[_escenario.ruta_ideal[0]].competencia
+		var decision := evento_diagnostico(Mediciones.INTERPRETACION)
+		decision.merge({"competencia": competencia,
+			"motivo": Mediciones.MOTIVOS[Mediciones.INTERPRETACION], "recuperacion": false, "eventos": []})
+		puntuar(decision)
+		_decisiones.append(decision)
+	return _diagnostico_final.duplicate()
+
+
+func evento_diagnostico(tipo_error: String) -> Dictionary:
+	return {"accion": "diagnostico_final", "estado_antes": estado(), "estado_despues": estado(),
+		"causa_elegida": _diagnostico_final.elegida, "fuente_entrada": _diagnostico_final.fuente_entrada,
+		"tiempo_ms": _diagnostico_final.tiempo_ms, "fuente": _diagnostico_final.fuente,
+		"criticidad": "normal" if tipo_error.is_empty() else "leve",
+		"tipo_error": tipo_error, "aplicada": true}
 
 
 func resumen() -> Dictionary:
@@ -251,9 +389,12 @@ func resumen() -> Dictionary:
 	var resultado := {"fin": _fin, "linea_tiempo": _decisiones.duplicate(true),
 		"aciertos": _decisiones.filter(es_acierto).duplicate(true),
 		"errores": _decisiones.filter(es_error).duplicate(true),
-		"brechas": brechas(), "pregunta": "¿Qué harías distinto?", "reflexion": _reflexion,
+		"brechas": brechas(), "diagnostico_final": _diagnostico_final.duplicate(), "pregunta": "¿Qué harías distinto?", "reflexion": _reflexion,
+		"reflexion_omitida": _reflexion_omitida,
 		"comparacion": {"anterior": _intento_anterior.duplicate(), "actual": metricas()}}
-	if not _reflexion.is_empty():
+	if mediciones != null:
+		resultado["errores_arnes"] = Mediciones.contar_errores(resultado.errores)
+	if _reflexion_omitida or not _reflexion.is_empty():
 		resultado["ruta_ideal"] = []
 		for id in _escenario.ruta_ideal:
 			var regla: Dictionary = _escenario.acciones[id]
@@ -300,7 +441,14 @@ func resultados(reloj_sim: String) -> Dictionary:
 		intento.valor = clampi(intento.valor + decision.get("ajuste_puntos", 0), 0, 100)
 		if es_error(decision):
 			intento.resultado = "incorrecto"
-			intento.tipo_error = decision.tipo_error
+			if mediciones == null and decision.tipo_error != "herramienta-equivocada":
+				intento.tipo_error = decision.tipo_error
+			if mediciones != null or decision.tipo_error == "herramienta-equivocada":
+				var detalle := intento_de(decision.competencia, decision.accion, reloj_sim)
+				detalle.merge({"formato": "detalle-escenario", "resultado": "incorrecto",
+					"valor": 0, "tipo_error": decision.tipo_error, "tiempo_ms": decision.tiempo_ms,
+					"fuente_entrada": decision.fuente_entrada}, true)
+				intentos.append(detalle)
 		if decision.criticidad == "critica":
 			intento.tipo_error = "falta-critica"
 			intento.valor = 0
@@ -312,6 +460,21 @@ func resultados(reloj_sim: String) -> Dictionary:
 		intento.merge({"valor": 0, "resultado": "incorrecto", "tipo_error": brecha.tipo_error,
 			"tiempo_ms": brecha.tiempo_ms, "fuente_entrada": brecha.fuente_entrada}, true)
 		intentos.append(intento)
+	if not _diagnostico_final.is_empty():
+		var cierre := _diagnostico_final
+		var competencia: String = _escenario.acciones[_escenario.ruta_ideal[0]].competencia
+		var intento := intento_de(competencia, cierre.elegida, reloj_sim)
+		var tipo_error := "" if cierre.correcto else "causa-equivocada"
+		# El resultado de la práctica ya aporta al dominio por competencia.
+		intento.merge({"formato": "detalle-escenario", "valor": 100 if cierre.correcto else 0,
+			"resultado": "correcto" if cierre.correcto else "incorrecto",
+			"tipo_error": null if cierre.correcto else tipo_error,
+			"tiempo_ms": cierre.tiempo_ms, "fuente_entrada": cierre.fuente_entrada}, true)
+		intentos.append(intento)
+		if not _lecturas_correctas or cierre.correcto:
+			var evento := evento_diagnostico(tipo_error)
+			evento.merge({"escenario": _escenario.id, "reloj_sim": reloj_sim})
+			eventos.append(evento)
 	return {"escenario": _escenario.id, "version_contenido": _escenario.version, "fin": _fin,
 		"puntaje": _puntaje, "por_competencia": por_competencia, "intentos": intentos,
 		"eventos": eventos, "errores": eventos.filter(es_error), "faltas": faltas(),

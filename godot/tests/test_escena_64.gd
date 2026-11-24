@@ -19,6 +19,6 @@ static func comprobar(base: String) -> bool:
 	var texto := Vista.leer(tablero)
 	var correcto: bool = tablero.lista.visible and tablero.lista.item_count == 1 \
 		and texto.contains("Retest simulado 100") and texto.contains("Línea de tiempo") \
-		and texto.contains("Ítem bateria-muestra-01") and texto.contains("Versión 1")
+		and texto.contains("Pregunta bateria-muestra-01") and texto.contains("Versión 1")
 	tablero.free()
 	return correcto

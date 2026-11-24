@@ -5,4 +5,4 @@
 [node name="Ruta" instance=ExtResource("1")]
 
 [node name="Titulo" parent="Margen/Centro/Tarjeta/Contenido" index="0"]
-text = "Ruta y microlecciones"
+text = "Ruta de aprendizaje"

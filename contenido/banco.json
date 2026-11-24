@@ -33,11 +33,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Para qué sirve el bloqueo dentro del procedimiento LOTO?",
+      "pregunta": "¿Para qué sirve el bloqueo en el procedimiento LOTO?",
       "opciones": [
-        "Para impedir la reconexión no autorizada del punto de aislamiento.",
-        "Para medir si queda energía almacenada.",
-        "Para identificar la clase de EPP requerida."
+        "Para evitar que alguien vuelva a conectar el circuito sin permiso.",
+        "Para medir cuánta energía queda almacenada.",
+        "Para saber qué equipo de protección personal (EPP) necesitas."
       ],
       "correcta": 0
     },
@@ -56,11 +56,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué función cumple la etiqueta en el procedimiento LOTO?",
+      "pregunta": "¿Qué indica la etiqueta en el procedimiento LOTO?",
       "opciones": [
-        "Retiene físicamente el dispositivo en su posición de aislamiento.",
-        "Comunica la restricción de operar el dispositivo y que hay un trabajo en curso.",
-        "Comprueba que el dispositivo de aislamiento abrió todos sus contactos."
+        "Mantiene fijo el dispositivo de aislamiento.",
+        "Avisa que hay trabajo en curso y que nadie debe operar el dispositivo.",
+        "Confirma que se abrieron todos los contactos del dispositivo de aislamiento."
       ],
       "correcta": 1
     },
@@ -79,11 +79,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿En qué se basa la selección del EPP para una tarea eléctrica?",
+      "pregunta": "¿Cómo eliges el EPP para un trabajo eléctrico?",
       "opciones": [
-        "En el estado de carga que muestra el tablero.",
-        "En el equipo que se usó para la última tarea del turno.",
-        "En los peligros evaluados y el procedimiento aplicable a la tarea."
+        "Según la carga que marca el tablero.",
+        "Según el equipo que usaste en el trabajo anterior.",
+        "Según los peligros que identificaste y el procedimiento de la tarea."
       ],
       "correcta": 2
     },
@@ -102,11 +102,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "El tablero simulado está apagado. ¿Qué falta para dar por comprobada la ausencia de tensión?",
+      "pregunta": "El tablero está apagado. ¿Cómo compruebas que no hay tensión?",
       "opciones": [
-        "Una verificación en los puntos pertinentes con el instrumento previsto por el procedimiento.",
-        "Una segunda lectura del mismo indicador apagado.",
-        "El registro del apagado en la orden de trabajo."
+        "Mide en los puntos indicados con el instrumento que pide el procedimiento.",
+        "Vuelve a mirar el indicador apagado.",
+        "Anota en la orden que el tablero se apagó."
       ],
       "correcta": 0
     },
@@ -125,11 +125,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "Un circuito simulado quedó aislado de su alimentación principal. ¿Qué se debe considerar antes de darlo por seguro?",
+      "pregunta": "Ya aislaste el circuito de su alimentación principal. ¿Qué falta revisar para saber si es seguro?",
       "opciones": [
-        "El tiempo de uso acumulado del equipo desde el último servicio.",
-        "Las demás fuentes posibles y la energía que pueda seguir almacenada.",
-        "El último consumo registrado mientras el circuito funcionaba."
+        "Cuánto tiempo lleva en uso el equipo desde el último servicio.",
+        "Si hay otras fuentes de alimentación o queda energía almacenada.",
+        "Cuánta energía consumía el circuito antes de apagarlo."
       ],
       "correcta": 1
     },
@@ -148,11 +148,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "El técnico ya cuenta con el EPP previsto. ¿Qué debe hacer si la tarea requiere desenergizar el circuito?",
+      "pregunta": "Ya tienes el EPP indicado. ¿Qué haces si debes dejar el circuito sin energía?",
       "opciones": [
-        "Convertir la tarea en una inspección visual y mantener el mismo alcance.",
-        "Registrar el EPP como evidencia de que se completó el aislamiento.",
-        "Aplicar el procedimiento para establecer y verificar la condición segura."
+        "Haz una revisión visual sin cambiar el alcance de la tarea.",
+        "Anota el EPP como prueba de que aislaste el circuito.",
+        "Sigue el procedimiento y comprueba que puedes trabajar sin riesgo eléctrico."
       ],
       "correcta": 2
     },
@@ -171,11 +171,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "El instrumento indicó ausencia de tensión en la simulación, pero falló su comprobación posterior. ¿Cómo se interpreta el resultado?",
+      "pregunta": "El instrumento no marcó tensión. Al comprobarlo después, falló. ¿Qué haces con esa lectura?",
       "opciones": [
-        "La ausencia de tensión sigue sin verificarse y la tarea debe quedar detenida.",
-        "La lectura inicial sigue siendo válida porque el instrumento alcanzó a mostrarla.",
-        "El bloqueo aplicado basta para validar retrospectivamente la lectura."
+        "Da por pendiente la comprobación y mantén detenida la tarea.",
+        "Acepta la lectura porque el instrumento alcanzó a mostrarla.",
+        "Da por válida la lectura porque ya aplicaste el bloqueo."
       ],
       "correcta": 0
     },
@@ -194,11 +194,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "En la maqueta se bloqueó la alimentación principal, pero el esquema indica una alimentación auxiliar hacia los puntos de trabajo. ¿Qué decisión corresponde?",
+      "pregunta": "Bloqueaste la alimentación principal. El esquema muestra otra fuente que alimenta los puntos de trabajo. ¿Qué haces?",
       "opciones": [
-        "Dar por concluido el aislamiento si la fuente auxiliar no aparece en el tablero.",
-        "Mantener detenida la tarea hasta controlar la fuente auxiliar y verificar la condición segura.",
-        "Aceptar el bloqueo principal porque la alimentación auxiliar pertenece a otro subsistema."
+        "Da por terminado el aislamiento si la fuente auxiliar no aparece en el tablero.",
+        "Mantén detenida la tarea. Controla la fuente auxiliar y comprueba que sea seguro seguir.",
+        "Acepta el bloqueo principal porque la fuente auxiliar pertenece a otro sistema."
       ],
       "correcta": 1
     },
@@ -217,11 +217,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Cuál es la función principal de la batería de tracción de un bus eléctrico?",
+      "pregunta": "¿Para qué sirve la batería de tracción de un autobús eléctrico?",
       "opciones": [
-        "Determinar si los conductores están aislados del chasis.",
-        "Almacenar energía para alimentar el sistema de propulsión.",
-        "Distribuir mensajes entre las unidades de control."
+        "Para comprobar el aislamiento entre los conductores y el chasis.",
+        "Para guardar energía y alimentar el sistema de propulsión.",
+        "Para repartir mensajes entre las unidades de control."
       ],
       "correcta": 1
     },
@@ -240,11 +240,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué magnitud ayuda a vigilar el estado térmico de la batería?",
+      "pregunta": "¿Qué dato te ayuda a saber si la batería se calienta?",
       "opciones": [
-        "El estado de carga estimado.",
-        "El tiempo transcurrido desde la última carga.",
-        "La temperatura de la batería."
+        "La carga estimada de la batería.",
+        "El tiempo que pasó desde la última carga.",
+        "La temperatura que marca la batería."
       ],
       "correcta": 2
     },
@@ -263,11 +263,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué condición vigila el monitoreo de aislamiento del sistema de tracción?",
+      "pregunta": "¿Qué comprueba el monitor de aislamiento del sistema de tracción?",
       "opciones": [
-        "La separación eléctrica entre el circuito de tracción y el chasis.",
-        "La energía disponible para el siguiente recorrido.",
-        "La estabilidad de la temperatura durante una recarga."
+        "Si el circuito de tracción está aislado del chasis.",
+        "Cuánta energía queda para el próximo recorrido.",
+        "Si la temperatura se mantiene durante la carga."
       ],
       "correcta": 0
     },
@@ -286,11 +286,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "El bus simulado conserva carga, pero registra una advertencia térmica de batería. ¿Cómo se interpretan ambos datos?",
+      "pregunta": "El autobús todavía tiene carga y aparece una alerta de temperatura de la batería. ¿Qué te dicen ambos datos?",
       "opciones": [
-        "La advertencia térmica indica por sí sola que la carga disponible se agotó.",
-        "La carga disponible y la condición térmica describen aspectos distintos de la batería.",
-        "La carga disponible hace que la advertencia se interprete como error de lectura."
+        "La alerta de temperatura indica que se acabó la carga.",
+        "La carga y la temperatura describen cosas distintas de la batería.",
+        "Si aún tiene carga, la alerta es un error de lectura."
       ],
       "correcta": 1
     },
@@ -309,11 +309,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué informa un aviso de aislamiento degradado en el simulador?",
+      "pregunta": "¿Qué te indica un aviso de aislamiento degradado?",
       "opciones": [
-        "La ubicación exacta de un módulo de batería averiado.",
-        "Una estimación actualizada de la autonomía disponible.",
-        "Una condición anómala de aislamiento que requiere evaluación."
+        "En qué lugar exacto falló un módulo de la batería.",
+        "Cuánta distancia puede recorrer ahora el autobús.",
+        "El aislamiento presenta una falla que debes revisar."
       ],
       "correcta": 2
     },
@@ -332,11 +332,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "Al desconectar la batería del resto del circuito de tracción simulado, ¿qué ocurre con la energía almacenada en sus celdas?",
+      "pregunta": "Desconectas la batería del circuito de tracción. ¿Qué pasa con la energía de sus celdas?",
       "opciones": [
-        "Puede seguir almacenada dentro de la batería.",
-        "Queda consumida por la operación de desconexión.",
-        "Pasa por completo al circuito de tracción desconectado."
+        "Puede quedar energía en la batería.",
+        "La desconexión consume toda la energía guardada.",
+        "Toda la energía pasa al circuito que desconectaste."
       ],
       "correcta": 0
     },
@@ -355,11 +355,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "La simulación muestra carga estable y aislamiento degradado. ¿Qué conclusión se sostiene con esos datos?",
+      "pregunta": "La carga se mantiene y el tablero avisa que bajó el aislamiento. ¿Qué puedes concluir?",
       "opciones": [
-        "La degradación del aislamiento demuestra una caída inmediata del estado de carga.",
-        "La carga estable y la degradación del aislamiento pueden coexistir.",
-        "La carga estable demuestra que el aviso corresponde al chasis y no al circuito."
+        "Si baja el aislamiento, la carga cae de inmediato.",
+        "La carga puede mantenerse aunque baje el aislamiento.",
+        "Si la carga se mantiene, la falla está solo en el chasis."
       ],
       "correcta": 1
     },
@@ -378,11 +378,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "Una sola lectura de temperatura difiere del resto de las señales térmicas del simulador. ¿Qué interpretación conserva la incertidumbre diagnóstica?",
+      "pregunta": "Una lectura de temperatura difiere de las demás. ¿Qué puedes concluir mientras revisas la diferencia?",
       "opciones": [
-        "El promedio confirma que toda la batería se mantuvo a la misma temperatura.",
-        "La diferencia identifica por sí sola una zona dañada del paquete.",
-        "Puede haber una diferencia térmica real o una lectura anómala. Hace falta contrastar ambas hipótesis."
+        "El promedio prueba que toda la batería estuvo a la misma temperatura.",
+        "Esa lectura basta para ubicar una zona dañada.",
+        "Puede ser una diferencia real de temperatura o un error de lectura. Comprueba ambas posibilidades."
       ],
       "correcta": 2
     },
@@ -401,11 +401,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué representa un código de falla de diagnóstico?",
+      "pregunta": "¿Qué te dice un código de falla?",
       "opciones": [
-        "La reparación que ya se aplicó a un componente.",
-        "La lista completa de piezas que se deben cambiar.",
-        "Una condición que el sistema de diagnóstico detectó y registró."
+        "Qué reparación ya le hicieron a la pieza.",
+        "Qué piezas tienes que cambiar.",
+        "Qué condición detectó y guardó el sistema de diagnóstico."
       ],
       "correcta": 2
     },
@@ -424,11 +424,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué conviene registrar al encontrar un código en el diagnóstico simulado?",
+      "pregunta": "¿Qué anotas al encontrar un código de falla?",
       "opciones": [
-        "El código, el módulo que lo reporta y el síntoma observado.",
-        "Solo el nombre comercial del bus y su autonomía.",
-        "Solo la pieza que el técnico sospechaba antes de leer el código."
+        "Anota el código, el módulo que lo mostró y el síntoma que viste.",
+        "Anota solo el modelo del autobús y su autonomía.",
+        "Anota solo la pieza de la que sospechabas."
       ],
       "correcta": 0
     },
@@ -447,11 +447,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué conserva evidencia para comparar una falla intermitente en dos sesiones?",
+      "pregunta": "¿Cómo guardas evidencia para comparar una falla intermitente en dos sesiones?",
       "opciones": [
-        "Conservar solo la lista de componentes que se revisaron.",
-        "Guardar los códigos y las condiciones en que se presentó el síntoma.",
-        "Registrar únicamente el resultado de la última sesión."
+        "Guarda solo la lista de piezas que revisaste.",
+        "Guarda los códigos y anota en qué condiciones apareció el síntoma.",
+        "Guarda solo el resultado de la última sesión."
       ],
       "correcta": 1
     },
@@ -470,11 +470,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "Un código figura como histórico y el síntoma ya no aparece. ¿Qué se puede concluir?",
+      "pregunta": "El código quedó en el historial y el síntoma desapareció. ¿Qué puedes concluir?",
       "opciones": [
-        "La misma condición sigue activa durante toda la sesión.",
-        "El componente asociado al registro quedó reparado.",
-        "El registro indica una detección anterior. Su relación con el síntoma requiere evidencia."
+        "La falla sigue activa durante toda la sesión.",
+        "Ya quedó reparada la pieza asociada al código.",
+        "El sistema detectó algo antes. Busca evidencia para relacionarlo con el síntoma."
       ],
       "correcta": 2
     },
@@ -493,11 +493,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "El tablero simulado registra que dejó de recibir datos de otro módulo. ¿Qué conviene investigar primero?",
+      "pregunta": "El tablero dejó de recibir datos de otro módulo. ¿Qué revisas primero?",
       "opciones": [
-        "El estado de comunicación y los registros de los módulos implicados.",
-        "La calibración de todos los sensores que aparecen en el tablero.",
-        "La sustitución del módulo que notificó la pérdida de comunicación."
+        "Revisa si los módulos involucrados se comunican y qué anotaron en su historial.",
+        "Revisa la calibración de todos los sensores del tablero.",
+        "Revisa cómo cambiar el módulo que dio el aviso."
       ],
       "correcta": 0
     },
@@ -516,11 +516,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "Un mismo síntoma coincide con varios códigos. ¿Qué ayuda a priorizar las hipótesis?",
+      "pregunta": "Varios códigos acompañan al mismo síntoma. ¿Cómo decides qué causas revisar primero?",
       "opciones": [
-        "Asignar una reparación independiente a cada código desde el inicio.",
-        "Relacionar el momento de aparición de los códigos con el síntoma y los módulos que los reportaron.",
-        "Priorizar el código cuyo identificador aparezca primero por orden alfabético."
+        "Planea desde el inicio una reparación por cada código.",
+        "Compara cuándo salió cada código con el síntoma y el módulo que lo registró.",
+        "Empieza por el primer código en orden alfabético."
       ],
       "correcta": 1
     },
@@ -539,11 +539,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "En el registro simulado varios módulos pierden comunicación al mismo tiempo, pero uno de ellos registra además un evento propio anterior. ¿Cómo se inicia el análisis?",
+      "pregunta": "Varios módulos pierden comunicación a la vez. Uno guardó un evento antes que los demás. ¿Por dónde empiezas?",
       "opciones": [
-        "Se atribuyen todas las pérdidas al módulo que guardó el evento anterior.",
-        "Se trata cada pérdida como avería independiente porque fue notificada por un módulo distinto.",
-        "Se reconstruye la cronología y se evalúa si una condición común explica las pérdidas simultáneas."
+        "Atribuye todas las pérdidas al módulo que guardó el primer evento.",
+        "Trata cada pérdida como una falla separada porque llegó de otro módulo.",
+        "Ordena los eventos por hora. Revisa si una causa común explica las pérdidas simultáneas."
       ],
       "correcta": 2
     },
@@ -562,11 +562,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "Después de una corrección simulada desaparece el código, pero sigue presente el síntoma original. ¿Qué conclusión corresponde?",
+      "pregunta": "Después de la corrección desapareció el código, pero sigue el síntoma. ¿Qué haces?",
       "opciones": [
-        "La corrección aún requiere comprobación y se debe continuar el diagnóstico del síntoma.",
-        "La desaparición del código confirma que el síntoma tiene una causa nueva.",
-        "El resultado basta para cerrar el diagnóstico del síntoma original."
+        "Comprueba la corrección y sigue investigando el síntoma.",
+        "Da por hecho que el síntoma tiene una causa nueva.",
+        "Cierra el diagnóstico del síntoma porque se borró el código."
       ],
       "correcta": 0
     },
@@ -585,11 +585,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué función cumple una red CAN en el vehículo?",
+      "pregunta": "¿Para qué sirve la red CAN del autobús?",
       "opciones": [
-        "Permite intercambiar mensajes entre unidades electrónicas.",
-        "Distribuye potencia eléctrica para el motor de tracción.",
-        "Almacena la energía usada por las unidades electrónicas."
+        "Para que las unidades electrónicas intercambien mensajes.",
+        "Para llevar potencia eléctrica al motor de tracción.",
+        "Para guardar la energía que usan las unidades electrónicas."
       ],
       "correcta": 0
     },
@@ -608,11 +608,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué papel cumple un sensor de temperatura en el sistema de supervisión?",
+      "pregunta": "¿Para qué sirve un sensor de temperatura?",
       "opciones": [
-        "Distribuye la alimentación a las unidades de control.",
-        "Proporciona una señal que representa la temperatura en el punto que vigila.",
-        "Decide por sí solo si se autoriza la marcha del vehículo."
+        "Para repartir la alimentación entre las unidades de control.",
+        "Para enviar una señal que representa la temperatura donde mide.",
+        "Para decidir por sí mismo si el autobús puede avanzar."
       ],
       "correcta": 1
     },
@@ -631,11 +631,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué función cumple una unidad de control cuando publica un dato en la red del vehículo?",
+      "pregunta": "¿Qué hace una unidad de control al publicar una lectura en la red?",
       "opciones": [
-        "Transfiere al receptor la alimentación eléctrica del sensor.",
-        "Modifica por sí misma el estado físico que se midió.",
-        "Pone ese dato a disposición de las unidades que usan el mensaje."
+        "Pasa al receptor la alimentación del sensor.",
+        "Cambia por sí misma lo que midió el sensor.",
+        "Comparte la lectura con las unidades que usan ese mensaje."
       ],
       "correcta": 2
     },
@@ -654,11 +654,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "El tablero simulado muestra una variable como no disponible. ¿Qué significa ese estado?",
+      "pregunta": "El tablero muestra «Sin datos» en una lectura. ¿Qué significa?",
       "opciones": [
-        "Que el tablero no dispone de un dato válido para mostrar.",
-        "Que la variable medida tomó automáticamente su valor mínimo.",
-        "Que el sensor quedó calibrado con el último dato mostrado."
+        "El tablero no tiene una lectura válida que mostrar.",
+        "La medición bajó automáticamente al valor mínimo.",
+        "El sensor se calibró con la última lectura."
       ],
       "correcta": 0
     },
@@ -677,11 +677,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué función cumple una pasarela entre redes del vehículo?",
+      "pregunta": "¿Para qué sirve una pasarela entre las redes del autobús?",
       "opciones": [
-        "Sustituye las mediciones de los sensores conectados a cada red.",
-        "Interconecta redes y reenvía los datos previstos por su configuración.",
-        "Suministra la energía de tracción a los nodos de ambas redes."
+        "Para sustituir las lecturas de los sensores de cada red.",
+        "Para conectar redes y reenviar los datos que le indicaron.",
+        "Para dar energía de tracción a los módulos de ambas redes."
       ],
       "correcta": 1
     },
@@ -700,11 +700,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "Una unidad conserva alimentación en la simulación, pero sus mensajes dejan de llegar al tablero. ¿Qué se puede concluir?",
+      "pregunta": "Un módulo tiene alimentación, pero sus mensajes ya no llegan al tablero. ¿Qué puedes concluir?",
       "opciones": [
-        "La alimentación presente confirma que el tablero recibe los mensajes.",
-        "La ausencia de mensajes confirma una avería del sensor conectado a la unidad.",
-        "La alimentación presente no confirma que la comunicación funcione."
+        "La alimentación confirma que el tablero recibe los mensajes.",
+        "Si no llegan mensajes, el sensor del módulo está dañado.",
+        "Tener alimentación no basta para confirmar que hay comunicación."
       ],
       "correcta": 2
     },
@@ -723,11 +723,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "Una unidad muestra la variable en su lectura local, pero dos receptores dejan de actualizarla al mismo tiempo. ¿Qué comprobación distingue mejor una falla de comunicación de una lectura anómala?",
+      "pregunta": "Dos receptores dejan de actualizar el mismo dato. El módulo aún muestra la lectura local. ¿Qué revisas para distinguir las fallas?",
       "opciones": [
-        "Comparar la lectura local con el estado del mensaje y su recorrido hasta los receptores.",
-        "Comparar solo los datos que quedaron congelados en los dos receptores.",
-        "Comparar la lectura local con otra variable de un subsistema no relacionado."
+        "Compara la lectura local con el mensaje y revisa si llega a los receptores.",
+        "Compara solo las últimas lecturas que quedaron en los dos receptores.",
+        "Compara la lectura local con un dato de otro sistema sin relación."
       ],
       "correcta": 0
     },
@@ -746,11 +746,11 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "Los nodos de una rama dejan de ser visibles y el resto sigue comunicando. ¿Qué hipótesis conviene contrastar primero con el esquema simulado?",
+      "pregunta": "Los módulos de una rama desaparecen de la red. Los demás siguen comunicándose. ¿Qué compruebas primero en el esquema?",
       "opciones": [
-        "Una calibración incorrecta e independiente en cada nodo de esa rama.",
-        "Una condición compartida por los nodos de esa rama.",
-        "Un fallo que afecta por igual a todas las redes del vehículo."
+        "Si cada módulo de esa rama tiene por separado una mala calibración.",
+        "Si los módulos de esa rama comparten algo que explique la falla.",
+        "Si la falla afecta igual a todas las redes del autobús."
       ],
       "correcta": 1
     },
@@ -770,10 +770,10 @@
       "revisado": false,
       "version": "1",
       "sintomas": [
-        "El tablero simulado deja de actualizar datos de un grupo de módulos.",
-        "Los módulos de otra rama siguen comunicando."
+        "El tablero deja de actualizar los datos de varios módulos.",
+        "Los módulos de otra rama siguen enviando datos."
       ],
-      "codigo_falla": "Pérdida de comunicación con una rama (aviso simulado)",
+      "codigo_falla": "Una rama de la red perdió comunicación",
       "causa_correcta": "Interrupción del enlace compartido por los módulos de la rama afectada.",
       "ruta_ideal": [
         "leer-registro",
@@ -783,8 +783,8 @@
       "pasos": [
         {
           "id": "leer-registro",
-          "accion": "Consultar y conservar los eventos de comunicación simulados.",
-          "resultado": "Los eventos agrupan a los módulos afectados en el mismo momento.",
+          "accion": "Revisar y guardar los avisos de comunicación",
+          "resultado": "Los avisos de esos módulos se guardaron a la misma hora.",
           "tipo_error": "orden-incorrecto",
           "fuente": {
             "origen": "Volvo Buses",
@@ -795,8 +795,8 @@
         },
         {
           "id": "comparar-ramas",
-          "accion": "Cruzar los módulos afectados con el esquema de red simulado.",
-          "resultado": "Los módulos sin comunicación comparten una rama.",
+          "accion": "Ubicar los módulos en el esquema de red",
+          "resultado": "Los módulos que dejaron de enviar datos están en la misma rama.",
           "tipo_error": "orden-incorrecto",
           "fuente": {
             "origen": "Volvo Buses",
@@ -807,8 +807,8 @@
         },
         {
           "id": "confirmar-enlace",
-          "accion": "Consultar el estado simulado del enlace identificado.",
-          "resultado": "El registro del simulador confirma una interrupción en esa rama.",
+          "accion": "Comprobar el enlace de esa rama",
+          "resultado": "El registro muestra que esa rama perdió comunicación.",
           "tipo_error": "orden-incorrecto",
           "fuente": {
             "origen": "Volvo Buses",
@@ -819,8 +819,8 @@
         },
         {
           "id": "atribuir-al-tablero",
-          "accion": "Atribuir el evento al tablero que muestra el aviso.",
-          "resultado": "El aviso identifica al receptor que dejó de recibir datos y no confirma una avería del tablero.",
+          "accion": "Atribuir la falla al tablero",
+          "resultado": "El aviso señala qué dejó de recibir datos. Revisa la red antes de atribuir la falla al tablero.",
           "tipo_error": "causa-equivocada",
           "fuente": {
             "origen": "Volvo Buses",
@@ -831,8 +831,8 @@
         },
         {
           "id": "omitir-comprobacion",
-          "accion": "Cerrar el diagnóstico con la agrupación de módulos como única evidencia.",
-          "resultado": "La agrupación orienta la hipótesis, pero falta confirmar el estado del enlace.",
+          "accion": "Cerrar el diagnóstico con la lista de módulos",
+          "resultado": "Los módulos apuntan a una rama. Comprueba el enlace antes de cerrar el diagnóstico.",
           "tipo_error": "paso-omitido",
           "fuente": {
             "origen": "Volvo Buses",
@@ -859,10 +859,10 @@
       "revisado": false,
       "version": "1",
       "sintomas": [
-        "El simulador muestra un aviso de aislamiento en el sistema de tracción.",
-        "La indicación de carga permanece estable."
+        "El tablero muestra un aviso de aislamiento del sistema de tracción.",
+        "La carga que marca el tablero se mantiene."
       ],
-      "codigo_falla": "Aislamiento degradado (aviso simulado)",
+      "codigo_falla": "Aviso de aislamiento degradado",
       "causa_correcta": "Degradación del aislamiento respecto al chasis, localizada en un ramal de tracción simulado.",
       "ruta_ideal": [
         "conservar-aviso",
@@ -872,8 +872,8 @@
       "pasos": [
         {
           "id": "conservar-aviso",
-          "accion": "Registrar el aviso y suspender la práctica de marcha.",
-          "resultado": "Se conserva la evidencia y la simulación queda detenida.",
+          "accion": "Guardar el aviso y detener la práctica de marcha",
+          "resultado": "El aviso queda guardado y la práctica se detiene.",
           "tipo_error": "orden-incorrecto",
           "fuente": {
             "origen": "Volvo Buses",
@@ -884,8 +884,8 @@
         },
         {
           "id": "revisar-aislamiento",
-          "accion": "Consultar el registro de aislamiento desde la pantalla de diagnóstico simulado.",
-          "resultado": "El registro confirma la condición de aislamiento degradado sin localizarla todavía.",
+          "accion": "Abrir el registro de aislamiento",
+          "resultado": "El registro confirma que bajó el aislamiento. Todavía falta ubicar la falla.",
           "tipo_error": "orden-incorrecto",
           "fuente": {
             "origen": "ISO 6469",
@@ -896,8 +896,8 @@
         },
         {
           "id": "localizar-ramal",
-          "accion": "Consultar la evidencia de localización que presenta el escenario.",
-          "resultado": "El simulador identifica un ramal de tracción con aislamiento degradado respecto al chasis.",
+          "accion": "Revisar dónde bajó el aislamiento",
+          "resultado": "La falla de aislamiento respecto al chasis está en un ramal de tracción.",
           "tipo_error": "orden-incorrecto",
           "fuente": {
             "origen": "ISO 6469",
@@ -908,8 +908,8 @@
         },
         {
           "id": "atribuir-a-carga",
-          "accion": "Atribuir el aviso a una disminución del estado de carga.",
-          "resultado": "El estado de carga estable no explica el aviso de aislamiento.",
+          "accion": "Atribuir el aviso a una baja de carga",
+          "resultado": "La carga no ha cambiado. Revisa el registro de aislamiento.",
           "tipo_error": "causa-equivocada",
           "fuente": {
             "origen": "ISO 6469",
@@ -920,8 +920,8 @@
         },
         {
           "id": "reanudar-marcha",
-          "accion": "Seleccionar reanudar marcha con el aviso de aislamiento pendiente.",
-          "resultado": "La práctica se detiene por intentar continuar con una condición eléctrica pendiente.",
+          "accion": "Reanudar la marcha con el aviso pendiente",
+          "resultado": "Intentaste avanzar con el aviso activo. Detén la marcha y revisa el aislamiento.",
           "tipo_error": "accion-insegura",
           "fuente": {
             "origen": "ISO 6469",
@@ -947,7 +947,7 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "instruccion": "Con el punto de aislamiento ya abierto en la simulación y ambos interruptores inactivos, activa Bloqueo.",
+      "instruccion": "El punto de aislamiento ya está abierto y ambos interruptores están apagados. Activa Bloqueo.",
       "secuencia_esperada": [
         {
           "ctrl": "bloqueo",
@@ -970,7 +970,7 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "instruccion": "Con el punto de aislamiento ya abierto en la simulación y ambos interruptores inactivos, activa Bloqueo y después Etiquetado.",
+      "instruccion": "El punto de aislamiento ya está abierto y ambos interruptores están apagados. Activa Bloqueo y luego Etiquetado.",
       "secuencia_esperada": [
         {
           "ctrl": "bloqueo",
@@ -997,7 +997,7 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "instruccion": "La maqueta indica bloqueo y etiquetado activos, pero la verificación de ausencia de tensión quedó inconclusa. Pulsa Cancelar en el intento de avance y conserva el bloqueo y el etiquetado.",
+      "instruccion": "Bloqueo y Etiquetado están activos. Aún falta comprobar que no haya tensión. Pulsa Cancelar cuando el panel te pida avanzar. Deja Bloqueo y Etiquetado activos.",
       "secuencia_esperada": [
         {
           "ctrl": "cancelar",

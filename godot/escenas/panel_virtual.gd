@@ -23,7 +23,7 @@ func _ready() -> void:
 		FondoTarjeta.aplicar(self, 16)
 	$Torque.draw.connect(dibujar_zona)
 	$Lectura.draw.connect(dibujar_perilla)
-	$Zona.text = "Zona segura simulada · %d–%d" % [ZONA_MINIMA, ZONA_MAXIMA]
+	$Zona.text = "Rango de ejemplo · %d–%d" % [ZONA_MINIMA, ZONA_MAXIMA]
 	for led in [$Energizado, $Bloqueado, $Falla]:
 		led.draw.connect(dibujar_led.bind(led))
 	$Bloqueo.toggled.connect(func(activo: bool): emitir("bloqueo", int(activo)))
@@ -35,6 +35,12 @@ func _ready() -> void:
 	$Confirmar.pressed.connect(func(): emitir("confirmar", 1))
 	$Cancelar.pressed.connect(func(): emitir("cancelar", 1))
 	mostrar_leds({})
+
+
+func resaltar_confirmar(pendiente: bool) -> void:
+	var estilo := &"Primario" if pendiente else &""
+	if $Confirmar.theme_type_variation != estilo:
+		$Confirmar.theme_type_variation = estilo
 
 
 func emitir(control: String, valor: float) -> void:

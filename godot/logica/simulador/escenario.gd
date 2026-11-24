@@ -1,9 +1,19 @@
 extends RefCounted
 
+const Inventario = preload("res://logica/simulador/inventario.gd")
+
 const RutasContenido = preload("res://logica/rutas_contenido.gd")
 
-const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria"]
+const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria",
+	"caja_fusibles", "fusible_faros", "conector_faros", "faro_izquierdo", "faro_derecho", "rele_faros",
+	"tapa_motor", "motor_traccion", "inversor_motor", "bomba_motor", "radiador_motor",
+	"monitor_temperatura", "abrazadera_motor", "fusibles_cabina", "multimetro", "hoja_diagnostico", "conductor_banco", "tp0", "tp1", "tp2"]
+const ZONAS := ["gabinete", "faros", "motor", "cabina", "banco", "bajos"]
+const GRUPOS_FUNCION := ["FG0", "FG1", "FG2", "FG3", "FG4", "FG5", "FG6", "FG7", "FG8", "FG9"]
+const ZonaBajos = preload("res://escenas/zona_bajos.gd")
+const FUENTE_BZR := "Volvo Buses, BZR Low Entry Eléctrico (página pública)"
 const AISLAMIENTO := "escenarios/aislamiento.json"
+const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
 const Banco = preload("res://logica/competencias/banco.gd")
 
 
@@ -30,13 +40,17 @@ static func validar(datos: Variant, ruta: String) -> Dictionary:
 
 
 static func campo_invalido(datos: Dictionary) -> String:
-	for campo in ["id", "titulo", "version", "fuente"]:
+	for campo in ["id", "titulo", "descripcion", "version", "fuente"]:
 		if not Banco.texto_presente(datos.get(campo)):
 			return campo
 	if not datos.get("muestra") is bool or (datos.muestra and not datos.titulo.begins_with("[MUESTRA]")):
 		return "muestra"
 	if not fuente_valida(datos.fuente, datos.muestra):
 		return "fuente"
+	if datos.get("zona") not in ZONAS:
+		return "zona"
+	if datos.get("grupo_funcion") not in GRUPOS_FUNCION:
+		return "grupo_funcion"
 	if datos.get("dificultad") not in Banco.DIFICULTADES:
 		return "dificultad"
 	for campo in ["estado", "acciones", "eventos", "recuperaciones", "terminacion", "variante"]:
@@ -47,6 +61,12 @@ static func campo_invalido(datos: Dictionary) -> String:
 	for variable in datos.estado:
 		if not Banco.texto_presente(variable) or not valor_simple(datos.estado[variable]):
 			return "estado.%s" % variable
+	if datos.has("briefing") and not briefing_valido(datos.briefing):
+		return "briefing"
+	if datos.has("ubicacion_inicial") and not ubicacion_valida(datos.ubicacion_inicial, datos.zona):
+		return "ubicacion_inicial"
+	if datos.has("indicios") and not indicios_validos(datos):
+		return "indicios"
 	if not datos.get("estados_imposibles") is Array:
 		return "estados_imposibles"
 	for condicion in datos.estados_imposibles:
@@ -59,6 +79,15 @@ static func campo_invalido(datos: Dictionary) -> String:
 	for causa in datos.causas:
 		if not Banco.texto_presente(causa) or datos.causas.count(causa) != 1:
 			return "causas"
+	if datos.has("causa_correcta") and datos.causa_correcta not in datos.causas:
+		return "causa_correcta"
+	if datos.has("causa_correcta") or datos.has("explicacion_causa"):
+		var explicaciones: Variant = datos.get("explicacion_causa")
+		if not explicaciones is Dictionary or explicaciones.size() != datos.causas.size():
+			return "explicacion_causa"
+		for causa in datos.causas:
+			if not Banco.texto_presente(explicaciones.get(causa)):
+				return "explicacion_causa." + causa
 	if datos.acciones.is_empty():
 		return "acciones"
 	for grupo in ["acciones", "recuperaciones", "eventos"]:
@@ -76,17 +105,93 @@ static func campo_invalido(datos: Dictionary) -> String:
 	var limite: Variant = datos.terminacion.get("limite_intentos")
 	if not numero(limite) or limite < 1 or limite > 2147483647 or limite != floor(limite):
 		return "terminacion.limite_intentos"
-	if not datos.get("ruta_ideal") is Array or datos.ruta_ideal.is_empty():
+	if not ruta_valida(datos.get("ruta_ideal"), datos.acciones):
 		return "ruta_ideal"
-	for id in datos.ruta_ideal:
-		if not datos.acciones.has(id) or datos.acciones[id].criticidad != "normal":
-			return "ruta_ideal"
+	if datos.variante.has("ruta_ideal") and not ruta_valida(datos.variante.ruta_ideal, datos.acciones):
+		return "variante.ruta_ideal"
+	if datos.variante.has("causa_correcta") and (not datos.has("causa_correcta")
+			or datos.variante.causa_correcta not in datos.causas):
+		return "variante.causa_correcta"
 	var cambio: Variant = datos.variante.get("estado")
 	if not asignacion_valida(cambio, datos.estado) or cambio.is_empty() \
 			or cumple(datos.estado, cambio) \
 			or imposible(datos.estado.merged(cambio, true), datos.estados_imposibles):
 		return "variante.estado"
+	if datos.zona == "bajos" and (datos.ruta_ideal[-1] != "cerrar_orden"
+			or datos.acciones.cerrar_orden.get("componente") != "consola_elevador"):
+		return "ruta_ideal"
+	if datos.zona == "banco":
+		for campo in ["s1_abierto", "s2_abierto", "resuelto"]:
+			if not datos.estado.get(campo) is bool:
+				return "estado." + campo
 	return ""
+
+
+static func briefing_valido(briefing: Variant) -> bool:
+	if not briefing is Dictionary or not Banco.texto_presente(briefing.get("sintoma")) \
+			or not Banco.texto_presente(briefing.get("objetivo")):
+		return false
+	var como: Variant = briefing.get("como")
+	return como is Array and como.size() in [1, 2, 3] and como.all(Banco.texto_presente)
+
+
+static func ubicacion_valida(ubicacion: Variant, zona: String) -> bool:
+	if not ubicacion is Dictionary:
+		return false
+	for objeto in ubicacion:
+		if objeto != "multimetro" or ubicacion[objeto] != "mesa_banco" or zona != "banco":
+			return false
+	return true
+
+
+static func indicios_validos(datos: Dictionary) -> bool:
+	if not datos.indicios is Array:
+		return false
+	var simples := {}
+	for indicio in datos.indicios:
+		if not indicio is Dictionary:
+			return false
+		for campo in ["mision", "ayuda"]:
+			if indicio.has(campo) and not Banco.texto_presente(indicio[campo]):
+				return false
+		if indicio.has("claves"):
+			if indicio.has("clave") or not Banco.texto_presente(indicio.get("mision")):
+				return false
+			continue
+		var clave: Variant = indicio.get("clave")
+		if not Banco.texto_presente(clave) or not Banco.texto_presente(indicio.get("etiqueta")) \
+				or simples.has(clave) or not (datos.estado.get(clave) is bool \
+				or (datos.zona == "banco" and clave in Mediciones.INDICIOS)):
+			return false
+		simples[clave] = true
+	var agrupadas := {}
+	for indicio in datos.indicios:
+		if not indicio.has("claves"):
+			continue
+		if not indicio.claves is Array or indicio.claves.size() < 2:
+			return false
+		for clave in indicio.claves:
+			if not Banco.texto_presente(clave) or not simples.has(clave) or agrupadas.has(clave):
+				return false
+			agrupadas[clave] = true
+	return true
+
+
+static func claves_mision(mision: Dictionary) -> Array:
+	return mision.claves if mision.has("claves") else [mision.clave]
+
+
+static func mision_cumplida(mision: Dictionary, progreso: Dictionary) -> bool:
+	return claves_mision(mision).all(func(clave: String): return progreso.get(clave, false))
+
+
+static func ruta_valida(ruta: Variant, acciones: Dictionary) -> bool:
+	if not ruta is Array or ruta.is_empty():
+		return false
+	for id in ruta:
+		if not acciones.has(id) or acciones[id].criticidad != "normal":
+			return false
+	return true
 
 
 static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> String:
@@ -112,7 +217,23 @@ static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> S
 			if not datos.recuperaciones.has(id) or regla.recuperaciones.count(id) != 1:
 				return ".recuperaciones"
 		return ""
-	if regla.has("componente") and regla.componente not in COMPONENTES:
+	if regla.has("requiere") and not Inventario.requisitos_validos(regla.requiere):
+		return ".requiere"
+	if regla.has("titulo") and not Banco.texto_presente(regla.titulo):
+		return ".titulo"
+	if not regla.get("requiere_panel", false) is bool:
+		return ".requiere_panel"
+	if regla.has("seguridad_panel"):
+		if regla.seguridad_panel not in ["previa", "critica"] or regla.criticidad == "critica":
+			return ".seguridad_panel"
+		if not Banco.texto_presente(regla.get("explicacion_seguridad")):
+			return ".explicacion_seguridad"
+	if regla.has("torque") and not torque_valido(regla, datos):
+		return ".torque"
+	if datos.zona == "bajos":
+		if not ZonaBajos.componente_valido(regla.get("componente")):
+			return ".componente"
+	elif regla.has("componente") and regla.componente not in COMPONENTES:
 		return ".componente"
 	if not Banco.COMPETENCIAS.has(regla.get("competencia")):
 		return ".competencia"
@@ -130,10 +251,21 @@ static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> S
 	return ""
 
 
+static func torque_valido(regla: Dictionary, datos: Dictionary) -> bool:
+	var torque: Variant = regla.torque
+	return datos.zona == "bajos" and regla.get("requiere_panel", false) and torque is Dictionary \
+		and numero(torque.get("minimo")) and numero(torque.get("maximo")) \
+		and 0 <= torque.minimo and torque.minimo <= torque.maximo and torque.maximo <= 100 \
+		and asignacion_valida(torque.get("efectos_fuera"), datos.estado) \
+		and not imposible(regla.previas.merged(torque.efectos_fuera, true), datos.estados_imposibles)
+
+
 static func fuente_valida(fuente: Variant, muestra: bool) -> bool:
 	if not Banco.texto_presente(fuente):
 		return false
 	if fuente == Banco.FUENTE_MUESTRA:
+		return muestra
+	if fuente == FUENTE_BZR:
 		return muestra
 	for permitida in Banco.FUENTES_PERMITIDAS:
 		if fuente == permitida or fuente.begins_with(permitida + ": "):

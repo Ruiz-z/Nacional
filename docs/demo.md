@@ -2,7 +2,7 @@
 
 | Tiempo | Paso |
 |---|---|
-| 0:00–0:30 | **Problema:** la teoría y la práctica del técnico están separadas. |
+| 0:00–0:30 | **Problema:** la teoría y la práctica del técnico están separadas y hoy su seguimiento es manual (Volvo lo confirmó). |
 | 0:30–1:30 | **Diagnóstico** del técnico ficticio `[DEMO]` ya precargado: se muestra su resultado y su ruta. |
 | 1:30–3:30 | **Escenario de falla de aislamiento:** el técnico marca la causa en pantalla, ejecuta la acción en el panel, comete un error (por ejemplo torque excesivo), aparece la recuperación y la **brecha**. |
 | 3:30–4:00 | **Resumen y reintento** con "¿qué harías distinto?". |

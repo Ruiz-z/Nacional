@@ -2,13 +2,32 @@
   "id": "aislamiento",
   "version": "1",
   "titulo": "[MUESTRA] Pérdida de aislamiento",
-  "descripcion": "[MUESTRA] El bus virtual muestra un aviso genérico de aislamiento en un sector simulado.",
+  "descripcion": "[MUESTRA] El tablero muestra un aviso de aislamiento. Revisa el gabinete señalado.",
+  "briefing": {
+    "sintoma": "El tablero muestra un aviso de aislamiento.",
+    "objetivo": "Encuentra la causa del aviso y resuelve la falla.",
+    "como": [
+      "Abre el gabinete señalado y revisa el monitor."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
+  "zona": "gabinete",
+  "grupo_funcion": "FG3",
   "dificultad": "media",
   "causas": [
     "aislamiento-degradado",
     "aviso-inconsistente"
+  ],
+  "causa_correcta": "aislamiento-degradado",
+  "explicacion_causa": {
+    "aislamiento-degradado": "[MUESTRA] La lectura del gabinete muestra que bajó el aislamiento.",
+    "aviso-inconsistente": "[MUESTRA] La lectura del gabinete coincide con el aviso."
+  },
+  "indicios": [
+    {"clave": "inspeccionado", "etiqueta": "Gabinete inspeccionado", "mision": "Inspecciona el gabinete", "ayuda": "Abre la compuerta del gabinete."},
+    {"clave": "indicio_confirmado", "etiqueta": "Aislamiento revisado", "mision": "Revisa el aislamiento", "ayuda": "Abre el monitor y elige Revisar el aislamiento."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Confirma la solución", "ayuda": "Elige Confirmar la solución en la batería y confirma en el panel."}
   ],
   "estado": {
     "sector": "Sector virtual A",
@@ -35,6 +54,11 @@
   ],
   "acciones": {
     "inspeccionar": {
+      "requiere": {
+        "herramienta": "destornillador"
+      },
+      "titulo": "Inspeccionar",
+      "requiere_panel": false,
       "componente": "compuerta",
       "previas": {},
       "efectos": {
@@ -44,10 +68,15 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Inspeccionar el sector señalado en la maqueta virtual.",
+      "descripcion": "[MUESTRA] Abre la compuerta del gabinete señalado.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "evaluar_indicio": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
+      "titulo": "Revisar el aislamiento",
+      "requiere_panel": false,
       "componente": "monitor",
       "previas": {
         "inspeccionado": true,
@@ -61,10 +90,15 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Relacionar el indicio simulado con el aviso de aislamiento.",
+      "descripcion": "[MUESTRA] Compara la lectura del monitor con el aviso de aislamiento.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_solucion": {
+      "requiere": {
+        "herramienta": "tech_tool"
+      },
+      "titulo": "Confirmar la solución",
+      "requiere_panel": true,
       "componente": "bateria",
       "previas": {
         "indicio_confirmado": true,
@@ -79,10 +113,14 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "aislamiento-degradado",
-      "descripcion": "[MUESTRA] Confirmar la solución ficticia en el simulador.",
+      "descripcion": "[MUESTRA] Confirma en el panel que el aviso ya no aparece.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "ignorar_aviso_seguridad": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
+      "titulo": "Ignorar el aviso de seguridad",
       "componente": "cables",
       "previas": {},
       "efectos": {},
@@ -90,10 +128,15 @@
       "criticidad": "critica",
       "tipo_error": "accion-insegura",
       "causa": "",
-      "descripcion": "[MUESTRA] Ignorar el aviso de seguridad del simulador detiene la práctica.",
+      "descripcion": "[MUESTRA] Ignoraste el aviso de seguridad. La práctica terminó. Vuelve a intentarlo y atiende el aviso.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "forzar_pieza": {
+      "requiere": {
+        "herramienta": "llave_ajustable"
+      },
+      "titulo": "Forzar la pieza",
+      "requiere_panel": false,
       "componente": "terminal",
       "previas": {
         "inspeccionado": true,
@@ -106,10 +149,11 @@
       "criticidad": "leve",
       "tipo_error": "valor-fuera-de-rango",
       "causa": "",
-      "descripcion": "[MUESTRA] La pieza virtual se rompe al forzarla.",
+      "descripcion": "[MUESTRA] Forzaste la pieza y se rompió. Pon una de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "elegir_otro_sector": {
+      "titulo": "Elegir otro gabinete",
       "componente": "bateria",
       "previas": {
         "inspeccionado": true,
@@ -122,10 +166,14 @@
       "criticidad": "leve",
       "tipo_error": "causa-equivocada",
       "causa": "",
-      "descripcion": "[MUESTRA] La selección apunta a un sector virtual ajeno al aviso.",
+      "descripcion": "[MUESTRA] Elegiste el gabinete equivocado. Vuelve al que señala el aviso.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "descartar_indicio": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
+      "titulo": "Descartar la lectura",
       "componente": "bateria",
       "previas": {
         "inspeccionado": true,
@@ -138,7 +186,7 @@
       "criticidad": "leve",
       "tipo_error": "paso-omitido",
       "causa": "",
-      "descripcion": "[MUESTRA] Se descarta el indicio del ejercicio.",
+      "descripcion": "[MUESTRA] Descartaste la lectura. Abre el monitor para recuperarla.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     }
   },
@@ -149,7 +197,7 @@
       },
       "efectos": {},
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
-      "descripcion": "[MUESTRA] La pieza virtual se rompe al forzarla.",
+      "descripcion": "[MUESTRA] Forzaste la pieza y se rompió. Pon una de repuesto.",
       "recuperaciones": [
         "reponer_pieza"
       ]
@@ -160,7 +208,7 @@
       },
       "efectos": {},
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
-      "descripcion": "[MUESTRA] La selección apunta a un sector virtual ajeno al aviso.",
+      "descripcion": "[MUESTRA] Elegiste el gabinete equivocado. Vuelve al que señala el aviso.",
       "recuperaciones": [
         "volver_al_sector"
       ]
@@ -171,7 +219,7 @@
       },
       "efectos": {},
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
-      "descripcion": "[MUESTRA] Se descarta el indicio del ejercicio.",
+      "descripcion": "[MUESTRA] Descartaste la lectura. Abre el monitor para recuperarla.",
       "recuperaciones": [
         "recuperar_indicio"
       ]
@@ -179,6 +227,9 @@
   },
   "recuperaciones": {
     "reponer_pieza": {
+      "requiere": {"herramienta": "llave_ajustable"},
+      "titulo": "Reponer pieza",
+      "requiere_panel": true,
       "componente": "terminal",
       "previas": {
         "tornillo_roto": true
@@ -190,13 +241,15 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Reponer la pieza en la maqueta virtual.",
+      "descripcion": "[MUESTRA] Pon una pieza de repuesto.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "costo": "[MUESTRA] bajo",
       "tiempo": "[MUESTRA] breve",
       "riesgo": "[MUESTRA] bajo"
     },
     "volver_al_sector": {
+      "titulo": "Volver al gabinete señalado",
+      "requiere_panel": true,
       "componente": "bateria",
       "previas": {
         "sector_equivocado": true
@@ -208,13 +261,18 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Volver al sector virtual indicado.",
+      "descripcion": "[MUESTRA] Vuelve al gabinete que señala el aviso.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "costo": "[MUESTRA] bajo",
       "tiempo": "[MUESTRA] breve",
       "riesgo": "[MUESTRA] bajo"
     },
     "recuperar_indicio": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
+      "titulo": "Recuperar la lectura",
+      "requiere_panel": true,
       "componente": "bateria",
       "previas": {
         "indicio_descartado": true
@@ -226,7 +284,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Recuperar el indicio en la pantalla de revisión.",
+      "descripcion": "[MUESTRA] Vuelve a abrir la lectura en el monitor.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
       "costo": "[MUESTRA] bajo",
       "tiempo": "[MUESTRA] breve",

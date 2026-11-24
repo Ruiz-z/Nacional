@@ -47,7 +47,7 @@ static func agregar_post(plan: Dictionary, items: Array, competencia: String, fo
 			item = buscar(items, competencia, formato, dificultad, usados)
 		if item.is_empty():
 			item = buscar(items, competencia, formato, "", usados)
-		avisar(plan, "Faltan ítems distintos del nivel previsto para %s / %s." % [competencia, formato])
+		avisar(plan, "Faltan preguntas del mismo nivel para %s." % Banco.COMPETENCIAS.get(competencia, competencia))
 	if not item.is_empty():
 		plan.items.append(item.duplicate(true))
 
@@ -65,7 +65,7 @@ static func retest(banco: Dictionary, plan_post: Dictionary, fecha_post: int, ah
 				actual = item
 				break
 		if actual.is_empty() or actual.get("version") != anterior.get("version"):
-			avisar(plan, "El ítem %s del post-test cambió o ya no está disponible." % anterior.id)
+			avisar(plan, "Una pregunta de la evaluación anterior cambió o ya no está disponible.")
 		if actual.is_empty():
 			actual = buscar(banco.items, anterior.competencia, anterior.formato, anterior.dificultad, reservados)
 			if actual.is_empty():

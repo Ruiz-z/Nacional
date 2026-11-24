@@ -1,0 +1,134 @@
+{
+  "id": "amortiguador_danado",
+  "version": "1",
+  "titulo": "[MUESTRA] Amortiguador dañado",
+  "descripcion": "[MUESTRA] La carrocería se inclina. Se oye un golpeteo del lado trasero derecho.",
+  "briefing": {
+    "sintoma": "La carrocería se inclina y se oye un golpeteo del lado trasero derecho.",
+    "objetivo": "Encuentra el origen del golpeteo y repara la falla.",
+    "como": [
+      "Prepara el elevador para revisar el amortiguador."
+    ]
+  },
+  "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+  "muestra": true,
+  "zona": "bajos",
+  "grupo_funcion": "FG7",
+  "dificultad": "dificil",
+  "causas": [
+    "Amortiguador dañado"
+  ],
+  "causa_correcta": "Amortiguador dañado",
+  "explicacion_causa": {
+    "Amortiguador dañado": "[MUESTRA] Al revisar el amortiguador trasero derecho, encontraste el daño."
+  },
+  "indicios": [
+    {
+      "clave": "revisar_amortiguador",
+      "etiqueta": "Revisar inclinación y ruido",
+      "mision": "Revisa la inclinación y el ruido",
+      "ayuda": "Revisa si el amortiguador trasero derecho explica la inclinación y el golpeteo."
+    },
+    {
+      "clave": "reponer_amortiguador",
+      "etiqueta": "Reponer el amortiguador",
+      "mision": "Cambia el amortiguador",
+      "ayuda": "Lleva el amortiguador de repuesto. Confirma el cambio en el panel."
+    },
+    {
+      "clave": "resuelto",
+      "etiqueta": "Cerrar la orden",
+      "mision": "Cierra la orden en la consola",
+      "ayuda": "Hazlo en la consola del elevador."
+    }
+  ],
+  "estado": {
+    "aviso": "La carrocería se inclina. Se oye un golpeteo del lado trasero derecho.",
+    "revisar_amortiguador": false,
+    "reponer_amortiguador": false,
+    "resuelto": false
+  },
+  "estados_imposibles": [],
+  "acciones": {
+    "revisar_amortiguador": {
+      "requiere": {
+        "herramienta": "lampara"
+      },
+      "titulo": "Revisar inclinación y ruido",
+      "componente": "amortiguador_trasero_derecho",
+      "previas": {
+        "revisar_amortiguador": false
+      },
+      "efectos": {
+        "revisar_amortiguador": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] El amortiguador trasero derecho está dañado. La carrocería se inclina y golpetea.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    },
+    "reponer_amortiguador": {
+      "titulo": "Reponer el amortiguador",
+      "componente": "amortiguador_trasero_derecho",
+      "previas": {
+        "revisar_amortiguador": true,
+        "reponer_amortiguador": false
+      },
+      "efectos": {
+        "reponer_amortiguador": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Amortiguador dañado",
+      "descripcion": "[MUESTRA] Coloca el amortiguador de repuesto.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "herramienta": "llave_ajustable",
+        "piezas": [
+          "amortiguador"
+        ]
+      }
+    },
+    "cerrar_orden": {
+      "titulo": "Cerrar la orden",
+      "componente": "consola_elevador",
+      "previas": {
+        "reponer_amortiguador": true,
+        "resuelto": false
+      },
+      "efectos": {
+        "resuelto": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Cierra la orden desde la consola.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    }
+  },
+  "eventos": {},
+  "recuperaciones": {},
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 30
+  },
+  "ruta_ideal": [
+    "revisar_amortiguador",
+    "reponer_amortiguador",
+    "cerrar_orden"
+  ],
+  "variante": {
+    "estado": {
+      "aviso": "Cuando mueves la carrocería, se inclina y se oye un golpeteo."
+    }
+  }
+}

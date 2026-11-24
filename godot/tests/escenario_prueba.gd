@@ -4,7 +4,7 @@ const FUENTE := "[MUESTRA] valor de ejemplo, sin fuente oficial"
 
 static func datos() -> Dictionary:
 	return {
-		"id": "prueba", "version": "1", "titulo": "[MUESTRA] Prueba", "fuente": FUENTE,
+		"id": "prueba", "version": "1", "zona": "gabinete", "grupo_funcion": "FG3", "descripcion": "Prueba del simulador.", "titulo": "[MUESTRA] Prueba", "fuente": FUENTE,
 		"muestra": true, "dificultad": "media", "causas": ["falla", "otra"],
 		"estado": {"listo": false, "tornillo_roto": false, "resuelto": false, "lugar": "A"},
 		"estados_imposibles": [{"tornillo_roto": true, "resuelto": true}],

@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Taller = preload("res://tests/acciones_taller.gd")
+
 const Base = preload("res://tests/base_tablero.gd")
 const Pantallas = preload("res://tests/pantallas_aprendizaje.gd")
 const Recorrido = preload("res://logica/flujo/recorrido.gd")
@@ -27,12 +29,32 @@ static func recorrido(menu: Node, base: String) -> bool:
 		return false
 	menu.actualizar()
 	menu.botones.escenario.pressed.emit()
+	var comunicacion := tarjeta_comunicacion(menu.pantalla)
+	if comunicacion == null or comunicacion.accessibility_description.contains("Resuelta"):
+		return false
+	comunicacion.pressed.emit()
 	var bus: Node = menu.pantalla
+	bus.flashcard.confirmar()
+	if bus.archivo.get_file() != "comunicacion.json" or bus.datos.id != "comunicacion":
+		return false
+	bus.abrir_menu(bus.get_node("Sector").piezas.terminal)
+	if bus.menu_pieza.visible or bus.motor.estado().sintomas_revisados:
+		return false
+	bus.cerrar_menu()
 	for accion in bus.datos.ruta_ideal:
+		if not Taller.equipar(bus, accion):
+			return false
 		bus.ejecutar(accion, "teclado")
+	if not Taller.cerrar_orden(bus):
+		return false
 	menu.volver()
 	if menu.botones.post.disabled:
 		return false
+	menu.botones.escenario.pressed.emit()
+	var resuelta := tarjeta_comunicacion(menu.pantalla)
+	if resuelta == null or not resuelta.accessibility_description.contains("Resuelta"):
+		return false
+	menu.volver()
 	menu.botones.post.pressed.emit()
 	if not Pantallas.responder(menu.pantalla, 10):
 		return false
@@ -54,3 +76,10 @@ static func recorrido(menu: Node, base: String) -> bool:
 	return por_momento.post.size() == 10 and por_momento.post == por_momento.retest \
 		and por_momento.post.all(func(id: String) -> bool: return id not in por_momento.pre) \
 		and not menu.botones.tablero.disabled
+
+
+static func tarjeta_comunicacion(catalogo: Node) -> Button:
+	for tarjeta: Button in catalogo.tarjetas.find_children("*", "Button", true, false):
+		if tarjeta.accessibility_name == "Falla de comunicación en la red":
+			return tarjeta
+	return null

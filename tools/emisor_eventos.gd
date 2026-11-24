@@ -10,8 +10,19 @@ const EVENTOS := [
 ]
 
 
+const BANCO := [
+	["nodo_p", 0, 1000],
+	["nodo_q", 1, 1000],
+	["nodo_p", 1, 1100],
+]
+
+
 func _initialize() -> void:
-	for indice in range(EVENTOS.size()):
-		var evento: Array = EVENTOS[indice]
+	var es_banco := "--banco" in OS.get_cmdline_user_args()
+	var eventos := BANCO if es_banco else EVENTOS
+	if es_banco:
+		print('{"v":1,"ctrl":"hb"}')
+	for indice in range(eventos.size()):
+		var evento: Array = eventos[indice]
 		print(JSON.stringify({"v": 1, "n": indice, "t": evento[2], "ctrl": evento[0], "valor": evento[1]}))
 	quit(0)

@@ -2,18 +2,36 @@
   "id": "comunicacion",
   "version": "1",
   "titulo": "[MUESTRA] Falla de comunicación en la red",
-  "descripcion": "[MUESTRA] Identifica la causa del aviso a partir de los síntomas del bus virtual.",
+  "descripcion": "[MUESTRA] Un módulo dejó de aparecer en la red. Revisa los síntomas para saber por qué.",
   "sintomas": [
-    "[MUESTRA] Un módulo virtual deja de aparecer en la vista de red.",
-    "[MUESTRA] Los demás módulos virtuales siguen visibles."
+    "[MUESTRA] Falta un módulo en la vista de red.",
+    "[MUESTRA] Los demás módulos siguen apareciendo en el monitor."
   ],
-  "codigo_falla": "[MUESTRA] Aviso genérico de comunicación",
+  "codigo_falla": "[MUESTRA] Aviso de comunicación",
+  "briefing": {
+    "sintoma": "Un módulo dejó de aparecer en la red.",
+    "objetivo": "Averigua por qué el módulo perdió comunicación y resuelve la falla.",
+    "como": [
+      "Revisa los síntomas en el monitor de la cabina."
+    ]
+  },
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
+  "zona": "cabina",
+  "grupo_funcion": "FG3",
   "dificultad": "facil",
   "causas": [
     "modulo-sin-comunicacion",
     "otro-modulo"
+  ],
+  "causa_correcta": "modulo-sin-comunicacion",
+  "explicacion_causa": {
+    "modulo-sin-comunicacion": "[MUESTRA] El módulo dejó de enviar datos a la red.",
+    "otro-modulo": "[MUESTRA] El monitor muestra cuál módulo dejó de comunicarse."
+  },
+  "indicios": [
+    {"clave": "sintomas_revisados", "etiqueta": "Síntomas de red revisados", "mision": "Revisa los síntomas de la red", "ayuda": "Abre el monitor y elige Revisar los síntomas."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Confirma el diagnóstico", "ayuda": "Elige Confirmar el diagnóstico en los cables y confirma en el panel."}
   ],
   "estado": {
     "modulo": "Módulo virtual A",
@@ -28,6 +46,11 @@
   ],
   "acciones": {
     "revisar_sintomas": {
+      "requiere": {
+        "herramienta": "tech_tool"
+      },
+      "titulo": "Revisar los síntomas",
+      "requiere_panel": false,
       "componente": "monitor",
       "previas": {},
       "efectos": {
@@ -37,11 +60,15 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "",
-      "descripcion": "[MUESTRA] Revisar los síntomas de la red virtual.",
+      "descripcion": "[MUESTRA] Abre el monitor y revisa qué módulos aparecen.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "seleccionar_otro_modulo": {
-      "componente": "monitor",
+      "requiere": {
+        "herramienta": "tech_tool"
+      },
+      "titulo": "Seleccionar otro módulo",
+      "componente": "cables",
       "previas": {
         "sintomas_revisados": true
       },
@@ -50,11 +77,16 @@
       "criticidad": "leve",
       "tipo_error": "causa-equivocada",
       "causa": "otro-modulo",
-      "descripcion": "[MUESTRA] Seleccionar un módulo ajeno al aviso.",
+      "descripcion": "[MUESTRA] Elegiste otro módulo. Revisa cuál dejó de aparecer en el monitor.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_diagnostico": {
-      "componente": "monitor",
+      "requiere": {
+        "herramienta": "tech_tool"
+      },
+      "titulo": "Confirmar el diagnóstico",
+      "requiere_panel": true,
+      "componente": "cables",
       "previas": {
         "sintomas_revisados": true
       },
@@ -65,7 +97,7 @@
       "criticidad": "normal",
       "tipo_error": "",
       "causa": "modulo-sin-comunicacion",
-      "descripcion": "[MUESTRA] Confirmar el diagnóstico del módulo ausente.",
+      "descripcion": "[MUESTRA] Confirma cuál módulo dejó de aparecer en la red.",
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     }
   },

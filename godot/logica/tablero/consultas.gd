@@ -2,6 +2,7 @@ extends RefCounted
 
 const Acceso = preload("res://logica/datos/acceso_sqlite.gd")
 const RegistroSimulador = preload("res://logica/tablero/registro_simulador.gd")
+const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
 const Registro = preload("res://logica/aprendizaje/registro.gd")
 const Indicadores = preload("res://logica/aprendizaje/indicadores.gd")
 
@@ -60,8 +61,11 @@ static func tecnico(base: String, alias: String, consultar: Callable = Acceso.co
 		for intento in intentos:
 			if intento.tipo_error == "falta-critica":
 				sumar_falta(faltas, intento.reloj_sim)
+	var eventos_banco: Array = eventos.filter(func(evento: Dictionary) -> bool:
+		return evento.escenario == "modulo_auxiliar")
 	var ruta: Variant = JSON.parse_string(perfil[0].ruta) if perfil[0].ruta != null else []
 	return {"alias": alias, "demo": bool(perfil[0].demo), "competencias": competencias,
+		"errores_arnes": {} if eventos_banco.is_empty() else Mediciones.contar_errores(eventos_banco),
 		"intentos": intentos, "eventos": eventos, "brechas": brechas, "faltas_criticas": faltas,
 		"estado": "sin_sesiones" if intentos.is_empty() and eventos.is_empty() and brechas.is_empty() else "con_sesiones",
 		"tiempos_por_escenario": tiempos, "retencion_simulada": true,

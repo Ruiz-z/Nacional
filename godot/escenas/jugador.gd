@@ -7,6 +7,8 @@ const Llave = preload("res://assets/modelos/herramientas/adjustable_wrench.glb")
 const Flexometro = preload("res://assets/modelos/herramientas/tape_measure.glb")
 
 var activo := true
+var origen_zona := Vector3.ZERO
+var limites_zona := Movimiento.TALLER
 var entrada: RefCounted
 var teclas := {}
 var mover_stick := false
@@ -17,6 +19,10 @@ var gravedad: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var camara: Camera3D = $Camara
 
 var herramientas := {}
+var soporte_mano: Node3D
+var objeto_mano: Node3D
+var id_mano := ""
+var pantalla_multimetro: Label3D
 
 
 func _ready() -> void:
@@ -29,6 +35,7 @@ func _ready() -> void:
 	var mano := Node3D.new()
 	mano.position = Vector3(0.15, -0.32, -0.65)
 	camara.add_child(mano)
+	soporte_mano = mano
 	var llave := Llave.instantiate() as Node3D
 	llave.scale = Vector3.ONE * 0.75
 	llave.position.z = -0.035
@@ -45,15 +52,41 @@ func _ready() -> void:
 	mano.add_child(multimetro)
 	pieza_multimetro(multimetro, Vector3.ZERO, Vector3(0.083, 0.035, 0.135), Color("#edbb31"))
 	pieza_multimetro(multimetro, Vector3(0, 0.019, -0.023), Vector3(0.057, 0.005, 0.041), Color("#365448"))
+	pantalla_multimetro = etiqueta_multimetro(multimetro, Vector3(0, 0.023, -0.023), "—", 0.00043)
 	for lado in [-1, 1]:
 		var color := Color("#d13931") if lado == 1 else Color("#292a2e")
+		cable_multimetro(multimetro, Vector3(lado * 0.026, 0, 0.056), Vector3(lado * 0.062, 0, 0.078), color)
+		cable_multimetro(multimetro, Vector3(lado * 0.062, 0, 0.078), Vector3(lado * 0.072, 0, -0.064), color)
+		cable_multimetro(multimetro, Vector3(lado * 0.072, 0, -0.064), Vector3(lado * 0.026, 0, -0.085), color)
+		etiqueta_multimetro(multimetro, Vector3(lado * 0.072, 0.009, -0.008),
+			"NEGRA" if lado == -1 else "ROJA", 0.00034)
 		pieza_multimetro(multimetro, Vector3(lado * 0.026, 0, -0.085), Vector3(0.012, 0.012, 0.048), color)
 		pieza_multimetro(multimetro, Vector3(lado * 0.026, 0, -0.114), Vector3(0.004, 0.004, 0.022), Color.SILVER)
 
 	herramientas = {"llave": llave, "flexometro": flexometro, "multimetro": multimetro}
 	for malla in camara.find_children("*", "MeshInstance3D", true, false):
 		malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mostrar_herramienta("")
+	mostrar_herramienta()
+
+
+func etiqueta_multimetro(padre: Node3D, centro: Vector3, texto: String, escala: float) -> Label3D:
+	var etiqueta := Label3D.new()
+	etiqueta.position = centro
+	etiqueta.rotation_degrees.x = -90
+	etiqueta.text = texto
+	etiqueta.font_size = 32
+	etiqueta.pixel_size = escala
+	etiqueta.modulate = Color("#dcffe6")
+	padre.add_child(etiqueta)
+	return etiqueta
+
+
+func cable_multimetro(padre: Node3D, desde: Vector3, hasta: Vector3, color: Color) -> void:
+	var segmento := Node3D.new()
+	padre.add_child(segmento)
+	segmento.position = (desde + hasta) / 2.0
+	segmento.look_at(padre.to_global(hasta))
+	pieza_multimetro(segmento, Vector3.ZERO, Vector3(0.005, 0.005, desde.distance_to(hasta)), color)
 
 
 func pieza_multimetro(padre: Node3D, centro: Vector3, tam: Vector3, color: Color) -> void:
@@ -68,10 +101,31 @@ func pieza_multimetro(padre: Node3D, centro: Vector3, tam: Vector3, color: Color
 	padre.add_child(pieza)
 
 
-func mostrar_herramienta(accion: String) -> void:
-	herramientas.llave.visible = accion in ["apretar", "apretar_terminal", "reponer_pieza"]
-	herramientas.flexometro.visible = accion in ["medir", "inspeccionar"]
-	herramientas.multimetro.visible = accion == "evaluar_indicio"
+func elegir_objeto(id: String, forma: Node3D) -> void:
+	if id == id_mano:
+		return
+	id_mano = id
+	if is_instance_valid(objeto_mano):
+		objeto_mano.free()
+		objeto_mano = null
+	if forma != null and id not in ["llave_ajustable", "flexometro", "multimetro"]:
+		objeto_mano = forma.duplicate() as Node3D
+		objeto_mano.position *= 0.52
+		objeto_mano.scale *= 0.52
+		soporte_mano.add_child(objeto_mano)
+		for malla in objeto_mano.find_children("*", "MeshInstance3D", true, false):
+			malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			malla.material_overlay = null
+	mostrar_herramienta()
+
+
+func mostrar_herramienta() -> void:
+	var herramienta := id_mano
+	herramientas.llave.visible = herramienta == "llave_ajustable"
+	herramientas.flexometro.visible = herramienta == "flexometro"
+	herramientas.multimetro.visible = herramienta == "multimetro"
+	if is_instance_valid(objeto_mano):
+		objeto_mano.visible = herramienta == id_mano
 
 
 func configurar(traductor: RefCounted) -> void:
@@ -112,9 +166,17 @@ func _physics_process(delta: float) -> void:
 	velocity = Vector3(horizontal.x, 0.0 if is_on_floor() else velocity.y - gravedad * delta,
 		horizontal.z)
 	move_and_slide()
-	var limitada := Movimiento.limitar(position)
+	var limitada := origen_zona + Movimiento.limitar(position - origen_zona, limites_zona)
 	if limitada != position:
 		position = limitada
+
+
+func ubicar(destino: Vector3, origen := Vector3.ZERO, limites := Movimiento.TALLER) -> void:
+	origen_zona = origen
+	limites_zona = limites
+	velocity = Vector3.ZERO
+	global_position = destino
+	reset_physics_interpolation()
 
 
 func eje_tecla(direccion: String) -> float:

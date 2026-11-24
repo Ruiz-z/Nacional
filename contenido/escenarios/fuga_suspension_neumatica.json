@@ -1,0 +1,163 @@
+{
+  "id": "fuga_suspension_neumatica",
+  "version": "1",
+  "titulo": "[MUESTRA] Fuga en la suspensión neumática",
+  "descripcion": "[MUESTRA] La suspensión trasera derecha pierde altura.",
+  "briefing": {
+    "sintoma": "La suspensión trasera derecha pierde altura.",
+    "objetivo": "Localiza la fuga y recupera la altura de la suspensión.",
+    "como": [
+      "Prepara el elevador para revisar la bolsa de aire."
+    ]
+  },
+  "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+  "muestra": true,
+  "zona": "bajos",
+  "grupo_funcion": "FG7",
+  "dificultad": "dificil",
+  "causas": [
+    "Fuga en la suspensión neumática"
+  ],
+  "causa_correcta": "Fuga en la suspensión neumática",
+  "explicacion_causa": {
+    "Fuga en la suspensión neumática": "[MUESTRA] La bolsa de aire pierde presión por la fuga."
+  },
+  "indicios": [
+    {
+      "clave": "medir_bolsa",
+      "etiqueta": "Medir presión de la bolsa",
+      "mision": "Mide la presión de la bolsa",
+      "ayuda": "Mide la presión de la bolsa de aire trasera derecha con el manómetro."
+    },
+    {
+      "clave": "localizar_fuga",
+      "etiqueta": "Localizar fuga",
+      "mision": "Localiza la fuga",
+      "ayuda": "Inspecciona la bolsa de aire trasera derecha para localizar la fuga."
+    },
+    {
+      "clave": "reponer_bolsa",
+      "etiqueta": "Reponer la bolsa de aire",
+      "mision": "Cambia la bolsa de aire",
+      "ayuda": "Lleva la bolsa de aire de repuesto. Confirma el cambio en el panel."
+    },
+    {
+      "clave": "resuelto",
+      "etiqueta": "Cerrar la orden",
+      "mision": "Cierra la orden en la consola",
+      "ayuda": "Hazlo en la consola del elevador."
+    }
+  ],
+  "estado": {
+    "aviso": "La suspensión trasera derecha pierde altura.",
+    "medir_bolsa": false,
+    "localizar_fuga": false,
+    "reponer_bolsa": false,
+    "resuelto": false
+  },
+  "estados_imposibles": [],
+  "acciones": {
+    "medir_bolsa": {
+      "titulo": "Medir presión",
+      "componente": "bolsa_trasero_derecho",
+      "previas": {
+        "medir_bolsa": false
+      },
+      "efectos": {
+        "medir_bolsa": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] La bolsa de aire trasera derecha tiene poca presión.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false,
+      "requiere": {
+        "herramienta": "manometro"
+      }
+    },
+    "localizar_fuga": {
+      "requiere": {
+        "herramienta": "lampara"
+      },
+      "titulo": "Localizar fuga",
+      "componente": "bolsa_trasero_derecho",
+      "previas": {
+        "medir_bolsa": true,
+        "localizar_fuga": false
+      },
+      "efectos": {
+        "localizar_fuga": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] La bolsa de aire pierde aire por un pliegue.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    },
+    "reponer_bolsa": {
+      "titulo": "Reponer la bolsa de aire",
+      "componente": "bolsa_trasero_derecho",
+      "previas": {
+        "localizar_fuga": true,
+        "reponer_bolsa": false
+      },
+      "efectos": {
+        "reponer_bolsa": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Fuga en la suspensión neumática",
+      "descripcion": "[MUESTRA] Coloca la bolsa de aire de repuesto.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "herramienta": "llave_ajustable",
+        "piezas": [
+          "bolsa_aire"
+        ]
+      }
+    },
+    "cerrar_orden": {
+      "titulo": "Cerrar la orden",
+      "componente": "consola_elevador",
+      "previas": {
+        "reponer_bolsa": true,
+        "resuelto": false
+      },
+      "efectos": {
+        "resuelto": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Cierra la orden desde la consola.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    }
+  },
+  "eventos": {},
+  "recuperaciones": {},
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 30
+  },
+  "ruta_ideal": [
+    "medir_bolsa",
+    "localizar_fuga",
+    "reponer_bolsa",
+    "cerrar_orden"
+  ],
+  "variante": {
+    "estado": {
+      "aviso": "El lado trasero derecho baja mientras el autobús está estacionado."
+    }
+  }
+}

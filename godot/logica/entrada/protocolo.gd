@@ -4,8 +4,10 @@ const VERSION := 1
 const REBOTE_MS := 50
 const CONTROLES := ["bloqueo", "etiquetado", "torque", "confirmar", "cancelar"]
 
-var _secuencias := {"panel": {}, "virtual": {}}
-var _tiempos := {"panel": {}, "virtual": {}}
+const NODOS := ["nodo_p", "nodo_q"]
+
+var _secuencias := {"panel": {}, "virtual": {}, "banco": {}}
+var _tiempos := {"panel": {}, "virtual": {}, "banco": {}}
 var _errores: Array[Dictionary] = []
 
 
@@ -20,7 +22,7 @@ func recibir(linea: String, fuente: String = "panel") -> Dictionary:
 		return rechazar("Versión desconocida", linea, fuente)
 	if datos.get("ctrl") == "hb":
 		return {"ctrl": "hb", "fuente_entrada": fuente}
-	if datos.get("ctrl") not in CONTROLES:
+	if datos.get("ctrl") not in (NODOS if fuente == "banco" else CONTROLES):
 		return rechazar("Control desconocido", linea, fuente)
 	if not entero(datos.get("n")) or not entero(datos.get("t")):
 		return rechazar("Secuencia o tiempo inválido", linea, fuente)

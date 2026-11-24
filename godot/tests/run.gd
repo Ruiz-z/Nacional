@@ -15,7 +15,7 @@ func ejecutar() -> void:
 	pruebas.sort()
 	var fallos := 0
 	for ruta in pruebas:
-		if ejecutar_prueba(ruta):
+		if await ejecutar_prueba(ruta):
 			print("OK: ", ruta)
 		else:
 			printerr("FALLO: ", ruta)
@@ -46,5 +46,5 @@ func ejecutar_prueba(ruta: String) -> bool:
 	var prueba := load(ruta) as GDScript
 	if prueba == null or not prueba.can_instantiate() or not prueba.has_method("ejecutar"):
 		return false
-	var resultado: Variant = prueba.call("ejecutar")
+	var resultado: Variant = await prueba.call("ejecutar")
 	return resultado is bool and resultado

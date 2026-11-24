@@ -40,7 +40,7 @@ Campos comunes: `id`, `competencia`, `formato`, `dificultad`, `criticidad` (`nor
 - RF-8: CUANDO el jugador ejecuta una acción `leve`, EL SISTEMA resta puntos, avisa y continúa.
 - RF-9: EL SISTEMA incluye al menos 8 ítems `opcion-multiple` por competencia (4 competencias, 32 en total), para cubrir diagnóstico, post-test y retest sin repetir.
 - RF-10: EL SISTEMA incluye al menos 2 `caso-diagnostico` (competencia 3) y 3 `accion-panel` (competencia 1).
-- RF-11: EL SISTEMA etiqueta cada paso de un `caso-diagnostico` con el tipo de error que produce si se elige mal: `causa-equivocada`, `paso-omitido`, `orden-incorrecto`, `accion-insegura`, `paso-innecesario`, `valor-fuera-de-rango` (por ejemplo, torque excesivo).
+- RF-11: EL SISTEMA etiqueta cada paso de un `caso-diagnostico` con el tipo de error que produce si se elige mal: `causa-equivocada`, `paso-omitido`, `orden-incorrecto`, `accion-insegura`, `paso-innecesario`, `herramienta-equivocada` (error leve en el taller), `valor-fuera-de-rango` (por ejemplo, torque excesivo).
 - RF-12: CUANDO un consumidor solicita ítems por competencia y dificultad, EL SISTEMA devuelve solo ítems válidos de esa competencia.
 - RF-13: EL SISTEMA expone la fuente (título, sección o página, URL o referencia) de cada ítem para mostrarla en pantalla.
 - RF-14: EL SISTEMA no genera ni modifica ítems con IA; el banco solo cambia editando el JSON.

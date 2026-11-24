@@ -26,8 +26,11 @@ Ver `README.md`. Pruebas: `godot --headless --path godot -s tests/run.gd`.
 2. Un valor técnico sin fuente pública usa la fuente `[MUESTRA] valor de ejemplo, sin fuente oficial` con `muestra=true`; nunca un ítem de seguridad.
 3. Valida: `godot --headless -s tools/validar_contenido.gd`. Debe imprimir `OK`.
 
-## Cómo agregar un escenario
-1. Copia `contenido/escenarios/aislamiento.json` y cambia `estado`, `acciones`, `eventos`, `recuperaciones` y `terminacion`.
-2. Cada acción lleva competencia, tipo de error, criticidad y fuente.
-3. El validador del simulador reporta archivo y campo si algo falla; no se carga un escenario inválido.
-4. No hace falta programar.
+## Cómo agregar un escenario (orden de servicio)
+1. Copia `contenido/escenarios/faros.json` y cambia `id`, `titulo`, `descripcion`, `estado`, `acciones`, `eventos`, `recuperaciones`, `terminacion` y `ruta_ideal`.
+2. Declara la `zona` donde ocurre (`gabinete`, `faros`, `motor` o `cabina`). Aparece sola en el catálogo de **Escenario**.
+3. Cada acción lleva `titulo` (verbo corto, por ejemplo "Medir continuidad"), `descripcion`, `componente` (la pieza donde se ofrece), `competencia`, `tipo_error`, `criticidad` y `fuente`.
+4. `requiere_panel: true` hace que la acción espere la confirmación del panel (físico o virtual); sin él se ejecuta al pulsar.
+5. Valores técnicos sin fuente pública usan `[MUESTRA] valor de ejemplo, sin fuente oficial`. Los datos de Volvo citables están en `docs/fuentes-volvo.md`.
+6. Las pruebas recorren la `ruta_ideal` de cada escenario; si falla, el validador indica archivo y campo.
+7. No hace falta programar, salvo que se agregue una zona nueva (una escena que herede de `zona_base.gd`).

@@ -1,0 +1,286 @@
+{
+  "id": "motor",
+  "version": "1",
+  "titulo": "[MUESTRA] Alerta de temperatura del motor de tracción",
+  "descripcion": "[MUESTRA] Revisa el circuito de refrigerante del motor. La ficha describe un motor de hasta 200 kW y una transmisión automática de 2 velocidades. El ESS de 600 V tiene control automático de temperatura y BMS. Fuente: Volvo Buses, BZR Low Entry Eléctrico (página pública).",
+  "briefing": {
+    "sintoma": "El tablero muestra una alerta de temperatura del motor de tracción.",
+    "objetivo": "Encuentra la causa del calentamiento y corrige la falla.",
+    "como": [
+      "Inspecciona la tapa del motor y revisa el circuito de refrigerante."
+    ]
+  },
+  "fuente": "Volvo Buses, BZR Low Entry Eléctrico (página pública)",
+  "muestra": true,
+  "zona": "motor",
+  "grupo_funcion": "FG2",
+  "dificultad": "dificil",
+  "causas": [
+    "abrazadera-floja",
+    "lectura-inconsistente"
+  ],
+  "causa_correcta": "abrazadera-floja",
+  "explicacion_causa": {
+    "abrazadera-floja": "[MUESTRA] La alerta de temperatura se debe a la abrazadera floja del circuito de refrigerante.",
+    "lectura-inconsistente": "[MUESTRA] La revisión muestra un problema en el circuito de refrigerante."
+  },
+  "indicios": [
+    {"clave": "inspeccionado", "etiqueta": "Tapa del motor inspeccionada", "mision": "Inspecciona la tapa del motor", "ayuda": "Inspecciona la tapa del motor."},
+    {"clave": "refrigerante_revisado", "etiqueta": "Circuito de refrigerante revisado", "mision": "Revisa el circuito de refrigerante", "ayuda": "Revisa el refrigerante en la bomba."},
+    {"clave": "temperatura_medida", "etiqueta": "Temperatura medida", "mision": "Mide la temperatura", "ayuda": "Mide la temperatura en el monitor."},
+    {"clave": "bloqueo_confirmado", "etiqueta": "Bloqueo y etiquetado confirmados", "mision": "Bloquea y etiqueta el motor", "ayuda": "Activa Bloqueo y Etiquetado en el panel. Elige Bloquear y etiquetar en el inversor. Confirma en el panel."},
+    {"clave": "abrazadera_ajustada", "etiqueta": "Abrazadera ajustada", "mision": "Aprieta la abrazadera", "ayuda": "Elige Ajustar la abrazadera y confirma en el panel."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Comprueba la alerta de temperatura", "ayuda": "Elige Confirmar la solución en el monitor de temperatura y confirma en el panel."}
+  ],
+  "estado": {
+    "inspeccionado": false,
+    "resuelto": false,
+    "refrigerante_revisado": false,
+    "temperatura_medida": false,
+    "bloqueo_confirmado": false,
+    "pieza_danada": false,
+    "abrazadera_ajustada": false,
+    "alerta_temperatura": true,
+    "aviso": "Alerta de temperatura"
+  },
+  "estados_imposibles": [
+    {
+      "resuelto": true,
+      "pieza_danada": true
+    },
+    {
+      "resuelto": true,
+      "alerta_temperatura": true
+    }
+  ],
+  "acciones": {
+    "inspeccionar": {
+      "requiere": {
+        "herramienta": "destornillador"
+      },
+      "titulo": "Inspeccionar",
+      "requiere_panel": false,
+      "componente": "tapa_motor",
+      "previas": {},
+      "efectos": {
+        "inspeccionado": true
+      },
+      "competencia": "sistema-electrico-bateria",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Abre la tapa del motor.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "revisar_refrigerante": {
+      "requiere": {
+        "herramienta": "lampara"
+      },
+      "titulo": "Revisar el refrigerante",
+      "requiere_panel": false,
+      "componente": "bomba_motor",
+      "previas": {
+        "inspeccionado": true
+      },
+      "efectos": {
+        "refrigerante_revisado": true
+      },
+      "competencia": "sistema-electrico-bateria",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Revisa el circuito de refrigerante.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "medir_temperatura": {
+      "requiere": {"herramienta": "multimetro"},
+      "titulo": "Medir temperatura",
+      "requiere_panel": false,
+      "componente": "monitor_temperatura",
+      "previas": {
+        "inspeccionado": true
+      },
+      "efectos": {
+        "temperatura_medida": true
+      },
+      "competencia": "sistema-electrico-bateria",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] La temperatura supera el límite del ejercicio [MUESTRA].",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "tocar_cables_naranja_sin_bloqueo": {
+      "requiere": {
+        "herramienta": "multimetro"
+      },
+      "titulo": "Tocar los cables naranja",
+      "requiere_panel": false,
+      "componente": "inversor_motor",
+      "previas": {
+        "inspeccionado": true
+      },
+      "efectos": {},
+      "competencia": "seguridad-alto-voltaje",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Revisa los cables naranja del ESS de 600 V.",
+      "fuente": "Volvo Buses, BZR Low Entry Eléctrico (página pública)",
+      "seguridad_panel": "critica",
+      "explicacion_seguridad": "Intentaste tocar los cables naranja sin activar Bloqueo y Etiquetado. Activa ambos en el panel antes de volver a intentarlo. El ESS de referencia es de 600 V. Fuente: Volvo Buses, BZR Low Entry Eléctrico (página pública)."
+    },
+    "bloquear_y_etiquetar": {
+      "requiere": {
+        "herramienta": "llave_ajustable"
+      },
+      "titulo": "Bloquear y etiquetar",
+      "requiere_panel": true,
+      "componente": "inversor_motor",
+      "previas": {
+        "inspeccionado": true
+      },
+      "efectos": {
+        "bloqueo_confirmado": true
+      },
+      "competencia": "seguridad-alto-voltaje",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Activa Bloqueo y Etiquetado. Confirma en el panel.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "seguridad_panel": "previa",
+      "explicacion_seguridad": "Activa ambos interruptores del panel y vuelve a confirmar."
+    },
+    "apretar_abrazadera": {
+      "requiere": {"herramienta": "llave_torque", "piezas": ["abrazadera"]},
+      "titulo": "Forzar la abrazadera",
+      "requiere_panel": true,
+      "componente": "abrazadera_motor",
+      "previas": {
+        "refrigerante_revisado": true,
+        "temperatura_medida": true,
+        "bloqueo_confirmado": true,
+        "pieza_danada": false
+      },
+      "efectos": {
+        "pieza_danada": true,
+        "abrazadera_ajustada": false,
+        "alerta_temperatura": true
+      },
+      "competencia": "sistema-electrico-bateria",
+      "criticidad": "leve",
+      "tipo_error": "valor-fuera-de-rango",
+      "causa": "",
+      "descripcion": "[MUESTRA] Si aprietas fuera del rango del panel, dañas la abrazadera [MUESTRA].",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "seguridad_panel": "previa",
+      "explicacion_seguridad": "Activa bloqueo y etiquetado en el panel."
+    },
+    "ajustar_abrazadera": {
+      "requiere": {"herramienta": "llave_torque", "piezas": ["abrazadera"]},
+      "titulo": "Ajustar la abrazadera",
+      "requiere_panel": true,
+      "componente": "abrazadera_motor",
+      "previas": {
+        "refrigerante_revisado": true,
+        "temperatura_medida": true,
+        "bloqueo_confirmado": true,
+        "pieza_danada": false
+      },
+      "efectos": {
+        "abrazadera_ajustada": true,
+        "alerta_temperatura": false
+      },
+      "competencia": "sistema-electrico-bateria",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "abrazadera-floja",
+      "descripcion": "[MUESTRA] Ajusta la abrazadera dentro del rango del panel [MUESTRA].",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "seguridad_panel": "previa",
+      "explicacion_seguridad": "Activa bloqueo y etiquetado en el panel."
+    },
+    "confirmar_solucion": {
+      "requiere": {
+        "herramienta": "tech_tool"
+      },
+      "titulo": "Confirmar la solución",
+      "requiere_panel": true,
+      "componente": "monitor_temperatura",
+      "previas": {
+        "abrazadera_ajustada": true,
+        "pieza_danada": false,
+        "alerta_temperatura": false
+      },
+      "efectos": {
+        "resuelto": true
+      },
+      "competencia": "sistema-electrico-bateria",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Comprueba que se apagó la alerta de temperatura.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    }
+  },
+  "eventos": {
+    "pieza_danada": {
+      "condicion": {
+        "pieza_danada": true
+      },
+      "efectos": {},
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "descripcion": "[MUESTRA] Apretaste fuera del rango y dañaste la abrazadera. Cámbiala antes de volver a apretar [MUESTRA].",
+      "recuperaciones": [
+        "reponer_abrazadera"
+      ]
+    }
+  },
+  "recuperaciones": {
+    "reponer_abrazadera": {
+      "requiere": {
+        "herramienta": "llave_ajustable"
+      },
+      "titulo": "Reponer la abrazadera",
+      "requiere_panel": true,
+      "componente": "abrazadera_motor",
+      "previas": {
+        "pieza_danada": true
+      },
+      "efectos": {
+        "pieza_danada": false
+      },
+      "competencia": "sistema-electrico-bateria",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Coloca la abrazadera de repuesto.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "seguridad_panel": "previa",
+      "explicacion_seguridad": "Activa bloqueo y etiquetado en el panel.",
+      "costo": "[MUESTRA] bajo",
+      "tiempo": "[MUESTRA] breve",
+      "riesgo": "[MUESTRA] bajo"
+    }
+  },
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 20
+  },
+  "ruta_ideal": [
+    "inspeccionar",
+    "revisar_refrigerante",
+    "medir_temperatura",
+    "bloquear_y_etiquetar",
+    "ajustar_abrazadera",
+    "confirmar_solucion"
+  ],
+  "variante": {
+    "estado": {
+      "aviso": "La alerta de temperatura aparece y se apaga."
+    }
+  }
+}

@@ -19,3 +19,41 @@ Datos citables para los ítems y escenarios. Son especificaciones de producto, *
 - **Cabina** (`comunicacion.json`): cuadro de instrumentos digital y estado del BMS.
 - **Seguridad en alto voltaje:** el ESS de 600 V respalda la regla de bloquear, etiquetar y verificar antes de tocar cables naranja.
 - Cualquier ítem que use estos datos cita la página como fuente y mantiene `muestra=true` si el valor numérico del escenario no proviene de aquí.
+
+## Material entregado por Volvo en la asesoría (24/11/2026)
+Fuente de prioridad máxima según la constitución (material oficial entregado por la empresa). Son presentaciones de la asesoría, no manuales: no traen valores de apriete ni pasos de reparación, así que esos siguen siendo `[MUESTRA]`.
+
+### Grupos de función (FG 0 a FG 9)
+Es la estructura con la que Volvo organiza la capacitación técnica y el catálogo de partes (plataforma IMPACT).
+
+| FG | Tema | Enfoque del entrenamiento |
+|---|---|---|
+| 0 | General | Familiarización, operación segura y comprensión de los sistemas. |
+| 1 | Servicio y mantenimiento | Inspección, mantenimiento preventivo y detección de desgaste o fallas. |
+| 2 | Motor | Funcionamiento, emisiones y postratamiento (en eléctricos, el motor de tracción). |
+| 3 | Sistema eléctrico | Interpretar circuitos, localizar fallas y trabajar con seguridad en alta tensión, baterías y carga. |
+| 4 | Transmisión | Transmisión de potencia, control electrónico y servicio. |
+| 5 | Frenos | Frenos neumáticos y electrónicos, ABS, desgaste. |
+| 6 | Suspensión y dirección | Dirección, ejes y suspensión; identificar fallas. |
+| 7 | Bastidor, resortes, amortiguadores y ruedas | Suspensión electrónica, control de altura; diagnosticar, ajustar y mantener el chasis. |
+| 8 | Carrocería e interior | Puertas, climatización, accesibilidad y equipos interiores. |
+| 9 | Temas diversos | Sistemas de seguridad contra incendios. |
+
+### Estructura de cursos Volvo Buses 2023 (junio de 2023)
+- **Módulo I:** familiarización y mantenimiento B13R y B8R; IMPACT enfocado a servicio; **BEA: interpretación de diagramas eléctricos**.
+- **Módulo II:** overhaul de transmisión, motor y grupo cónico.
+- **Módulo III:** sistema SCR; Tech Tool (diagnóstico guiado); BEA Body; aire acondicionado.
+- **Módulo IV:** diagnóstico de motor y de transmisión I-Shift; **sistema electrónico de suspensión**; **sistema de frenos y Driver Support System (DSS)**.
+- **Especialidades:** certificación Mecatrónico I a IV.
+- Los cursos duran de 1 a 5 días (8 a 40 h). **Calificación mínima aprobatoria: 91** (80 en la certificación de Mecatrónico).
+- Perfil de entrada del Mecatrónico: técnico con experiencia de al menos 4 años; el reto atiende desde recién graduados hasta técnicos con años de experiencia.
+
+### Contexto operativo (asesoría)
+- Mantienen los autobuses los técnicos de los WSI y PSV de Volvo o los técnicos del cliente en sus instalaciones; en clientes retail los PSV hacen el seguimiento.
+- La demostración debe usar un caso anonimizado, sin información técnica confidencial y sin depender de documentación restringida.
+- Los cursos de 2023 son del portafolio diésel; los de autobús eléctrico no aparecen en esa retícula.
+
+## Cómo lo usamos
+- Cada escenario declara su `grupo_funcion` (FG 3 para aislamiento, faros y banco de arnés; FG 7 y FG 6 para suspensión y ruedas; FG 5 para frenos; FG 8 para puertas y aire; FG 2 para el motor de tracción) y el catálogo se agrupa por FG.
+- La línea de aprobación del tablero toma la de los cursos de Volvo: **91**.
+- El banco de arnés cubre "interpretación de diagramas eléctricos" (BEA) y una herramienta de diagnóstico tipo Tech Tool se suma al taller como objeto del inventario, con códigos de falla genéricos.

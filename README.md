@@ -22,11 +22,11 @@ Si Godot no puede escribir sus logs, antepón `XDG_DATA_HOME=/tmp/nacional-godot
 |---|---|---|
 | Caminar y mirar | WASD y ratón | Sticks izquierdo y derecho |
 | Abrir el menú de una pieza | Apuntar y hacer clic izquierdo | Apuntar y pulsar A |
-| Elegir una acción | 1–9 o lista del menú | Cruceta arriba / abajo |
+| Elegir una acción | Clic en la tarjeta o 1–9 | Cruceta arriba / abajo y A |
 | Confirmar o cancelar | Enter / Esc | X / B |
 | Liberar o capturar el cursor | Tab | Tab en el teclado |
 
-Confirma la acción elegida con el panel físico o virtual. Para usar con el ratón el panel virtual, **Marcar una causa** o los controles para ocultar los paneles, libera el cursor con **Tab**. En aislamiento, selecciona y confirma **Inspeccionar** en la compuerta para abrir el gabinete. En comunicación, las acciones están en el monitor.
+En **Escenario**, elige una orden de servicio. Al abrir el menú de una pieza se libera el cursor. **Inspeccionar** abre la compuerta al elegirlo y habilita **Marcar una causa** en el menú. En comunicación, **Revisar síntomas** cumple esa función en el monitor. Cuando una acción pide confirmación, pulsa **Enter**, **X** o **Confirmar** en el panel físico o virtual. **Esc** o **B** cierra el menú y recupera el control de la cámara.
 
 ## Estructura
 ```

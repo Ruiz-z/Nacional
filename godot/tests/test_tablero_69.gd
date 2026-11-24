@@ -15,7 +15,7 @@ static func comprobar(base: String) -> bool:
 	var antes := Consultas.tecnico(base, Demo.ALIAS, Base.consultar)
 	var asistente := Asistente.new()
 	var respuesta := asistente.responder("carga", Callable(), antes)
-	if respuesta.get("disponible", true) or respuesta.texto != "Asistente no disponible":
+	if respuesta.get("disponible", true) or respuesta.texto != "El asistente no está disponible. Intenta de nuevo más tarde.":
 		return false
 	var fuente := base + ".txt"
 	var archivo := FileAccess.open(fuente, FileAccess.WRITE)
@@ -28,5 +28,5 @@ static func comprobar(base: String) -> bool:
 		return false
 	var desconectado := func(_peticion: Dictionary) -> Variant: return null
 	respuesta = asistente.responder("carga", desconectado, antes)
-	return not respuesta.disponible and respuesta.texto == "Asistente no disponible" \
+	return not respuesta.disponible and respuesta.texto == "El asistente no está disponible. Intenta de nuevo más tarde." \
 		and Consultas.tecnico(base, Demo.ALIAS, Base.consultar) == antes

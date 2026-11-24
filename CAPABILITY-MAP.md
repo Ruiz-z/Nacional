@@ -47,3 +47,6 @@ Requisitos transversales: operación offline, trazabilidad de resultados, conten
 
 ## Actualización
 - Módulo `flujo` (Spec 007): depende de aprendizaje, simulador, tablero. `entrada` está dentro de `panel`. Orden: competencias → aprendizaje+simulador → panel → tablero → flujo → entrega.
+
+## Actualización — arnés
+- Módulo `arnes` (Spec 008): práctica de diagnóstico con medición. Depende de `simulador`, `panel`, `aprendizaje`, `tablero`. Banco físico opcional; el multímetro virtual es obligatorio.
