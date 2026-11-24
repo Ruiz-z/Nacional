@@ -29,7 +29,7 @@ static func recorrido(menu: Node, base: String) -> bool:
 	menu.botones.escenario.pressed.emit()
 	var tarjetas: Node = menu.pantalla.get_node("Centro/Columna/Tarjetas")
 	var elegida := false
-	for tarjeta in tarjetas.get_children():
+	for tarjeta in tarjetas.find_children("*", "Button", true, false):
 		if tarjeta.text.contains("Cabina"):
 			tarjeta.pressed.emit()
 			elegida = true

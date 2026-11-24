@@ -8,7 +8,9 @@ const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria",
 	"caja_fusibles", "fusible_faros", "conector_faros", "faro_izquierdo", "faro_derecho", "rele_faros",
 	"tapa_motor", "motor_traccion", "inversor_motor", "bomba_motor", "radiador_motor",
 	"monitor_temperatura", "abrazadera_motor", "fusibles_cabina", "multimetro", "tp0", "tp1", "tp2"]
-const ZONAS := ["gabinete", "faros", "motor", "cabina", "banco"]
+const ZONAS := ["gabinete", "faros", "motor", "cabina", "banco", "bajos"]
+const GRUPOS_FUNCION := ["FG0", "FG1", "FG2", "FG3", "FG4", "FG5", "FG6", "FG7", "FG8", "FG9"]
+const ZonaBajos = preload("res://escenas/zona_bajos.gd")
 const FUENTE_BZR := "Volvo Buses, BZR Low Entry Eléctrico (página pública)"
 const AISLAMIENTO := "escenarios/aislamiento.json"
 const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
@@ -47,6 +49,8 @@ static func campo_invalido(datos: Dictionary) -> String:
 		return "fuente"
 	if datos.get("zona") not in ZONAS:
 		return "zona"
+	if datos.get("grupo_funcion") not in GRUPOS_FUNCION:
+		return "grupo_funcion"
 	if datos.get("dificultad") not in Banco.DIFICULTADES:
 		return "dificultad"
 	for campo in ["estado", "acciones", "eventos", "recuperaciones", "terminacion", "variante"]:
@@ -97,6 +101,9 @@ static func campo_invalido(datos: Dictionary) -> String:
 			or cumple(datos.estado, cambio) \
 			or imposible(datos.estado.merged(cambio, true), datos.estados_imposibles):
 		return "variante.estado"
+	if datos.zona == "bajos" and (datos.ruta_ideal[-1] != "cerrar_orden"
+			or datos.acciones.cerrar_orden.get("componente") != "consola_elevador"):
+		return "ruta_ideal"
 	if datos.zona == "banco":
 		for campo in ["s1_abierto", "s2_abierto", "resuelto"]:
 			if not datos.estado.get(campo) is bool:
@@ -165,7 +172,12 @@ static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> S
 			return ".seguridad_panel"
 		if not Banco.texto_presente(regla.get("explicacion_seguridad")):
 			return ".explicacion_seguridad"
-	if regla.has("componente") and regla.componente not in COMPONENTES:
+	if regla.has("torque") and not torque_valido(regla, datos):
+		return ".torque"
+	if datos.zona == "bajos":
+		if not ZonaBajos.componente_valido(regla.get("componente")):
+			return ".componente"
+	elif regla.has("componente") and regla.componente not in COMPONENTES:
 		return ".componente"
 	if not Banco.COMPETENCIAS.has(regla.get("competencia")):
 		return ".competencia"
@@ -181,6 +193,15 @@ static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> S
 			if not Banco.texto_presente(regla.get(campo)):
 				return "." + campo
 	return ""
+
+
+static func torque_valido(regla: Dictionary, datos: Dictionary) -> bool:
+	var torque: Variant = regla.torque
+	return datos.zona == "bajos" and regla.get("requiere_panel", false) and torque is Dictionary \
+		and numero(torque.get("minimo")) and numero(torque.get("maximo")) \
+		and 0 <= torque.minimo and torque.minimo <= torque.maximo and torque.maximo <= 100 \
+		and asignacion_valida(torque.get("efectos_fuera"), datos.estado) \
+		and not imposible(regla.previas.merged(torque.efectos_fuera, true), datos.estados_imposibles)
 
 
 static func fuente_valida(fuente: Variant, muestra: bool) -> bool:

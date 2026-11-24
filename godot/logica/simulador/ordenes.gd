@@ -23,6 +23,6 @@ static func listar(ruta := "escenarios") -> Dictionary:
 		var datos: Dictionary = carga.escenario
 		var accion: Dictionary = datos.acciones[datos.ruta_ideal[-1]]
 		resultado.ordenes.append({"archivo": archivo, "titulo": datos.titulo.trim_prefix("[MUESTRA]").strip_edges(),
-			"zona": datos.zona, "dificultad": datos.dificultad,
+			"zona": datos.zona, "grupo_funcion": datos.grupo_funcion, "dificultad": datos.dificultad,
 			"competencia": Banco.COMPETENCIAS[accion.competencia]})
 	return resultado

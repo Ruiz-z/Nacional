@@ -1,0 +1,139 @@
+{
+  "id": "freno_desgastado",
+  "version": "1",
+  "titulo": "[MUESTRA] Freno desgastado",
+  "descripcion": "[MUESTRA] Se oye un roce en el freno delantero derecho.",
+  "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+  "muestra": true,
+  "zona": "bajos",
+  "grupo_funcion": "FG5",
+  "dificultad": "media",
+  "causas": [
+    "Freno desgastado"
+  ],
+  "indicios": [
+    {
+      "clave": "medir_pastillas",
+      "etiqueta": "Medir desgaste de pastillas",
+      "ayuda": "Mide las pastillas delanteras derechas con el flexómetro."
+    },
+    {
+      "clave": "reponer_pastillas",
+      "etiqueta": "Reponer las pastillas",
+      "ayuda": "Lleva pastillas de repuesto y confirma la reposición en el panel."
+    },
+    {
+      "clave": "resuelto",
+      "etiqueta": "Cerrar la orden",
+      "ayuda": "Destraba ambos soportes, despeja los bajos, baja el autobús y cierra la orden en la consola."
+    }
+  ],
+  "estado": {
+    "aviso": "Se oye un roce en el freno delantero derecho.",
+    "medir_pastillas": false,
+    "reponer_pastillas": false,
+    "resuelto": false
+  },
+  "estados_imposibles": [],
+  "acciones": {
+    "medir_pastillas": {
+      "titulo": "Medir desgaste de pastillas",
+      "componente": "pastillas_delantero_derecho",
+      "previas": {
+        "medir_pastillas": false
+      },
+      "efectos": {
+        "medir_pastillas": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Pastillas por debajo del espesor de servicio de la maqueta",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false,
+      "requiere": {
+        "herramientas": [
+          "flexometro"
+        ]
+      }
+    },
+    "reponer_pastillas": {
+      "titulo": "Reponer las pastillas",
+      "componente": "pastillas_delantero_derecho",
+      "previas": {
+        "medir_pastillas": true,
+        "reponer_pastillas": false
+      },
+      "efectos": {
+        "reponer_pastillas": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Freno desgastado",
+      "descripcion": "[MUESTRA] Reponer las pastillas",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "piezas": [
+          "pastillas_freno"
+        ]
+      }
+    },
+    "cerrar_orden": {
+      "titulo": "Cerrar la orden",
+      "componente": "consola_elevador",
+      "previas": {
+        "reponer_pastillas": true,
+        "resuelto": false
+      },
+      "efectos": {
+        "resuelto": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Cerrar la orden",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    },
+    "medir_pastillas_lado_equivocado": {
+      "titulo": "Medir desgaste de pastillas",
+      "componente": "pastillas_delantero_izquierdo",
+      "previas": {},
+      "efectos": {},
+      "competencia": "diagnostico-fallas",
+      "criticidad": "leve",
+      "tipo_error": "punto-de-medicion-incorrecto",
+      "causa": "",
+      "descripcion": "[MUESTRA] Estas pastillas están en buen estado. El indicio corresponde al freno delantero derecho.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false,
+      "requiere": {
+        "herramientas": [
+          "flexometro"
+        ]
+      }
+    }
+  },
+  "eventos": {},
+  "recuperaciones": {},
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 30
+  },
+  "ruta_ideal": [
+    "medir_pastillas",
+    "reponer_pastillas",
+    "cerrar_orden"
+  ],
+  "variante": {
+    "estado": {
+      "aviso": "El roce se detectó durante la revisión del freno delantero derecho."
+    }
+  }
+}

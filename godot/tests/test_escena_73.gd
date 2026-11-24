@@ -20,11 +20,11 @@ static func comprobar(base: String) -> bool:
 	correcto = correcto and not menu.botones.diagnostico.disabled and menu.botones.ruta.disabled
 	correcto = correcto and menu.inicio.get_node("Siguiente").text.contains("Diagnóstico")
 	menu._process(0.0)
-	correcto = correcto and menu.inicio.get_node("Entrada").text == "Panel virtual"
+	correcto = correcto and menu.barra.get_node("Entrada").text == "Panel virtual"
 	menu.conexion.iniciar_panel(Time.get_ticks_msec() - 3000)
 	menu._process(0.0)
-	correcto = correcto and menu.inicio.get_node("Entrada").text.contains("Panel desconectado")
-	menu.inicio.get_node("Demo").pressed.emit()
+	correcto = correcto and menu.barra.get_node("Entrada").text.contains("Panel desconectado")
+	menu.recorrido.get_node("Demo").pressed.emit()
 	correcto = correcto and menu.pantalla != null and not menu.inicio.visible
 	menu.pantalla.get_node("Tablero").pressed.emit()
 	correcto = correcto and menu.pantalla.alias_actual.begins_with("[DEMO]")

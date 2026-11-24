@@ -1,0 +1,146 @@
+{
+  "id": "fuga_suspension_neumatica",
+  "version": "1",
+  "titulo": "[MUESTRA] Fuga en la suspensión neumática",
+  "descripcion": "[MUESTRA] La suspensión trasera derecha pierde altura.",
+  "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+  "muestra": true,
+  "zona": "bajos",
+  "grupo_funcion": "FG7",
+  "dificultad": "media",
+  "causas": [
+    "Fuga en la suspensión neumática"
+  ],
+  "indicios": [
+    {
+      "clave": "medir_bolsa",
+      "etiqueta": "Medir presión de la bolsa",
+      "ayuda": "Mide la presión de la bolsa de aire trasera derecha con el manómetro."
+    },
+    {
+      "clave": "localizar_fuga",
+      "etiqueta": "Localizar fuga",
+      "ayuda": "Inspecciona la bolsa de aire trasera derecha para localizar la fuga."
+    },
+    {
+      "clave": "reponer_bolsa",
+      "etiqueta": "Reponer la bolsa de aire",
+      "ayuda": "Lleva la bolsa de aire de repuesto y confirma la reposición en el panel."
+    },
+    {
+      "clave": "resuelto",
+      "etiqueta": "Cerrar la orden",
+      "ayuda": "Destraba ambos soportes, despeja los bajos, baja el autobús y cierra la orden en la consola."
+    }
+  ],
+  "estado": {
+    "aviso": "La suspensión trasera derecha pierde altura.",
+    "medir_bolsa": false,
+    "localizar_fuga": false,
+    "reponer_bolsa": false,
+    "resuelto": false
+  },
+  "estados_imposibles": [],
+  "acciones": {
+    "medir_bolsa": {
+      "titulo": "Medir presión de la bolsa",
+      "componente": "bolsa_trasero_derecho",
+      "previas": {
+        "medir_bolsa": false
+      },
+      "efectos": {
+        "medir_bolsa": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Presión baja en la bolsa de aire trasera derecha",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false,
+      "requiere": {
+        "herramientas": [
+          "manometro"
+        ]
+      }
+    },
+    "localizar_fuga": {
+      "titulo": "Localizar fuga",
+      "componente": "bolsa_trasero_derecho",
+      "previas": {
+        "medir_bolsa": true,
+        "localizar_fuga": false
+      },
+      "efectos": {
+        "localizar_fuga": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Fuga localizada en un pliegue de la bolsa de aire",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    },
+    "reponer_bolsa": {
+      "titulo": "Reponer la bolsa de aire",
+      "componente": "bolsa_trasero_derecho",
+      "previas": {
+        "localizar_fuga": true,
+        "reponer_bolsa": false
+      },
+      "efectos": {
+        "reponer_bolsa": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Fuga en la suspensión neumática",
+      "descripcion": "[MUESTRA] Reponer la bolsa de aire",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "piezas": [
+          "bolsa_aire"
+        ]
+      }
+    },
+    "cerrar_orden": {
+      "titulo": "Cerrar la orden",
+      "componente": "consola_elevador",
+      "previas": {
+        "reponer_bolsa": true,
+        "resuelto": false
+      },
+      "efectos": {
+        "resuelto": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Cerrar la orden",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    }
+  },
+  "eventos": {},
+  "recuperaciones": {},
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 30
+  },
+  "ruta_ideal": [
+    "medir_bolsa",
+    "localizar_fuga",
+    "reponer_bolsa",
+    "cerrar_orden"
+  ],
+  "variante": {
+    "estado": {
+      "aviso": "Con el autobús estacionado, el lado trasero derecho desciende."
+    }
+  }
+}

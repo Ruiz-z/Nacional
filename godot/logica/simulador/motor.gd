@@ -2,6 +2,8 @@ extends RefCounted
 
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
+const EvaluacionPanel = preload("res://logica/entrada/evaluacion_panel.gd")
+const FUENTE_ELEVADOR := "[MUESTRA] procedimiento didáctico, sin fuente oficial"
 const ENTRADAS := ["panel", "virtual", "teclado", "control", "banco"]
 
 # Estas cifras son reglas del juego, independientes de los valores del escenario.
@@ -76,6 +78,14 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 			return rechazo("Cierra el conductor abierto en el banco físico.")
 		if fuente_entrada not in ["panel", "virtual", "banco"]:
 			return rechazo("Confirma la reparación en el panel.")
+	var bajos: bool = _escenario.get("zona") == "bajos"
+	var bajo_autobus: bool = bajos and regla.componente != "consola_elevador"
+	var falta_elevador: bool = bajo_autobus and not controles.get("elevador_seguro", false)
+	if bajos and regla.get("requiere_panel", false) and not falta_elevador \
+			and fuente_entrada not in ["panel", "virtual"]:
+		return rechazo("Confirma la reparación en el panel.")
+	if regla.has("torque") and not falta_elevador and not Escenario.numero(controles.get("torque")):
+		return rechazo("Ajusta la perilla del panel para registrar el torque.")
 	var decision := {"accion": id, "estado_antes": estado(), "fuente_entrada": fuente_entrada,
 		"tiempo_ms": tiempo_ms, "competencia": regla.competencia, "fuente": regla.fuente,
 		"criticidad": regla.criticidad, "tipo_error": regla.tipo_error, "aplicada": false,
@@ -95,15 +105,33 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 		if seguridad == "critica":
 			decision.criticidad = "critica"
 			decision.tipo_error = "accion-insegura"
+	if falta_elevador:
+		decision.criticidad = "critica"
+		decision.tipo_error = "accion-insegura"
+		decision.fuente = FUENTE_ELEVADOR
+		decision.motivo = "Falta crítica: se intentó trabajar en los bajos sin ambos soportes trabados. " + FUENTE_ELEVADOR
 	if decision.criticidad == "critica":
 		_fin = "falta-critica"
 		_puntaje = 0
-		if seguridad != "critica":
+		if seguridad != "critica" and not falta_elevador:
 			decision.motivo = regla.descripcion
 	elif not faltantes.is_empty():
 		decision.previas_faltantes = faltantes
+		if bajos and id == "cerrar_orden":
+			decision.tipo_error = "paso-omitido"
 	elif decision.motivo.is_empty():
-		var cambio := activar_eventos(_estado, _estado.merged(regla.efectos, true))
+		var efectos: Dictionary = regla.efectos
+		if regla.has("torque"):
+			var valor: float = controles.torque
+			var rango: Dictionary = regla.torque
+			var error := EvaluacionPanel.evaluar_torque(valor, rango.minimo, rango.maximo)
+			decision["torque_simulado"] = valor
+			if not error.is_empty():
+				decision.tipo_error = error.tipo_error
+				decision.criticidad = "leve"
+				decision.motivo = "[MUESTRA] Torque fuera del rango de la escala del panel."
+				efectos = rango.efectos_fuera
+		var cambio := activar_eventos(_estado, _estado.merged(efectos, true))
 		if cambio.is_empty():
 			decision.motivo = "La acción produciría un estado imposible."
 		else:
@@ -261,7 +289,7 @@ func reintentar() -> RefCounted:
 		if not decision.aplicada:
 			continue
 		var reglas: Dictionary = variante.acciones if not decision.recuperacion else variante.recuperaciones
-		if reglas[decision.accion].has("seguridad_panel"):
+		if variante.zona == "bajos" or reglas[decision.accion].has("seguridad_panel"):
 			break
 		var repetida: Dictionary = nuevo.ejecutar(decision.accion, decision.fuente_entrada, 0)
 		if not repetida.aplicada or not nuevo.fin().is_empty():

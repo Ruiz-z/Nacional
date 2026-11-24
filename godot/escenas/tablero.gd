@@ -6,7 +6,7 @@ const Vistas = preload("res://logica/tablero/vistas.gd")
 const COLORES_NIVEL := {
 	"Novato": Color("#d64545"),
 	"Básico": Color("#f2b705"),
-	"Competente": Color("#3b82c4"),
+	"Competente": Color("#1aa7a6"),
 	"Experto": Color("#3fae6a"),
 }
 

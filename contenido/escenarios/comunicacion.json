@@ -11,6 +11,7 @@
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
   "zona": "cabina",
+  "grupo_funcion": "FG3",
   "dificultad": "facil",
   "causas": [
     "modulo-sin-comunicacion",

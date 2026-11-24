@@ -1,0 +1,541 @@
+{
+  "id": "neumatico_pinchado",
+  "version": "1",
+  "titulo": "[MUESTRA] Neumático pinchado",
+  "descripcion": "[MUESTRA] El neumático delantero derecho pierde presión.",
+  "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+  "muestra": true,
+  "zona": "bajos",
+  "grupo_funcion": "FG7",
+  "dificultad": "media",
+  "causas": [
+    "Neumático pinchado"
+  ],
+  "indicios": [
+    {
+      "clave": "medir_presion",
+      "etiqueta": "Medir presión del neumático",
+      "ayuda": "Mide la presión en el neumático delantero derecho con el manómetro."
+    },
+    {
+      "clave": "localizar_pinchazo",
+      "etiqueta": "Localizar pinchazo",
+      "ayuda": "Inspecciona ese neumático para localizar el pinchazo."
+    },
+    {
+      "clave": "cambiar_rueda",
+      "etiqueta": "Cambiar la rueda",
+      "ayuda": "Lleva el neumático de repuesto y confirma el cambio de rueda en el panel."
+    },
+    {
+      "clave": "apretar_tuerca_1",
+      "etiqueta": "Apretar tuerca 1",
+      "ayuda": "Empieza el apriete en cruz por la tuerca 1 de la rueda delantera derecha. El orden es 1, 3, 5, 2, 4. Usa la perilla con el rango indicado [MUESTRA]."
+    },
+    {
+      "clave": "apretar_tuerca_3",
+      "etiqueta": "Apretar tuerca 3",
+      "ayuda": "Selecciona la tuerca 3 de la rueda delantera derecha y aplica el torque [MUESTRA] con la perilla (40–60 en la escala del panel)."
+    },
+    {
+      "clave": "apretar_tuerca_5",
+      "etiqueta": "Apretar tuerca 5",
+      "ayuda": "Selecciona la tuerca 5 de la rueda delantera derecha y aplica el torque [MUESTRA] con la perilla (40–60 en la escala del panel)."
+    },
+    {
+      "clave": "apretar_tuerca_2",
+      "etiqueta": "Apretar tuerca 2",
+      "ayuda": "Selecciona la tuerca 2 de la rueda delantera derecha y aplica el torque [MUESTRA] con la perilla (40–60 en la escala del panel)."
+    },
+    {
+      "clave": "apretar_tuerca_4",
+      "etiqueta": "Apretar tuerca 4",
+      "ayuda": "Selecciona la tuerca 4 de la rueda delantera derecha y aplica el torque [MUESTRA] con la perilla (40–60 en la escala del panel)."
+    },
+    {
+      "clave": "resuelto",
+      "etiqueta": "Cerrar la orden",
+      "ayuda": "Destraba ambos soportes, despeja los bajos, baja el autobús y cierra la orden en la consola."
+    }
+  ],
+  "estado": {
+    "aviso": "El neumático delantero derecho pierde presión.",
+    "medir_presion": false,
+    "localizar_pinchazo": false,
+    "cambiar_rueda": false,
+    "apretar_tuerca_1": false,
+    "tuerca_1_danada": false,
+    "apretar_tuerca_3": false,
+    "tuerca_3_danada": false,
+    "apretar_tuerca_5": false,
+    "tuerca_5_danada": false,
+    "apretar_tuerca_2": false,
+    "tuerca_2_danada": false,
+    "apretar_tuerca_4": false,
+    "tuerca_4_danada": false,
+    "resuelto": false
+  },
+  "estados_imposibles": [],
+  "acciones": {
+    "medir_presion": {
+      "titulo": "Medir presión del neumático",
+      "componente": "neumatico_delantero_derecho",
+      "previas": {
+        "medir_presion": false
+      },
+      "efectos": {
+        "medir_presion": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Presión baja en el neumático delantero derecho",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false,
+      "requiere": {
+        "herramientas": [
+          "manometro"
+        ]
+      }
+    },
+    "localizar_pinchazo": {
+      "titulo": "Localizar pinchazo",
+      "componente": "neumatico_delantero_derecho",
+      "previas": {
+        "medir_presion": true,
+        "localizar_pinchazo": false
+      },
+      "efectos": {
+        "localizar_pinchazo": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Pinchazo localizado en la banda de rodadura",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    },
+    "cambiar_rueda": {
+      "titulo": "Cambiar la rueda",
+      "componente": "neumatico_delantero_derecho",
+      "previas": {
+        "localizar_pinchazo": true,
+        "cambiar_rueda": false
+      },
+      "efectos": {
+        "cambiar_rueda": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Neumático pinchado",
+      "descripcion": "[MUESTRA] Cambiar la rueda",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "piezas": [
+          "neumatico"
+        ]
+      }
+    },
+    "apretar_tuerca_1": {
+      "titulo": "Apretar tuerca 1",
+      "componente": "tuerca_delantero_derecho_1",
+      "previas": {
+        "cambiar_rueda": true,
+        "apretar_tuerca_1": false,
+        "tuerca_1_danada": false
+      },
+      "efectos": {
+        "apretar_tuerca_1": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Neumático pinchado",
+      "descripcion": "[MUESTRA] Apretar tuerca 1",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "herramientas": [
+          "llave_torque"
+        ]
+      },
+      "torque": {
+        "minimo": 40,
+        "maximo": 60,
+        "efectos_fuera": {
+          "tuerca_1_danada": true
+        }
+      }
+    },
+    "apretar_tuerca_3": {
+      "titulo": "Apretar tuerca 3",
+      "componente": "tuerca_delantero_derecho_3",
+      "previas": {
+        "apretar_tuerca_1": true,
+        "apretar_tuerca_3": false,
+        "tuerca_3_danada": false
+      },
+      "efectos": {
+        "apretar_tuerca_3": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Neumático pinchado",
+      "descripcion": "[MUESTRA] Apretar tuerca 3",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "herramientas": [
+          "llave_torque"
+        ]
+      },
+      "torque": {
+        "minimo": 40,
+        "maximo": 60,
+        "efectos_fuera": {
+          "tuerca_3_danada": true
+        }
+      }
+    },
+    "apretar_tuerca_5": {
+      "titulo": "Apretar tuerca 5",
+      "componente": "tuerca_delantero_derecho_5",
+      "previas": {
+        "apretar_tuerca_3": true,
+        "apretar_tuerca_5": false,
+        "tuerca_5_danada": false
+      },
+      "efectos": {
+        "apretar_tuerca_5": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Neumático pinchado",
+      "descripcion": "[MUESTRA] Apretar tuerca 5",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "herramientas": [
+          "llave_torque"
+        ]
+      },
+      "torque": {
+        "minimo": 40,
+        "maximo": 60,
+        "efectos_fuera": {
+          "tuerca_5_danada": true
+        }
+      }
+    },
+    "apretar_tuerca_2": {
+      "titulo": "Apretar tuerca 2",
+      "componente": "tuerca_delantero_derecho_2",
+      "previas": {
+        "apretar_tuerca_5": true,
+        "apretar_tuerca_2": false,
+        "tuerca_2_danada": false
+      },
+      "efectos": {
+        "apretar_tuerca_2": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Neumático pinchado",
+      "descripcion": "[MUESTRA] Apretar tuerca 2",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "herramientas": [
+          "llave_torque"
+        ]
+      },
+      "torque": {
+        "minimo": 40,
+        "maximo": 60,
+        "efectos_fuera": {
+          "tuerca_2_danada": true
+        }
+      }
+    },
+    "apretar_tuerca_4": {
+      "titulo": "Apretar tuerca 4",
+      "componente": "tuerca_delantero_derecho_4",
+      "previas": {
+        "apretar_tuerca_2": true,
+        "apretar_tuerca_4": false,
+        "tuerca_4_danada": false
+      },
+      "efectos": {
+        "apretar_tuerca_4": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Neumático pinchado",
+      "descripcion": "[MUESTRA] Apretar tuerca 4",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "herramientas": [
+          "llave_torque"
+        ]
+      },
+      "torque": {
+        "minimo": 40,
+        "maximo": 60,
+        "efectos_fuera": {
+          "tuerca_4_danada": true
+        }
+      }
+    },
+    "cerrar_orden": {
+      "titulo": "Cerrar la orden",
+      "componente": "consola_elevador",
+      "previas": {
+        "apretar_tuerca_4": true,
+        "resuelto": false
+      },
+      "efectos": {
+        "resuelto": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Cerrar la orden",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    },
+    "medir_presion_lado_equivocado": {
+      "titulo": "Medir presión del neumático",
+      "componente": "neumatico_delantero_izquierdo",
+      "previas": {},
+      "efectos": {},
+      "competencia": "diagnostico-fallas",
+      "criticidad": "leve",
+      "tipo_error": "punto-de-medicion-incorrecto",
+      "causa": "",
+      "descripcion": "[MUESTRA] Esta rueda está en buen estado. El indicio corresponde a la delantera derecha.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false,
+      "requiere": {
+        "herramientas": [
+          "manometro"
+        ]
+      }
+    }
+  },
+  "eventos": {
+    "tuerca_1_danada": {
+      "condicion": {
+        "tuerca_1_danada": true
+      },
+      "efectos": {},
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "descripcion": "[MUESTRA] Tuerca 1 dañada por torque fuera de rango. Repón la tuerca y vuelve a apretar.",
+      "recuperaciones": [
+        "reponer_tuerca_1"
+      ]
+    },
+    "tuerca_3_danada": {
+      "condicion": {
+        "tuerca_3_danada": true
+      },
+      "efectos": {},
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "descripcion": "[MUESTRA] Tuerca 3 dañada por torque fuera de rango. Repón la tuerca y vuelve a apretar.",
+      "recuperaciones": [
+        "reponer_tuerca_3"
+      ]
+    },
+    "tuerca_5_danada": {
+      "condicion": {
+        "tuerca_5_danada": true
+      },
+      "efectos": {},
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "descripcion": "[MUESTRA] Tuerca 5 dañada por torque fuera de rango. Repón la tuerca y vuelve a apretar.",
+      "recuperaciones": [
+        "reponer_tuerca_5"
+      ]
+    },
+    "tuerca_2_danada": {
+      "condicion": {
+        "tuerca_2_danada": true
+      },
+      "efectos": {},
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "descripcion": "[MUESTRA] Tuerca 2 dañada por torque fuera de rango. Repón la tuerca y vuelve a apretar.",
+      "recuperaciones": [
+        "reponer_tuerca_2"
+      ]
+    },
+    "tuerca_4_danada": {
+      "condicion": {
+        "tuerca_4_danada": true
+      },
+      "efectos": {},
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "descripcion": "[MUESTRA] Tuerca 4 dañada por torque fuera de rango. Repón la tuerca y vuelve a apretar.",
+      "recuperaciones": [
+        "reponer_tuerca_4"
+      ]
+    }
+  },
+  "recuperaciones": {
+    "reponer_tuerca_1": {
+      "titulo": "Reponer tuerca",
+      "componente": "tuerca_delantero_derecho_1",
+      "previas": {
+        "tuerca_1_danada": true
+      },
+      "efectos": {
+        "tuerca_1_danada": false
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Reponer tuerca dañada",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "piezas": [
+          "tuercas"
+        ]
+      },
+      "costo": "[MUESTRA] bajo",
+      "tiempo": "[MUESTRA] breve",
+      "riesgo": "[MUESTRA] bajo"
+    },
+    "reponer_tuerca_3": {
+      "titulo": "Reponer tuerca",
+      "componente": "tuerca_delantero_derecho_3",
+      "previas": {
+        "tuerca_3_danada": true
+      },
+      "efectos": {
+        "tuerca_3_danada": false
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Reponer tuerca dañada",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "piezas": [
+          "tuercas"
+        ]
+      },
+      "costo": "[MUESTRA] bajo",
+      "tiempo": "[MUESTRA] breve",
+      "riesgo": "[MUESTRA] bajo"
+    },
+    "reponer_tuerca_5": {
+      "titulo": "Reponer tuerca",
+      "componente": "tuerca_delantero_derecho_5",
+      "previas": {
+        "tuerca_5_danada": true
+      },
+      "efectos": {
+        "tuerca_5_danada": false
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Reponer tuerca dañada",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "piezas": [
+          "tuercas"
+        ]
+      },
+      "costo": "[MUESTRA] bajo",
+      "tiempo": "[MUESTRA] breve",
+      "riesgo": "[MUESTRA] bajo"
+    },
+    "reponer_tuerca_2": {
+      "titulo": "Reponer tuerca",
+      "componente": "tuerca_delantero_derecho_2",
+      "previas": {
+        "tuerca_2_danada": true
+      },
+      "efectos": {
+        "tuerca_2_danada": false
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Reponer tuerca dañada",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "piezas": [
+          "tuercas"
+        ]
+      },
+      "costo": "[MUESTRA] bajo",
+      "tiempo": "[MUESTRA] breve",
+      "riesgo": "[MUESTRA] bajo"
+    },
+    "reponer_tuerca_4": {
+      "titulo": "Reponer tuerca",
+      "componente": "tuerca_delantero_derecho_4",
+      "previas": {
+        "tuerca_4_danada": true
+      },
+      "efectos": {
+        "tuerca_4_danada": false
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Reponer tuerca dañada",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "piezas": [
+          "tuercas"
+        ]
+      },
+      "costo": "[MUESTRA] bajo",
+      "tiempo": "[MUESTRA] breve",
+      "riesgo": "[MUESTRA] bajo"
+    }
+  },
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 30
+  },
+  "ruta_ideal": [
+    "medir_presion",
+    "localizar_pinchazo",
+    "cambiar_rueda",
+    "apretar_tuerca_1",
+    "apretar_tuerca_3",
+    "apretar_tuerca_5",
+    "apretar_tuerca_2",
+    "apretar_tuerca_4",
+    "cerrar_orden"
+  ],
+  "variante": {
+    "estado": {
+      "aviso": "La pérdida de presión apareció durante la revisión previa a la salida."
+    }
+  }
+}

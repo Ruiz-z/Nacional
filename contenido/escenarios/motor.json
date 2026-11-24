@@ -6,6 +6,7 @@
   "fuente": "Volvo Buses, BZR Low Entry Eléctrico (página pública)",
   "muestra": true,
   "zona": "motor",
+  "grupo_funcion": "FG2",
   "dificultad": "dificil",
   "causas": [
     "abrazadera-floja",

@@ -1,9 +1,10 @@
 extends SceneTree
 
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
+# Menú: godot --path godot -s ../tools/captura.gd -- escenas/menu.tscn salida.png 1280 720
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
-# Taller: [ancho alto] taller|baliza [--verificar]
+# Taller: [ancho alto] taller|baliza|elevador|bajos [--verificar]
 # Banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
 func _initialize() -> void:
@@ -19,10 +20,10 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "bajos"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
-	var vista_taller := vista in ["taller", "baliza"]
+	var vista_taller := vista in ["taller", "baliza", "elevador", "bajos"]
 	var zona := ""
 	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
@@ -92,7 +93,9 @@ func capturar() -> void:
 			fallar("La escena no tiene un gabinete de servicio.")
 			return
 		escena.modo_captura = true
-	if vista_taller and vista == "baliza":
+	if vista in ["elevador", "bajos"]:
+		escena.archivo = "escenarios/neumatico_pinchado.json"
+	elif vista == "baliza":
 		escena.archivo = "escenarios/faros.json"
 	if not zona.is_empty():
 		if zona != "interior":
@@ -104,7 +107,11 @@ func capturar() -> void:
 		if escena.motor == null:
 			fallar("El simulador no se inicializó.")
 			return
-		if vista_taller:
+		if vista in ["elevador", "bajos"]:
+			if not preparar_elevador(escena, vista):
+				fallar("El elevador o su encuadre no corresponde a la vista.")
+				return
+		elif vista_taller:
 			if not preparar_taller(escena, vista):
 				fallar("El taller no corresponde a la vista solicitada.")
 				return
@@ -250,6 +257,8 @@ func capturar() -> void:
 				or (escena.panel.visible and tarjeta.get_global_rect().intersects(escena.panel.get_global_rect())):
 			fallar("El menú queda recortado o invade el panel virtual.")
 			return
+	await process_frame
+	await process_frame
 	if verificar:
 		quit(0)
 		return
@@ -264,6 +273,40 @@ func capturar() -> void:
 		return
 	print("Guardado ", args[1], " ", img.get_size())
 	quit(0)
+
+
+func preparar_elevador(escena: Node3D, vista: String) -> bool:
+	var elevador := escena.get_node("Elevador")
+	var bajos := escena.get_node("Bajos")
+	escena.jugador.set_physics_process(false)
+	escena.set_process(false)
+	escena.set_physics_process(false)
+	for ruta in ["Interfaz", "PistaControles", "AlineacionPanel", "AlternarPanel", "Mira", "Apuntado"]:
+		escena.get_node(ruta).hide()
+	for brazo in escena.jugador.camara.get_children():
+		if brazo is Node3D and not brazo is RayCast3D:
+			brazo.hide()
+	elevador.colocar_calzas()
+	elevador.mover(true, true)
+	for soporte in elevador.trabas:
+		elevador.cambiar_traba(soporte, true)
+	if vista == "elevador":
+		escena.jugador.ubicar(Vector3(-10.7, 0.10, 6.9))
+		escena.apuntar_jugador(Vector3(0, 2.54, 0.10))
+	else:
+		escena.jugador.ubicar(Vector3(-0.84, -1.05, -0.69))
+		escena.apuntar_jugador(Vector3(0.46, 1.66, -2.78))
+	var camara: Camera3D = escena.jugador.camara
+	var puntos := [elevador.piezas.consola_elevador.global_position, Vector3(0, 3.8, 0)]
+	if vista == "bajos":
+		puntos = [bajos.piezas.neumatico_trasero_derecho.global_position,
+			bajos.piezas.bolsa_trasero_derecho.global_position,
+			bajos.piezas.amortiguador_trasero_derecho.global_position]
+	for punto in puntos:
+		if camara.is_position_behind(punto) or not camara.get_viewport().get_visible_rect().has_point(
+				camara.unproject_position(punto)):
+			return false
+	return elevador.seguro() and bajos.visible
 
 
 func preparar_taller(escena: Node3D, vista: String) -> bool:

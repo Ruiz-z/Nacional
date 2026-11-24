@@ -1,0 +1,116 @@
+{
+  "id": "amortiguador_danado",
+  "version": "1",
+  "titulo": "[MUESTRA] Amortiguador dañado",
+  "descripcion": "[MUESTRA] La carrocería se inclina y se oye ruido en el eje trasero derecho.",
+  "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+  "muestra": true,
+  "zona": "bajos",
+  "grupo_funcion": "FG7",
+  "dificultad": "media",
+  "causas": [
+    "Amortiguador dañado"
+  ],
+  "indicios": [
+    {
+      "clave": "revisar_amortiguador",
+      "etiqueta": "Revisar inclinación y ruido",
+      "ayuda": "Inspecciona el amortiguador trasero derecho para relacionar la inclinación y el ruido."
+    },
+    {
+      "clave": "reponer_amortiguador",
+      "etiqueta": "Reponer el amortiguador",
+      "ayuda": "Lleva el amortiguador de repuesto y confirma la reposición en el panel."
+    },
+    {
+      "clave": "resuelto",
+      "etiqueta": "Cerrar la orden",
+      "ayuda": "Destraba ambos soportes, despeja los bajos, baja el autobús y cierra la orden en la consola."
+    }
+  ],
+  "estado": {
+    "aviso": "La carrocería se inclina y se oye ruido en el eje trasero derecho.",
+    "revisar_amortiguador": false,
+    "reponer_amortiguador": false,
+    "resuelto": false
+  },
+  "estados_imposibles": [],
+  "acciones": {
+    "revisar_amortiguador": {
+      "titulo": "Revisar inclinación y ruido",
+      "componente": "amortiguador_trasero_derecho",
+      "previas": {
+        "revisar_amortiguador": false
+      },
+      "efectos": {
+        "revisar_amortiguador": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Inclinación y golpeteo asociados al amortiguador trasero derecho",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    },
+    "reponer_amortiguador": {
+      "titulo": "Reponer el amortiguador",
+      "componente": "amortiguador_trasero_derecho",
+      "previas": {
+        "revisar_amortiguador": true,
+        "reponer_amortiguador": false
+      },
+      "efectos": {
+        "reponer_amortiguador": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "Amortiguador dañado",
+      "descripcion": "[MUESTRA] Reponer el amortiguador",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true,
+      "requiere": {
+        "piezas": [
+          "amortiguador"
+        ]
+      }
+    },
+    "cerrar_orden": {
+      "titulo": "Cerrar la orden",
+      "componente": "consola_elevador",
+      "previas": {
+        "reponer_amortiguador": true,
+        "resuelto": false
+      },
+      "efectos": {
+        "resuelto": true
+      },
+      "competencia": "diagnostico-fallas",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Cerrar la orden",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": false
+    }
+  },
+  "eventos": {},
+  "recuperaciones": {},
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 30
+  },
+  "ruta_ideal": [
+    "revisar_amortiguador",
+    "reponer_amortiguador",
+    "cerrar_orden"
+  ],
+  "variante": {
+    "estado": {
+      "aviso": "La inclinación y el ruido aparecen al mover la carrocería en la revisión."
+    }
+  }
+}

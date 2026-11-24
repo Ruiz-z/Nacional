@@ -8,14 +8,27 @@ static func ejecutar() -> bool:
 	if ordenes == null:
 		return false
 	var listado: Dictionary = ordenes.listar()
-	var zonas := {}
+	var esperadas := {
+		"aislamiento": ["gabinete", "FG3"], "comunicacion": ["cabina", "FG3"],
+		"modulo_auxiliar": ["banco", "FG3"], "faros": ["faros", "FG3"], "motor": ["motor", "FG2"],
+		"neumatico_pinchado": ["bajos", "FG7"], "tuercas_rueda_flojas": ["bajos", "FG7"],
+		"fuga_suspension_neumatica": ["bajos", "FG7"], "amortiguador_danado": ["bajos", "FG7"],
+		"freno_desgastado": ["bajos", "FG5"],
+	}
 	for orden in listado.ordenes:
-		zonas[orden.archivo.get_file()] = orden.zona
+		var id: String = orden.archivo.get_file().get_basename()
+		if esperadas.get(id) != [orden.zona, orden.grupo_funcion]:
+			return false
+		esperadas.erase(id)
 		if orden.titulo.begins_with("[MUESTRA]") or orden.competencia.is_empty():
 			return false
 	var datos: Dictionary = Escenario.cargar(Escenario.AISLAMIENTO).escenario
+	for invalido in ["FG10", "FG 3", 3, null]:
+		datos.grupo_funcion = invalido
+		var errores: Array = Escenario.validar(datos, "prueba.json").errores
+		if errores.size() != 1 or not errores[0].contains("grupo_funcion"):
+			return false
+	datos.grupo_funcion = "FG3"
 	datos.zona = "taller"
-	return listado.errores.is_empty() and zonas.get("aislamiento.json") == "gabinete" \
-		and zonas.get("comunicacion.json") == "cabina" \
-		and zonas.size() == 5 and zonas.get("modulo_auxiliar.json") == "banco" and zonas.get("faros.json") == "faros" and zonas.get("motor.json") == "motor" \
+	return listado.errores.is_empty() and esperadas.is_empty() \
 		and not Escenario.validar(datos, "prueba.json").errores.is_empty()

@@ -157,12 +157,12 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-123 S — Tomar y dejar por el menú de pieza y HUD de inventario con selección de la mano (RF-2, 4) — Hecho cuando: prueba de flujo real y captura del HUD.
 - [x] T-124 S — Guía: ubicación en el aviso, baliza visible, indicador en pantalla y tecla de guía (RF-7, 8) — Hecho cuando: captura con la baliza y prueba de que la guía apunta al mueble correcto.
 - [x] T-125 S — Requisitos en los escenarios existentes: foco y fusible en faros, llave en motor y aislamiento, multímetro en el banco (RF-5) — Hecho cuando: las rutas ideales siguen pasando tomando lo requerido.
-- [ ] T-126 S — Elevador: consola, animación, calzas, trabas y falta crítica bajo el autobús (RF-10 a 12) — Hecho cuando: pruebas del procedimiento y captura con el autobús elevado.
-- [ ] T-127 S — Zona de bajos: ruedas con tuercas, suspensión neumática, amortiguador y frenos, con colisiones bajo el autobús (RF-13) — Hecho cuando: capturas desde abajo y prueba de movimiento.
-- [ ] T-128 S — Órdenes mecánicas: neumático pinchado, tuercas flojas con perilla de torque, fuga de suspensión, amortiguador y freno (RF-14, 15) — Hecho cuando: ruta ideal de cada una pasa por `motor.gd`.
+- [x] T-126 S — Elevador: consola, animación, calzas, trabas y falta crítica bajo el autobús (RF-10 a 12) — Hecho cuando: pruebas del procedimiento y captura con el autobús elevado.
+- [x] T-127 S — Zona de bajos: ruedas con tuercas, suspensión neumática, amortiguador y frenos, con colisiones bajo el autobús (RF-13) — Hecho cuando: capturas desde abajo y prueba de movimiento.
+- [x] T-128 S — Órdenes mecánicas: neumático pinchado, tuercas flojas con perilla de torque, fuga de suspensión, amortiguador y freno (RF-14, 15) — Hecho cuando: ruta ideal de cada una pasa por `motor.gd`.
 - [ ] T-129 S — Órdenes eléctricas nuevas: carga CCS que no inicia, puerta de pasajeros que no cierra y luces interiores apagadas (RF-15) — Hecho cuando: ruta ideal de cada una pasa y la fuente citada es la de Volvo cuando aplique.
 - [ ] T-130 S — Catálogo de órdenes agrupado y desplazable con teclado, ratón y control (RF-16) — Hecho cuando: captura del catálogo con 13 órdenes.
 - [ ] T-131 S — Documentación, checklist y recorrido e2e con Playwright del taller (RF-18) — Hecho cuando: el recorrido toma una pieza, la guía la señala y se resuelve una orden.
-- [ ] T-132 S — Campo `grupo_funcion` en los escenarios, validación y catálogo agrupado por FG (taller RF-20) — Hecho cuando: el catálogo muestra grupos FG con sus órdenes.
+- [x] T-132 S — Campo `grupo_funcion` en los escenarios, validación y catálogo agrupado por FG (taller RF-20) — Hecho cuando: el catálogo muestra grupos FG con sus órdenes.
 - [ ] T-133 S — Línea de aprobación de 91 en el tablero como referencia, sin cambiar el cálculo de dominio (decisión de aprobación) — Hecho cuando: barras del tablero muestran la línea y la prueba la verifica.
 - [ ] T-134 S — Herramienta de diagnóstico tipo Tech Tool con códigos de falla genéricos y órdenes de suspensión electrónica, frenos, puerta y aire acondicionado (RF-21, 22) — Hecho cuando: ruta ideal de cada orden pasa y el Tech Tool muestra su código.

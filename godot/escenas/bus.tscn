@@ -24,6 +24,9 @@
 
 [ext_resource type="Script" path="res://escenas/taller.gd" id="Taller"]
 
+[ext_resource type="Script" path="res://escenas/elevador.gd" id="Elevador"]
+[ext_resource type="Script" path="res://escenas/zona_bajos.gd" id="Bajos"]
+
 [sub_resource type="Environment" id="AmbienteTaller"]
 background_mode = 1
 background_color = Color(0.18, 0.21, 0.24, 1)
@@ -213,6 +216,13 @@ script = ExtResource("Faros")
 position = Vector3(0, 1.15, -5.64)
 rotation_degrees = Vector3(0, 90, 0)
 script = ExtResource("Motor")
+
+[node name="Elevador" type="Node3D" parent="."]
+script = ExtResource("Elevador")
+
+[node name="Bajos" type="Node3D" parent="."]
+position = Vector3(0, -0.29, 0)
+script = ExtResource("Bajos")
 
 [node name="Interior" parent="." instance=ExtResource("Interior")]
 position = Vector3(100, 0, 0)

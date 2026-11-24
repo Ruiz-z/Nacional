@@ -49,6 +49,7 @@ const Practica = preload("res://logica/simulador/practica.gd")
 const MenuPieza = preload("res://logica/simulador/menu_pieza.gd")
 const FuenteBanco = preload("res://logica/simulador/fuente_banco.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
+const Elevador = preload("res://escenas/elevador.gd")
 const ZonaBase = preload("res://escenas/zona_base.gd")
 const Interactuable = preload("res://escenas/interactuable.gd")
 
@@ -74,6 +75,7 @@ var zona_activa: Node3D
 var zona_menu: ZonaBase
 var navegando := false
 var seguridad_panel := {}
+var torque_fisico := -1.0
 var fuente_seguridad := ""
 var requisito_pendiente := ""
 var pieza_menu: Interactuable
@@ -81,7 +83,7 @@ var pieza_menu: Interactuable
 @onready var interior := $Interior
 @onready var puerta_pasajeros: Interactuable = $PuertaPasajeros
 @onready var negro: ColorRect = $Fundido/Negro
-@onready var zonas := {"gabinete": $Sector, "cabina": interior, "faros": $Faros, "motor": $Motor, "banco": $Banco}
+@onready var zonas := {"gabinete": $Sector, "cabina": interior, "faros": $Faros, "motor": $Motor, "banco": $Banco, "bajos": $Bajos}
 @onready var jugador := $Jugador
 @onready var alcance: RayCast3D = $Jugador/Camara/Alcance
 @onready var resumen := $Interfaz/Lateral/Resumen
@@ -93,6 +95,9 @@ var pieza_menu: Interactuable
 
 
 func _ready() -> void:
+	var carga_elevador: Array[Node3D] = [$Autobus, $Sector, $Faros, $Motor, $PuertaPasajeros, $Bajos]
+	$Elevador.configurar(carga_elevador, $Colisiones/Casco, $Bajos)
+	$Bajos.acceso = Elevador.CONSOLA
 	jugador.configurar(panel.entrada)
 	jugador.activo = false
 	var fondo := lateral.get_theme_stylebox("panel", "PanelContainer").duplicate() as StyleBoxFlat
@@ -162,8 +167,11 @@ func ubicar_jugador(componente: String) -> void:
 	if zona_activa == interior:
 		ubicar_interior(interior.CABINA, componente)
 		return
-	var objetivo: Node3D = zona_activa.piezas[componente]
+	var objetivo: Node3D = $Elevador.piezas[componente] if componente == Elevador.CONSOLA \
+		else zona_activa.piezas[componente]
 	var origen := zona_activa.to_global(Vector3(1.8, 0, 0))
+	if zona_activa == $Bajos:
+		origen = objetivo.global_position + Vector3(-1.25, 0, 0)
 	if zona_activa in [$Faros, $Motor, $Banco]:
 		var centro := zona_activa.to_local(objetivo.global_position)
 		var desnivel: float = jugador.camara.position.y - objetivo.global_position.y
@@ -187,6 +195,10 @@ func apuntar_jugador(objetivo: Vector3) -> void:
 
 
 func navegar(destino: String) -> void:
+	if destino == "subir" and $Elevador.arriba:
+		cerrar_menu()
+		avisar("Baja el autobús antes de entrar.")
+		return
 	navegando = true
 	cerrar_menu()
 	jugador.activo = false
@@ -212,11 +224,26 @@ func navegar(destino: String) -> void:
 func ejecutar(id: String, fuente: String, lectura_previa: Dictionary = {}) -> void:
 	if motor == null or (panel.conexion.pausado() and fuente != "banco"):
 		return
-	if not comprobar_inventario(id):
+	var bajos: bool = zona_activa == $Bajos
+	sincronizar_fuente_seguridad()
+	var controles := controles_seguridad()
+	if bajos:
+		if id == "cerrar_orden":
+			if $Elevador.arriba or $Elevador.en_movimiento():
+				avisar("Baja el autobús antes de cerrar la orden.")
+				return
+		elif not $Elevador.arriba or $Elevador.en_movimiento():
+			avisar("Sube el autobús para acceder a los bajos.")
+			return
+		controles["elevador_seguro"] = $Elevador.seguro()
+		if fuente_seguridad == "virtual":
+			controles["torque"] = panel.get_node("Torque").value
+		elif torque_fisico >= 0.0:
+			controles["torque"] = torque_fisico
+	if (not bajos or id == "cerrar_orden" or controles.elevador_seguro) and not comprobar_inventario(id):
 		return
 	var ahora := Time.get_ticks_msec()
-	sincronizar_fuente_seguridad()
-	var decision: Dictionary = motor.ejecutar(id, fuente, ahora - ultimo_ms, controles_seguridad(), lectura_previa)
+	var decision: Dictionary = motor.ejecutar(id, fuente, ahora - ultimo_ms, controles, lectura_previa)
 	ultimo_ms = ahora
 	if decision.get("aplicada", false):
 		taller.consumir(requisitos(id), carrito_cerca())
@@ -313,9 +340,13 @@ func mostrar_resultado(decision: Dictionary) -> void:
 		else:
 			texto = RESULTADOS.get(id, "Acción completada")
 	if decision.get("aplicada", false) and decision.tipo_error.is_empty() and decision.eventos.is_empty():
-		var ayuda := siguiente_ayuda(progreso_indicios(motor.estado()))
-		if not ayuda.is_empty():
-			texto = texto.trim_suffix(".") + ". Ahora " + ayuda.left(1).to_lower() + ayuda.substr(1)
+		if zona_activa == $Bajos:
+			var regla: Dictionary = datos.acciones.get(decision.accion, datos.recuperaciones.get(decision.accion, {}))
+			texto = regla.get("descripcion", texto)
+		else:
+			var ayuda := siguiente_ayuda(progreso_indicios(motor.estado()))
+			if not ayuda.is_empty():
+				texto = texto.trim_suffix(".") + ". Ahora " + ayuda.left(1).to_lower() + ayuda.substr(1)
 	avisar(texto, decision.has("lectura-reportada") or decision.has("previas_faltantes"))
 
 
@@ -382,6 +413,11 @@ func mostrar_estado(inmediato := false) -> void:
 			lineas.append("Fuente: %s · TP0 primero, luego TP1 o TP2." % $Banco.etiqueta_fuente(motor.mediciones.fuente))
 	lateral.get_node("Indicios").text = "\n".join(lineas)
 	var ayuda := siguiente_ayuda(progreso)
+	if zona_activa == $Bajos and not Escenario.cumple(estado, datos.acciones.cerrar_orden.previas):
+		if not $Elevador.arriba:
+			ayuda = "Toma las calzas de la caja roja y sube el autobús desde la consola."
+		elif not $Elevador.seguro():
+			ayuda = "Traba ambos soportes antes de trabajar en los bajos."
 	lateral.get_node("Siguiente").text = "" if ayuda.is_empty() else "Siguiente: " + ayuda
 	actualizar_leds()
 	actualizar_hud()
@@ -423,6 +459,10 @@ func reintentar() -> void:
 		return
 	motor = nuevo
 	taller.reiniciar()
+	if $Elevador.arriba or $Elevador.en_movimiento():
+		jugador.ubicar(Vector3(-4, 0, 0.1))
+		apuntar_jugador($Elevador.piezas[Elevador.CONSOLA].global_position)
+	$Elevador.reiniciar()
 	requisito_pendiente = ""
 	if zona_activa is ZonaBase:
 		zona_activa.apertura_manual = null
@@ -439,6 +479,8 @@ func reintentar() -> void:
 func abrir_menu(pieza: Interactuable) -> void:
 	if motor == null or not motor.fin().is_empty() or pausa_visible or navegando or not accion_pendiente.is_empty():
 		return
+	if pieza.zona == $Bajos and not $Elevador.arriba:
+		return
 	var zona := pieza.zona as ZonaBase
 	pieza_menu = pieza
 	if zona != null and zona.es_pieza_interna(pieza.componente) and not zona.abierta:
@@ -447,6 +489,22 @@ func abrir_menu(pieza: Interactuable) -> void:
 	var causas: Array = []
 	var lectura := "[MUESTRA] Sin falla en esta orden"
 	match pieza.componente:
+		Elevador.CONSOLA:
+			opciones.append(MenuPieza.navegacion("elevar_bus", "Subir el autobús"))
+			opciones.append(MenuPieza.navegacion("descender_bus", "Bajar el autobús"))
+			if zona_activa == $Bajos and not $Elevador.arriba:
+				opciones.append_array(MenuPieza.entradas(motor, datos, pieza.componente))
+			lectura = "Autobús elevado" if $Elevador.arriba else "Autobús abajo"
+		Elevador.CALZAS:
+			if not $Elevador.calzas_colocadas and not $Elevador.arriba:
+				opciones.append(MenuPieza.navegacion("colocar_calzas", "Colocar calzas"))
+			lectura = "Calzas colocadas" if $Elevador.calzas_colocadas else "Punto junto a la rueda"
+		"soporte_izquierdo", "soporte_derecho":
+			var trabado: bool = $Elevador.trabas[pieza.componente]
+			if $Elevador.arriba:
+				opciones.append(MenuPieza.navegacion("destrabar_soporte" if trabado else "trabar_soporte",
+					"Destrabar soportes" if trabado else "Trabar soportes"))
+			lectura = "Soporte trabado" if trabado else "Soporte libre"
 		"mesa_taller":
 			if not taller.mano.is_empty():
 				opciones.append(MenuPieza.navegacion("dejar", "Dejar"))
@@ -474,7 +532,7 @@ func abrir_menu(pieza: Interactuable) -> void:
 		lectura = "%d espacio(s)" % Inventario.CATALOGO[pieza.componente].espacio
 	if opciones.is_empty() and pieza.zona == zona_activa:
 		opciones = MenuPieza.entradas(motor, datos, pieza.componente)
-		if zona_activa != $Sector or not opciones.is_empty():
+		if zona_activa not in [$Sector, $Bajos] or not opciones.is_empty():
 			lectura = zona_activa.lectura_pieza(pieza.componente)
 		if motor.estado().get("inspeccionado", motor.estado().get("sintomas_revisados", false)):
 			causas = datos.causas
@@ -546,22 +604,72 @@ func elegir_accion(indice: int, fuente: String) -> void:
 		if entrada.id in ["abrir_acceso", "cerrar_acceso"]:
 			zona_menu.cambiar_acceso(entrada.id == "abrir_acceso")
 			cerrar_menu()
+		elif entrada.id in ["elevar_bus", "descender_bus", "colocar_calzas", "trabar_soporte", "destrabar_soporte"]:
+			accion_elevador(entrada.id, pieza_menu.componente)
 		elif entrada.id in ["tomar", "dejar", "cajones", "carrito"]:
 			accion_taller(entrada.id)
 		else:
 			if taller.lleva_carrito and entrada.id == "subir":
 				taller.lleva_carrito = false
 			navegar(entrada.id)
+	elif pieza_menu.zona == $Bajos and not $Elevador.seguro():
+		cerrar_menu()
+		ejecutar(entrada.id, fuente)
 	elif not comprobar_inventario(entrada.id):
 		cerrar_menu()
 	elif entrada.requiere_panel:
 		accion_pendiente = entrada.id
 		actualizar_panel(Time.get_ticks_msec())
 		menu_pieza.esperar_panel(entrada.id == "reconectar" and fuente_banco.fuente() == "banco")
+		var torque: Dictionary = datos.acciones.get(entrada.id, {}).get("torque", {})
+		if not torque.is_empty():
+			avisar("Ajusta la perilla a %d–%d en la escala del panel [MUESTRA]." %
+				[torque.minimo, torque.maximo], true, 5.0)
 		jugador.mostrar_herramienta(entrada.id)
 	else:
 		cerrar_menu()
 		ejecutar(entrada.id, fuente)
+
+
+func accion_elevador(id: String, componente: String) -> void:
+	cerrar_menu()
+	if $Elevador.en_movimiento():
+		return
+	var tiene_calzas: bool = "calzas" in taller.inventario.accesibles(carrito_cerca())
+	match id:
+		"colocar_calzas":
+			if $Elevador.arriba:
+				return
+			if not tiene_calzas:
+				avisar("Necesitas las calzas. " + taller.senalar("calzas"), false, 5.0)
+				return
+			$Elevador.colocar_calzas()
+		"trabar_soporte", "destrabar_soporte":
+			if not $Elevador.arriba or not $Elevador.trabas.has(componente):
+				return
+			$Elevador.cambiar_traba(componente, id == "trabar_soporte")
+		"elevar_bus", "descender_bus":
+			var subir := id == "elevar_bus"
+			if subir == $Elevador.arriba:
+				avisar("El autobús ya está %s." % ("arriba" if subir else "abajo"))
+				return
+			if subir and not $Elevador.calzas_colocadas and not tiene_calzas:
+				avisar("Necesitas las calzas. " + taller.senalar("calzas"), false, 5.0)
+				return
+			if not subir and true in $Elevador.trabas.values():
+				avisar("Destraba ambos soportes antes de bajar el autobús.")
+				return
+			if $Elevador.ocupado(jugador.global_position):
+				avisar("Despeja el área bajo el autobús.")
+				return
+			if subir and not $Elevador.calzas_colocadas:
+				$Elevador.colocar_calzas()
+			navegando = true
+			jugador.activo = false
+			$Elevador.mover(subir)
+			await $Elevador.recorrido.finished
+			navegando = false
+	mostrar_estado()
 
 
 func accion_taller(id: String) -> void:
@@ -585,6 +693,15 @@ func recibir_accion(accion: Dictionary) -> void:
 	if panel.conexion.pausado() or motor == null or not motor.fin().is_empty():
 		return
 	match accion.accion:
+		"torque":
+			sincronizar_fuente_seguridad()
+			if accion.fuente_entrada == "panel" and fuente_seguridad == "panel":
+				torque_fisico = accion.valor
+			elif accion.fuente_entrada == "virtual" and fuente_seguridad == "virtual" \
+					and datos.acciones.get(accion_pendiente, {}).has("torque"):
+				var id := accion_pendiente
+				cerrar_menu()
+				ejecutar(id, "virtual")
 		"bloqueo", "etiquetado":
 			sincronizar_fuente_seguridad()
 			if accion.fuente_entrada == "panel" and fuente_seguridad == "panel":
@@ -614,7 +731,7 @@ func recibir_accion(accion: Dictionary) -> void:
 			if not accion_pendiente.is_empty():
 				if accion_pendiente == "reconectar" and fuente_banco.fuente() == "banco":
 					return
-				if zona_activa == $Banco and accion.fuente_entrada in ["teclado", "control"]:
+				if zona_activa in [$Banco, $Bajos] and accion.fuente_entrada in ["teclado", "control"]:
 					if panel.conexion.fuente_panel() == "virtual":
 						panel.emitir("confirmar", 1)
 					return
@@ -740,6 +857,7 @@ func sincronizar_fuente_seguridad() -> void:
 		return
 	fuente_seguridad = fuente
 	seguridad_panel.clear()
+	torque_fisico = -1.0
 	if fuente == "virtual":
 		panel.get_node("Bloqueo").set_pressed_no_signal(false)
 		panel.get_node("Etiquetado").set_pressed_no_signal(false)
