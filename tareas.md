@@ -121,3 +121,12 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-93 S — Raycast, resaltado y menú contextual por pieza (RF-26) — Hecho cuando: prueba que cada pieza lista solo sus acciones. — falta verificación manual
 - [ ] T-94 S — HUD en franja colapsable y reflejo del estado en la escena (RF-28) — Hecho cuando: captura con tornillo roto y LED en rojo. — falta verificación manual
 - [ ] T-95 S — Recorrido completo y actualizar README y checklist — Hecho cuando: ejecutable exportado recorre inspeccionar, fallo, recuperación, resumen y reintento. — falta verificación manual
+
+## 11. Menú contextual, órdenes de servicio y zonas (plan aprobado)
+- [ ] T-96 S — Menú contextual en pantalla junto a la mira, con lógica pura `menu_pieza.gd` (RF-29, 30, 31) — Hecho cuando: pruebas de la lógica y captura con el menú abierto sobre el gabinete.
+- [ ] T-97 S — Campo `requiere_panel`, ejecución inmediata de diagnóstico y aviso central (RF-30, 31) — Hecho cuando: prueba de que inspeccionar abre la puerta sin confirmar y reponer espera el panel.
+- [ ] T-98 S — Pantalla de órdenes de servicio y campo `zona` (RF-32) — Hecho cuando: prueba lista los escenarios válidos y la escena arranca el elegido.
+- [ ] T-99 S — Zona de faros y escenario `faros.json` (RF-33) — Hecho cuando: ruta ideal pasa en prueba y captura de la zona.
+- [ ] T-100 S — Zona del motor eléctrico y escenario `motor.json` con falta crítica sin bloqueo (RF-33) — Hecho cuando: ruta ideal y falta crítica pasan en prueba y captura.
+- [ ] T-101 S — Interior y cabina con entrada por la puerta de pasajeros (RF-33) — Hecho cuando: prueba de entrada y salida y captura de la cabina.
+- [ ] T-102 S — Recorrido manual de las cuatro órdenes, README y checklist — Hecho cuando: ejecutable exportado completa cada orden.

@@ -62,6 +62,11 @@ Escena en Godot de un bus eléctrico donde el técnico inspecciona, diagnostica 
 - RF-26: CUANDO el técnico apunta a una pieza a menos de 2,5 m, EL SISTEMA la resalta y muestra su nombre; AL pulsar inspeccionar con clic izquierdo o A, muestra las acciones de esa pieza y las recuperaciones habilitadas. La decisión se ejecuta al confirmar la acción seleccionada.
 - RF-27: CADA acción o recuperación de un escenario puede declarar un `componente` (`compuerta`, `monitor`, `cables`, `terminal`, `bateria`); SI el valor no existe, ENTONCES el validador rechaza el escenario con archivo y campo. Si se omite el campo, la acción o recuperación aparece en la batería.
 - RF-28: CUANDO cambia el estado del motor, EL SISTEMA refleja en la escena la compuerta abierta o cerrada, el LED del monitor y la pieza dañada.
+- RF-29: CUANDO el técnico pulsa sobre una pieza, EL SISTEMA muestra al instante un menú en pantalla junto a la mira con las acciones de esa pieza, su costo, tiempo y riesgo, navegable con clic, teclas numéricas o control.
+- RF-30: EL SISTEMA ejecuta de inmediato las acciones de diagnóstico y, en las acciones con `requiere_panel`, espera la confirmación del panel físico o virtual antes de ejecutarlas.
+- RF-31: CUANDO se ejecuta una acción, EL SISTEMA muestra un aviso central con su resultado y anima la escena en ese momento.
+- RF-32: EL SISTEMA ofrece órdenes de servicio, una por escenario con su `zona`, y activa solo la falla de la orden elegida; las demás piezas se pueden inspeccionar sin falla.
+- RF-33: EL SISTEMA incluye las zonas gabinete lateral, faros, motor eléctrico de tracción y cabina interior, accesibles caminando; la cabina se alcanza por la puerta de pasajeros.
 
 ## Requisitos no funcionales
 - Godot 4.7.2; modo escritorio; español.
