@@ -67,6 +67,7 @@ var indicador_puntas: Label
 var acciones_mision := {}
 var firma_mision: Array = []
 var subpaso_guia := {}
+var objetos_requeridos: Array[String] = []
 static var preferencia_guia_automatica := true
 var guia_automatica := preferencia_guia_automatica
 var ultimo_ms: int
@@ -665,8 +666,19 @@ func configurar_misiones() -> void:
 				grupos[clave].ids.append(id)
 		acciones_mision[indice] = grupos.values()
 
+func herramientas_para_dejar() -> Array[String]:
+	var candidatas: Array[String] = []
+	var cinturon: Array[String] = taller.inventario.cinturon.duplicate()
+	cinturon.reverse()
+	for id in cinturon:
+		if Inventario.CATALOGO[id].tipo == "herramienta" and id not in objetos_requeridos:
+			candidatas.append(id)
+	return candidatas
+
+
 func actualizar_mision(inmediato := false) -> void:
 	if misiones.is_empty():
+		objetos_requeridos.clear()
 		cambiar_subpaso_guia({})
 		return
 	var estado: Dictionary = motor.estado()
@@ -695,6 +707,7 @@ func actualizar_mision(inmediato := false) -> void:
 			if not flashcard.visible and not motor.fin().is_empty():
 				resumen.mostrar(motor, datos, lateral.get_node("Aviso").text))
 	if actual == -1:
+		objetos_requeridos.clear()
 		cambiar_subpaso_guia({})
 		return
 	var mision: Dictionary = misiones[actual]
@@ -703,16 +716,21 @@ func actualizar_mision(inmediato := false) -> void:
 	var disponibles: Array[String] = taller.inventario.accesibles(true)
 	var aciertos: Array[String] = motor.acciones_acertadas()
 	var ayuda := siguiente_ayuda(progreso)
-	var firma := [actual, cumplidas, controles.duplicate(), disponibles, taller.mano, accion_pendiente,
+	var firma := [actual, cumplidas, controles.duplicate(), taller.inventario.cinturon.duplicate(),
+		taller.inventario.carrito.duplicate(), taller.hay_superficie(taller.mesa), taller.mano, accion_pendiente,
 		aciertos, ayuda, elevador, fuente_banco.fuente(), taller.cajones_abiertos, carrito_cerca(),
 		motor.mediciones.punta_negra if motor.mediciones != null else ""]
 	if firma == firma_mision:
 		return
 	firma_mision = firma
+	objetos_requeridos.clear()
 	var filas: Array = []
 	var clave: String = mision.get("clave", "")
 	var grupos: Array = acciones_mision[actual]
 	if not elevador.is_empty():
+		var herramienta: String = requisitos(elevador.id).get("herramienta", "")
+		if not herramienta.is_empty():
+			objetos_requeridos.append(herramienta)
 		var texto: String = PASOS_ELEVADOR.get(elevador.id, "Cierra la orden en la consola")
 		var objetivo: String = elevador.objetivo
 		if elevador.id in ["trabar_soporte", "destrabar_soporte"]:
@@ -736,6 +754,9 @@ func actualizar_mision(inmediato := false) -> void:
 			herramientas = [requiere.herramienta]
 		if id.begins_with("medir_") and motor.mediciones != null and motor.mediciones.fuente == "banco":
 			herramientas = []
+		if not hecha:
+			objetos_requeridos.append_array(herramientas)
+			objetos_requeridos.append_array(requiere.get("piezas", []))
 		for herramienta in herramientas:
 			agregar_herramienta(filas, herramienta, hecha, disponibles)
 		for pieza in requiere.get("piezas", []):
@@ -771,7 +792,29 @@ func actualizar_mision(inmediato := false) -> void:
 	if ayuda.trim_suffix(".") == titulo or (not grupos.is_empty() and clave == "bloqueo_confirmado"):
 		ayuda = ""
 	var pendiente := filas.find_custom(func(fila: Dictionary) -> bool: return not fila.hecho)
-	cambiar_subpaso_guia(filas[pendiente].get("guia", {}) if pendiente >= 0 and motor.fin().is_empty() else {})
+	var guia: Dictionary = filas[pendiente].get("guia", {}) if pendiente >= 0 and motor.fin().is_empty() else {}
+	var objetivo := ""
+	if not guia.is_empty():
+		for fila in filas.slice(pendiente):
+			var destino: Dictionary = fila.get("guia", {})
+			if fila.hecho or destino.has("mano"):
+				continue
+			objetivo = destino.get("objeto", "")
+			break
+	if not objetivo.is_empty() and objetivo not in disponibles:
+		var carga: int = Inventario.CATALOGO[objetivo].espacio
+		if carga > Inventario.libres(taller.inventario.cinturon) \
+				and (not carrito_cerca() or carga > Inventario.libres(taller.inventario.carrito)):
+			var candidatas := herramientas_para_dejar()
+			if not candidatas.is_empty() and taller.hay_superficie(taller.mesa):
+				var herramienta := candidatas[0]
+				var nombre: String = Inventario.CATALOGO[herramienta].nombre
+				var articulo: String = {
+					"calzas": "las ", "lampara": "la ", "llave_ajustable": "la ", "llave_torque": "la "
+				}.get(herramienta, "el ")
+				guia = {"pieza": taller.mesa.piezas.mesa_taller, "columna": true}
+				filas.insert(pendiente, {"texto": "Deja %s%s en la mesa" % [articulo, nombre], "hecho": false})
+	cambiar_subpaso_guia(guia)
 	if not hud_mision.celebrando:
 		hud_mision.mostrar(actual, titulo, cumplidas, filas, TextoLimpio.limpiar(ayuda).texto)
 
@@ -1128,6 +1171,7 @@ func mueble_para_dejar(pieza: Interactuable) -> Node3D:
 
 func accion_taller(id: String, objeto := "") -> void:
 	var aviso := ""
+	var carga := 0
 	match id:
 		"tomar":
 			var id_objeto := pieza_menu.componente if objeto.is_empty() else objeto
@@ -1135,6 +1179,8 @@ func accion_taller(id: String, objeto := "") -> void:
 				taller.mano = id_objeto
 			else:
 				aviso = taller.tomar(id_objeto, carrito_cerca())
+				if not aviso.is_empty() and id_objeto not in taller.inventario.accesibles(true):
+					carga = Inventario.objeto(id_objeto).get("espacio", 0)
 		"dejar":
 			aviso = taller.dejar(taller.mano, carrito_cerca(), mueble_para_dejar(pieza_menu))
 		"cajones":
@@ -1144,7 +1190,26 @@ func accion_taller(id: String, objeto := "") -> void:
 	cerrar_menu()
 	actualizar_inventario()
 	actualizar_mision()
-	if not aviso.is_empty():
+	if carga > 0:
+		var libres_carrito := Inventario.libres(taller.inventario.carrito)
+		var sitio_carrito := carga <= libres_carrito
+		if not sitio_carrito:
+			if libres_carrito == 0 and Inventario.libres(taller.inventario.cinturon) == 0:
+				aviso += " El cinturón y el carrito están llenos."
+			else:
+				aviso += " Tampoco cabe en el carrito."
+		var candidatas := herramientas_para_dejar()
+		if candidatas.is_empty():
+			aviso += " Deja un objeto para hacer espacio."
+		else:
+			var nombres := PackedStringArray()
+			for candidata in candidatas.slice(0, 2):
+				nombres.append(Inventario.CATALOGO[candidata].nombre)
+			aviso += " Deja una herramienta que no necesites ahora, por ejemplo: %s." % " o ".join(nombres)
+		if sitio_carrito:
+			aviso += " Acércate al carrito (a menos de 3 m) para llevarla ahí."
+		avisar(aviso, "aviso", "No cabe en el cinturón")
+	elif not aviso.is_empty():
 		avisar(aviso, "aviso", "Revisa el inventario")
 
 

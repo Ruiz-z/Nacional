@@ -57,6 +57,14 @@ static func espacio(almacen: Array[String]) -> int:
 	return total
 
 
+static func libres(almacen: Array[String]) -> int:
+	return CAPACIDAD - espacio(almacen)
+
+
+static func cantidad_espacios(cantidad: int) -> String:
+	return "%d espacio%s" % [cantidad, "" if cantidad == 1 else "s"]
+
+
 func accesibles(cerca := false) -> Array[String]:
 	return cinturon + carrito if cerca else cinturon.duplicate()
 
@@ -67,13 +75,17 @@ func tomar(id: String, cerca := false) -> String:
 	if id in cinturon or id in carrito:
 		return "Ya llevas %s." % CATALOGO[id].nombre
 	var carga: int = CATALOGO[id].espacio
-	if espacio(cinturon) + carga <= CAPACIDAD:
+	if carga <= libres(cinturon):
 		cinturon.append(id)
-	elif cerca and espacio(carrito) + carga <= CAPACIDAD:
+	elif cerca and carga <= libres(carrito):
 		carrito.append(id)
 	else:
-		return "El cinturón y el carrito están llenos. Deja un objeto para hacer espacio." if cerca \
-			else "No hay espacio en el cinturón. Acércate al carrito o deja un objeto."
+		var quedan := libres(cinturon)
+		var nombre: String = CATALOGO[id].nombre
+		if id == "bolsa_aire":
+			nombre = "La " + nombre
+		return "%s ocupa %s y en el cinturón te queda%s %d." % [
+			nombre, cantidad_espacios(carga), "" if quedan == 1 else "n", quedan]
 	return ""
 
 

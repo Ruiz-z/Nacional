@@ -29,7 +29,153 @@ static func ejecutar() -> bool:
 	if not fallo.is_empty():
 		printerr(fallo)
 		return false
-	return probar_motor(arbol) and Base.con_base(probar_cierres)
+	return await probar_carga(arbol) and probar_motor(arbol) and Base.con_base(probar_cierres)
+
+
+static func probar_carga(arbol: SceneTree) -> bool:
+	var tamano := arbol.root.size
+	arbol.root.size = Vector2i(1280, 720)
+	var bus := Bus.instantiate()
+	bus.archivo = "escenarios/fuga_suspension_neumatica.json"
+	bus.modo_captura = true
+	arbol.root.add_child(bus)
+	bus.flashcard.confirmar()
+	bus.jugador.set_physics_process(false)
+	var fallo := await comprobar_carga(bus, arbol)
+	bus.free()
+	arbol.root.size = tamano
+	if not fallo.is_empty():
+		printerr(fallo)
+	return fallo.is_empty()
+
+
+static func comprobar_carga(bus: Node3D, arbol: SceneTree) -> String:
+	var taller: Node3D = bus.taller
+	var caja: StaticBody3D = taller.caja_roja.piezas.caja_taller
+	var mesa: StaticBody3D = taller.mesa.piezas.mesa_taller
+	var carrito: StaticBody3D = taller.carrito.piezas.carrito_taller
+	var bolsa: StaticBody3D = taller.objetos.bolsa_aire
+	await arbol.physics_frame
+	if not await usar_menu(bus, caja, "cajones", arbol, 1) or taller.animacion == null:
+		return "No se abrieron los cajones con clic."
+	await taller.animacion.finished
+	await arbol.physics_frame
+	for id in ["calzas", "manometro", "lampara"]:
+		if not await usar_menu(bus, taller.objetos[id], "tomar", arbol) or taller.mano != id:
+			return "No se tomó %s con clic." % id
+	var elevador: Node3D = bus.get_node("Elevador")
+	elevador.colocar_calzas()
+	elevador.mover(true, true)
+	for soporte in elevador.trabas:
+		elevador.cambiar_traba(soporte, true)
+	var carrito_original: Vector3 = taller.carrito.position
+	taller.carrito.position += Vector3.RIGHT * 12
+	if not await usar_menu(bus, bolsa, "tomar", arbol):
+		return "No se abrió el menú de la bolsa."
+	var texto: String = bus.flashcard.cuerpo.text
+	if bus.flashcard.titulo.text != "No cabe en el cinturón" \
+			or not texto.begins_with("La Bolsa de aire ocupa 2 espacios y en el cinturón te queda 1.") \
+			or not texto.contains("Lámpara o Calzas") or not texto.contains("a menos de 3 m") \
+			or taller.hud.get_child(0).get_child(0).text != "Cinturón 3/4" \
+			or taller.hud.get_child(1).get_child(0).text != "Carrito 0/4 · lejos":
+		return "El aviso o el HUD no explicaron la carga: " + texto
+	await arbol.process_frame
+	await arbol.process_frame
+	Clic.clic(arbol.root, bus.flashcard.ok.get_global_rect().get_center())
+	Acciones.tecla(bus, 3)
+	if not await usar_menu(bus, mesa, "dejar", arbol) \
+			or taller.hud.get_child(0).get_child(0).text != "Cinturón 2/4" \
+			or taller.mano != "" or not bus.flashcard.cola.is_empty():
+		return "Dejar la lámpara en la mesa no liberó un espacio al instante."
+	if not await usar_menu(bus, bolsa, "tomar", arbol) or taller.mano != "bolsa_aire" \
+			or taller.espacios_hud[2].text != "3 Bolsa de aire ×2" \
+			or taller.espacios_hud[3].text != "" \
+			or taller.hud.get_child(0).get_child(0).text != "Cinturón 4/4":
+		return "La bolsa no ocupó sus dos casillas tras liberar espacio."
+	if not await usar_menu(bus, mesa, "dejar", arbol):
+		return "No se dejó la bolsa en la mesa."
+	Acciones.tecla(bus, 1)
+	if not await usar_menu(bus, caja, "dejar", arbol) or "calzas" in taller.inventario.cinturon:
+		return "La caja roja no liberó espacio."
+	taller.carrito.position = carrito_original
+	await arbol.physics_frame
+	Acciones.tecla(bus, 1)
+	bus.jugador.ubicar(taller.carrito.global_position + Vector3.BACK * 3.1)
+	bus.apuntar_jugador(carrito.global_position)
+	Clic.clic(arbol.root, arbol.root.get_visible_rect().get_center())
+	if bus.carrito_cerca() or bus.menu_pieza.visible or taller.mano != "manometro":
+		return "El carrito lejano respondió a Dejar o cambió el objeto en mano."
+	if not await usar_menu(bus, carrito, "dejar", arbol, 1) \
+			or not taller.inventario.cinturon.is_empty() or "manometro" not in taller.objetos_en(taller.carrito):
+		return "No se dejó la herramienta en el carrito con la tecla del menú."
+	await arbol.physics_frame
+	if not await usar_menu(bus, carrito, "tomar", arbol) or taller.mano != "manometro":
+		return "No se volvió a tomar la herramienta desde el carrito."
+	if not await usar_menu(bus, caja, "tomar", arbol) or taller.mano != "calzas":
+		return "No se recuperaron las calzas de la caja roja."
+	if not await usar_menu(bus, mesa, "tomar", arbol) or taller.mano != "lampara":
+		return "No se recuperó la lámpara de la mesa."
+	var controles := {"elevador_seguro": true}
+	for accion in ["medir_bolsa", "localizar_fuga"]:
+		if not bus.motor.ejecutar(accion, "teclado", 0, controles).aplicada:
+			return "No se preparó la misión de cambiar la bolsa."
+	var llave: StaticBody3D = taller.objetos.llave_ajustable
+	# La misión requiere la llave en la mano antes de pedir la bolsa.
+	Acciones.tecla(bus, 2)
+	if not await usar_menu(bus, caja, "dejar", arbol) \
+			or not await usar_menu(bus, llave, "tomar", arbol):
+		return "No se preparó la llave para cambiar la bolsa."
+	taller.carrito.position += Vector3.RIGHT * 12
+	bus.actualizar_mision()
+	if taller.pieza_guia != mesa or not taller.baliza.visible \
+			or not bus.hud_mision.filas.any(func(fila: Dictionary) -> bool:
+				return fila.texto == "Toma Bolsa de aire (ocupa 2 espacios)") \
+			or not bus.hud_mision.filas.any(func(fila: Dictionary) -> bool:
+				return fila.texto == "Deja la Lámpara en la mesa"):
+		return "La guía no indicó qué soltar para tomar la bolsa."
+	Acciones.tecla(bus, taller.espacio_de("lampara"))
+	if taller.mano != "lampara" or taller.pieza_guia != mesa:
+		return "La guía dejó de marcar la mesa al seleccionar la lámpara."
+	var bolsa_en_mesa: StaticBody3D = taller.objetos.bolsa_aire
+	taller.carrito.global_position = bolsa_en_mesa.global_position + Vector3(1.5, -bolsa_en_mesa.global_position.y, 0.5)
+	await arbol.physics_frame
+	if not await usar_menu(bus, bolsa_en_mesa, "tomar", arbol) or not bus.carrito_cerca() \
+			or taller.inventario.carrito != ["bolsa_aire"] or bus.flashcard.visible \
+			or taller.titulos_hud[1].text != "Carrito 2/4":
+		return "La bolsa no pasó sola al carrito cercano al faltar espacio."
+	if not await usar_menu(bus, carrito, "dejar", arbol, 1) \
+			or not taller.inventario.carrito.is_empty() or taller.titulos_hud[1].text != "Carrito 0/4":
+		return "Dejar la bolsa en la superficie del carrito no liberó su carga."
+	await arbol.physics_frame
+	if not await usar_menu(bus, carrito, "tomar", arbol) or taller.mano != "bolsa_aire" \
+			or not bus.flashcard.cola.is_empty() or taller.titulos_hud[1].text != "Carrito 2/4":
+		return "Al retomar la bolsa del carrito quedó un aviso o una cuenta vieja."
+	if not await usar_menu(bus, carrito, "dejar", arbol, 1):
+		return "No se pudo preparar el caso de ambos almacenes llenos."
+	for id in ["flexometro", "destornillador", "llave_torque", "multimetro", "tech_tool"]:
+		if not taller.tomar(id, true).is_empty():
+			return "No se pudieron llenar ambos almacenes."
+	await arbol.physics_frame
+	if not await usar_menu(bus, carrito, "tomar", arbol) \
+			or not bus.flashcard.cuerpo.text.contains("te quedan 0. El cinturón y el carrito están llenos.") \
+			or bus.flashcard.cuerpo.text.contains("Acércate al carrito") \
+			or not bus.flashcard.cuerpo.text.contains("Flexómetro o Lámpara"):
+		return "El aviso con ambos almacenes llenos mostró una cuenta o sugerencia incorrecta."
+	return ""
+
+
+static func usar_menu(bus: Node3D, pieza: StaticBody3D, id: String, arbol: SceneTree, tecla := 0) -> bool:
+	if not apuntar(bus, pieza):
+		return false
+	Clic.clic(arbol.root, arbol.root.get_visible_rect().get_center())
+	if not bus.menu_pieza.visible:
+		return false
+	if tecla > 0:
+		if bus.menu_pieza.entradas[tecla - 1].id != id:
+			return false
+		Acciones.tecla(bus, tecla)
+		return not bus.menu_pieza.visible
+	return await elegir(bus, id, arbol) and not bus.menu_pieza.visible
 
 
 static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
@@ -203,6 +349,7 @@ static func elegir(bus: Node3D, id: String, arbol: SceneTree) -> bool:
 	await arbol.process_frame
 	var boton: Button = bus.menu_pieza.botones[indice]
 	Clic.clic(bus.get_viewport(), boton.get_global_rect().get_center())
+
 	return true
 
 

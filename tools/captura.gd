@@ -9,7 +9,7 @@ extends SceneTree
 # Resumen y hallazgo del motor: [ancho alto] resumen|resumen-critico|exito [--verificar]
 # Cierre: [ancho alto] cierre [correcto|incorrecto] [--verificar]
 # Misiones: [ancho alto] mision [motor|faros|neumatico] [--verificar]
-# Inventario: [ancho alto] inventario [--verificar]
+# Inventario: [ancho alto] inventario|inventario-lleno [--verificar]
 # Guía automática: [ancho alto] guia-objeto|guia-inventario [--verificar]
 # Taller: [ancho alto] taller|baliza|elevador|elevador-guia|bajos [--verificar]
 # Banco: [ancho alto] banco-mesa|banco-puntas|hoja|orden [--verificar]
@@ -49,10 +49,10 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "guia-objeto", "guia-inventario", "cierre", "resumen", "resumen-critico", "exito", "mision", "banco-mesa", "banco-puntas", "hoja", "orden"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "inventario-lleno", "guia-objeto", "guia-inventario", "cierre", "resumen", "resumen-critico", "exito", "mision", "banco-mesa", "banco-puntas", "hoja", "orden"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
-	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "guia-objeto", "guia-inventario", "cierre", "resumen", "resumen-critico", "exito", "mision"]
+	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "inventario-lleno", "guia-objeto", "guia-inventario", "cierre", "resumen", "resumen-critico", "exito", "mision"]
 	var zona := ""
 	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
@@ -127,6 +127,8 @@ func capturar() -> void:
 		escena.modo_captura = true
 	if vista in ["elevador", "elevador-guia", "bajos"]:
 		escena.archivo = "escenarios/neumatico_pinchado.json"
+	elif vista == "inventario-lleno":
+		escena.archivo = "escenarios/fuga_suspension_neumatica.json"
 	elif vista == "mision":
 		var archivo := "neumatico_pinchado" if orden_mision == "neumatico" else orden_mision
 		escena.archivo = "escenarios/%s.json" % archivo
@@ -149,6 +151,10 @@ func capturar() -> void:
 		if vista in ["elevador", "elevador-guia", "bajos"]:
 			if not preparar_elevador(escena, vista):
 				fallar("El elevador o su encuadre no corresponde a la vista.")
+				return
+		elif vista == "inventario-lleno":
+			if not preparar_inventario_lleno(escena):
+				fallar("El inventario no mostró el aviso de la bolsa de aire.")
 				return
 		elif vista == "mision":
 			if not preparar_mision(escena, orden_mision):
@@ -371,7 +377,7 @@ func capturar() -> void:
 	if vista == "guia-objeto" and not escena.taller.flecha.visible:
 		fallar("La flecha debe aparecer junto al borde del encuadre.")
 		return
-	if vista in ["inventario", "guia-inventario"]:
+	if vista in ["inventario", "inventario-lleno", "guia-inventario"]:
 		if not vp.get_visible_rect().encloses(escena.taller.hud.get_global_rect()):
 			fallar("El inventario debe caber en el encuadre.")
 			return
@@ -446,6 +452,24 @@ func preparar_mision(escena: Node3D, orden: String) -> bool:
 	escena.mostrar_estado(true)
 	escena.ubicar_jugador(escena.datos.acciones[id].componente)
 	return escena.hud_mision.indice == previas[orden] and not escena.flashcard.visible
+
+
+func preparar_inventario_lleno(escena: Node3D) -> bool:
+	var taller: Node3D = escena.taller
+	escena.jugador.set_physics_process(false)
+	taller.cambiar_cajones(true, true)
+	escena.jugador.ubicar(Vector3(-6.0, 0, -3.5))
+	var bolsa: Node3D = taller.objetos.bolsa_aire
+	escena.apuntar_jugador(bolsa.global_position)
+	for id in ["calzas", "manometro", "lampara"]:
+		escena.abrir_menu(taller.objetos[id])
+		if not Acciones.elegir(escena, "tomar"):
+			return false
+	escena.abrir_menu(bolsa)
+	return Acciones.elegir(escena, "tomar") and escena.flashcard.visible \
+		and escena.flashcard.titulo.text == "No cabe en el cinturón" \
+		and escena.flashcard.cuerpo.text.contains("ocupa 2 espacios y en el cinturón te queda 1") \
+		and taller.titulos_hud[0].text == "Cinturón 3/4"
 
 
 func preparar_orden(escena: Node3D, vista: String, respuesta: String) -> bool:

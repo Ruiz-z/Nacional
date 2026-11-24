@@ -41,8 +41,9 @@ var mueble_guia: Node3D
 var mallas_guia: Array[MeshInstance3D] = []
 var espacio_guia := 0
 var tecla_guia: Label
-var recuadro_guia := StyleBoxFlat.new()
 var hud: HBoxContainer
+var titulos_hud: Array[Label] = []
+var estilos_casilla: Array[StyleBoxFlat] = []
 var espacios_hud: Array[Label] = []
 var superficies := {}
 var caducidad: Timer
@@ -67,25 +68,30 @@ func _ready() -> void:
 	interfaz.add_child(hud)
 	hud.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	hud.offset_left = 16
-	hud.offset_top = -116
+	hud.offset_top = -124
 	hud.add_theme_constant_override("separation", 24)
 	for grupo in ["Cinturón", "Carrito"]:
 		var columna := VBoxContainer.new()
 		columna.add_theme_constant_override("separation", 0)
 		hud.add_child(columna)
-		etiqueta(columna, grupo, 14)
+		titulos_hud.append(etiqueta(columna, grupo, 14))
 		for indice in Inventario.CAPACIDAD:
-			espacios_hud.append(etiqueta(columna, "", 14))
+			var casilla := etiqueta(columna, "", 14)
+			casilla.custom_minimum_size = Vector2(220, 24)
+			espacios_hud.append(casilla)
+	for color in [Color("#354452"), Color("#69859b"), COLOR_MANO, GUIA]:
+		var estilo := StyleBoxFlat.new()
+		estilo.bg_color = Color("#111a20") if estilos_casilla.is_empty() else Color("#182c40")
+		estilo.border_color = color
+		estilo.set_border_width_all(1)
+		estilo.content_margin_left = 6
+		estilo.content_margin_right = 6
+		estilos_casilla.append(estilo)
 	var columna_tecla := VBoxContainer.new()
 	hud.add_child(columna_tecla)
 	tecla_guia = etiqueta(columna_tecla, "", 14)
 	tecla_guia.modulate = GUIA_TEXTO
 	tecla_guia.hide()
-	recuadro_guia.bg_color = Color("#182c40")
-	recuadro_guia.border_color = GUIA
-	recuadro_guia.set_border_width_all(1)
-	recuadro_guia.content_margin_left = 4
-	recuadro_guia.content_margin_right = 4
 	flecha = Control.new()
 	flecha.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	interfaz.add_child(flecha)
@@ -344,6 +350,14 @@ func objetos_en(mueble: Node3D) -> Array[String]:
 	return disponibles
 
 
+func hay_superficie(mueble: Node3D) -> bool:
+	var ocupadas := 0
+	for id in superficies:
+		if objetos[id].zona == mueble:
+			ocupadas += 1
+	return ocupadas < LIMITE_SUPERFICIE
+
+
 func dejar(id: String, cerca_carrito: bool, mueble: Node3D = mesa) -> String:
 	if mueble == caja_roja and Inventario.CATALOGO.get(id, {}).get("tipo") != "herramienta":
 		return "La caja roja es para herramientas. Deja este objeto en otro mueble."
@@ -470,18 +484,45 @@ func actualizar_hud(cerca_carrito: bool, visible_hud: bool) -> void:
 	if firma == ultimo_inventario:
 		return
 	ultimo_inventario = firma.duplicate(true)
+	titulos_hud[0].text = "Cinturón %d/%d" % [
+		Inventario.espacio(inventario.cinturon), Inventario.CAPACIDAD]
+	titulos_hud[1].text = "Carrito %d/%d%s" % [
+		Inventario.espacio(inventario.carrito), Inventario.CAPACIDAD, "" if cerca_carrito else " · lejos"]
+	var color_carrito := Color.WHITE if cerca_carrito else Color("#98a2ad")
+	titulos_hud[1].modulate = color_carrito
+	var restantes := 0
+	var estilo: StyleBoxFlat
+	var color := Color.WHITE
 	for numero in range(1, 9):
 		var id := objeto_en_espacio(numero)
-		var etiqueta_espacio := espacios_hud[numero - 1]
-		etiqueta_espacio.text = "%d %s" % [numero, Inventario.CATALOGO.get(id, {}).get("nombre", "—")]
-		etiqueta_espacio.modulate = Color("#98a2ad") if numero > 4 and not cerca_carrito else Color.WHITE
-		if not id.is_empty() and id == mano:
-			etiqueta_espacio.modulate = COLOR_MANO
-		if numero == espacio_guia:
-			etiqueta_espacio.modulate = GUIA_TEXTO
-			etiqueta_espacio.add_theme_stylebox_override("normal", recuadro_guia)
+		var casilla := espacios_hud[numero - 1]
+		var continuacion := restantes > 0
+		if continuacion:
+			casilla.text = ""
 		else:
-			etiqueta_espacio.remove_theme_stylebox_override("normal")
+			var objeto := Inventario.objeto(id)
+			var tamano: int = objeto.get("espacio", 1)
+			restantes = tamano
+			var nombre: String = objeto.get("nombre", "—")
+			casilla.text = "%d %s%s" % [numero, nombre, " ×%d" % tamano if tamano > 1 else ""]
+			color = color_carrito if numero > 4 else Color.WHITE
+			estilo = estilos_casilla[0 if id.is_empty() else 1]
+			if not id.is_empty() and mano == id:
+				color = COLOR_MANO
+				estilo = estilos_casilla[2]
+			if numero == espacio_guia:
+				color = GUIA_TEXTO
+				estilo = estilos_casilla[3]
+		var borde := estilo
+		if continuacion or restantes > 1:
+			borde = estilo.duplicate()
+			borde.border_width_top = 0 if continuacion else 1
+			borde.border_width_bottom = 0 if restantes > 1 else 1
+			borde.content_margin_top = 1
+			borde.content_margin_bottom = 1
+		casilla.modulate = color
+		casilla.add_theme_stylebox_override("normal", borde)
+		restantes -= 1
 	tecla_guia.visible = espacio_guia > 0
 	tecla_guia.text = "Pulsa %d" % espacio_guia
 
@@ -535,7 +576,11 @@ func fila_cajon(id: String) -> int:
 func instruccion_tomar(id: String) -> String:
 	var fila := fila_cajon(id)
 	if fila < 0:
-		return "Toma " + Inventario.CATALOGO[id].nombre
+		var objeto := Inventario.objeto(id)
+		var texto := "Toma " + str(objeto.nombre)
+		if objeto.espacio > 1:
+			texto += " (ocupa %s)" % Inventario.cantidad_espacios(objeto.espacio)
+		return texto
 	var detalle := "de abajo" if fila == 0 else ("de arriba" if fila == cajones.size() - 1 else "del medio")
 	return "Abre el cajón %s · %s" % [detalle, Inventario.CATALOGO[id].nombre]
 
@@ -561,6 +606,8 @@ func senalar(id: String, pieza: Node3D = null, manual := true, columna := true) 
 		if fila >= 0:
 			mallas_guia.append(cajones[fila].get_node("Cajon%d" % fila))
 			mallas_guia.append(cajones[fila].get_node("Tirador%d" % fila))
+		elif pieza == mesa.piezas.mesa_taller:
+			mallas_guia.append(mesa.get_node("Tablero"))
 		else:
 			for malla in (forma if forma != null else pieza).find_children("*", "MeshInstance3D", true, false):
 				if malla.visible:

@@ -92,6 +92,11 @@ static func comprobar_muebles(bus: Node3D) -> String:
 	if not taller.dejar("destornillador", true, taller.mesa).is_empty():
 		return "No se pudo dejar el destornillador en la mesa."
 	bus.actualizar_mision()
+	if not comprobar_marca(bus, taller.mesa.piezas.mesa_taller):
+		return "La guía debe marcar la mesa para liberar espacio en el cinturón."
+	if not taller.dejar("llave_ajustable", true, taller.mesa).is_empty():
+		return "No se pudo liberar un espacio del cinturón."
+	bus.actualizar_mision()
 	if taller.mueble_guia != taller.mesa or not comprobar_marca(bus, taller.objetos.destornillador):
 		return "La guía debe seguir al destornillador a la mesa."
 	return ""
