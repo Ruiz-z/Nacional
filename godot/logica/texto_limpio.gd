@@ -26,3 +26,8 @@ static func fuente(texto: String) -> String:
 			if dato.texto.begins_with(prefijo):
 				return "ejemplo didáctico" + dato.texto.trim_prefix(prefijo)
 	return dato.texto.trim_suffix(" (página pública)").replace(" — ", ". ").replace(";", ".")
+
+
+static func mostrar_chip(chip: Label, titulo: String) -> void:
+	chip.text = limpiar(titulo).etiqueta
+	chip.visible = not chip.text.is_empty()

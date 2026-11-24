@@ -152,6 +152,17 @@ corner_radius_bottom_right = 10
 bg_color = Color(0.07059, 0.60784, 0.60392, 1)
 border_color = Color(0.05490, 0.10196, 0.13333, 1)
 
+[sub_resource type="StyleBoxFlat" id="ChipOrden"]
+bg_color = Color(0.14, 0.32, 0.48, 1)
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+
 [sub_resource type="StyleBoxFlat" id="Chip"]
 content_margin_left = 12.0
 border_width_left = 1
@@ -409,6 +420,10 @@ Secundario/colors/font_color = Color(0.92549, 0.98039, 0.98039, 0.82)
 Metadato/base_type = &"Label"
 Metadato/font_sizes/font_size = 16
 Metadato/colors/font_color = Color(0.92549, 0.98039, 0.98039, 1)
+ChipOrden/base_type = &"Label"
+ChipOrden/colors/font_color = Color(0.73, 1, 0.96, 1)
+ChipOrden/font_sizes/font_size = 14
+ChipOrden/styles/normal = SubResource("ChipOrden")
 Chip/base_type = &"Label"
 Chip/font_sizes/font_size = 18
 Chip/colors/font_color = Color(1.00000, 1.00000, 1.00000, 1)

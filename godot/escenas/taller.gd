@@ -28,6 +28,7 @@ var animacion: Tween
 var mano := ""
 var ultimo_inventario: Array = []
 var objetivo := ""
+var pieza_guia: Node3D
 var baliza: MeshInstance3D
 var contorno := StandardMaterial3D.new()
 var flecha: Label
@@ -472,22 +473,28 @@ func ubicacion(id: String) -> String:
 	return ubicaciones[mueble_de(id)]
 
 
-func senalar(id: String) -> void:
+func senalar(id: String, pieza: Node3D = null) -> void:
 	apagar_guia()
 	objetivo = id
-	var pieza: StaticBody3D = objetos[id]
-	var mueble := mueble_de(id)
-	for malla in pieza.get_node("Forma").find_children("*", "MeshInstance3D", true, false):
+	pieza_guia = pieza if pieza != null else objetos[id]
+	var forma := pieza_guia.get_node_or_null("Forma") if pieza == null else pieza_guia
+	for malla in forma.find_children("*", "MeshInstance3D", true, false):
 		malla.material_overlay = contorno
-	baliza.position = to_local(mueble.global_position) + Vector3.UP * (alturas[mueble] + 1.02)
+	if pieza == null:
+		var mueble := mueble_de(id)
+		baliza.position = to_local(mueble.global_position) + Vector3.UP * (alturas[mueble] + 1.02)
+	else:
+		baliza.position = to_local(pieza.global_position) + Vector3.UP * 1.02
 	baliza.show()
 	caducidad.start()
 
 
 func apagar_guia() -> void:
-	if not objetivo.is_empty():
-		for malla in objetos[objetivo].get_node("Forma").find_children("*", "MeshInstance3D", true, false):
+	if is_instance_valid(pieza_guia):
+		var forma := pieza_guia.get_node_or_null("Forma") if objetos.has(objetivo) else pieza_guia
+		for malla in forma.find_children("*", "MeshInstance3D", true, false):
 			malla.material_overlay = null
+	pieza_guia = null
 	objetivo = ""
 	baliza.hide()
 	flecha.hide()
@@ -495,14 +502,13 @@ func apagar_guia() -> void:
 
 
 func actualizar_flecha(camara: Camera3D, mostrar: bool) -> void:
-	if objetivo.is_empty() or not mostrar:
+	if pieza_guia == null or not mostrar:
 		flecha.hide()
 		return
-	var pieza: StaticBody3D = objetos[objetivo]
-	if pieza.zona == carrito:
+	if objetos.has(objetivo) and pieza_guia.zona == carrito:
 		baliza.position = to_local(carrito.global_position) + Vector3.UP * (alturas[carrito] + 1.02)
-	var punto := pieza.global_position
-	if not pieza.visible:
+	var punto := pieza_guia.global_position
+	if not pieza_guia.visible:
 		punto = baliza.global_position - Vector3.UP
 	var rect := camara.get_viewport().get_visible_rect()
 	if not camara.is_position_behind(punto) and rect.has_point(camara.unproject_position(punto)):

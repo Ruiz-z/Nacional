@@ -26,6 +26,12 @@ theme_type_variation = &"Titulo"
 text = "Resumen de la práctica"
 autowrap_mode = 3
 
+[node name="Marca" type="Label" parent="Contenido"]
+unique_name_in_owner = true
+visible = false
+size_flags_horizontal = 0
+theme_type_variation = &"ChipOrden"
+
 [node name="Estado" type="Label" parent="Contenido"]
 unique_name_in_owner = true
 theme_type_variation = &"Seccion"
@@ -68,14 +74,14 @@ theme_override_colors/font_color = Color(1, 0.78, 0.4, 1)
 autowrap_mode = 3
 text = "Escribe tu respuesta o pulsa Omitir"
 
-[node name="Ruta" type="Label" parent="Contenido/Desplazamiento/Lectura"]
-unique_name_in_owner = true
-autowrap_mode = 3
-
 [node name="Detalle" type="RichTextLabel" parent="Contenido/Desplazamiento/Lectura"]
 unique_name_in_owner = true
 fit_content = true
 scroll_active = false
+
+[node name="Ruta" type="Label" parent="Contenido/Desplazamiento/Lectura"]
+unique_name_in_owner = true
+autowrap_mode = 3
 
 [node name="Acciones" type="HFlowContainer" parent="Contenido"]
 unique_name_in_owner = true

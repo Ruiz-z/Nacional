@@ -86,7 +86,7 @@ static func paso(bus: Node3D, pieza: String, id: String, arbol: SceneTree, aplic
 
 
 static func comprobar_indicios(bus: Node3D, completados: int) -> bool:
-	var lineas := PackedStringArray(["Ejemplo didáctico", "Pasos"])
+	var lineas := PackedStringArray(["Pasos"])
 	for indice in range(INDICIOS.size()):
 		lineas.append(("[x] " if indice < completados else "[ ] ") + INDICIOS[indice])
 	return bus.lateral.get_node("Indicios").text == "\n".join(lineas)

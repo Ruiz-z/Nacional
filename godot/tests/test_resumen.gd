@@ -33,6 +33,13 @@ static func comprobar(bus: Node3D, arbol: SceneTree, modo: String) -> bool:
 	await arbol.process_frame
 	await arbol.process_frame
 	var resumen: Control = bus.resumen
+	var marca: Label = resumen.get_node("%Marca")
+	var detalle: String = resumen.get_node("%Detalle").text
+	if not marca.visible or marca.text != "Ejemplo didáctico" or marca.text in detalle:
+		return false
+	if not detalle.contains("Tu práctica") or not detalle.contains("Paso a paso") \
+			or not detalle.contains("Tiempo: ") or " ·\n" in detalle or " ms" in detalle or "[MUESTRA]" in detalle:
+		return false
 	var reflexion: LineEdit = resumen.get_node("%Reflexion")
 	if resumen.get_node("%Estado").text != "Orden resuelta" or arbol.root.gui_get_focus_owner() != reflexion:
 		return false
@@ -93,7 +100,9 @@ static func comprobar(bus: Node3D, arbol: SceneTree, modo: String) -> bool:
 			if not bus.motor.resumen().reflexion_omitida or not resumen.get_node("%Ruta").visible:
 				return false
 			control(arbol.root, JOY_BUTTON_B)
-	return salidas.size() == 1
+	var ruta: String = resumen.get_node("%Ruta").text
+	return salidas.size() == 1 and ruta.begins_with("Ruta ideal\n") \
+		and "Ejemplo didáctico" not in ruta and "[MUESTRA]" not in ruta
 
 
 static func agotar_intentos(bus: Node3D) -> bool:

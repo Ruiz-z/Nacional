@@ -42,7 +42,7 @@ func guardar(omitir: bool) -> void:
 func mostrar(actual: RefCounted, datos_orden: Dictionary = {}, aviso := "") -> void:
 	if not datos_orden.is_empty():
 		escenario = datos_orden
-		%Aviso.text = TextoLimpio.linea(aviso)
+		%Aviso.text = TextoLimpio.limpiar(aviso).texto
 		%Aviso.visible = not aviso.is_empty()
 	var abrir := motor != actual or not visible
 	motor = actual
@@ -51,6 +51,7 @@ func mostrar(actual: RefCounted, datos_orden: Dictionary = {}, aviso := "") -> v
 	visible = disponible or get_parent() == get_tree().root
 	%Vacio.visible = not disponible
 	%Estado.visible = disponible
+	TextoLimpio.mostrar_chip(%Marca, escenario.get("titulo", "") if disponible else "")
 	%Desplazamiento.visible = disponible
 	%Acciones.visible = disponible
 	if not disponible:
@@ -60,7 +61,7 @@ func mostrar(actual: RefCounted, datos_orden: Dictionary = {}, aviso := "") -> v
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var reflexionado: bool = datos.has("ruta_ideal")
 	%Estado.text = FINALES.get(datos.fin, "Práctica terminada")
-	%Pregunta.text = ("Reflexión omitida" if datos.reflexion_omitida else TextoLimpio.linea(datos.reflexion)) \
+	%Pregunta.text = ("Reflexión omitida" if datos.reflexion_omitida else TextoLimpio.limpiar(datos.reflexion).texto) \
 		if reflexionado else datos.pregunta
 	%Reflexion.visible = not reflexionado
 	%Guardar.visible = not reflexionado
@@ -74,42 +75,49 @@ func mostrar(actual: RefCounted, datos_orden: Dictionary = {}, aviso := "") -> v
 	if reflexionado:
 		%Validacion.hide()
 	var lineas := PackedStringArray()
-	var marca_orden: String = TextoLimpio.limpiar(escenario.get("titulo", "")).etiqueta
-	if not marca_orden.is_empty():
-		lineas.append(marca_orden)
 	var cierre: Dictionary = datos.diagnostico_final
 	if not cierre.is_empty():
-		lineas.append("Diagnóstico final: %s · Respuesta: %s" % [
-			"Correcto" if cierre.correcto else "Incorrecto", MenuVisual.nombre_causa(cierre.elegida)])
-		lineas.append("Causa real: %s · %s" % [MenuVisual.nombre_causa(cierre.real), TextoLimpio.linea(cierre.explicacion)])
-		var marca: String = TextoLimpio.limpiar(cierre.fuente).etiqueta
-		if not marca.is_empty():
-			lineas.append(marca)
+		lineas.append("Diagnóstico")
+		lineas.append("Respuesta %s: %s" % [
+			"correcta" if cierre.correcto else "incorrecta", MenuVisual.nombre_causa(cierre.elegida)])
+		lineas.append("Causa real: " + MenuVisual.nombre_causa(cierre.real))
+		var explicacion: String = TextoLimpio.limpiar(cierre.explicacion).texto
+		if not explicacion.is_empty():
+			lineas.append(explicacion)
 		lineas.append("Fuente: " + TextoLimpio.fuente(cierre.fuente))
-	for intento in datos.comparacion:
+		lineas.append("")
+	lineas.append("Tu práctica")
+	for intento in ["actual", "anterior"]:
 		var metricas: Dictionary = datos.comparacion[intento]
 		if not metricas.is_empty():
-			lineas.append("%s: %d puntos · %d errores · %d ms" % [
-				intento.capitalize(), metricas.puntaje, metricas.errores, metricas.tiempo_ms])
+			if intento == "anterior":
+				lineas.append("Intento anterior")
+			var tiempo := "menos de 1 s" if metricas.tiempo_ms < 1000 else "%d s" % floori(metricas.tiempo_ms / 1000.0)
+			lineas.append("%d puntos · %d errores\nTiempo: %s" % [metricas.puntaje, metricas.errores, tiempo])
 	if datos.has("errores_arnes"):
 		lineas.append("Errores de medición: %d · Errores de interpretación: %d" % [
 			datos.errores_arnes.medicion, datos.errores_arnes.interpretacion])
+	lineas.append("")
+	lineas.append("Paso a paso")
 	for decision in datos.linea_tiempo:
-		lineas.append("%s · %s · %s" % [nombre_accion(decision.accion),
-			"Acierto" if decision.aplicada and decision.tipo_error.is_empty() else "Error",
-			TextoLimpio.linea(decision.motivo)])
+		var resultado := "acierto"
+		if not decision.aplicada or not decision.tipo_error.is_empty():
+			resultado = "error crítico" if decision.criticidad == "critica" else "error leve"
+		lineas.append("%s: %s" % [nombre_accion(decision.accion), resultado])
 	for brecha in datos.brechas:
 		lineas.append("Elegiste %s y ejecutaste %s." % [
 			MenuVisual.nombre_causa(brecha.causa_marcada), nombre_accion(brecha.accion_ejecutada)])
 	%Detalle.text = "\n".join(lineas)
 	if reflexionado:
-		var ruta := PackedStringArray(["Pasos para resolver la falla"])
+		var ruta := PackedStringArray(["Ruta ideal"])
+		var fuentes := PackedStringArray()
 		for paso in datos.ruta_ideal:
-			ruta.append(TextoLimpio.linea(paso.descripcion))
-			var marca: String = TextoLimpio.limpiar(paso.fuente).etiqueta
-			if not marca.is_empty():
-				ruta.append(marca)
-			ruta.append("Fuente: " + TextoLimpio.fuente(paso.fuente))
+			ruta.append(TextoLimpio.limpiar(paso.descripcion).texto)
+			var fuente := TextoLimpio.fuente(paso.fuente)
+			if not fuente.is_empty() and fuente not in fuentes:
+				fuentes.append(fuente)
+		for fuente in fuentes:
+			ruta.append("Fuente: " + fuente)
 		%Ruta.text = "\n".join(ruta)
 	if abrir:
 		%Desplazamiento.scroll_vertical = 0

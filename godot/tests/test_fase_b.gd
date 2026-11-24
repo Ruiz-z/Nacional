@@ -37,6 +37,12 @@ static func ruta_ideal(id: String) -> bool:
 		var bus := Bus.instantiate()
 		bus.archivo = "escenarios/%s.json" % id
 		raiz.add_child(bus)
+		var pasos: String = bus.lateral.get_node("Indicios").text
+		var marca: Label = bus.lateral.get_node("Marca")
+		if not pasos.ends_with("[ ] Cerrar la orden") or "Ejemplo didáctico" in pasos \
+				or not marca.visible or marca.text != "Ejemplo didáctico":
+			bus.free()
+			return false
 		if variante:
 			var adaptado := datos.duplicate(true)
 			adaptado.estado.merge(datos.variante.estado, true)
@@ -86,6 +92,9 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	var rueda: StaticBody3D = bajos.piezas.neumatico_delantero_derecho
 	var decisiones: Array[Dictionary] = []
 	bus.decision_tomada.connect(func(decision: Dictionary) -> void: decisiones.append(decision))
+	if not comprobar_guia(bus, "calzas"):
+		return false
+	bus.taller.apagar_guia()
 	for pieza in bajos.piezas.values():
 		if pieza.collision_layer != 0:
 			return false
@@ -99,7 +108,11 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	bus.taller.cambiar_cajones(true, true)
 	if not elegir(bus, bus.taller.objetos.calzas, "tomar"):
 		return false
+	if not comprobar_guia(bus, Elevador.CALZAS, true):
+		return false
 	if not elegir(bus, elevador.piezas[Elevador.CALZAS], "colocar_calzas") or not elevador.calzas_colocadas:
+		return false
+	if not comprobar_guia(bus, Elevador.CONSOLA):
 		return false
 	bus.jugador.ubicar(Vector3.ZERO)
 	if not elegir(bus, consola, "elevar_bus") or elevador.en_movimiento():
@@ -149,7 +162,7 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	if not Taller.equipar(bus, "trabar_soporte"):
 		return false
 	for soporte in elevador.trabas:
-		if not elegir(bus, elevador.piezas[soporte], "trabar_soporte"):
+		if not comprobar_guia(bus, soporte) or not elegir(bus, elevador.piezas[soporte], "trabar_soporte"):
 			return false
 	if not elevador.seguro() or not decisiones.is_empty() or bus.motor.puntaje() != 100:
 		return false
@@ -219,8 +232,10 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	if not Taller.equipar(bus, "destrabar_soporte"):
 		return false
 	for soporte in elevador.trabas:
-		if not elegir(bus, elevador.piezas[soporte], "destrabar_soporte"):
+		if not comprobar_guia(bus, soporte) or not elegir(bus, elevador.piezas[soporte], "destrabar_soporte"):
 			return false
+	if not comprobar_guia(bus, Elevador.CONSOLA):
+		return false
 	bus.jugador.ubicar(Vector3.ZERO)
 	Taller.cerrar_exitos(bus)
 	if not elegir(bus, consola, "descender_bus") or elevador.en_movimiento():
@@ -228,6 +243,14 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	bus.jugador.ubicar(Vector3(-4, 0, 0))
 	bus.flashcard.ok.pressed.emit()
 	if not await mover(bus, consola, elevador, "descender_bus"):
+		return false
+	if not bus.flashcard.visible or bus.taller.baliza.visible \
+			or bus.flashcard.chip.text != "BIEN HECHO" \
+			or bus.flashcard.cuerpo.text != "Solo falta cerrar la orden. Hazlo en la consola del elevador.":
+		return false
+	bus.flashcard.ok.pressed.emit()
+	if bus.taller.objetivo != Elevador.CONSOLA or not comprobar_guia(bus, Elevador.CONSOLA, true) \
+			or not bus.lateral.get_node("Siguiente").text.ends_with("Hazlo en la consola del elevador."):
 		return false
 	await arbol.physics_frame
 	await arbol.physics_frame
@@ -256,3 +279,19 @@ static func mover(bus: Node3D, consola: StaticBody3D, elevador: Node3D, id: Stri
 		return false
 	await elevador.recorrido.finished
 	return true
+
+
+static func comprobar_guia(bus: Node3D, objetivo: String, control := false) -> bool:
+	if control:
+		var evento := InputEventJoypadButton.new()
+		evento.button_index = JOY_BUTTON_Y
+		evento.pressed = true
+		bus.get_viewport().push_input(evento, true)
+	else:
+		var evento := InputEventKey.new()
+		evento.keycode = KEY_G
+		evento.pressed = true
+		bus.get_viewport().push_input(evento, true)
+	var elevador := bus.get_node("Elevador")
+	return bus.taller.baliza.visible and bus.taller.objetivo == objetivo \
+		and (not elevador.piezas.has(objetivo) or bus.taller.pieza_guia == elevador.piezas[objetivo])

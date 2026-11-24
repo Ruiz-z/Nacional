@@ -7,6 +7,14 @@ signal resultados_registrados
 signal salida_solicitada
 
 const ANCHO_HUD := 352.0
+const PASOS_ELEVADOR := {
+	"colocar_calzas": "Colocar calzas",
+	"elevar_bus": "Subir el autobús",
+	"trabar_soporte": "Trabar los soportes",
+	"destrabar_soporte": "Destrabar los soportes",
+	"descender_bus": "Bajar el autobús",
+	"cerrar_orden": "Cerrar la orden",
+}
 const FondoTarjeta = preload("res://escenas/fondo_tarjeta.gd")
 const INDICIOS := {
 	"inspeccionado": "Gabinete inspeccionado",
@@ -157,7 +165,7 @@ func _ready() -> void:
 	flashcard.abierta.connect(pausar_por_flashcard)
 	flashcard.confirmada.connect(func(aviso: Dictionary):
 		if not aviso.objeto.is_empty():
-			taller.senalar(aviso.objeto))
+			senalar_guia(aviso.objeto))
 	flashcard.opcion_elegida.connect(responder_cierre)
 	flashcard.terminada.connect(reanudar_tras_flashcard)
 	zona_activa = zonas[datos.zona]
@@ -376,7 +384,39 @@ func comprobar_inventario(id: String, fuente := "teclado", solo_guia := false) -
 	return false
 
 
+func senalar_guia(objetivo: String) -> void:
+	taller.senalar(objetivo, $Elevador.piezas.get(objetivo))
+
+
+func listo_para_bajar(estado: Dictionary) -> bool:
+	return estado.resuelto or Escenario.cumple(estado, datos.acciones.cerrar_orden.previas)
+
+
+func paso_elevador(estado: Dictionary) -> Dictionary:
+	if zona_activa != $Bajos or not motor.fin().is_empty() or $Elevador.en_movimiento():
+		return {}
+	var listo := listo_para_bajar(estado)
+	if $Elevador.arriba:
+		for soporte in $Elevador.trabas:
+			if $Elevador.trabas[soporte] == listo:
+				return {"id": "destrabar_soporte" if listo else "trabar_soporte", "objetivo": soporte}
+		if listo:
+			return {"id": "descender_bus", "objetivo": Elevador.CONSOLA}
+	elif listo:
+		return {"id": "cerrar_orden", "objetivo": Elevador.CONSOLA}
+	elif not $Elevador.calzas_colocadas:
+		var objetivo := Elevador.CALZAS if "calzas" in taller.inventario.accesibles(carrito_cerca()) else "calzas"
+		return {"id": "colocar_calzas", "objetivo": objetivo}
+	else:
+		return {"id": "elevar_bus", "objetivo": Elevador.CONSOLA}
+	return {}
+
+
 func orientar_requisitos() -> void:
+	var paso := paso_elevador(motor.estado())
+	if not paso.is_empty():
+		senalar_guia(paso.objetivo)
+		return
 	var candidatos: Array = []
 	if not requisito_pendiente.is_empty():
 		candidatos.append(requisito_pendiente)
@@ -580,13 +620,27 @@ func mostrar_estado(inmediato := false) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var lineas := PackedStringArray()
 	var progreso := progreso_indicios(estado)
-	var marca: String = TextoLimpio.limpiar(datos.titulo).etiqueta
-	if not marca.is_empty():
-		lineas.append(marca)
 	lineas.append("Pasos")
+	var bajos: bool = zona_activa == $Bajos
+	var listo := bajos and listo_para_bajar(estado)
+	if bajos:
+		lineas.append(paso_hud(PASOS_ELEVADOR.colocar_calzas, $Elevador.calzas_colocadas))
+		lineas.append(paso_hud(PASOS_ELEVADOR.elevar_bus, $Elevador.arriba or listo))
+		lineas.append(paso_hud(PASOS_ELEVADOR.trabar_soporte, $Elevador.seguro() or listo))
 	for clave in indicios:
-		if progreso.has(clave):
-			lineas.append("%s %s" % ["[x]" if progreso[clave] else "[ ]", TextoLimpio.limpiar(indicios[clave]).texto])
+		if progreso.has(clave) and (not bajos or clave != "resuelto"):
+			lineas.append(paso_hud(indicios[clave], progreso[clave]))
+	if bajos:
+		lineas.append(paso_hud(PASOS_ELEVADOR.destrabar_soporte, listo and not true in $Elevador.trabas.values()))
+		lineas.append(paso_hud(PASOS_ELEVADOR.descender_bus, listo and not $Elevador.arriba))
+		lineas.append(paso_hud(PASOS_ELEVADOR.cerrar_orden, estado.resuelto))
+		if $Elevador.piezas.has(taller.objetivo):
+			var paso := paso_elevador(estado)
+			if paso.is_empty():
+				taller.apagar_guia()
+			elif paso.objetivo != taller.objetivo:
+				senalar_guia(paso.objetivo)
+	TextoLimpio.mostrar_chip(lateral.get_node("Marca"), datos.titulo)
 	var orden: Label = lateral.get_node("Estado")
 	orden.text = TextoLimpio.limpiar(datos.titulo).texto
 	orden.tooltip_text = orden.text
@@ -606,22 +660,35 @@ func mostrar_estado(inmediato := false) -> void:
 		resumen.mostrar(motor, datos, lateral.get_node("Aviso").text)
 
 
+func paso_hud(etiqueta: String, completado: bool) -> String:
+	return "%s %s" % ["[x]" if completado else "[ ]", TextoLimpio.limpiar(etiqueta).texto]
+
+
 func actualizar_ayuda() -> void:
 	var estado: Dictionary = motor.estado()
 	var terminado: bool = not motor.fin().is_empty()
 	var progreso := progreso_indicios(estado)
 	var ayuda := siguiente_ayuda(progreso)
-	if zona_activa == $Bajos and not Escenario.cumple(estado, datos.acciones.cerrar_orden.previas):
-		if not $Elevador.arriba:
-			ayuda = "Toma las calzas de la caja roja. Sube el autobús desde la consola."
-		elif not $Elevador.seguro():
-			ayuda = "Traba ambos soportes antes de trabajar en los bajos."
-	if not terminado and not ayuda.is_empty():
+	var paso := paso_elevador(estado)
+	if not paso.is_empty():
+		ayuda = PASOS_ELEVADOR[paso.id]
+		match paso.id:
+			"colocar_calzas":
+				if paso.objetivo == "calzas":
+					ayuda += "\nToma las calzas de la caja roja."
+			"trabar_soporte", "destrabar_soporte":
+				var soporte: Node3D = $Elevador.piezas[paso.objetivo]
+				ayuda += "\n" + soporte.nombre
+				if taller.mano != "llave_ajustable":
+					ayuda += "\nUsa la llave ajustable."
+			"descender_bus":
+				ayuda += "\nDespeja los bajos."
+			"cerrar_orden":
+				ayuda += "\n" + siguiente_ayuda(progreso)
+	if not terminado and not ayuda.is_empty() and paso.is_empty():
 		var herramienta := ""
 		if zona_activa == $Banco:
 			herramienta = "llave_ajustable" if progreso.diagnostico_registrado else "multimetro"
-		elif zona_activa == $Bajos and not $Elevador.seguro():
-			herramienta = "llave_ajustable" if $Elevador.arriba else ""
 		else:
 			for id in datos.ruta_ideal:
 				var regla: Dictionary = datos.acciones[id]
@@ -631,7 +698,7 @@ func actualizar_ayuda() -> void:
 				break
 		if not herramienta.is_empty() and taller.mano != herramienta:
 			ayuda = "Toma esta herramienta: %s. %s" % [Inventario.CATALOGO[herramienta].nombre, ayuda]
-	lateral.get_node("Siguiente").text = "" if ayuda.is_empty() else "Siguiente paso\n" + TextoLimpio.linea(ayuda)
+	lateral.get_node("Siguiente").text = "" if ayuda.is_empty() else "Siguiente paso\n" + TextoLimpio.limpiar(ayuda).texto
 
 
 func actualizar_leds() -> void:
@@ -653,6 +720,8 @@ func actualizar_hud() -> void:
 	$Interfaz.offset_right = 476.0 if terminado else 12.0 + ANCHO_HUD
 	$Interfaz.anchor_bottom = 1.0 if terminado else 0.0
 	lateral.get_node("Estado").visible = detalle
+	var marca: Label = lateral.get_node("Marca")
+	marca.visible = detalle and not marca.text.is_empty()
 	lateral.get_node("Indicios").visible = detalle or (terminado and motor.fin() == "resuelto" and not hud_oculto)
 	var siguiente: Label = lateral.get_node("Siguiente")
 	siguiente.visible = detalle and not siguiente.text.is_empty()
@@ -886,6 +955,10 @@ func accion_elevador(id: String, componente: String, fuente := "teclado") -> voi
 			$Elevador.mover(subir)
 			await $Elevador.recorrido.finished
 			navegando = false
+			if not subir and zona_activa == $Bajos and listo_para_bajar(motor.estado()):
+				taller.apagar_guia()
+				flashcard.encolar({"texto": "Solo falta cerrar la orden. Hazlo en la consola del elevador.",
+					"tipo": "exito", "titulo": "Cerrar la orden", "donde": "", "fuente": "", "objeto": Elevador.CONSOLA})
 	if requisito_pendiente == id:
 		requisito_pendiente = ""
 	mostrar_estado()

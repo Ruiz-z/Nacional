@@ -8,7 +8,7 @@ extends SceneTree
 # Resumen y éxito en caja de fusibles: [ancho alto] resumen|exito [--verificar]
 # Cierre: [ancho alto] cierre [correcto|incorrecto] [--verificar]
 # Inventario y título largo: [ancho alto] inventario [--verificar]
-# Taller: [ancho alto] taller|baliza|elevador|bajos [--verificar]
+# Taller: [ancho alto] taller|baliza|elevador|elevador-guia|bajos [--verificar]
 # Banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
 const Acciones = preload("res://tests/acciones_taller.gd")
@@ -38,10 +38,10 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "bajos", "inventario", "cierre", "resumen", "exito"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "exito"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
-	var vista_taller := vista in ["taller", "baliza", "elevador", "bajos", "inventario", "cierre", "resumen", "exito"]
+	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "exito"]
 	var zona := ""
 	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
@@ -111,7 +111,7 @@ func capturar() -> void:
 			fallar("La escena no tiene un gabinete de servicio.")
 			return
 		escena.modo_captura = true
-	if vista in ["elevador", "bajos"]:
+	if vista in ["elevador", "elevador-guia", "bajos"]:
 		escena.archivo = "escenarios/neumatico_pinchado.json"
 	elif vista in ["baliza", "cierre", "resumen", "exito"]:
 		escena.archivo = "escenarios/faros.json"
@@ -127,7 +127,7 @@ func capturar() -> void:
 		if escena.motor == null:
 			fallar("El simulador no se inicializó.")
 			return
-		if vista in ["elevador", "bajos"]:
+		if vista in ["elevador", "elevador-guia", "bajos"]:
 			if not preparar_elevador(escena, vista):
 				fallar("El elevador o su encuadre no corresponde a la vista.")
 				return
@@ -394,7 +394,11 @@ func preparar_elevador(escena: Node3D, vista: String) -> bool:
 	elevador.mover(true, true)
 	for soporte in elevador.trabas:
 		elevador.cambiar_traba(soporte, true)
-	if vista == "elevador":
+	if vista == "elevador-guia":
+		escena.senalar_guia("consola_elevador")
+		if not escena.taller.baliza.visible:
+			return false
+	if vista in ["elevador", "elevador-guia"]:
 		escena.jugador.ubicar(Vector3(-10.7, 0.10, 6.9))
 		escena.apuntar_jugador(Vector3(0, 2.54, 0.10))
 	else:
@@ -402,6 +406,8 @@ func preparar_elevador(escena: Node3D, vista: String) -> bool:
 		escena.apuntar_jugador(Vector3(0.46, 1.66, -2.78))
 	var camara: Camera3D = escena.jugador.camara
 	var puntos := [elevador.piezas.consola_elevador.global_position, Vector3(0, 3.8, 0)]
+	if vista == "elevador-guia":
+		puntos.append(escena.taller.baliza.global_position)
 	if vista == "bajos":
 		puntos = [bajos.piezas.neumatico_trasero_derecho.global_position,
 			bajos.piezas.bolsa_trasero_derecho.global_position,

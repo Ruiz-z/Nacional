@@ -1261,6 +1261,12 @@ offset_bottom = 48.0
 autowrap_mode = 3
 theme_override_font_sizes/font_size = 15
 
+[node name="Marca" type="Label" parent="Interfaz/Lateral"]
+unique_name_in_owner = true
+visible = false
+size_flags_horizontal = 0
+theme_type_variation = &"ChipOrden"
+
 [node name="Indicios" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Secundario"
 text = ""

@@ -336,7 +336,9 @@ static func comprobar_cierre(bus: Node3D, base: String, caso: Array) -> bool:
 	if bus.flashcard.titulo.text != caso[0].capitalize() 			or not bus.flashcard.cuerpo.text.contains("Causa real: Foco dañado") 			or bus.flashcard.fuente.text != "Fuente: ejemplo didáctico, sin fuente oficial" or not bus.resultados_guardados:
 		return false
 	bus.flashcard.confirmar()
-	if not bus.resumen.visible or not bus.resumen.get_node("%Detalle").text.contains("Diagnóstico final: " + caso[0].capitalize()):
+	var detalle: String = bus.resumen.get_node("%Detalle").text
+	var respuesta := "correcta" if caso[0] == "correcto" else "incorrecta"
+	if not bus.resumen.visible or not detalle.begins_with("Diagnóstico\nRespuesta " + respuesta + ": "):
 		return false
 	var intentos: Array = Base.consultar(base,
 		"SELECT formato, valor, peso, tipo_error FROM intento WHERE tecnico = ? ORDER BY id;", [bus.tecnico.id])

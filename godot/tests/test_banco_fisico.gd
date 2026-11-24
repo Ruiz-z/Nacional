@@ -99,7 +99,7 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 			or not bus.accion_pendiente.is_empty():
 		return false
 	var hud: Label = bus.lateral.get_node("Indicios")
-	if hud.text != "\n".join(["Ejemplo didáctico", "Pasos", "[x] TP1 medido", "[x] TP2 medido",
+	if hud.text != "\n".join(["Pasos", "[x] TP1 medido", "[x] TP2 medido",
 			"[x] Lectura de TP1 reportada", "[x] Lectura de TP2 reportada",
 			"[x] Diagnóstico registrado", "[x] Falla resuelta"]):
 		return false
