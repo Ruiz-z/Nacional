@@ -68,9 +68,10 @@ func etiqueta(contenedor: Container, tamano: int, color: Color, seminegrita := f
 	return rotulo
 
 
-func mostrar(numero: int, nombre: String, estados: Array, subpasos: Array, texto_pista: String) -> void:
+func mostrar(numero: int, nombre: String, estados: Array, subpasos: Array, texto_pista: String, problema := false) -> void:
 	indice = numero
-	contador.text = "MISIÓN %d DE %d" % [indice + 1, estados.size()]
+	contador.text = "PROBLEMA · REPÁRALO ANTES DE SEGUIR" if problema else "MISIÓN %d DE %d" % [indice + 1, estados.size()]
+	contador.add_theme_color_override("font_color", Color("#F2B705") if problema else ACENTO)
 	titulo.text = nombre
 	progreso = estados
 	puntos.queue_redraw()

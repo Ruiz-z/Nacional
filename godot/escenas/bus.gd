@@ -572,6 +572,10 @@ func mostrar_resultado(decision: Dictionary) -> void:
 
 
 func aviso_previas(faltantes: Dictionary) -> String:
+	var problema := problema_activo()
+	if not problema.is_empty():
+		var causa: String = problema.causa if not problema.causa.is_empty() else "Hay un problema que reparar."
+		return "%s Primero elige «%s»." % [causa, problema.titulo]
 	var etiquetas := PackedStringArray()
 	for clave in indicios:
 		if faltantes.get(clave) == true:
@@ -717,6 +721,23 @@ func herramientas_para_dejar() -> Array[String]:
 	return candidatas
 
 
+# Problema activo (por ejemplo, una pieza dañada) con su recuperación, o {} si no hay.
+func problema_activo() -> Dictionary:
+	if motor == null or not motor.fin().is_empty():
+		return {}
+	var opciones: Dictionary = motor.recuperaciones_disponibles()
+	if opciones.is_empty():
+		return {}
+	var id: String = opciones.keys()[0]
+	var regla: Dictionary = opciones[id]
+	var causa := ""
+	for evento in datos.get("eventos", {}).values():
+		if Escenario.cumple(motor.estado(), evento.condicion):
+			causa = TextoLimpio.limpiar(evento.get("descripcion", "")).texto
+			break
+	return {"id": id, "regla": regla, "titulo": TextoLimpio.limpiar(regla.get("titulo", "Reparar")).texto, "causa": causa}
+
+
 func actualizar_mision(inmediato := false) -> void:
 	if misiones.is_empty():
 		objetos_requeridos.clear()
@@ -747,17 +768,19 @@ func actualizar_mision(inmediato := false) -> void:
 				finalizar_orden()
 			if not flashcard.visible and not motor.fin().is_empty():
 				resumen.mostrar(motor, datos, lateral.get_node("Aviso").text))
-	if actual == -1:
+	var problema := problema_activo()
+	if actual == -1 and problema.is_empty():
 		objetos_requeridos.clear()
 		cambiar_subpaso_guia({})
 		return
-	var mision: Dictionary = misiones[actual]
+	var mision: Dictionary = {"mision": "Antes de seguir: " + problema.get("titulo", "").to_lower(), "clave": "problema"} \
+		if not problema.is_empty() else misiones[actual]
 	var controles := controles_seguridad()
 	var elevador: Dictionary = paso_elevador(estado)
 	var disponibles: Array[String] = taller.inventario.accesibles(true)
 	var aciertos: Array[String] = motor.acciones_acertadas()
-	var ayuda := siguiente_ayuda(progreso)
-	var firma := [actual, cumplidas, controles.duplicate(), taller.inventario.cinturon.duplicate(),
+	var ayuda: String = problema.causa if not problema.is_empty() else siguiente_ayuda(progreso)
+	var firma := [problema.get("id", ""), actual, cumplidas, controles.duplicate(), taller.inventario.cinturon.duplicate(),
 		taller.inventario.carrito.duplicate(), taller.hay_superficie(taller.mesa), taller.mano, accion_pendiente,
 		aciertos, ayuda, elevador, fuente_banco.fuente(), taller.cajon_abierto, carrito_cerca(),
 		motor.mediciones.punta_negra if motor.mediciones != null else ""]
@@ -767,7 +790,8 @@ func actualizar_mision(inmediato := false) -> void:
 	objetos_requeridos.clear()
 	var filas: Array = []
 	var clave: String = mision.get("clave", "")
-	var grupos: Array = acciones_mision[actual]
+	var grupos: Array = [{"ids": [problema.id], "regla": problema.regla, "titulo": problema.titulo, "pendiente": true}] \
+		if not problema.is_empty() else acciones_mision[actual]
 	if not elevador.is_empty():
 		var herramienta: String = requisitos(elevador.id).get("herramienta", "")
 		if not herramienta.is_empty():
@@ -784,7 +808,7 @@ func actualizar_mision(inmediato := false) -> void:
 	for grupo in grupos:
 		var regla: Dictionary = grupo.regla
 		var id: String = grupo.ids[0]
-		var hecha: bool = grupo.ids.any(func(accion: String): return accion in aciertos)
+		var hecha: bool = not grupo.get("pendiente", false) and grupo.ids.any(func(accion: String): return accion in aciertos)
 		if motor.mediciones != null and motor.mediciones.fuente == "banco" and id.begins_with("medir_"):
 			# En el banco físico, reportar la lectura también acredita la medición.
 			var prefijo := "reportar_" + id.trim_prefix("medir_") + "_"
@@ -859,7 +883,7 @@ func actualizar_mision(inmediato := false) -> void:
 				filas.insert(pendiente, {"texto": "Deja %s en la mesa de trabajo." % nombre, "hecho": false})
 	cambiar_subpaso_guia(guia)
 	if not hud_mision.celebrando:
-		hud_mision.mostrar(actual, titulo, cumplidas, filas, TextoLimpio.limpiar(ayuda).texto)
+		hud_mision.mostrar(maxi(actual, 0), titulo, cumplidas, filas, TextoLimpio.limpiar(ayuda).texto, not problema.is_empty())
 
 
 func nombre_pieza_mision(pieza: Node3D) -> String:
