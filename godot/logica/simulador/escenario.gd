@@ -2,8 +2,12 @@ extends RefCounted
 
 const RutasContenido = preload("res://logica/rutas_contenido.gd")
 
-const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria"]
+const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria",
+	"caja_fusibles", "fusible_faros", "conector_faros", "faro_izquierdo", "faro_derecho", "rele_faros",
+	"tapa_motor", "motor_traccion", "inversor_motor", "bomba_motor", "radiador_motor",
+	"monitor_temperatura", "abrazadera_motor"]
 const ZONAS := ["gabinete", "faros", "motor", "cabina"]
+const FUENTE_BZR := "Volvo Buses, BZR Low Entry Eléctrico (página pública)"
 const AISLAMIENTO := "escenarios/aislamiento.json"
 const Banco = preload("res://logica/competencias/banco.gd")
 
@@ -117,6 +121,11 @@ static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> S
 		return ""
 	if not regla.get("requiere_panel", false) is bool:
 		return ".requiere_panel"
+	if regla.has("seguridad_panel"):
+		if regla.seguridad_panel not in ["previa", "critica"] or regla.criticidad == "critica":
+			return ".seguridad_panel"
+		if not Banco.texto_presente(regla.get("explicacion_seguridad")):
+			return ".explicacion_seguridad"
 	if regla.has("componente") and regla.componente not in COMPONENTES:
 		return ".componente"
 	if not Banco.COMPETENCIAS.has(regla.get("competencia")):
@@ -139,6 +148,8 @@ static func fuente_valida(fuente: Variant, muestra: bool) -> bool:
 	if not Banco.texto_presente(fuente):
 		return false
 	if fuente == Banco.FUENTE_MUESTRA:
+		return muestra
+	if fuente == FUENTE_BZR:
 		return muestra
 	for permitida in Banco.FUENTES_PERMITIDAS:
 		if fuente == permitida or fuente.begins_with(permitida + ": "):

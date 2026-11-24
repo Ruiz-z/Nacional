@@ -13,6 +13,9 @@
 
 [ext_resource type="Script" path="res://escenas/compartimento.gd" id="Gabinete"]
 
+[ext_resource type="Script" path="res://escenas/zona_faros.gd" id="Faros"]
+[ext_resource type="Script" path="res://escenas/zona_motor.gd" id="Motor"]
+
 [ext_resource type="PackedScene" path="res://escenas/menu_pieza.tscn" id="MenuPieza"]
 
 [sub_resource type="Environment" id="AmbienteTaller"]
@@ -179,6 +182,19 @@ rotation_degrees = Vector3(0, -90, 0)
 [node name="Sector" type="Node3D" parent="."]
 position = Vector3(1.25, 0.9, 0.08)
 script = ExtResource("Gabinete")
+
+; BUS.fbx en mundo: extremo delantero z=5.635 y trasero z=-5.635.
+; Fase 4: cristal de la puerta delantera (Windows), x [-1.181,-1.097],
+; y [1.393,2.519], z [4.418,5.160]. Acceso por el costado -X, centro z=4.789.
+[node name="Faros" type="Node3D" parent="."]
+position = Vector3(0, 0.961, 5.64)
+rotation_degrees = Vector3(0, -90, 0)
+script = ExtResource("Faros")
+
+[node name="Motor" type="Node3D" parent="."]
+position = Vector3(0, 1.15, -5.64)
+rotation_degrees = Vector3(0, 90, 0)
+script = ExtResource("Motor")
 
 [node name="Taller" type="Node3D" parent="."]
 

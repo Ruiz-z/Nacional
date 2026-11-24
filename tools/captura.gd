@@ -1,7 +1,8 @@
 extends SceneTree
 
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
-# Argumentos opcionales: [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [menu] [--verificar]
+# Zonas nuevas: [ancho alto] faros|motor [cerrado|abierto] [menu] [--verificar]
+# Gabinete: [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [menu] [--verificar]
 func _initialize() -> void:
 	call_deferred("capturar")
 
@@ -15,9 +16,18 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() >= 9 and args[-1] in ["entrada", "cerrado", "abierto", "danado"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "danado"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
+	var zona := ""
+	if args.size() > 2 and args[-1] in ["faros", "motor"]:
+		zona = args[-1]
+		args.remove_at(args.size() - 1)
+		if vista.is_empty():
+			vista = "cerrado"
+		if vista not in ["cerrado", "abierto"] or args.size() not in [2, 4]:
+			fallar("Usa [ancho alto] faros|motor [cerrado|abierto].")
+			return
 	if args.size() not in [2, 4, 8, 9]:
 		fallar("Uso: -- <escena res://> <salida.png> [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [menu] [--verificar]")
 		return
@@ -53,6 +63,9 @@ func capturar() -> void:
 			fallar("La escena no tiene un gabinete de servicio.")
 			return
 		escena.modo_captura = true
+	if not zona.is_empty():
+		escena.archivo = "escenarios/%s.json" % zona
+		escena.get_node("Jugador").set_physics_process(false)
 	vp.add_child(escena)
 
 	if args.size() >= 8:
@@ -79,7 +92,18 @@ func capturar() -> void:
 			escena.ejecutar("inspeccionar", "teclado")
 		if vista == "danado":
 			escena.ejecutar("forzar_pieza", "teclado")
-		if not comprobar_estado(escena, sector, vista):
+		if not zona.is_empty():
+			sector = escena.zona_activa
+			var objetivo: String = sector.acceso
+			if vista == "abierto":
+				objetivo = "conector_faros" if zona == "faros" else "monitor_temperatura"
+			escena.ubicar_jugador(objetivo)
+			await physics_frame
+			await physics_frame
+			if sector.abierta != (vista == "abierto") or not comprobar_pieza(escena, objetivo):
+				fallar("El estado o el encuadre de la zona no corresponde a la vista %s." % vista)
+				return
+		elif not comprobar_estado(escena, sector, vista):
 			fallar("El estado del gabinete no corresponde a la vista %s." % vista)
 			return
 		if vista == "entrada":
@@ -89,7 +113,7 @@ func capturar() -> void:
 			escena.set_process(false)
 		await physics_frame
 		await physics_frame
-		if not comprobar_encuadre(escena, vista):
+		if zona.is_empty() and not comprobar_encuadre(escena, vista):
 			fallar("El encuadre no corresponde a la vista %s." % vista)
 			return
 		var triangulos := 0
@@ -157,16 +181,19 @@ func comprobar_encuadre(escena: Node3D, vista: String) -> bool:
 					return false
 		print("Autobús completo dentro de ", cuadro.size)
 		return true
+	return comprobar_pieza(escena, "compuerta" if vista == "cerrado" else "monitor")
+
+
+func comprobar_pieza(escena: Node3D, esperado: String) -> bool:
 	var alcance: RayCast3D = escena.alcance
 	alcance.force_raycast_update()
 	var pieza := alcance.get_collider() as StaticBody3D
-	var esperado := "compuerta" if vista == "cerrado" else "monitor"
 	if pieza == null or pieza.get("componente") != esperado:
 		print("La mira alcanza ", pieza)
 		return false
 	var impacto := alcance.get_collision_point()
 	print("Mira sobre ", pieza.get("nombre"), " en ", impacto,
-		", distancia ", camara.global_position.distance_to(impacto), " m")
+		", distancia ", escena.jugador.camara.global_position.distance_to(impacto), " m")
 	return true
 
 

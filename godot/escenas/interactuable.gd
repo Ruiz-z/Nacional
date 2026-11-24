@@ -1,5 +1,6 @@
 extends StaticBody3D
 
+var zona: Node3D
 var componente: String
 var nombre: String
 var superficie: MeshInstance3D

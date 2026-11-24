@@ -52,7 +52,7 @@ func faltas() -> Array:
 	return _faltas.duplicate(true)
 
 
-func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int) -> Dictionary:
+func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dictionary = {}) -> Dictionary:
 	if not _fin.is_empty():
 		return rechazo("El escenario ya terminó.")
 	if fuente_entrada not in ENTRADAS or tiempo_ms < 0:
@@ -70,10 +70,18 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int) -> Dictionary:
 		if _estado[campo] != regla.previas[campo]:
 			decision.motivo = "Se requiere %s = %s." % [campo, regla.previas[campo]]
 			break
-	if regla.criticidad == "critica":
+	var seguridad: String = regla.get("seguridad_panel", "")
+	if not seguridad.is_empty() and not (controles.get("bloqueo", false) == true
+			and controles.get("etiquetado", false) == true):
+		decision.motivo = regla.explicacion_seguridad
+		if seguridad == "critica":
+			decision.criticidad = "critica"
+			decision.tipo_error = "accion-insegura"
+	if decision.criticidad == "critica":
 		_fin = "falta-critica"
 		_puntaje = 0
-		decision.motivo = regla.descripcion
+		if seguridad != "critica":
+			decision.motivo = regla.descripcion
 	elif decision.motivo.is_empty():
 		var cambio := activar_eventos(_estado, _estado.merged(regla.efectos, true))
 		if cambio.is_empty():
@@ -84,10 +92,10 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int) -> Dictionary:
 			decision.aplicada = true
 	if regla.criticidad == "leve" and decision.aplicada:
 		decision.motivo = regla.descripcion
-	elif not decision.aplicada and regla.criticidad != "critica" and decision.tipo_error.is_empty():
+	elif not decision.aplicada and decision.criticidad != "critica" and decision.tipo_error.is_empty():
 		decision.tipo_error = "orden-incorrecto"
 	decision.estado_despues = estado()
-	if regla.criticidad != "critica":
+	if decision.criticidad != "critica":
 		puntuar(decision)
 	_decisiones.append(decision)
 	if _fin == "falta-critica":
@@ -219,6 +227,9 @@ func reintentar() -> RefCounted:
 	for decision in _progreso_previo + _decisiones.slice(0, _punto_seguro):
 		if not decision.aplicada:
 			continue
+		var reglas: Dictionary = variante.acciones if not decision.recuperacion else variante.recuperaciones
+		if reglas[decision.accion].has("seguridad_panel"):
+			break
 		var repetida: Dictionary = nuevo.ejecutar(decision.accion, decision.fuente_entrada, 0)
 		if not repetida.aplicada or not nuevo.fin().is_empty():
 			break

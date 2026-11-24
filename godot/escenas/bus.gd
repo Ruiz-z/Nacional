@@ -5,12 +5,18 @@ signal decision_tomada(decision: Dictionary)
 const FondoTarjeta = preload("res://escenas/fondo_tarjeta.gd")
 const INDICIOS := {
 	"inspeccionado": "Sector inspeccionado",
+	"continuidad_medida": "Continuidad medida",
+	"refrigerante_revisado": "Circuito de refrigerante revisado",
+	"temperatura_medida": "Temperatura medida",
 	"indicio_confirmado": "Indicio de aislamiento confirmado",
 	"sintomas_revisados": "Síntomas de red revisados",
 	"resuelto": "Falla resuelta",
 }
 const PROBLEMAS := {
 	"tornillo_roto": "Pieza dañada",
+	"fusible_quemado": "Fusible quemado",
+	"pieza_danada": "Abrazadera dañada",
+	"alerta_temperatura": "Alerta de temperatura",
 	"sector_equivocado": "Sector equivocado",
 	"indicio_descartado": "Indicio descartado",
 }
@@ -44,6 +50,10 @@ var pausa_visible := false
 var hud_colapsado := false
 var panel_oculto := false
 var modo_captura := false
+var zona_activa: Node3D
+var seguridad_panel := {}
+var fuente_seguridad := ""
+@onready var zonas := {"gabinete": $Sector, "cabina": $Sector, "faros": $Faros, "motor": $Motor}
 @onready var jugador := $Jugador
 @onready var alcance: RayCast3D = $Jugador/Camara/Alcance
 @onready var resumen := $Interfaz/Lateral/Resumen
@@ -82,26 +92,40 @@ func _ready() -> void:
 		if motor.marcar_causa(causa):
 			causa_marcada = causa)
 	duracion_aviso.timeout.connect(resultado.hide)
-	if not modo_captura and datos.zona in ["gabinete", "cabina"]:
-		var objetivo: Node3D = $Sector.piezas.monitor if datos.zona == "cabina" else $Sector.piezas.compuerta
-		jugador.position = Vector3($Sector.position.x + 1.8, 0, objetivo.global_position.z)
-		jugador.look_at(Vector3(objetivo.global_position.x, jugador.global_position.y, objetivo.global_position.z))
-		jugador.camara.look_at(objetivo.global_position)
+	zona_activa = zonas[datos.zona]
+	for zona in [$Faros, $Motor]:
+		if zona != zona_activa:
+			zona.reflejar_estado({}, false, true)
+	if not modo_captura:
+		ubicar_jugador("monitor" if datos.zona == "cabina" else zona_activa.acceso)
 	lateral.get_node("Continuar").pressed.connect(func():
 		panel.conexion.reanudar()
 		ultimo_ms = Time.get_ticks_msec()
 		actualizar_panel(ultimo_ms))
 	panel.accion_recibida.connect(recibir_accion)
+	if datos.zona == "motor":
+		panel.get_node("Bloqueo").toggled.connect(func(_activo: bool): actualizar_leds())
 	resumen.reintento_solicitado.connect(reintentar)
 	mostrar_estado(true)
 	actualizar_panel(ultimo_ms)
+
+
+func ubicar_jugador(componente: String) -> void:
+	var objetivo: Node3D = zona_activa.piezas[componente]
+	var origen := zona_activa.to_global(Vector3(1.8, 0, 0))
+	jugador.global_position = Vector3(origen.x, 0, origen.z)
+	if zona_activa == $Sector:
+		jugador.global_position.z = objetivo.global_position.z
+	jugador.look_at(Vector3(objetivo.global_position.x, jugador.global_position.y, objetivo.global_position.z))
+	jugador.camara.look_at(objetivo.global_position)
 
 
 func ejecutar(id: String, fuente: String) -> void:
 	if motor == null or panel.conexion.pausado():
 		return
 	var ahora := Time.get_ticks_msec()
-	var decision: Dictionary = motor.ejecutar(id, fuente, ahora - ultimo_ms)
+	sincronizar_fuente_seguridad()
+	var decision: Dictionary = motor.ejecutar(id, fuente, ahora - ultimo_ms, controles_seguridad())
 	ultimo_ms = ahora
 	mostrar_resultado(decision)
 	jugador.mostrar_herramienta(id if decision.get("aplicada", false) else "")
@@ -126,7 +150,11 @@ func mostrar_resultado(decision: Dictionary) -> void:
 	elif not decision.get("aplicada", false) and texto.begins_with("Se requiere "):
 		texto = "Acción no aplicada. Revisa los indicios y completa los pasos previos."
 	elif texto.is_empty():
-		texto = RESULTADOS.get(decision.get("accion"), "Acción completada")
+		var id: String = decision.get("accion", "")
+		if id == "inspeccionar" and zona_activa != $Sector:
+			texto = "%s abierta" % zona_activa.piezas[zona_activa.acceso].nombre
+		else:
+			texto = RESULTADOS.get(id, "Acción completada")
 	avisar(texto)
 
 
@@ -153,11 +181,19 @@ func mostrar_estado(inmediato := false) -> void:
 	lateral.get_node("Objetivo").text = datos.descripcion.trim_prefix("[MUESTRA] ")
 	lateral.get_node("Indicios").text = "\n".join(lineas)
 	var falla: bool = motor.hay_problemas() or motor.fin() == "falta-critica"
-	$Sector.reflejar_estado(estado, falla, inmediato or modo_captura)
-	panel.mostrar_leds({"energizado": estado.get("energizado"), "bloqueado": estado.get("bloqueo_puesto"),
-		"falla": falla})
+	zona_activa.reflejar_estado(estado, falla, inmediato or modo_captura)
+	actualizar_leds()
 	actualizar_hud()
 	resumen.mostrar(motor)
+
+
+func actualizar_leds() -> void:
+	var estado: Dictionary = motor.estado()
+	var bloqueado: Variant = estado.get("bloqueo_puesto")
+	if datos.zona == "motor":
+		bloqueado = controles_seguridad().get("bloqueo", false)
+	panel.mostrar_leds({"energizado": estado.get("energizado"), "bloqueado": bloqueado,
+		"falla": motor.hay_problemas() or motor.fin() == "falta-critica"})
 
 
 func actualizar_hud() -> void:
@@ -191,12 +227,15 @@ func reintentar() -> void:
 func abrir_menu(pieza: Interactuable) -> void:
 	if motor == null or not motor.fin().is_empty() or pausa_visible or not accion_pendiente.is_empty():
 		return
-	var opciones := MenuPieza.entradas(motor, datos, pieza.componente)
-	var lectura: String = $Sector.lectura_pieza(pieza.componente)
-	var causas: Array = datos.causas if motor.estado().get("inspeccionado",
-		motor.estado().get("sintomas_revisados", false)) else []
-	if opciones.is_empty():
-		lectura = "[MUESTRA] Sin falla en esta orden"
+	var opciones: Array[Dictionary] = []
+	var causas: Array = []
+	var lectura := "[MUESTRA] Sin falla en esta orden"
+	if pieza.zona == zona_activa:
+		opciones = MenuPieza.entradas(motor, datos, pieza.componente)
+		if zona_activa != $Sector or not opciones.is_empty():
+			lectura = zona_activa.lectura_pieza(pieza.componente)
+		if motor.estado().get("inspeccionado", motor.estado().get("sintomas_revisados", false)):
+			causas = datos.causas
 	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada)
 	jugador.activo = false
 	$Apuntado.hide()
@@ -232,6 +271,12 @@ func recibir_accion(accion: Dictionary) -> void:
 	if panel.conexion.pausado() or motor == null or not motor.fin().is_empty():
 		return
 	match accion.accion:
+		"bloqueo", "etiquetado":
+			sincronizar_fuente_seguridad()
+			if accion.fuente_entrada == "panel" and fuente_seguridad == "panel":
+				seguridad_panel[accion.accion] = accion.valor == 1
+				if datos.zona == "motor":
+					actualizar_leds()
 		"inspeccionar":
 			if not menu_pieza.visible and is_instance_valid(pieza_apuntada):
 				abrir_menu(pieza_apuntada)
@@ -271,6 +316,7 @@ func _exit_tree() -> void:
 
 func actualizar_panel(ahora: int) -> void:
 	panel.conexion.actualizar(ahora)
+	sincronizar_fuente_seguridad()
 	lateral.get_node("Conexion").text = panel.conexion.etiqueta()
 	var pausa: bool = panel.conexion.pausado()
 	if pausa != pausa_visible:
@@ -288,6 +334,24 @@ func actualizar_panel(ahora: int) -> void:
 		and motor != null and motor.fin().is_empty()
 	$AlternarPanel.text = "Mostrar panel virtual" if panel_oculto else "Ocultar panel virtual"
 	panel.visible = $AlternarPanel.visible and not panel_oculto
+
+
+func controles_seguridad() -> Dictionary:
+	if fuente_seguridad == "virtual":
+		return {"bloqueo": panel.get_node("Bloqueo").button_pressed,
+			"etiquetado": panel.get_node("Etiquetado").button_pressed}
+	return seguridad_panel
+
+
+func sincronizar_fuente_seguridad() -> void:
+	var fuente: String = panel.conexion.fuente_panel()
+	if fuente == fuente_seguridad:
+		return
+	fuente_seguridad = fuente
+	seguridad_panel.clear()
+	if fuente == "virtual":
+		panel.get_node("Bloqueo").set_pressed_no_signal(false)
+		panel.get_node("Etiquetado").set_pressed_no_signal(false)
 
 
 func _unhandled_input(evento: InputEvent) -> void:

@@ -69,9 +69,10 @@ func pieza_multimetro(padre: Node3D, centro: Vector3, tam: Vector3, color: Color
 
 
 func mostrar_herramienta(accion: String) -> void:
-	herramientas.llave.visible = accion in ["apretar", "apretar_terminal", "reponer_pieza"]
+	herramientas.llave.visible = accion in ["apretar", "apretar_terminal", "reponer_pieza",
+		"apretar_abrazadera", "ajustar_abrazadera", "reponer_abrazadera"]
 	herramientas.flexometro.visible = accion in ["medir", "inspeccionar"]
-	herramientas.multimetro.visible = accion == "evaluar_indicio"
+	herramientas.multimetro.visible = accion in ["evaluar_indicio", "medir_continuidad"]
 
 
 func configurar(traductor: RefCounted) -> void:

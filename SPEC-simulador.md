@@ -22,6 +22,7 @@ Escena en Godot de un bus eléctrico donde el técnico inspecciona, diagnostica 
 ## Modelo de escenario (JSON)
 - `estado`: variables simples (`energizado`, `bloqueo_puesto`, `torque_borne`, `tornillo_roto`, `aislamiento_ok`...).
 - `acciones`: condiciones previas, efectos sobre el estado, competencia, tipo de error, criticidad, fuente.
+- Una acción o recuperación puede declarar `seguridad_panel` y `explicacion_seguridad`. El motor evalúa los interruptores activos de bloqueo y etiquetado al ejecutar. Con `previa`, rechaza la acción si falta un interruptor. Con `critica`, registra `accion-insegura` y termina en `falta-critica` si falta uno o ambos. Con los dos activos se aplican las condiciones previas y los efectos habituales. El reintento conserva el progreso seguro anterior a la primera acción dependiente del panel.
 - `eventos`: condición sobre el estado que activa un problema o el fin del escenario.
 - `recuperaciones`: opciones con costo, tiempo y riesgo que modifican el estado.
 - `terminacion`: falla resuelta, falta crítica o límite de intentos.
