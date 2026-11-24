@@ -36,7 +36,7 @@ Campos comunes: `id`, `competencia`, `formato`, `dificultad`, `criticidad` (`nor
 - RF-6: EL SISTEMA clasifica cada acción insegura como `critica` o `leve`.
 - RF-7: CUANDO el jugador ejecuta una acción `critica`, EL SISTEMA detiene el escenario, muestra la explicación y registra la falta.
 - RF-8: CUANDO el jugador ejecuta una acción `leve`, EL SISTEMA resta puntos, avisa y continúa.
-- RF-9: EL SISTEMA incluye al menos 6 ítems `opcion-multiple` por competencia (4 competencias, 24 en total).
+- RF-9: EL SISTEMA incluye al menos 8 ítems `opcion-multiple` por competencia (4 competencias, 32 en total), para cubrir diagnóstico, post-test y retest sin repetir.
 - RF-10: EL SISTEMA incluye al menos 2 `caso-diagnostico` (competencia 3) y 3 `accion-panel` (competencia 1).
 - RF-11: EL SISTEMA etiqueta cada paso de un `caso-diagnostico` con el tipo de error que produce si se elige mal: `causa-equivocada`, `paso-omitido`, `orden-incorrecto`, `accion-insegura`, `paso-innecesario`.
 - RF-12: CUANDO un consumidor solicita ítems por competencia y dificultad, EL SISTEMA devuelve solo ítems válidos de esa competencia.
