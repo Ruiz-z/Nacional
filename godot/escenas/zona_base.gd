@@ -12,11 +12,13 @@ var bisagra: Node3D
 var animacion: Tween
 var luz_servicio: OmniLight3D
 var abierta := false
+var apertura_manual: Variant = null
+var nombre_acceso := "la compuerta"
 var giro_abierto := Vector3(0, 100, 0)
 
 
 func reflejar_estado(estado: Dictionary, _falla: bool, inmediato := false) -> void:
-	abrir(estado.get("inspeccionado", false), inmediato)
+	abrir(estado.get("inspeccionado", false) if apertura_manual == null else apertura_manual, inmediato)
 
 
 func lectura_pieza(componente: String) -> String:
@@ -25,10 +27,22 @@ func lectura_pieza(componente: String) -> String:
 	return ""
 
 
+func cambiar_acceso(valor: bool) -> void:
+	apertura_manual = valor
+	abrir(valor, false)
+
+
+func es_pieza_interna(componente: String) -> bool:
+	return bisagra != null and componente != acceso
+
+
 func abrir(valor: bool, inmediato: bool) -> void:
 	if valor == abierta and not inmediato:
 		return
 	abierta = valor
+	for componente in piezas:
+		if es_pieza_interna(componente):
+			piezas[componente].collision_layer = 2 if abierta else 0
 	if luz_servicio != null:
 		luz_servicio.visible = abierta
 	if animacion != null:
@@ -136,3 +150,4 @@ func tapa_superior(nombre: String, eje: Vector3, alto: float, ancho: float,
 	luz_servicio.omni_range = maxf(ancho, 0.95)
 	luz_servicio.hide()
 	add_child(luz_servicio)
+	abrir(false, true)

@@ -63,10 +63,11 @@ func _ready() -> void:
 	brillo.emission_enabled = true
 	brillo.emission = Color("#ffd37a")
 	caja(chispa, Vector3(0, 0.015, 0.006), Vector3(0.016, 0.013, 0.05), Color("#ffd37a"))
+	abrir(false, true)
 
 
 func reflejar_estado(estado: Dictionary, falla: bool, inmediato := false) -> void:
-	abrir(estado.get("inspeccionado", true), inmediato)
+	super.reflejar_estado(estado, falla, inmediato)
 	var dano: bool = estado.get("tornillo_roto", false)
 	tornillo.visible = not dano
 	fragmento.visible = dano

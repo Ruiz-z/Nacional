@@ -11,7 +11,7 @@ Abrir `godot/` en Godot 4.7.2 y pulsar Ejecutar (abre el menú principal). Marca
 - [ ] Post-test y retest: si no se adelantó el reloj, avisa cuánto falta.
 - [ ] Modo demo: carga `[DEMO]` sin tocar datos reales; "Adelantar reloj" y "Restablecer demo" funcionan.
 
-## Simulador (T-52, T-57 a T-60, T-91 a T-98)
+## Simulador (T-52, T-57 a T-60, T-91 a T-98, T-117 y T-118)
 
 - [ ] En el ejecutable exportado, WASD y ratón permiten caminar y mirar desde el inicio de la orden. El personaje choca con el autobús y las paredes. Repetir con los sticks del Pro Controller si está disponible.
 - [ ] A menos de 2,5 m, la mira resalta la compuerta y muestra su nombre. Clic izquierdo o A abre su menú. Elegir **Inspeccionar** abre la puerta de inmediato y muestra el resultado durante dos segundos.
@@ -24,6 +24,11 @@ Abrir `godot/` en Godot 4.7.2 y pulsar Ejecutar (abre el menú principal). Marca
 - [ ] Evaluar el indicio en el monitor. Verificar el LED verde y confirmar la solución en la batería. Revisar la línea de tiempo, guardar la reflexión y reintentar. Comprobar la variante y el estado del gabinete al reintentar.
 - [ ] Una falta crítica detiene el escenario y explica la causa con fuente. Una leve resta puntos y permite continuar.
 - [ ] Desconectar el panel a mitad del escenario pausa, avisa y deja continuar con el virtual.
+
+- [ ] En el gabinete, faros y motor, abrir y cerrar la tapa desde su menú. Con la tapa cerrada, mover la mira sobre las piezas internas y comprobar que quedan fuera de alcance. Reabrir desde el menú o con **Inspeccionar** y comprobar que las piezas siguen ofreciendo sus acciones. Revisar que abrir y cerrar no aparezca en la línea de tiempo ni cambie el puntaje.
+- [ ] En faros, inspeccionar la caja y medir continuidad. Intentar confirmar la solución desde el relé antes de reponer el foco. Al confirmar en el panel virtual, el aviso central muestra **Falta: Foco izquierdo repuesto**. Reponer el foco y confirmar desde el relé. Comprobar los cuatro indicios marcados en el HUD y el resumen de orden resuelta.
+- [ ] Repetir faros con un fusible equivocado y luego uno correcto. En otro recorrido provocar una chispa y corregirla con el cambio de foco. Dejar una pausa entre confirmaciones del panel y verificar que ambos recorridos terminan con la falla resuelta.
+- [ ] En aislamiento, comunicación, motor y el banco, comprobar que el HUD marca los pasos de la orden a medida que se completan.
 
 ### Capturas de primera persona
 

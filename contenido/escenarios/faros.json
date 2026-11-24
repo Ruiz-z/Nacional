@@ -11,6 +11,12 @@
     "foco-danado",
     "fusible-abierto"
   ],
+  "indicios": [
+    {"clave": "inspeccionado", "etiqueta": "Caja de fusibles inspeccionada"},
+    {"clave": "continuidad_medida", "etiqueta": "Continuidad medida"},
+    {"clave": "foco_repuesto", "etiqueta": "Foco izquierdo repuesto"},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta"}
+  ],
   "estado": {
     "inspeccionado": false,
     "resuelto": false,

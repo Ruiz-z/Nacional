@@ -2,6 +2,7 @@ extends RefCounted
 
 const Banco = preload("res://logica/simulador/banco_arnes.gd")
 const PUNTOS := ["tp1", "tp2"]
+const INDICIOS := ["tp1_medido", "tp2_medido", "tp1_reportado", "tp2_reportado", "diagnostico_registrado"]
 const OPCIONES := {"0": "≈0 V", "5": "≈5 V", "otra": "Otra"}
 const ERRORES_MEDICION := ["punto-de-medicion-incorrecto", "valor-fuera-de-rango", "paso-omitido"]
 const INTERPRETACION := "lectura-mal-interpretada"
@@ -32,6 +33,13 @@ func _init(lector: Callable = leer_variante, nombre_fuente := "virtual") -> void
 
 static func leer_variante(estado: Dictionary) -> Dictionary:
 	return Banco.calcular(estado.s1_abierto, estado.s2_abierto)
+
+
+func indicios() -> Dictionary:
+	var evidencia := reportadas if fuente == "banco" else medidas
+	return {"tp1_medido": evidencia.has("tp1"), "tp2_medido": evidencia.has("tp2"),
+		"tp1_reportado": reportadas.has("tp1"), "tp2_reportado": reportadas.has("tp2"),
+		"diagnostico_registrado": not diagnostico.is_empty()}
 
 
 func tocar(punto: String) -> String:

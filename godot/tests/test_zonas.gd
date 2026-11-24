@@ -23,13 +23,13 @@ static func comprobar(bus: Node3D, nombre: String) -> bool:
 	var acceso: StaticBody3D = zona.piezas[zona.acceso]
 	var antes: Dictionary = bus.motor.estado()
 	bus.abrir_menu(bus.get_node("Sector").piezas.compuerta)
-	if not bus.menu_pieza.visible or not bus.menu_pieza.entradas.is_empty() \
+	if not bus.menu_pieza.visible or bus.menu_pieza.entradas.size() != 1 or not bus.menu_pieza.entradas[0].navegacion \
 			or bus.menu_pieza.diagnostico.visible or bus.motor.estado() != antes \
-			or bus.menu_pieza.contenido.get_node("Lectura").text != "[MUESTRA] Sin falla en esta orden":
+			or bus.menu_pieza.contenido.get_node("Lectura").text != "Cerrada":
 		return false
 	bus.cerrar_menu()
 	bus.abrir_menu(acceso)
-	if bus.menu_pieza.entradas.size() != 1 or zona.abierta \
+	if bus.menu_pieza.entradas.size() != 2 or zona.abierta \
 			or bus.jugador.global_position.distance_to(acceso.global_position) > 2.5:
 		return false
 	bus.elegir_accion(0, "teclado")

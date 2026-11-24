@@ -86,6 +86,11 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	if bus.motor.fin() != "resuelto" or bus.motor.puntaje() != 100 \
 			or not bus.accion_pendiente.is_empty():
 		return false
+	var hud: Label = bus.lateral.get_node("Indicios")
+	if hud.text != "\n".join(["[x] TP1 medido", "[x] TP2 medido",
+			"[x] Lectura de TP1 reportada", "[x] Lectura de TP2 reportada",
+			"[x] Diagnóstico registrado", "[x] Falla resuelta"]):
+		return false
 	var decisiones: Array = bus.motor.resumen().linea_tiempo
 	if decisiones.back().fuente_entrada != "banco" or decisiones.back().fuente_falla != "banco" \
 			or decisiones[0].get("lectura-reportada") != "≈0 V":

@@ -14,6 +14,17 @@ const INDICIOS := {
 	"sintomas_revisados": "Síntomas de red revisados",
 	"resuelto": "Falla resuelta",
 }
+const PREVIAS := {
+	"faro_izquierdo": "Faro izquierdo encendido",
+	"faro_derecho": "Faro derecho encendido",
+	"fusible_quemado": "Fusible correcto instalado",
+	"chispa": "Chispa eliminada",
+	"pieza_danada": "Abrazadera dañada repuesta",
+	"alerta_temperatura": "Alerta de temperatura eliminada",
+	"tornillo_roto": "Tornillo repuesto",
+	"sector_equivocado": "Sector correcto recuperado",
+	"indicio_descartado": "Indicio recuperado",
+}
 const PROBLEMAS := {
 	"tornillo_roto": "Pieza dañada",
 	"fusible_quemado": "Fusible quemado",
@@ -37,11 +48,13 @@ const Practica = preload("res://logica/simulador/practica.gd")
 const MenuPieza = preload("res://logica/simulador/menu_pieza.gd")
 const FuenteBanco = preload("res://logica/simulador/fuente_banco.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
+const ZonaBase = preload("res://escenas/zona_base.gd")
 const Interactuable = preload("res://escenas/interactuable.gd")
 
 @export_file("*.json") var archivo := Escenario.AISLAMIENTO
 var motor: RefCounted
 var datos: Dictionary
+var indicios := {}
 var ultimo_ms: int
 var accion_pendiente := ""
 var causa_marcada := ""
@@ -57,6 +70,7 @@ var salida_hasta := 0
 var panel_oculto := false
 var modo_captura := false
 var zona_activa: Node3D
+var zona_menu: ZonaBase
 var navegando := false
 var seguridad_panel := {}
 var fuente_seguridad := ""
@@ -96,6 +110,11 @@ func _ready() -> void:
 	if datos.is_empty():
 		$Interfaz/Lateral/Estado.text = str(carga)
 		return
+	indicios = INDICIOS
+	if datos.has("indicios"):
+		indicios = {}
+		for indicio in datos.indicios:
+			indicios[indicio.clave] = indicio.etiqueta
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	if datos.zona == "banco":
 		motor = Motor.new(datos, fuente_banco.leer)
@@ -193,6 +212,12 @@ func ejecutar(id: String, fuente: String, lectura_previa: Dictionary = {}) -> vo
 	sincronizar_fuente_seguridad()
 	var decision: Dictionary = motor.ejecutar(id, fuente, ahora - ultimo_ms, controles_seguridad(), lectura_previa)
 	ultimo_ms = ahora
+	var zona := zona_activa as ZonaBase
+	if zona != null and zona.apertura_manual == false:
+		var regla: Dictionary = datos.acciones.get(id, datos.recuperaciones.get(id, {}))
+		if not regla.is_empty() and (id == "inspeccionar" \
+				or zona.es_pieza_interna(regla.get("componente", "bateria"))):
+			zona.cambiar_acceso(true)
 	mostrar_resultado(decision)
 	jugador.mostrar_herramienta(id if decision.get("aplicada", false) else "")
 	if not motor.fin().is_empty() and not tecnico.is_empty() and not resultados_guardados:
@@ -213,8 +238,8 @@ func mostrar_resultado(decision: Dictionary) -> void:
 	elif not decision.get("eventos", []).is_empty():
 		var evento: String = decision.eventos[0]
 		texto = PROBLEMAS.get(evento, datos.eventos[evento].descripcion.trim_prefix("[MUESTRA] "))
-	elif not decision.get("aplicada", false) and texto.begins_with("Se requiere "):
-		texto = "Acción no aplicada. Revisa los indicios y completa los pasos previos."
+	elif decision.has("previas_faltantes"):
+		texto = aviso_previas(decision.previas_faltantes)
 	elif decision.has("punto_medido"):
 		texto = "Medición registrada: %s = %.1f V" % [
 			decision.punto_medido.to_upper(), decision.lectura_mostrada]
@@ -230,7 +255,22 @@ func mostrar_resultado(decision: Dictionary) -> void:
 			texto = "Conductor reconectado"
 		else:
 			texto = RESULTADOS.get(id, "Acción completada")
-	avisar(texto, decision.has("lectura-reportada"))
+	avisar(texto, decision.has("lectura-reportada") or decision.has("previas_faltantes"))
+
+
+func aviso_previas(faltantes: Dictionary) -> String:
+	var etiquetas := PackedStringArray()
+	for clave in indicios:
+		if faltantes.get(clave) == true:
+			etiquetas.append(indicios[clave])
+	for clave in faltantes:
+		if faltantes[clave] == true and indicios.has(clave):
+			continue
+		# La reposición del foco también enciende el faro izquierdo.
+		if clave == "faro_izquierdo" and faltantes.get("foco_repuesto") == true:
+			continue
+		etiquetas.append(PREVIAS.get(clave, "%s = %s" % [clave.capitalize(), faltantes[clave]]))
+	return "Falta: " + ", ".join(etiquetas)
 
 
 func avisar(texto: String, sobre_menu := false) -> void:
@@ -246,9 +286,12 @@ func mostrar_estado(inmediato := false) -> void:
 	if terminado:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var lineas := PackedStringArray()
-	for clave in INDICIOS:
-		if estado.has(clave):
-			lineas.append("%s %s" % ["[x]" if estado[clave] else "[ ]", INDICIOS[clave]])
+	var progreso := estado
+	if motor.mediciones != null:
+		progreso = estado.merged(motor.mediciones.indicios())
+	for clave in indicios:
+		if progreso.has(clave):
+			lineas.append("%s %s" % ["[x]" if progreso[clave] else "[ ]", indicios[clave]])
 	var orden: Label = lateral.get_node("Estado")
 	orden.text = datos.titulo.trim_prefix("[MUESTRA] ")
 	orden.tooltip_text = orden.text
@@ -258,7 +301,8 @@ func mostrar_estado(inmediato := false) -> void:
 	if zona_activa == $Banco:
 		actualizar_banco()
 		interior.mostrar_modulo_auxiliar(estado.resuelto)
-		lineas.append("Fuente: %s · TP0 primero, luego TP1 o TP2." % $Banco.etiqueta_fuente(motor.mediciones.fuente))
+		if not terminado:
+			lineas.append("Fuente: %s · TP0 primero, luego TP1 o TP2." % $Banco.etiqueta_fuente(motor.mediciones.fuente))
 	lateral.get_node("Indicios").text = "\n".join(lineas)
 	actualizar_leds()
 	actualizar_hud()
@@ -284,7 +328,7 @@ func actualizar_hud() -> void:
 	$Interfaz.offset_right = 476.0 if terminado else 12.0 + ANCHO_HUD
 	$Interfaz.anchor_bottom = 1.0 if terminado else 0.0
 	lateral.get_node("Estado").visible = detalle
-	lateral.get_node("Indicios").visible = detalle
+	lateral.get_node("Indicios").visible = detalle or (terminado and motor.fin() == "resuelto" and not hud_oculto)
 	lateral.get_node("Conexion").visible = pausa_visible
 	var margen: float = $Interfaz.get_theme_stylebox("panel").get_minimum_size().y
 	$Interfaz.offset_bottom = -12.0 if terminado else 12.0 + lateral.get_combined_minimum_size().y + margen
@@ -295,6 +339,8 @@ func reintentar() -> void:
 	if nuevo == null:
 		return
 	motor = nuevo
+	if zona_activa is ZonaBase:
+		zona_activa.apertura_manual = null
 	resultados_guardados = false
 	causa_marcada = ""
 	cerrar_menu()
@@ -307,6 +353,9 @@ func reintentar() -> void:
 
 func abrir_menu(pieza: Interactuable) -> void:
 	if motor == null or not motor.fin().is_empty() or pausa_visible or navegando or not accion_pendiente.is_empty():
+		return
+	var zona := pieza.zona as ZonaBase
+	if zona != null and zona.es_pieza_interna(pieza.componente) and not zona.abierta:
 		return
 	var opciones: Array[Dictionary] = []
 	var causas: Array = []
@@ -326,6 +375,12 @@ func abrir_menu(pieza: Interactuable) -> void:
 			causas = datos.causas
 	elif opciones.is_empty() and pieza.zona == interior:
 		lectura = interior.lectura_pieza(pieza.componente)
+	if zona != null and zona.bisagra != null and pieza.componente == zona.acceso:
+		var id := "cerrar_acceso" if zona.abierta else "abrir_acceso"
+		var verbo := "Cerrar" if zona.abierta else "Abrir"
+		opciones.append(MenuPieza.navegacion(id, "%s %s" % [verbo, zona.nombre_acceso]))
+		lectura = zona.lectura_pieza(pieza.componente)
+		zona_menu = zona
 	salida_hasta = 0
 	resultado.hide()
 	var banco := zona_activa == $Banco and pieza.zona == $Banco and pieza.componente == "multimetro"
@@ -367,6 +422,7 @@ func estado_pieza(pieza: Interactuable) -> Dictionary:
 
 func cerrar_menu() -> void:
 	accion_pendiente = ""
+	zona_menu = null
 	menu_pieza.cerrar()
 	jugador.mostrar_herramienta("")
 	if not navegando and not pausa_visible and motor != null and motor.fin().is_empty():
@@ -380,7 +436,11 @@ func elegir_accion(indice: int, fuente: String) -> void:
 		return
 	var entrada: Dictionary = menu_pieza.entradas[indice]
 	if entrada.get("navegacion", false):
-		navegar(entrada.id)
+		if entrada.id in ["abrir_acceso", "cerrar_acceso"]:
+			zona_menu.cambiar_acceso(entrada.id == "abrir_acceso")
+			cerrar_menu()
+		else:
+			navegar(entrada.id)
 	elif entrada.requiere_panel:
 		accion_pendiente = entrada.id
 		if panel.conexion.fuente_panel() == "virtual":

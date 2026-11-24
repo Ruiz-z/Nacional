@@ -8,6 +8,7 @@ var continuidad := false
 
 func _ready() -> void:
 	acceso = "caja_fusibles"
+	nombre_acceso = "la caja de fusibles"
 	giro_abierto = Vector3(0, 0, 110)
 	# FrontLights del FBX en mundo: x [-1.102,-0.734] y [0.748,1.116],
 	# y [0.866,1.056], z [5.480,5.524]. El frente mira a +Z.
@@ -63,6 +64,10 @@ func _ready() -> void:
 	rotulo(rele, Vector3(0.045, 0, 0), "RELÉ", 0.00066)
 	tapa_superior("Caja de fusibles", Vector3(0.143, 0.25, 0), alto, ancho, "⚠  ELÉCTRICO")
 
+
+
+func es_pieza_interna(componente: String) -> bool:
+	return super.es_pieza_interna(componente) and not lentes.has(componente)
 
 
 func reflejar_estado(estado: Dictionary, falla: bool, inmediato := false) -> void:

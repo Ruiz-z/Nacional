@@ -16,6 +16,10 @@
     "modulo-sin-comunicacion",
     "otro-modulo"
   ],
+  "indicios": [
+    {"clave": "sintomas_revisados", "etiqueta": "Síntomas de red revisados"},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta"}
+  ],
   "estado": {
     "modulo": "Módulo virtual A",
     "sintomas_revisados": false,

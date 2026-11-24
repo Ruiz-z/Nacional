@@ -40,7 +40,7 @@ static func recorrido(menu: Node, base: String) -> bool:
 	if bus.archivo.get_file() != "comunicacion.json" or bus.datos.id != "comunicacion":
 		return false
 	bus.abrir_menu(bus.get_node("Sector").piezas.terminal)
-	if not bus.menu_pieza.entradas.is_empty() or bus.motor.estado().sintomas_revisados:
+	if bus.menu_pieza.visible or bus.motor.estado().sintomas_revisados:
 		return false
 	bus.cerrar_menu()
 	for accion in bus.datos.ruta_ideal:

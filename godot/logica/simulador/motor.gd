@@ -80,13 +80,17 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 		"tiempo_ms": tiempo_ms, "competencia": regla.competencia, "fuente": regla.fuente,
 		"criticidad": regla.criticidad, "tipo_error": regla.tipo_error, "aplicada": false,
 		"motivo": "", "recuperacion": recuperacion, "eventos": []}
+	var faltantes := {}
 	for campo in regla.previas:
 		if _estado[campo] != regla.previas[campo]:
-			decision.motivo = "Se requiere %s = %s." % [campo, regla.previas[campo]]
-			break
+			faltantes[campo] = regla.previas[campo]
+	if not faltantes.is_empty():
+		var campo: String = faltantes.keys()[0]
+		decision.motivo = "Se requiere %s = %s." % [campo, faltantes[campo]]
 	var seguridad: String = regla.get("seguridad_panel", "")
 	if not seguridad.is_empty() and not (controles.get("bloqueo", false) == true
 			and controles.get("etiquetado", false) == true):
+		faltantes.clear()
 		decision.motivo = regla.explicacion_seguridad
 		if seguridad == "critica":
 			decision.criticidad = "critica"
@@ -96,6 +100,8 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 		_puntaje = 0
 		if seguridad != "critica":
 			decision.motivo = regla.descripcion
+	elif not faltantes.is_empty():
+		decision.previas_faltantes = faltantes
 	elif decision.motivo.is_empty():
 		var cambio := activar_eventos(_estado, _estado.merged(regla.efectos, true))
 		if cambio.is_empty():

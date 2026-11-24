@@ -11,6 +11,14 @@
     "abrazadera-floja",
     "lectura-inconsistente"
   ],
+  "indicios": [
+    {"clave": "inspeccionado", "etiqueta": "Tapa del motor inspeccionada"},
+    {"clave": "refrigerante_revisado", "etiqueta": "Circuito de refrigerante revisado"},
+    {"clave": "temperatura_medida", "etiqueta": "Temperatura medida"},
+    {"clave": "bloqueo_confirmado", "etiqueta": "Bloqueo y etiquetado confirmados"},
+    {"clave": "abrazadera_ajustada", "etiqueta": "Abrazadera ajustada"},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta"}
+  ],
   "estado": {
     "inspeccionado": false,
     "resuelto": false,

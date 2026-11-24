@@ -10,6 +10,7 @@ var aviso := ""
 
 func _ready() -> void:
 	acceso = "tapa_motor"
+	nombre_acceso = "la tapa del motor"
 	giro_abierto = Vector3(0, 0, 105)
 	# La franja de servicio queda por encima de RearLights y debajo de la luneta.
 	var ancho := 1.70

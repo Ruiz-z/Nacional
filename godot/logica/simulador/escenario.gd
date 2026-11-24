@@ -9,6 +9,7 @@ const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria",
 const ZONAS := ["gabinete", "faros", "motor", "cabina", "banco"]
 const FUENTE_BZR := "Volvo Buses, BZR Low Entry Eléctrico (página pública)"
 const AISLAMIENTO := "escenarios/aislamiento.json"
+const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
 const Banco = preload("res://logica/competencias/banco.gd")
 
 
@@ -54,6 +55,8 @@ static func campo_invalido(datos: Dictionary) -> String:
 	for variable in datos.estado:
 		if not Banco.texto_presente(variable) or not valor_simple(datos.estado[variable]):
 			return "estado.%s" % variable
+	if datos.has("indicios") and not indicios_validos(datos):
+		return "indicios"
 	if not datos.get("estados_imposibles") is Array:
 		return "estados_imposibles"
 	for condicion in datos.estados_imposibles:
@@ -97,6 +100,22 @@ static func campo_invalido(datos: Dictionary) -> String:
 			if not datos.estado.get(campo) is bool:
 				return "estado." + campo
 	return ""
+
+
+static func indicios_validos(datos: Dictionary) -> bool:
+	if not datos.indicios is Array:
+		return false
+	var claves := {}
+	for indicio in datos.indicios:
+		if not indicio is Dictionary or not Banco.texto_presente(indicio.get("clave")) \
+				or not Banco.texto_presente(indicio.get("etiqueta")):
+			return false
+		var clave: String = indicio.clave
+		if claves.has(clave) or not (datos.estado.get(clave) is bool \
+				or (datos.zona == "banco" and clave in Mediciones.INDICIOS)):
+			return false
+		claves[clave] = true
+	return true
 
 
 static func ruta_valida(ruta: Variant, acciones: Dictionary) -> bool:

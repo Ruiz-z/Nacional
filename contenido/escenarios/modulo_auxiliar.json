@@ -12,6 +12,14 @@
     "senal",
     "modulo"
   ],
+  "indicios": [
+    {"clave": "tp1_medido", "etiqueta": "TP1 medido"},
+    {"clave": "tp2_medido", "etiqueta": "TP2 medido"},
+    {"clave": "tp1_reportado", "etiqueta": "Lectura de TP1 reportada"},
+    {"clave": "tp2_reportado", "etiqueta": "Lectura de TP2 reportada"},
+    {"clave": "diagnostico_registrado", "etiqueta": "Diagnóstico registrado"},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta"}
+  ],
   "estado": {
     "s1_abierto": true,
     "s2_abierto": false,

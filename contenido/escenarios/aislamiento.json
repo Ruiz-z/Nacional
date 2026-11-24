@@ -11,6 +11,11 @@
     "aislamiento-degradado",
     "aviso-inconsistente"
   ],
+  "indicios": [
+    {"clave": "inspeccionado", "etiqueta": "Gabinete inspeccionado"},
+    {"clave": "indicio_confirmado", "etiqueta": "Indicio de aislamiento confirmado"},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta"}
+  ],
   "estado": {
     "sector": "Sector virtual A",
     "inspeccionado": false,
