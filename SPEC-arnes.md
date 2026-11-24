@@ -81,7 +81,10 @@ Los puntos de prueba van del lado de J2, después de los interruptores.
 - Demo manual: aviso en la cabina, medir TP1 y TP2 en el banco, registrar lecturas, diagnosticar, reparar y ver en el resumen si el error fue de medición o de interpretación, con las dos variantes.
 - Si hay banco físico: las tres filas de la tabla se comprueban con un multímetro real antes de conectar el simulador.
 
+## Decisiones
+- Se construyen el banco **virtual y el físico**; el virtual es el respaldo.
+- El banco físico usa un **Arduino Uno R3 aparte**, sin tocar el panel de torque.
+- En la demo el técnico usa un **multímetro real**: lo que mide se registra como `lectura-reportada` y el multímetro virtual queda de respaldo.
+
 ## Dudas abiertas
-- [NECESITA ACLARACIÓN] Si habrá banco físico para la demo y la fecha en que se arma.
-- [NECESITA ACLARACIÓN] Arduino Uno R3 dedicado o compartido con el panel de torque.
-- [NECESITA ACLARACIÓN] Si el multímetro de la demo es real (lectura reportada) o solo virtual.
+- [NECESITA ACLARACIÓN] Fecha en que estará armado el banco físico.
