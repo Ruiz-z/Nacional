@@ -1,23 +1,1009 @@
 {
   "competencias": [
-    {"id": "seguridad-alto-voltaje", "nombre": "Seguridad de alto voltaje"},
-    {"id": "sistema-electrico-bateria", "nombre": "Sistema eléctrico y batería"},
-    {"id": "diagnostico-fallas", "nombre": "Diagnóstico de fallas"},
-    {"id": "electronica-conectividad", "nombre": "Electrónica y conectividad"}
+    {
+      "id": "seguridad-alto-voltaje",
+      "nombre": "Seguridad de alto voltaje"
+    },
+    {
+      "id": "sistema-electrico-bateria",
+      "nombre": "Sistema eléctrico y batería"
+    },
+    {
+      "id": "diagnostico-fallas",
+      "nombre": "Diagnóstico de fallas"
+    },
+    {
+      "id": "electronica-conectividad",
+      "nombre": "Electrónica y conectividad"
+    }
   ],
   "items": [
+    {
+      "id": "seguridad-01",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "NOM-029-STPS",
+        "titulo": "Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad",
+        "seccion": "Control de la reenergización",
+        "referencia": "NOM-029-STPS-2011"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Para qué sirve el bloqueo dentro del procedimiento LOTO?",
+      "opciones": [
+        "Para impedir la reconexión no autorizada del punto de aislamiento.",
+        "Para medir si queda energía almacenada.",
+        "Para identificar la clase de EPP requerida."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "seguridad-02",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "NOM-029-STPS",
+        "titulo": "Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad",
+        "seccion": "Señalización durante el mantenimiento",
+        "referencia": "NOM-029-STPS-2011"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué función cumple la etiqueta en el procedimiento LOTO?",
+      "opciones": [
+        "Retiene físicamente el dispositivo en su posición de aislamiento.",
+        "Comunica la restricción de operar el dispositivo y que hay un trabajo en curso.",
+        "Comprueba que el dispositivo de aislamiento abrió todos sus contactos."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "seguridad-03",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "NFPA 70E",
+        "titulo": "Standard for Electrical Safety in the Workplace",
+        "seccion": "Selección del equipo de protección personal",
+        "referencia": "NFPA 70E"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿En qué se basa la selección del EPP para una tarea eléctrica?",
+      "opciones": [
+        "En el estado de carga que muestra el tablero.",
+        "En el equipo que se usó para la última tarea del turno.",
+        "En los peligros evaluados y el procedimiento aplicable a la tarea."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "seguridad-04",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "NFPA 70E",
+        "titulo": "Standard for Electrical Safety in the Workplace",
+        "seccion": "Verificación de una condición eléctricamente segura",
+        "referencia": "NFPA 70E"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "El tablero simulado está apagado. ¿Qué falta para dar por comprobada la ausencia de tensión?",
+      "opciones": [
+        "Una verificación en los puntos pertinentes con el instrumento previsto por el procedimiento.",
+        "Una segunda lectura del mismo indicador apagado.",
+        "El registro del apagado en la orden de trabajo."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "seguridad-05",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "NFPA 70E",
+        "titulo": "Standard for Electrical Safety in the Workplace",
+        "seccion": "Fuentes de energía y energía almacenada",
+        "referencia": "NFPA 70E"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Un circuito simulado quedó aislado de su alimentación principal. ¿Qué se debe considerar antes de darlo por seguro?",
+      "opciones": [
+        "El tiempo de uso acumulado del equipo desde el último servicio.",
+        "Las demás fuentes posibles y la energía que pueda seguir almacenada.",
+        "El último consumo registrado mientras el circuito funcionaba."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "seguridad-06",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "NFPA 70E",
+        "titulo": "Standard for Electrical Safety in the Workplace",
+        "seccion": "Equipo de protección personal y desenergización",
+        "referencia": "NFPA 70E"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "El técnico ya cuenta con el EPP previsto. ¿Qué debe hacer si la tarea requiere desenergizar el circuito?",
+      "opciones": [
+        "Convertir la tarea en una inspección visual y mantener el mismo alcance.",
+        "Registrar el EPP como evidencia de que se completó el aislamiento.",
+        "Aplicar el procedimiento para establecer y verificar la condición segura."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "seguridad-07",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "NFPA 70E",
+        "titulo": "Standard for Electrical Safety in the Workplace",
+        "seccion": "Comprobación del instrumento para verificar ausencia de tensión",
+        "referencia": "NFPA 70E"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "El instrumento indicó ausencia de tensión en la simulación, pero falló su comprobación posterior. ¿Cómo se interpreta el resultado?",
+      "opciones": [
+        "La ausencia de tensión sigue sin verificarse y la tarea debe quedar detenida.",
+        "La lectura inicial sigue siendo válida porque el instrumento alcanzó a mostrarla.",
+        "El bloqueo aplicado basta para validar retrospectivamente la lectura."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "seguridad-08",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "NFPA 70E",
+        "titulo": "Standard for Electrical Safety in the Workplace",
+        "seccion": "Identificación de todas las fuentes de alimentación",
+        "referencia": "NFPA 70E"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En la maqueta se bloqueó la alimentación principal, pero el esquema indica una alimentación auxiliar hacia los puntos de trabajo. ¿Qué decisión corresponde?",
+      "opciones": [
+        "Dar por concluido el aislamiento si la fuente auxiliar no aparece en el tablero.",
+        "Mantener detenida la tarea hasta controlar la fuente auxiliar y verificar la condición segura.",
+        "Aceptar el bloqueo principal porque la alimentación auxiliar pertenece a otro subsistema."
+      ],
+      "correcta": 1
+    },
     {
       "id": "bateria-muestra-01",
       "competencia": "sistema-electrico-bateria",
       "formato": "opcion-multiple",
       "dificultad": "facil",
       "criticidad": "normal",
-      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Electric safety",
+        "seccion": "Baterías de tracción",
+        "referencia": "Volvo Buses, información pública sobre seguridad eléctrica"
+      },
       "muestra": true,
+      "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué valor muestra el indicador de carga simulado si marca 50 %?",
-      "opciones": ["La mitad de la carga", "Carga completa", "Carga agotada"],
+      "pregunta": "¿Cuál es la función principal de la batería de tracción de un bus eléctrico?",
+      "opciones": [
+        "Determinar si los conductores están aislados del chasis.",
+        "Almacenar energía para alimentar el sistema de propulsión.",
+        "Distribuir mensajes entre las unidades de control."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "bateria-02",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Electric safety",
+        "seccion": "Supervisión de parámetros de batería",
+        "referencia": "Volvo Buses, información pública sobre seguridad eléctrica"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué magnitud ayuda a vigilar el estado térmico de la batería?",
+      "opciones": [
+        "El estado de carga estimado.",
+        "El tiempo transcurrido desde la última carga.",
+        "La temperatura de la batería."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "bateria-03",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "ISO 6469",
+        "titulo": "Electrically propelled road vehicles — Safety specifications — Part 3: Electrical safety",
+        "seccion": "Aislamiento eléctrico respecto del chasis",
+        "referencia": "ISO 6469-3"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué condición vigila el monitoreo de aislamiento del sistema de tracción?",
+      "opciones": [
+        "La separación eléctrica entre el circuito de tracción y el chasis.",
+        "La energía disponible para el siguiente recorrido.",
+        "La estabilidad de la temperatura durante una recarga."
+      ],
       "correcta": 0
+    },
+    {
+      "id": "bateria-04",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Electric safety",
+        "seccion": "Supervisión de la batería durante el funcionamiento",
+        "referencia": "Volvo Buses, información pública sobre seguridad eléctrica"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "El bus simulado conserva carga, pero registra una advertencia térmica de batería. ¿Cómo se interpretan ambos datos?",
+      "opciones": [
+        "La advertencia térmica indica por sí sola que la carga disponible se agotó.",
+        "La carga disponible y la condición térmica describen aspectos distintos de la batería.",
+        "La carga disponible hace que la advertencia se interprete como error de lectura."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "bateria-05",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "ISO 6469",
+        "titulo": "Electrically propelled road vehicles — Safety specifications — Part 3: Electrical safety",
+        "seccion": "Protección contra choque eléctrico y aislamiento",
+        "referencia": "ISO 6469-3"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué informa un aviso de aislamiento degradado en el simulador?",
+      "opciones": [
+        "La ubicación exacta de un módulo de batería averiado.",
+        "Una estimación actualizada de la autonomía disponible.",
+        "Una condición anómala de aislamiento que requiere evaluación."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "bateria-06",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Electric safety",
+        "seccion": "Supervisión y desconexión del sistema eléctrico",
+        "referencia": "Volvo Buses, información pública sobre seguridad eléctrica"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Al desconectar la batería del resto del circuito de tracción simulado, ¿qué ocurre con la energía almacenada en sus celdas?",
+      "opciones": [
+        "Puede seguir almacenada dentro de la batería.",
+        "Queda consumida por la operación de desconexión.",
+        "Pasa por completo al circuito de tracción desconectado."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "bateria-07",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "ISO 6469",
+        "titulo": "Electrically propelled road vehicles — Safety specifications — Part 3: Electrical safety",
+        "seccion": "Aislamiento del sistema de propulsión eléctrica",
+        "referencia": "ISO 6469-3"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "La simulación muestra carga estable y aislamiento degradado. ¿Qué conclusión se sostiene con esos datos?",
+      "opciones": [
+        "La degradación del aislamiento demuestra una caída inmediata del estado de carga.",
+        "La carga estable y la degradación del aislamiento pueden coexistir.",
+        "La carga estable demuestra que el aviso corresponde al chasis y no al circuito."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "bateria-08",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Electric safety",
+        "seccion": "Monitoreo de parámetros de batería",
+        "referencia": "Volvo Buses, información pública sobre seguridad eléctrica"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Una sola lectura de temperatura difiere del resto de las señales térmicas del simulador. ¿Qué interpretación conserva la incertidumbre diagnóstica?",
+      "opciones": [
+        "El promedio confirma que toda la batería se mantuvo a la misma temperatura.",
+        "La diferencia identifica por sí sola una zona dañada del paquete.",
+        "Puede haber una diferencia térmica real o una lectura anómala. Hace falta contrastar ambas hipótesis."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "diagnostico-01",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Workshop services",
+        "seccion": "Lectura de códigos de diagnóstico",
+        "referencia": "Volvo Buses, acceso remoto a códigos de diagnóstico"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué representa un código de falla de diagnóstico?",
+      "opciones": [
+        "La reparación que ya se aplicó a un componente.",
+        "La lista completa de piezas que se deben cambiar.",
+        "Una condición que el sistema de diagnóstico detectó y registró."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "diagnostico-02",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Workshop services",
+        "seccion": "Registro de códigos para preparar el servicio",
+        "referencia": "Volvo Buses, acceso remoto a códigos de diagnóstico"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué conviene registrar al encontrar un código en el diagnóstico simulado?",
+      "opciones": [
+        "El código, el módulo que lo reporta y el síntoma observado.",
+        "Solo el nombre comercial del bus y su autonomía.",
+        "Solo la pieza que el técnico sospechaba antes de leer el código."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "diagnostico-03",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Workshop services",
+        "seccion": "Consulta de códigos y preparación del servicio",
+        "referencia": "Volvo Buses, acceso remoto a códigos de diagnóstico"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué conserva evidencia para comparar una falla intermitente en dos sesiones?",
+      "opciones": [
+        "Conservar solo la lista de componentes que se revisaron.",
+        "Guardar los códigos y las condiciones en que se presentó el síntoma.",
+        "Registrar únicamente el resultado de la última sesión."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "diagnostico-04",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Workshop services",
+        "seccion": "Interpretación del registro de diagnóstico",
+        "referencia": "Volvo Buses, acceso remoto a códigos de diagnóstico"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Un código figura como histórico y el síntoma ya no aparece. ¿Qué se puede concluir?",
+      "opciones": [
+        "La misma condición sigue activa durante toda la sesión.",
+        "El componente asociado al registro quedó reparado.",
+        "El registro indica una detección anterior. Su relación con el síntoma requiere evidencia."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "diagnostico-05",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "MID 221 AIC, fault tracing",
+        "seccion": "Diagnóstico de comunicación entre unidades",
+        "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "El tablero simulado registra que dejó de recibir datos de otro módulo. ¿Qué conviene investigar primero?",
+      "opciones": [
+        "El estado de comunicación y los registros de los módulos implicados.",
+        "La calibración de todos los sensores que aparecen en el tablero.",
+        "La sustitución del módulo que notificó la pérdida de comunicación."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "diagnostico-06",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Workshop services",
+        "seccion": "Uso de códigos para planificar el diagnóstico",
+        "referencia": "Volvo Buses, acceso remoto a códigos de diagnóstico"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Un mismo síntoma coincide con varios códigos. ¿Qué ayuda a priorizar las hipótesis?",
+      "opciones": [
+        "Asignar una reparación independiente a cada código desde el inicio.",
+        "Relacionar el momento de aparición de los códigos con el síntoma y los módulos que los reportaron.",
+        "Priorizar el código cuyo identificador aparezca primero por orden alfabético."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "diagnostico-07",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "MID 221 AIC, fault tracing",
+        "seccion": "Diagnóstico de fallas compartidas en el enlace de datos",
+        "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En el registro simulado varios módulos pierden comunicación al mismo tiempo, pero uno de ellos registra además un evento propio anterior. ¿Cómo se inicia el análisis?",
+      "opciones": [
+        "Se atribuyen todas las pérdidas al módulo que guardó el evento anterior.",
+        "Se trata cada pérdida como avería independiente porque fue notificada por un módulo distinto.",
+        "Se reconstruye la cronología y se evalúa si una condición común explica las pérdidas simultáneas."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "diagnostico-08",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Workshop services",
+        "seccion": "Seguimiento de registros de diagnóstico",
+        "referencia": "Volvo Buses, acceso remoto a códigos de diagnóstico"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Después de una corrección simulada desaparece el código, pero sigue presente el síntoma original. ¿Qué conclusión corresponde?",
+      "opciones": [
+        "La corrección aún requiere comprobación y se debe continuar el diagnóstico del síntoma.",
+        "La desaparición del código confirma que el síntoma tiene una causa nueva.",
+        "El resultado basta para cerrar el diagnóstico del síntoma original."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "conectividad-01",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "MID 221 AIC, fault tracing",
+        "seccion": "Redes de datos del vehículo",
+        "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué función cumple una red CAN en el vehículo?",
+      "opciones": [
+        "Permite intercambiar mensajes entre unidades electrónicas.",
+        "Distribuye potencia eléctrica para el motor de tracción.",
+        "Almacena la energía usada por las unidades electrónicas."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "conectividad-02",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Electric safety",
+        "seccion": "Monitoreo de parámetros eléctricos",
+        "referencia": "Volvo Buses, información pública sobre seguridad eléctrica"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué papel cumple un sensor de temperatura en el sistema de supervisión?",
+      "opciones": [
+        "Distribuye la alimentación a las unidades de control.",
+        "Proporciona una señal que representa la temperatura en el punto que vigila.",
+        "Decide por sí solo si se autoriza la marcha del vehículo."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "conectividad-03",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "MID 221 AIC, fault tracing",
+        "seccion": "Comunicación entre unidades electrónicas",
+        "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué función cumple una unidad de control cuando publica un dato en la red del vehículo?",
+      "opciones": [
+        "Transfiere al receptor la alimentación eléctrica del sensor.",
+        "Modifica por sí misma el estado físico que se midió.",
+        "Pone ese dato a disposición de las unidades que usan el mensaje."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "conectividad-04",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "MID 221 AIC, fault tracing",
+        "seccion": "Comunicación y disponibilidad de datos",
+        "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "El tablero simulado muestra una variable como no disponible. ¿Qué significa ese estado?",
+      "opciones": [
+        "Que el tablero no dispone de un dato válido para mostrar.",
+        "Que la variable medida tomó automáticamente su valor mínimo.",
+        "Que el sensor quedó calibrado con el último dato mostrado."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "conectividad-05",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "MID 221 AIC, fault tracing",
+        "seccion": "Interconexión de redes de datos",
+        "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué función cumple una pasarela entre redes del vehículo?",
+      "opciones": [
+        "Sustituye las mediciones de los sensores conectados a cada red.",
+        "Interconecta redes y reenvía los datos previstos por su configuración.",
+        "Suministra la energía de tracción a los nodos de ambas redes."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "conectividad-06",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "MID 221 AIC, fault tracing",
+        "seccion": "Diagnóstico de enlaces de datos",
+        "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Una unidad conserva alimentación en la simulación, pero sus mensajes dejan de llegar al tablero. ¿Qué se puede concluir?",
+      "opciones": [
+        "La alimentación presente confirma que el tablero recibe los mensajes.",
+        "La ausencia de mensajes confirma una avería del sensor conectado a la unidad.",
+        "La alimentación presente no confirma que la comunicación funcione."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "conectividad-07",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "MID 221 AIC, fault tracing",
+        "seccion": "Diagnóstico de datos entre emisor y receptor",
+        "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Una unidad muestra la variable en su lectura local, pero dos receptores dejan de actualizarla al mismo tiempo. ¿Qué comprobación distingue mejor una falla de comunicación de una lectura anómala?",
+      "opciones": [
+        "Comparar la lectura local con el estado del mensaje y su recorrido hasta los receptores.",
+        "Comparar solo los datos que quedaron congelados en los dos receptores.",
+        "Comparar la lectura local con otra variable de un subsistema no relacionado."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "conectividad-08",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "MID 221 AIC, fault tracing",
+        "seccion": "Topología y diagnóstico de redes del vehículo",
+        "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Los nodos de una rama dejan de ser visibles y el resto sigue comunicando. ¿Qué hipótesis conviene contrastar primero con el esquema simulado?",
+      "opciones": [
+        "Una calibración incorrecta e independiente en cada nodo de esa rama.",
+        "Una condición compartida por los nodos de esa rama.",
+        "Un fallo que afecta por igual a todas las redes del vehículo."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "caso-comunicacion-01",
+      "competencia": "diagnostico-fallas",
+      "formato": "caso-diagnostico",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "MID 221 AIC, fault tracing",
+        "seccion": "Diagnóstico del enlace de datos entre unidades",
+        "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "sintomas": [
+        "El tablero simulado deja de actualizar datos de un grupo de módulos.",
+        "Los módulos de otra rama siguen comunicando."
+      ],
+      "codigo_falla": "Pérdida de comunicación con una rama (aviso simulado)",
+      "causa_correcta": "Interrupción del enlace compartido por los módulos de la rama afectada.",
+      "ruta_ideal": [
+        "leer-registro",
+        "comparar-ramas",
+        "confirmar-enlace"
+      ],
+      "pasos": [
+        {
+          "id": "leer-registro",
+          "accion": "Consultar y conservar los eventos de comunicación simulados.",
+          "resultado": "Los eventos agrupan a los módulos afectados en el mismo momento.",
+          "tipo_error": "orden-incorrecto",
+          "fuente": {
+            "origen": "Volvo Buses",
+            "titulo": "MID 221 AIC, fault tracing",
+            "seccion": "Diagnóstico del enlace de datos entre unidades",
+            "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+          }
+        },
+        {
+          "id": "comparar-ramas",
+          "accion": "Cruzar los módulos afectados con el esquema de red simulado.",
+          "resultado": "Los módulos sin comunicación comparten una rama.",
+          "tipo_error": "orden-incorrecto",
+          "fuente": {
+            "origen": "Volvo Buses",
+            "titulo": "MID 221 AIC, fault tracing",
+            "seccion": "Diagnóstico del enlace de datos entre unidades",
+            "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+          }
+        },
+        {
+          "id": "confirmar-enlace",
+          "accion": "Consultar el estado simulado del enlace identificado.",
+          "resultado": "El registro del simulador confirma una interrupción en esa rama.",
+          "tipo_error": "orden-incorrecto",
+          "fuente": {
+            "origen": "Volvo Buses",
+            "titulo": "MID 221 AIC, fault tracing",
+            "seccion": "Diagnóstico del enlace de datos entre unidades",
+            "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+          }
+        },
+        {
+          "id": "atribuir-al-tablero",
+          "accion": "Atribuir el evento al tablero que muestra el aviso.",
+          "resultado": "El aviso identifica al receptor que dejó de recibir datos y no confirma una avería del tablero.",
+          "tipo_error": "causa-equivocada",
+          "fuente": {
+            "origen": "Volvo Buses",
+            "titulo": "MID 221 AIC, fault tracing",
+            "seccion": "Diagnóstico del enlace de datos entre unidades",
+            "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+          }
+        },
+        {
+          "id": "omitir-comprobacion",
+          "accion": "Cerrar el diagnóstico con la agrupación de módulos como única evidencia.",
+          "resultado": "La agrupación orienta la hipótesis, pero falta confirmar el estado del enlace.",
+          "tipo_error": "paso-omitido",
+          "fuente": {
+            "origen": "Volvo Buses",
+            "titulo": "MID 221 AIC, fault tracing",
+            "seccion": "Diagnóstico del enlace de datos entre unidades",
+            "referencia": "Volvo Bus Corporation, manual de servicio, redes de datos del vehículo"
+          }
+        }
+      ]
+    },
+    {
+      "id": "caso-aislamiento-02",
+      "competencia": "diagnostico-fallas",
+      "formato": "caso-diagnostico",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "ISO 6469",
+        "titulo": "Electrically propelled road vehicles — Safety specifications — Part 3: Electrical safety",
+        "seccion": "Aislamiento eléctrico del sistema de propulsión",
+        "referencia": "ISO 6469-3"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "sintomas": [
+        "El simulador muestra un aviso de aislamiento en el sistema de tracción.",
+        "La indicación de carga permanece estable."
+      ],
+      "codigo_falla": "Aislamiento degradado (aviso simulado)",
+      "causa_correcta": "Degradación del aislamiento respecto al chasis, localizada en un ramal de tracción simulado.",
+      "ruta_ideal": [
+        "conservar-aviso",
+        "revisar-aislamiento",
+        "localizar-ramal"
+      ],
+      "pasos": [
+        {
+          "id": "conservar-aviso",
+          "accion": "Registrar el aviso y suspender la práctica de marcha.",
+          "resultado": "Se conserva la evidencia y la simulación queda detenida.",
+          "tipo_error": "orden-incorrecto",
+          "fuente": {
+            "origen": "Volvo Buses",
+            "titulo": "Workshop services",
+            "seccion": "Consulta de códigos de diagnóstico",
+            "referencia": "Volvo Buses, acceso remoto a códigos de diagnóstico"
+          }
+        },
+        {
+          "id": "revisar-aislamiento",
+          "accion": "Consultar el registro de aislamiento desde la pantalla de diagnóstico simulado.",
+          "resultado": "El registro confirma la condición de aislamiento degradado sin localizarla todavía.",
+          "tipo_error": "orden-incorrecto",
+          "fuente": {
+            "origen": "ISO 6469",
+            "titulo": "Electrically propelled road vehicles — Safety specifications — Part 3: Electrical safety",
+            "seccion": "Aislamiento eléctrico del sistema de propulsión",
+            "referencia": "ISO 6469-3"
+          }
+        },
+        {
+          "id": "localizar-ramal",
+          "accion": "Consultar la evidencia de localización que presenta el escenario.",
+          "resultado": "El simulador identifica un ramal de tracción con aislamiento degradado respecto al chasis.",
+          "tipo_error": "orden-incorrecto",
+          "fuente": {
+            "origen": "ISO 6469",
+            "titulo": "Electrically propelled road vehicles — Safety specifications — Part 3: Electrical safety",
+            "seccion": "Aislamiento eléctrico del sistema de propulsión",
+            "referencia": "ISO 6469-3"
+          }
+        },
+        {
+          "id": "atribuir-a-carga",
+          "accion": "Atribuir el aviso a una disminución del estado de carga.",
+          "resultado": "El estado de carga estable no explica el aviso de aislamiento.",
+          "tipo_error": "causa-equivocada",
+          "fuente": {
+            "origen": "ISO 6469",
+            "titulo": "Electrically propelled road vehicles — Safety specifications — Part 3: Electrical safety",
+            "seccion": "Aislamiento eléctrico del sistema de propulsión",
+            "referencia": "ISO 6469-3"
+          }
+        },
+        {
+          "id": "reanudar-marcha",
+          "accion": "Seleccionar reanudar marcha con el aviso de aislamiento pendiente.",
+          "resultado": "La práctica se detiene por intentar continuar con una condición eléctrica pendiente.",
+          "tipo_error": "accion-insegura",
+          "fuente": {
+            "origen": "ISO 6469",
+            "titulo": "Electrically propelled road vehicles — Safety specifications — Part 3: Electrical safety",
+            "seccion": "Aislamiento eléctrico del sistema de propulsión",
+            "referencia": "ISO 6469-3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "panel-bloqueo-01",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "accion-panel",
+      "dificultad": "facil",
+      "criticidad": "critica",
+      "fuente": {
+        "origen": "NFPA 70E",
+        "titulo": "Standard for Electrical Safety in the Workplace",
+        "seccion": "Bloqueo del punto de aislamiento",
+        "referencia": "NFPA 70E"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "instruccion": "Con el punto de aislamiento ya abierto en la simulación y ambos interruptores inactivos, activa Bloqueo.",
+      "secuencia_esperada": [
+        {
+          "ctrl": "bloqueo",
+          "valor": 1
+        }
+      ]
+    },
+    {
+      "id": "panel-loto-02",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "accion-panel",
+      "dificultad": "media",
+      "criticidad": "critica",
+      "fuente": {
+        "origen": "NFPA 70E",
+        "titulo": "Standard for Electrical Safety in the Workplace",
+        "seccion": "Bloqueo y etiquetado",
+        "referencia": "NFPA 70E"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "instruccion": "Con el punto de aislamiento ya abierto en la simulación y ambos interruptores inactivos, activa Bloqueo y después Etiquetado.",
+      "secuencia_esperada": [
+        {
+          "ctrl": "bloqueo",
+          "valor": 1
+        },
+        {
+          "ctrl": "etiquetado",
+          "valor": 1
+        }
+      ]
+    },
+    {
+      "id": "panel-verificacion-03",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "accion-panel",
+      "dificultad": "dificil",
+      "criticidad": "critica",
+      "fuente": {
+        "origen": "NFPA 70E",
+        "titulo": "Standard for Electrical Safety in the Workplace",
+        "seccion": "Verificación de ausencia de tensión",
+        "referencia": "NFPA 70E"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "instruccion": "La maqueta indica bloqueo y etiquetado activos, pero la verificación de ausencia de tensión quedó inconclusa. Pulsa Cancelar en el intento de avance y conserva el bloqueo y el etiquetado.",
+      "secuencia_esperada": [
+        {
+          "ctrl": "cancelar",
+          "valor": 1
+        }
+      ]
     }
   ]
 }
