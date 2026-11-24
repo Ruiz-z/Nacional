@@ -18,3 +18,6 @@ Si se usa un modelo de terceros, se declara aquí su autor y licencia. Un modelo
 
 ## Pruebas de usabilidad
 Se declara si las personas que probaron el sistema tenían o no conocimiento técnico de vehículos.
+
+## Créditos de modelos 3D
+- Autobús exterior: "3D Bus" de ajanhallinta, licencia CC0 (https://opengameart.org/content/3d-bus). Referencia visual genérica; no representa un modelo Volvo ni el vehículo del escenario.
