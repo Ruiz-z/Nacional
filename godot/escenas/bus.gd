@@ -1,7 +1,9 @@
 extends Node3D
 
 signal decision_tomada(decision: Dictionary)
+signal salida_solicitada
 
+const ANCHO_HUD := 352.0
 const FondoTarjeta = preload("res://escenas/fondo_tarjeta.gd")
 const INDICIOS := {
 	"inspeccionado": "Sector inspeccionado",
@@ -47,7 +49,8 @@ var conexion_panel: RefCounted
 var tecnico := {}
 var resultados_guardados := false
 var pausa_visible := false
-var hud_colapsado := false
+var hud_oculto := false
+var salida_hasta := 0
 var panel_oculto := false
 var modo_captura := false
 var zona_activa: Node3D
@@ -67,11 +70,14 @@ var fuente_seguridad := ""
 func _ready() -> void:
 	jugador.configurar(panel.entrada)
 	jugador.activo = false
-	$Interfaz.add_theme_stylebox_override("panel", lateral.get_theme_stylebox("panel", "PanelContainer"))
+	var fondo := lateral.get_theme_stylebox("panel", "PanelContainer").duplicate() as StyleBoxFlat
+	for lado in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		fondo.set_content_margin(lado, 12)
+	$Interfaz.add_theme_stylebox_override("panel", fondo)
 	FondoTarjeta.aplicar(panel, 16)
-	lateral.get_node("AlternarHud").pressed.connect(func():
-		hud_colapsado = not hud_colapsado
-		actualizar_hud())
+	var pista := create_tween()
+	pista.tween_property($PistaControles, "modulate:a", 0.0, 0.5).set_delay(7.5)
+	pista.tween_callback($PistaControles.hide)
 	$AlternarPanel.pressed.connect(func():
 		panel_oculto = not panel_oculto
 		actualizar_panel(Time.get_ticks_msec()))
@@ -106,6 +112,7 @@ func _ready() -> void:
 	if datos.zona == "motor":
 		panel.get_node("Bloqueo").toggled.connect(func(_activo: bool): actualizar_leds())
 	resumen.reintento_solicitado.connect(reintentar)
+	lateral.minimum_size_changed.connect(actualizar_hud)
 	mostrar_estado(true)
 	actualizar_panel(ultimo_ms)
 
@@ -174,11 +181,9 @@ func mostrar_estado(inmediato := false) -> void:
 	for clave in INDICIOS:
 		if estado.has(clave):
 			lineas.append("%s %s" % ["✓" if estado[clave] else "—", INDICIOS[clave]])
-	for clave in PROBLEMAS:
-		if estado.get(clave, false):
-			lineas.append("!  %s" % PROBLEMAS[clave])
-	lateral.get_node("Estado").text = datos.titulo.trim_prefix("[MUESTRA] ")
-	lateral.get_node("Objetivo").text = datos.descripcion.trim_prefix("[MUESTRA] ")
+	var orden: Label = lateral.get_node("Estado")
+	orden.text = datos.titulo.trim_prefix("[MUESTRA] ")
+	orden.tooltip_text = orden.text
 	lateral.get_node("Indicios").text = "\n".join(lineas)
 	var falla: bool = motor.hay_problemas() or motor.fin() == "falta-critica"
 	zona_activa.reflejar_estado(estado, falla, inmediato or modo_captura)
@@ -198,15 +203,17 @@ func actualizar_leds() -> void:
 
 func actualizar_hud() -> void:
 	var terminado: bool = motor != null and not motor.fin().is_empty()
-	var detalle := not terminado and not hud_colapsado
-	$Interfaz.offset_right = 476.0 if terminado else 312.0
-	lateral.get_node("AlternarHud").visible = not terminado
-	lateral.get_node("AlternarHud").text = "Mostrar HUD" if hud_colapsado else "Ocultar HUD"
-	for nombre in ["Estado", "Objetivo", "IndiciosTitulo", "Indicios", "Conexion"]:
-		lateral.get_node(nombre).visible = detalle or (nombre == "Conexion" and pausa_visible)
-	lateral.get_node("Muestra").visible = detalle and datos.get("muestra", false)
-	lateral.get_node("Controles").visible = not terminado
-	lateral.get_node("Aviso").visible = not lateral.get_node("Aviso").text.is_empty()
+	var aviso: Control = lateral.get_node("Aviso")
+	aviso.visible = not aviso.text.is_empty()
+	var detalle := not terminado and not hud_oculto
+	$Interfaz.visible = detalle or terminado or pausa_visible or aviso.visible
+	$Interfaz.offset_right = 476.0 if terminado else 12.0 + ANCHO_HUD
+	$Interfaz.anchor_bottom = 1.0 if terminado else 0.0
+	lateral.get_node("Estado").visible = detalle
+	lateral.get_node("Indicios").visible = detalle
+	lateral.get_node("Conexion").visible = pausa_visible
+	var margen: float = $Interfaz.get_theme_stylebox("panel").get_minimum_size().y
+	$Interfaz.offset_bottom = -12.0 if terminado else 12.0 + lateral.get_combined_minimum_size().y + margen
 
 
 func reintentar() -> void:
@@ -236,9 +243,38 @@ func abrir_menu(pieza: Interactuable) -> void:
 			lectura = zona_activa.lectura_pieza(pieza.componente)
 		if motor.estado().get("inspeccionado", motor.estado().get("sintomas_revisados", false)):
 			causas = datos.causas
-	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada)
+	salida_hasta = 0
+	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada, estado_pieza(pieza))
 	jugador.activo = false
 	$Apuntado.hide()
+
+
+func estado_pieza(pieza: Interactuable) -> Dictionary:
+	if pieza.zona != zona_activa:
+		return {"texto": "Correcto", "color": "verde"}
+	var estado: Dictionary = motor.estado()
+	var componente := pieza.componente
+	match componente:
+		"terminal", "abrazadera_motor":
+			var clave := "tornillo_roto" if componente == "terminal" else "pieza_danada"
+			if estado.get(clave, false):
+				return {"texto": "Daño", "color": "rojo"}
+		"fusible_faros":
+			if estado.get("fusible_quemado", false):
+				return {"texto": "Falla", "color": "rojo"}
+		"faro_izquierdo", "faro_derecho":
+			if not estado.get(componente, true):
+				return {"texto": "Falla", "color": "rojo"}
+		"monitor":
+			if datos.zona == "cabina":
+				return {"texto": "Falla", "color": "rojo"}
+			match zona_activa.lectura:
+				"Rojo": return {"texto": "Falla", "color": "rojo"}
+				"Ámbar": return {"texto": "Alerta", "color": "ambar"}
+		"monitor_temperatura", "motor_traccion":
+			if estado.get("alerta_temperatura", false):
+				return {"texto": "Alerta", "color": "ambar"}
+	return {"texto": "Correcto", "color": "verde"}
 
 
 func cerrar_menu() -> void:
@@ -260,7 +296,7 @@ func elegir_accion(indice: int, fuente: String) -> void:
 		if panel.conexion.fuente_panel() == "virtual":
 			panel_oculto = false
 			actualizar_panel(Time.get_ticks_msec())
-		menu_pieza.esperar_panel(entrada.texto)
+		menu_pieza.esperar_panel()
 		jugador.mostrar_herramienta(entrada.id)
 	else:
 		cerrar_menu()
@@ -364,7 +400,29 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 
 func _input(evento: InputEvent) -> void:
-	if motor == null or not motor.fin().is_empty() or not evento.is_pressed() or evento.is_echo():
+	if motor == null or not evento.is_pressed() or evento.is_echo():
+		return
+	if evento is InputEventKey:
+		if evento.keycode == KEY_ESCAPE and not menu_pieza.visible:
+			var ahora := Time.get_ticks_msec()
+			get_viewport().set_input_as_handled()
+			if ahora < salida_hasta:
+				salida_hasta = 0
+				salida_solicitada.emit()
+			else:
+				avisar("Esc de nuevo para salir")
+				salida_hasta = ahora + int(duracion_aviso.wait_time * 1000)
+			return
+		if evento.keycode == KEY_H and motor.fin().is_empty():
+			hud_oculto = not hud_oculto
+			actualizar_hud()
+			get_viewport().set_input_as_handled()
+			return
+		if menu_pieza.visible and evento.keycode in [KEY_UP, KEY_DOWN]:
+			menu_pieza.mover_foco(1 if evento.keycode == KEY_DOWN else -1)
+			get_viewport().set_input_as_handled()
+			return
+	if not motor.fin().is_empty():
 		return
 	var capturado := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	var accion := {}
@@ -387,14 +445,13 @@ func _input(evento: InputEvent) -> void:
 	elif evento is InputEventJoypadButton:
 		match evento.button_index:
 			JOY_BUTTON_A:
-				if menu_pieza.visible and not menu_pieza.causa.get_popup().visible \
-						and menu_pieza.elegir_con_control():
+				if menu_pieza.visible and menu_pieza.elegir_con_control():
 					get_viewport().set_input_as_handled()
 					return
 				if capturado:
 					accion = panel.entrada.traducir("control", "A", 1)
 			JOY_BUTTON_DPAD_UP, JOY_BUTTON_DPAD_DOWN:
-				if menu_pieza.visible and not menu_pieza.causa.get_popup().visible:
+				if menu_pieza.visible:
 					menu_pieza.mover_foco(1 if evento.button_index == JOY_BUTTON_DPAD_DOWN else -1)
 					get_viewport().set_input_as_handled()
 					return

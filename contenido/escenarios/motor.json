@@ -34,6 +34,7 @@
   ],
   "acciones": {
     "inspeccionar": {
+      "titulo": "Inspeccionar",
       "requiere_panel": false,
       "componente": "tapa_motor",
       "previas": {},
@@ -48,6 +49,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "revisar_refrigerante": {
+      "titulo": "Revisar el refrigerante",
       "requiere_panel": false,
       "componente": "bomba_motor",
       "previas": {
@@ -64,6 +66,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "medir_temperatura": {
+      "titulo": "Medir temperatura",
       "requiere_panel": false,
       "componente": "monitor_temperatura",
       "previas": {
@@ -80,6 +83,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "tocar_cables_naranja_sin_bloqueo": {
+      "titulo": "Tocar los cables naranja",
       "requiere_panel": false,
       "componente": "inversor_motor",
       "previas": {
@@ -96,6 +100,7 @@
       "explicacion_seguridad": "Falta crítica: se intentó tocar los cables naranja sin bloqueo y etiquetado activos. El ESS de referencia es de 600 V. Fuente: Volvo Buses, BZR Low Entry Eléctrico (página pública)."
     },
     "bloquear_y_etiquetar": {
+      "titulo": "Bloquear y etiquetar",
       "requiere_panel": true,
       "componente": "inversor_motor",
       "previas": {
@@ -114,6 +119,7 @@
       "explicacion_seguridad": "Activa ambos interruptores del panel y vuelve a confirmar."
     },
     "apretar_abrazadera": {
+      "titulo": "Forzar la abrazadera",
       "requiere_panel": true,
       "componente": "abrazadera_motor",
       "previas": {
@@ -137,6 +143,7 @@
       "explicacion_seguridad": "Activa bloqueo y etiquetado en el panel."
     },
     "ajustar_abrazadera": {
+      "titulo": "Ajustar la abrazadera",
       "requiere_panel": true,
       "componente": "abrazadera_motor",
       "previas": {
@@ -159,6 +166,7 @@
       "explicacion_seguridad": "Activa bloqueo y etiquetado en el panel."
     },
     "confirmar_solucion": {
+      "titulo": "Confirmar la solución",
       "requiere_panel": true,
       "componente": "monitor_temperatura",
       "previas": {
@@ -192,6 +200,7 @@
   },
   "recuperaciones": {
     "reponer_abrazadera": {
+      "titulo": "Reponer la abrazadera",
       "requiere_panel": true,
       "componente": "abrazadera_motor",
       "previas": {

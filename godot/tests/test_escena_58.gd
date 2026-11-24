@@ -15,13 +15,17 @@ static func comprobar(base: String) -> bool:
 	bus.abrir_menu(bus.get_node("Sector").piezas.compuerta)
 	bus.menu_pieza.botones[0].pressed.emit()
 	bus.abrir_menu(bus.get_node("Sector").piezas.monitor)
-	bus.menu_pieza.causa.select(2)
-	bus.menu_pieza.causa.item_selected.emit(2)
+	var opciones: Array = bus.menu_pieza.causas
+	opciones[0].button_pressed = true
+	opciones[0].pressed.emit()
+	opciones[1].button_pressed = true
+	opciones[1].pressed.emit()
+	var marca_correcta: bool = not opciones[0].button_pressed and opciones[1].text.begins_with("✓")
 	bus.menu_pieza.botones[0].pressed.emit()
 	bus.abrir_menu(bus.get_node("Sector").piezas.bateria)
 	bus.menu_pieza.botones[0].pressed.emit()
 	bus.panel.get_node("Confirmar").pressed.emit()
-	var correcto: bool = bus.motor.estado().indicio_confirmado and bus.motor.brechas().size() == 1
+	var correcto: bool = marca_correcta and bus.motor.estado().indicio_confirmado and bus.motor.brechas().size() == 1
 	correcto = correcto and bus.resultados_guardados
 	var brechas: Variant = Base.consultar(base, "SELECT causa_marcada FROM brecha;")
 	var intentos: Variant = Base.consultar(base, "SELECT tipo_error FROM intento WHERE tipo_error = 'diagnostico-vs-accion';")

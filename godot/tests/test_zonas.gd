@@ -24,7 +24,7 @@ static func comprobar(bus: Node3D, nombre: String) -> bool:
 	var antes: Dictionary = bus.motor.estado()
 	bus.abrir_menu(bus.get_node("Sector").piezas.compuerta)
 	if not bus.menu_pieza.visible or not bus.menu_pieza.entradas.is_empty() \
-			or bus.menu_pieza.causa.visible or bus.motor.estado() != antes \
+			or bus.menu_pieza.diagnostico.visible or bus.motor.estado() != antes \
 			or bus.menu_pieza.contenido.get_node("Lectura").text != "[MUESTRA] Sin falla en esta orden":
 		return false
 	bus.cerrar_menu()

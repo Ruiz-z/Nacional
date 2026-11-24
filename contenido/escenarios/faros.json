@@ -30,6 +30,7 @@
   ],
   "acciones": {
     "inspeccionar": {
+      "titulo": "Inspeccionar",
       "requiere_panel": false,
       "componente": "caja_fusibles",
       "previas": {},
@@ -44,6 +45,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "medir_continuidad": {
+      "titulo": "Medir continuidad",
       "requiere_panel": false,
       "componente": "conector_faros",
       "previas": {
@@ -60,6 +62,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "cambiar_foco_sin_desconectar": {
+      "titulo": "Cambiar foco sin desconectar",
       "requiere_panel": false,
       "componente": "faro_izquierdo",
       "previas": {
@@ -76,6 +79,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "reponer_fusible_equivocado": {
+      "titulo": "Instalar otro fusible",
       "requiere_panel": true,
       "componente": "fusible_faros",
       "previas": {
@@ -93,6 +97,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "cambiar_foco_correcto": {
+      "titulo": "Desconectar y cambiar el foco",
       "requiere_panel": true,
       "componente": "faro_izquierdo",
       "previas": {
@@ -112,6 +117,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_solucion": {
+      "titulo": "Confirmar la solución",
       "requiere_panel": true,
       "componente": "rele_faros",
       "previas": {
@@ -150,6 +156,7 @@
   },
   "recuperaciones": {
     "reponer_fusible": {
+      "titulo": "Reponer el fusible",
       "requiere_panel": true,
       "componente": "fusible_faros",
       "previas": {

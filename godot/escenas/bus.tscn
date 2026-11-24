@@ -1174,7 +1174,7 @@ text = "PELIGRO\nALTO VOLTAJE"
 anchor_bottom = 1.0
 offset_left = 12.0
 offset_top = 12.0
-offset_right = 312.0
+offset_right = 364.0
 offset_bottom = -12.0
 horizontal_scroll_mode = 0
 follow_focus = true
@@ -1201,13 +1201,6 @@ mouse_filter = 2
 custom_minimum_size = Vector2(232, 0)
 size_flags_vertical = 0
 
-[node name="Controles" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Secundario"
-autowrap_mode = 3
-text = "Tab · Cursor libre / caminar"
-
-[node name="AlternarHud" type="Button" parent="Interfaz/Lateral"]
-
 [node name="AlternarPanel" type="Button" parent="."]
 anchor_left = 1.0
 anchor_right = 1.0
@@ -1217,26 +1210,8 @@ offset_top = 12.0
 offset_bottom = 48.0
 
 [node name="Estado" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Titulo"
-text = ""
-autowrap_mode = 2
-theme_override_font_sizes/font_size = 24
-
-[node name="Muestra" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Metadato"
-text = "[MUESTRA] · Datos de práctica"
-autowrap_mode = 3
-
-[node name="Objetivo" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Secundario"
-text = ""
-autowrap_mode = 2
-theme_override_font_sizes/font_size = 16
-
-[node name="IndiciosTitulo" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Seccion"
-text = "Indicios"
-autowrap_mode = 3
+text_overrun_behavior = 3
+theme_override_font_sizes/font_size = 15
 
 [node name="Indicios" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Secundario"
@@ -1264,6 +1239,22 @@ theme_override_font_sizes/normal_font_size = 16
 
 [node name="Resumen" parent="Interfaz/Lateral" instance=ExtResource("3")]
 visible = false
+
+[node name="PistaControles" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -136.0
+offset_top = -36.0
+offset_right = 136.0
+offset_bottom = -12.0
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_outline_color = Color(0.04, 0.06, 0.08, 1)
+theme_override_constants/outline_size = 5
+text = "Tab · Cursor libre"
 
 [node name="Mira" type="Label" parent="."]
 anchor_left = 0.5

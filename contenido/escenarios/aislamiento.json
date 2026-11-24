@@ -36,6 +36,7 @@
   ],
   "acciones": {
     "inspeccionar": {
+      "titulo": "Inspeccionar",
       "requiere_panel": false,
       "componente": "compuerta",
       "previas": {},
@@ -50,6 +51,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "evaluar_indicio": {
+      "titulo": "Evaluar el indicio",
       "requiere_panel": false,
       "componente": "monitor",
       "previas": {
@@ -68,6 +70,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_solucion": {
+      "titulo": "Confirmar la solución",
       "requiere_panel": true,
       "componente": "bateria",
       "previas": {
@@ -87,6 +90,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "ignorar_aviso_seguridad": {
+      "titulo": "Ignorar el aviso de seguridad",
       "componente": "cables",
       "previas": {},
       "efectos": {},
@@ -98,6 +102,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "forzar_pieza": {
+      "titulo": "Forzar la pieza",
       "requiere_panel": false,
       "componente": "terminal",
       "previas": {
@@ -115,6 +120,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "elegir_otro_sector": {
+      "titulo": "Elegir otro sector",
       "componente": "bateria",
       "previas": {
         "inspeccionado": true,
@@ -131,6 +137,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "descartar_indicio": {
+      "titulo": "Descartar el indicio",
       "componente": "bateria",
       "previas": {
         "inspeccionado": true,
@@ -184,6 +191,7 @@
   },
   "recuperaciones": {
     "reponer_pieza": {
+      "titulo": "Reponer pieza",
       "requiere_panel": true,
       "componente": "terminal",
       "previas": {
@@ -203,6 +211,7 @@
       "riesgo": "[MUESTRA] bajo"
     },
     "volver_al_sector": {
+      "titulo": "Volver al sector indicado",
       "requiere_panel": true,
       "componente": "bateria",
       "previas": {
@@ -222,6 +231,7 @@
       "riesgo": "[MUESTRA] bajo"
     },
     "recuperar_indicio": {
+      "titulo": "Recuperar el indicio",
       "requiere_panel": true,
       "componente": "bateria",
       "previas": {

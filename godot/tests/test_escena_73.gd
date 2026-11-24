@@ -30,5 +30,14 @@ static func comprobar(base: String) -> bool:
 	correcto = correcto and menu.pantalla.alias_actual.begins_with("[DEMO]")
 	menu.get_node("Marco/Volver").pressed.emit()
 	correcto = correcto and menu.inicio.visible and menu.perfil.alias == "T-73"
+	var raiz := menu.get_tree().root
+	menu.abrir_bus(menu.perfil.merged({"base": base}))
+	var esc := InputEventKey.new()
+	esc.keycode = KEY_ESCAPE
+	esc.pressed = true
+	raiz.push_input(esc)
+	correcto = correcto and is_instance_valid(menu.pantalla) and not menu.inicio.visible
+	raiz.push_input(esc)
+	correcto = correcto and menu.pantalla == null and menu.inicio.visible
 	menu.free()
 	return correcto

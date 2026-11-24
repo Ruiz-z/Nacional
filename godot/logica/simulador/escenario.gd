@@ -119,6 +119,8 @@ static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> S
 			if not datos.recuperaciones.has(id) or regla.recuperaciones.count(id) != 1:
 				return ".recuperaciones"
 		return ""
+	if regla.has("titulo") and not Banco.texto_presente(regla.titulo):
+		return ".titulo"
 	if not regla.get("requiere_panel", false) is bool:
 		return ".requiere_panel"
 	if regla.has("seguridad_panel"):

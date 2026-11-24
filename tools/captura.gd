@@ -1,8 +1,8 @@
 extends SceneTree
 
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
-# Zonas nuevas: [ancho alto] faros|motor [cerrado|abierto] [menu] [--verificar]
-# Gabinete: [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [menu] [--verificar]
+# Zonas nuevas: [ancho alto] comunicacion|faros|motor [cerrado|abierto] [menu] [--verificar]
+# Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
 func _initialize() -> void:
 	call_deferred("capturar")
 
@@ -20,13 +20,14 @@ func capturar() -> void:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
 	var zona := ""
-	if args.size() > 2 and args[-1] in ["faros", "motor"]:
+	if args.size() > 2 and args[-1] in ["comunicacion", "faros", "motor"]:
 		zona = args[-1]
 		args.remove_at(args.size() - 1)
 		if vista.is_empty():
-			vista = "cerrado"
-		if vista not in ["cerrado", "abierto"] or args.size() not in [2, 4]:
-			fallar("Usa [ancho alto] faros|motor [cerrado|abierto].")
+			vista = "abierto" if zona == "comunicacion" else "cerrado"
+		if vista not in ["cerrado", "abierto"] or args.size() not in [2, 4] \
+				or (zona == "comunicacion" and vista != "abierto"):
+			fallar("Usa [ancho alto] comunicacion|faros|motor [cerrado|abierto].")
 			return
 	if args.size() not in [2, 4, 8, 9]:
 		fallar("Uso: -- <escena res://> <salida.png> [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [menu] [--verificar]")
@@ -80,7 +81,7 @@ func capturar() -> void:
 		if args.size() == 9:
 			camara.rotation_degrees.x = float(args[8])
 		elif vista in ["cerrado", "abierto", "danado"]:
-			var id := "compuerta" if vista == "cerrado" else "monitor"
+			var id := pieza_gabinete(vista, menu)
 			var objetivo: Vector3 = camara.to_local(sector.piezas[id].global_position)
 			camara.rotation.x = atan2(objetivo.y, -objetivo.z)
 		print("Cámara ", camara.global_position, ", giro ", args[7], "°, inclinación ", camara.rotation_degrees.x, "°")
@@ -89,31 +90,37 @@ func capturar() -> void:
 			fallar("El simulador no se inicializó.")
 			return
 		if vista in ["abierto", "danado"]:
-			escena.ejecutar("inspeccionar", "teclado")
+			escena.ejecutar("revisar_sintomas" if zona == "comunicacion" else "inspeccionar", "teclado")
 		if vista == "danado":
 			escena.ejecutar("forzar_pieza", "teclado")
 		if not zona.is_empty():
 			sector = escena.zona_activa
 			var objetivo: String = sector.acceso
 			if vista == "abierto":
-				objetivo = "conector_faros" if zona == "faros" else "monitor_temperatura"
+				objetivo = {"faros": "conector_faros", "motor": "monitor_temperatura",
+					"comunicacion": "monitor"}[zona]
 			escena.ubicar_jugador(objetivo)
 			await physics_frame
 			await physics_frame
-			if sector.abierta != (vista == "abierto") or not comprobar_pieza(escena, objetivo):
+			var abierto := vista == "abierto"
+			if sector.abierta != abierto or not comprobar_pieza(escena, objetivo):
 				fallar("El estado o el encuadre de la zona no corresponde a la vista %s." % vista)
 				return
 		elif not comprobar_estado(escena, sector, vista):
 			fallar("El estado del gabinete no corresponde a la vista %s." % vista)
 			return
+		if zona.is_empty() and args.size() < 8 and vista != "entrada":
+			escena.get_node("Jugador").set_physics_process(false)
+			escena.ubicar_jugador(pieza_gabinete(vista, menu))
 		if vista == "entrada":
 			escena.get_node("Interfaz").hide()
+			escena.get_node("PistaControles").hide()
 			escena.get_node("AlineacionPanel").hide()
 			escena.get_node("AlternarPanel").hide()
 			escena.set_process(false)
 		await physics_frame
 		await physics_frame
-		if zona.is_empty() and not comprobar_encuadre(escena, vista):
+		if zona.is_empty() and not comprobar_encuadre(escena, vista, menu):
 			fallar("El encuadre no corresponde a la vista %s." % vista)
 			return
 		var triangulos := 0
@@ -138,6 +145,13 @@ func capturar() -> void:
 		escena.abrir_menu(pieza)
 		if not escena.menu_pieza.visible:
 			fallar("No se pudo abrir el menú de la pieza.")
+			return
+		await process_frame
+		await process_frame
+		var tarjeta: Control = escena.menu_pieza.get_node("Centro/Tarjeta")
+		if not vp.get_visible_rect().encloses(tarjeta.get_global_rect()) \
+				or tarjeta.get_global_rect().intersects(escena.panel.get_global_rect()):
+			fallar("El menú queda recortado o invade el panel virtual.")
 			return
 	if verificar:
 		quit(0)
@@ -170,7 +184,7 @@ func comprobar_estado(escena: Node3D, sector: Node3D, vista: String) -> bool:
 		and led.emission_enabled and (led.emission == sector.COLORES_LED.Rojo) == dano
 
 
-func comprobar_encuadre(escena: Node3D, vista: String) -> bool:
+func comprobar_encuadre(escena: Node3D, vista: String, menu: bool) -> bool:
 	var camara: Camera3D = escena.jugador.camara
 	if vista == "entrada":
 		var cuadro := camara.get_viewport().get_visible_rect()
@@ -181,7 +195,13 @@ func comprobar_encuadre(escena: Node3D, vista: String) -> bool:
 					return false
 		print("Autobús completo dentro de ", cuadro.size)
 		return true
-	return comprobar_pieza(escena, "compuerta" if vista == "cerrado" else "monitor")
+	return comprobar_pieza(escena, pieza_gabinete(vista, menu))
+
+
+func pieza_gabinete(vista: String, menu: bool) -> String:
+	if vista == "cerrado":
+		return "compuerta"
+	return "terminal" if menu and vista == "danado" else "monitor"
 
 
 func comprobar_pieza(escena: Node3D, esperado: String) -> bool:

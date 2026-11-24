@@ -4,67 +4,178 @@ signal elegida(indice: int, fuente: String)
 signal causa_marcada(causa: String)
 signal cierre_solicitado
 
+const COLORES := {
+	"gris": [Color("#303c49"), Color("#e3eaf1")],
+	"azul": [Color("#1b4164"), Color("#e0f1ff")],
+	"rojo": [Color("#592d34"), Color("#ffdedf")],
+	"ambar": [Color("#503b1c"), Color("#ffe1a1")],
+	"verde": [Color("#204939"), Color("#d1f8e3")],
+}
+const CAUSAS := {
+	"modulo-sin-comunicacion": "Módulo sin comunicación",
+	"otro-modulo": "Otro módulo",
+	"foco-danado": "Foco dañado",
+}
+
 var entradas: Array[Dictionary] = []
 var botones: Array[Button] = []
+var causas: Array[Button] = []
 @onready var contenido := $Centro/Tarjeta/Contenido
-@onready var causa: OptionButton = contenido.get_node("Causa")
-@onready var acciones: VBoxContainer = contenido.get_node("Acciones")
+@onready var diagnostico := contenido.get_node("Diagnostico")
+@onready var lista: ScrollContainer = contenido.get_node("Lista")
+@onready var acciones: VBoxContainer = lista.get_node("Acciones")
+@onready var cerrar_boton: Button = contenido.get_node("Cerrar")
 
 
 func _ready() -> void:
-	contenido.get_node("Cerrar").pressed.connect(func(): cierre_solicitado.emit())
-	causa.item_selected.connect(func(indice: int): causa_marcada.emit(causa.get_item_metadata(indice)))
+	acciones.minimum_size_changed.connect(ajustar_lista)
+	cerrar_boton.pressed.connect(func(): cierre_solicitado.emit())
+	var pendiente: Label = contenido.get_node("Pendiente")
+	estilo_chip(pendiente, "azul", 16)
 
 
-func abrir(titulo: String, lectura: String, opciones: Array[Dictionary], causas: Array, marcada: String) -> void:
+func abrir(titulo: String, lectura: String, opciones: Array[Dictionary],
+		ids_causa: Array, marcada: String, estado: Dictionary) -> void:
 	entradas = opciones
-	contenido.get_node("Titulo").text = titulo
+	contenido.get_node("Cabecera/Titulo").text = titulo
+	var chip_estado: Label = contenido.get_node("Cabecera/Estado")
+	chip_estado.text = estado.texto
+	estilo_chip(chip_estado, estado.color)
 	contenido.get_node("Lectura").text = lectura
 	contenido.get_node("Lectura").visible = not lectura.is_empty()
-	causa.clear()
-	causa.add_item("Marcar una causa")
-	causa.set_item_metadata(0, "")
-	for id in causas:
-		causa.add_item(id.replace("-", " ").capitalize())
-		causa.set_item_metadata(causa.item_count - 1, id)
-		if id == marcada:
-			causa.select(causa.item_count - 1)
-	causa.visible = not causas.is_empty()
-	for boton in botones:
-		acciones.remove_child(boton)
+	for boton in causas + botones:
+		boton.get_parent().remove_child(boton)
 		boton.queue_free()
+	causas.clear()
 	botones.clear()
-	for indice in range(entradas.size()):
-		var entrada := entradas[indice]
+	var grupo := ButtonGroup.new()
+	for id: String in ids_causa:
 		var boton := Button.new()
-		boton.text = "%d. %s" % [indice + 1, entrada.texto]
-		if entrada.costo != "—" or entrada.tiempo != "—" or entrada.riesgo != "—":
-			boton.text += "\nCosto %s · Tiempo %s · Riesgo %s" % [entrada.costo, entrada.tiempo, entrada.riesgo]
-		boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		boton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		boton.add_theme_font_size_override("font_size", 16)
-		boton.pressed.connect(func(): elegida.emit(indice, "teclado"))
-		acciones.add_child(boton)
-		botones.append(boton)
-	acciones.show()
+		var nombre: String = CAUSAS.get(id, id.left(1).to_upper() + id.substr(1).replace("-", " "))
+		boton.toggle_mode = true
+		boton.button_group = grupo
+		boton.add_theme_font_size_override("font_size", 15)
+		boton.set_pressed_no_signal(id == marcada)
+		boton.text = ("✓  " if boton.button_pressed else "○  ") + nombre
+		boton.toggled.connect(func(activo: bool):
+			boton.text = ("✓  " if activo else "○  ") + nombre)
+		boton.pressed.connect(func(): causa_marcada.emit(id))
+		diagnostico.get_node("Causas").add_child(boton)
+		causas.append(boton)
+	diagnostico.visible = not causas.is_empty()
+	for indice in range(entradas.size()):
+		agregar_accion(indice, entradas[indice])
+	lista.visible = not botones.is_empty()
+	ajustar_lista()
+	contenido.get_node("SinAcciones").visible = botones.is_empty()
+	contenido.get_node("AccionesTitulo").show()
 	contenido.get_node("Pendiente").hide()
 	show()
-	var foco: Control = botones[0] if not botones.is_empty() else contenido.get_node("Cerrar")
+	lista.set_deferred("scroll_vertical", 0)
+	var foco := botones[0] if not botones.is_empty() else (causas[0] if not causas.is_empty() else cerrar_boton)
 	foco.grab_focus()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
-func esperar_panel(accion: String) -> void:
-	acciones.hide()
-	causa.hide()
+func agregar_accion(indice: int, entrada: Dictionary) -> void:
+	var boton := Button.new()
+	boton.accessibility_name = entrada.titulo
+	boton.accessibility_description = "%s. %s" % [entrada.ejecucion, entrada.descripcion]
+	boton.pressed.connect(func(): elegida.emit(indice, "teclado"))
+	acciones.add_child(boton)
+	botones.append(boton)
+
+	var margen := MarginContainer.new()
+	margen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	boton.add_child(margen)
+	margen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for lado in ["left", "right", "top", "bottom"]:
+		margen.add_theme_constant_override("margin_" + lado, 10)
+	var fila := HBoxContainer.new()
+	fila.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margen.add_child(fila)
+	var tecla := agregar_chip(fila, str(indice + 1), "gris")
+	tecla.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tecla.custom_minimum_size.x = 28
+	tecla.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+
+	var texto := VBoxContainer.new()
+	texto.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	texto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	texto.add_theme_constant_override("separation", 2)
+	fila.add_child(texto)
+	var titulo := Label.new()
+	titulo.text = entrada.titulo
+	titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	titulo.add_theme_font_size_override("font_size", 17)
+	var negrita := FontVariation.new()
+	negrita.base_font = titulo.get_theme_default_font()
+	negrita.variation_embolden = 0.6
+	titulo.add_theme_font_override("font", negrita)
+	texto.add_child(titulo)
+	var descripcion := Label.new()
+	descripcion.text = entrada.descripcion
+	descripcion.theme_type_variation = &"Secundario"
+	descripcion.add_theme_font_size_override("font_size", 15)
+	descripcion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	texto.add_child(descripcion)
+
+	var etiquetas := HFlowContainer.new()
+	etiquetas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	etiquetas.custom_minimum_size.x = 200
+	etiquetas.alignment = FlowContainer.ALIGNMENT_END
+	etiquetas.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	etiquetas.add_theme_constant_override("h_separation", 4)
+	etiquetas.add_theme_constant_override("v_separation", 4)
+	fila.add_child(etiquetas)
+	if entrada.ejecucion == "confirmar en panel":
+		agregar_chip(etiquetas, "Confirma en panel", "azul")
+	else:
+		agregar_chip(etiquetas, "Inmediata", "gris")
+	for campo in ["costo", "tiempo", "riesgo"]:
+		if entrada[campo] != "—":
+			var alto: bool = campo == "riesgo" and entrada.riesgo.to_lower().begins_with("alt")
+			agregar_chip(etiquetas, "%s %s" % [campo.capitalize(), entrada[campo]], "ambar" if alto else "gris")
+	margen.minimum_size_changed.connect(func(): boton.custom_minimum_size.y = margen.get_combined_minimum_size().y)
+	boton.custom_minimum_size.y = margen.get_combined_minimum_size().y
+
+
+func ajustar_lista() -> void:
+	lista.custom_minimum_size.y = minf(acciones.get_combined_minimum_size().y, 310.0)
+
+
+func agregar_chip(padre: Control, texto: String, color: String) -> Label:
+	var etiqueta := Label.new()
+	padre.add_child(etiqueta)
+	etiqueta.text = texto
+	estilo_chip(etiqueta, color)
+	return etiqueta
+
+
+func estilo_chip(etiqueta: Label, color: String, tam := 13) -> void:
+	var estilo := etiqueta.get_theme_stylebox("normal", "Chip").duplicate() as StyleBoxFlat
+	estilo.bg_color = COLORES[color][0]
+	estilo.border_color = estilo.bg_color.lightened(0.14)
+	for lado in [SIDE_LEFT, SIDE_RIGHT]:
+		estilo.set_content_margin(lado, 7)
+	for lado in [SIDE_TOP, SIDE_BOTTOM]:
+		estilo.set_content_margin(lado, 3)
+	etiqueta.add_theme_stylebox_override("normal", estilo)
+	etiqueta.add_theme_color_override("font_color", COLORES[color][1])
+	etiqueta.add_theme_font_size_override("font_size", tam)
+
+
+func esperar_panel() -> void:
+	lista.hide()
+	diagnostico.hide()
+	contenido.get_node("AccionesTitulo").hide()
 	var aviso: Label = contenido.get_node("Pendiente")
-	aviso.text = "%s\nConfirma en el panel (Enter o botón Confirmar)\nControl · X" % accion
+	aviso.text = "Acción lista: confirma en el panel (Enter o botón Confirmar)"
 	aviso.show()
-	contenido.get_node("Cerrar").grab_focus()
+	cerrar_boton.grab_focus()
 
 
 func cerrar() -> void:
-	causa.get_popup().hide()
 	var foco := get_viewport().gui_get_focus_owner()
 	if foco != null and contenido.is_ancestor_of(foco):
 		foco.release_focus()
@@ -72,19 +183,25 @@ func cerrar() -> void:
 
 
 func elegir_con_control() -> bool:
-	var indice := botones.find(get_viewport().gui_get_focus_owner())
-	if indice < 0 or not acciones.visible:
+	var foco := get_viewport().gui_get_focus_owner() as Button
+	if lista.visible and foco in botones:
+		elegida.emit(botones.find(foco), "control")
+	elif diagnostico.visible and foco in causas:
+		foco.button_pressed = true
+		foco.pressed.emit()
+	elif foco == cerrar_boton:
+		cierre_solicitado.emit()
+	else:
 		return false
-	elegida.emit(indice, "control")
 	return true
 
 
 func mover_foco(paso: int) -> void:
-	var controles: Array[Control] = []
-	if causa.visible:
-		controles.append(causa)
-	if acciones.visible:
+	var controles: Array[Button] = []
+	if diagnostico.visible:
+		controles.append_array(causas)
+	if lista.visible:
 		controles.append_array(botones)
-	controles.append(contenido.get_node("Cerrar"))
+	controles.append(cerrar_boton)
 	var indice := controles.find(get_viewport().gui_get_focus_owner())
 	controles[posmod(indice + paso, controles.size())].grab_focus()

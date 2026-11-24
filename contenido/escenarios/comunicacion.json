@@ -29,6 +29,7 @@
   ],
   "acciones": {
     "revisar_sintomas": {
+      "titulo": "Revisar los síntomas",
       "requiere_panel": false,
       "componente": "monitor",
       "previas": {},
@@ -43,6 +44,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "seleccionar_otro_modulo": {
+      "titulo": "Seleccionar otro módulo",
       "componente": "monitor",
       "previas": {
         "sintomas_revisados": true
@@ -56,6 +58,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_diagnostico": {
+      "titulo": "Confirmar el diagnóstico",
       "requiere_panel": true,
       "componente": "monitor",
       "previas": {

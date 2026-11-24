@@ -171,12 +171,7 @@ func abrir_bus(tecnico: Dictionary, archivo: String = Escenario.AISLAMIENTO) -> 
 	bus.conexion_panel = conexion
 	bus.tecnico = tecnico
 	abrir(bus)
-	var volver_bus := Button.new()
-	volver_bus.text = "‹  Volver al menú"
-	volver_bus.custom_minimum_size.y = 52
-	volver_bus.pressed.connect(volver)
-	bus.lateral.add_child(volver_bus)
-	bus.lateral.move_child(volver_bus, 0)
+	bus.salida_solicitada.connect(volver)
 	$Marco/Volver.hide()
 
 

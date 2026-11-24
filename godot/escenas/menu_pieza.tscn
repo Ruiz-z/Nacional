@@ -9,29 +9,64 @@ script = ExtResource("1")
 
 [node name="Centro" type="CenterContainer" parent="."]
 anchor_right = 1.0
-anchor_top = 0.18
-anchor_bottom = 0.97
+anchor_top = 0.08
+anchor_bottom = 1.0
 mouse_filter = 2
 
 [node name="Tarjeta" type="PanelContainer" parent="Centro"]
-custom_minimum_size = Vector2(448, 0)
+custom_minimum_size = Vector2(668, 0)
 
 [node name="Contenido" type="VBoxContainer" parent="Centro/Tarjeta"]
 
-[node name="Titulo" type="Label" parent="Centro/Tarjeta/Contenido"]
+[node name="Cabecera" type="HBoxContainer" parent="Centro/Tarjeta/Contenido"]
+
+[node name="Titulo" type="Label" parent="Centro/Tarjeta/Contenido/Cabecera"]
 theme_type_variation = &"Seccion"
+size_flags_horizontal = 3
+
+[node name="Estado" type="Label" parent="Centro/Tarjeta/Contenido/Cabecera"]
+size_flags_vertical = 4
 
 [node name="Lectura" type="Label" parent="Centro/Tarjeta/Contenido"]
 theme_type_variation = &"Metadato"
 autowrap_mode = 3
 
-[node name="Causa" type="OptionButton" parent="Centro/Tarjeta/Contenido"]
+[node name="Diagnostico" type="VBoxContainer" parent="Centro/Tarjeta/Contenido"]
+theme_override_constants/separation = 6
 
-[node name="Acciones" type="VBoxContainer" parent="Centro/Tarjeta/Contenido"]
+[node name="Separador" type="HSeparator" parent="Centro/Tarjeta/Contenido/Diagnostico"]
+
+[node name="Titulo" type="Label" parent="Centro/Tarjeta/Contenido/Diagnostico"]
+text = "Tu diagnóstico"
+theme_override_font_sizes/font_size = 18
+
+[node name="Pregunta" type="Label" parent="Centro/Tarjeta/Contenido/Diagnostico"]
+text = "¿Qué crees que causa la falla?"
+theme_type_variation = &"Secundario"
+
+[node name="Causas" type="HFlowContainer" parent="Centro/Tarjeta/Contenido/Diagnostico"]
+
+[node name="Separador" type="HSeparator" parent="Centro/Tarjeta/Contenido"]
+
+[node name="AccionesTitulo" type="Label" parent="Centro/Tarjeta/Contenido"]
+text = "Acciones"
+theme_override_font_sizes/font_size = 18
+
+[node name="SinAcciones" type="Label" parent="Centro/Tarjeta/Contenido"]
+text = "No hay acciones disponibles para esta pieza."
+theme_type_variation = &"Secundario"
+
+[node name="Lista" type="ScrollContainer" parent="Centro/Tarjeta/Contenido"]
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="Acciones" type="VBoxContainer" parent="Centro/Tarjeta/Contenido/Lista"]
+size_flags_horizontal = 3
 
 [node name="Pendiente" type="Label" parent="Centro/Tarjeta/Contenido"]
-theme_type_variation = &"Aviso"
 autowrap_mode = 3
 
 [node name="Cerrar" type="Button" parent="Centro/Tarjeta/Contenido"]
-text = "Cerrar · Esc / B"
+text = "Esc · Cerrar"
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 15

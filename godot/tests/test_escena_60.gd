@@ -13,7 +13,8 @@ static func ejecutar() -> bool:
 	correcto = correcto and gabinete.fragmento.visible and gabinete.chispa.visible \
 		and not gabinete.tornillo.visible and gabinete.lectura == "Rojo"
 	correcto = correcto and elegir(bus, "terminal", "reponer_pieza") \
-		and bus.accion_pendiente == "reponer_pieza" and gabinete.fragmento.visible
+		and bus.accion_pendiente == "reponer_pieza" and gabinete.fragmento.visible \
+		and bus.menu_pieza.contenido.get_node("Cabecera/Estado").text == "Daño"
 	bus.panel.get_node("Confirmar").pressed.emit()
 	correcto = correcto and not bus.motor.estado().tornillo_roto and gabinete.tornillo.visible \
 		and not gabinete.fragmento.visible and gabinete.lectura == "Ámbar"
