@@ -14,8 +14,19 @@ const PROBLEMAS := {
 	"sector_equivocado": "Sector equivocado",
 	"indicio_descartado": "Indicio descartado",
 }
+const RESULTADOS := {
+	"inspeccionar": "Compuerta abierta",
+	"evaluar_indicio": "Indicio de aislamiento confirmado",
+	"revisar_sintomas": "Síntomas de la red revisados",
+	"confirmar_solucion": "Falla resuelta",
+	"confirmar_diagnostico": "Diagnóstico confirmado",
+	"reponer_pieza": "Tornillo repuesto",
+	"volver_al_sector": "Sector correcto recuperado",
+	"recuperar_indicio": "Indicio recuperado",
+}
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Practica = preload("res://logica/simulador/practica.gd")
+const MenuPieza = preload("res://logica/simulador/menu_pieza.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
 const Interactuable = preload("res://escenas/interactuable.gd")
 
@@ -23,7 +34,8 @@ const Interactuable = preload("res://escenas/interactuable.gd")
 var motor: RefCounted
 var datos: Dictionary
 var ultimo_ms: int
-var componente := ""
+var accion_pendiente := ""
+var causa_marcada := ""
 var pieza_apuntada: Interactuable
 var conexion_panel: RefCounted
 var tecnico := {}
@@ -36,6 +48,9 @@ var modo_captura := false
 @onready var alcance: RayCast3D = $Jugador/Camara/Alcance
 @onready var resumen := $Interfaz/Lateral/Resumen
 @onready var lateral := $Interfaz/Lateral
+@onready var menu_pieza := $MenuPieza
+@onready var resultado: Label = $AvisoCentral/Resultado
+@onready var duracion_aviso: Timer = $AvisoCentral/Duracion
 @onready var panel := $AlineacionPanel/PanelVirtual
 
 
@@ -50,8 +65,6 @@ func _ready() -> void:
 	$AlternarPanel.pressed.connect(func():
 		panel_oculto = not panel_oculto
 		actualizar_panel(Time.get_ticks_msec()))
-	lateral.get_node("Accion").item_selected.connect(func(_indice: int):
-		actualizar_accion_visible())
 	if conexion_panel != null:
 		panel.conexion = conexion_panel
 		panel.conexion.protocolo.reiniciar_fuente("virtual")
@@ -63,20 +76,24 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	motor = Motor.new(datos)
 	ultimo_ms = Time.get_ticks_msec()
-	lateral.get_node("Causa").add_item("Marcar una causa")
-	for causa in datos.causas:
-		lateral.get_node("Causa").add_item(causa.replace("-", " ").capitalize())
-	lateral.get_node("Causa").item_selected.connect(func(indice: int):
-		motor.marcar_causa("" if indice == 0 else datos.causas[indice - 1]))
+	menu_pieza.elegida.connect(elegir_accion)
+	menu_pieza.cierre_solicitado.connect(cerrar_menu)
+	menu_pieza.causa_marcada.connect(func(causa: String):
+		if motor.marcar_causa(causa):
+			causa_marcada = causa)
+	duracion_aviso.timeout.connect(resultado.hide)
+	if not modo_captura and datos.zona in ["gabinete", "cabina"]:
+		var objetivo: Node3D = $Sector.piezas.monitor if datos.zona == "cabina" else $Sector.piezas.compuerta
+		jugador.position = Vector3($Sector.position.x + 1.8, 0, objetivo.global_position.z)
+		jugador.look_at(Vector3(objetivo.global_position.x, jugador.global_position.y, objetivo.global_position.z))
+		jugador.camara.look_at(objetivo.global_position)
 	lateral.get_node("Continuar").pressed.connect(func():
 		panel.conexion.reanudar()
 		ultimo_ms = Time.get_ticks_msec()
 		actualizar_panel(ultimo_ms))
-	lateral.get_node("ConfirmarAccion").pressed.connect(func():
-		recibir_accion({"accion": "confirmar", "fuente_entrada": "teclado"}))
 	panel.accion_recibida.connect(recibir_accion)
 	resumen.reintento_solicitado.connect(reintentar)
-	mostrar_estado()
+	mostrar_estado(true)
 	actualizar_panel(ultimo_ms)
 
 
@@ -86,30 +103,43 @@ func ejecutar(id: String, fuente: String) -> void:
 	var ahora := Time.get_ticks_msec()
 	var decision: Dictionary = motor.ejecutar(id, fuente, ahora - ultimo_ms)
 	ultimo_ms = ahora
-	var mensajes := PackedStringArray()
-	if not decision.get("motivo", "").is_empty():
-		mensajes.append(decision.motivo)
-	for evento in decision.get("eventos", []):
-		mensajes.append("Problema · %s" % PROBLEMAS.get(evento, datos.eventos[evento].descripcion))
-	if not mensajes.is_empty() and not decision.get("fuente", "").is_empty():
-		mensajes.append(decision.fuente)
-	lateral.get_node("Aviso").text = "\n".join(mensajes)
+	mostrar_resultado(decision)
+	jugador.mostrar_herramienta(id if decision.get("aplicada", false) else "")
 	if not motor.fin().is_empty() and not tecnico.is_empty() and not resultados_guardados:
 		resultados_guardados = Practica.guardar(tecnico.base, tecnico.id, tecnico.alias, motor,
 			int(Time.get_unix_time_from_system()))
 		if not resultados_guardados:
 			lateral.get_node("Aviso").text += "\nNo se pudo guardar el resultado de la práctica."
-	componente = ""
 	mostrar_estado()
 	if not motor.fin().is_empty() and resumen.get_node("Reflexion").visible:
 		resumen.get_node("Reflexion").grab_focus()
 	decision_tomada.emit(decision)
 
 
-func mostrar_estado() -> void:
+func mostrar_resultado(decision: Dictionary) -> void:
+	var texto: String = decision.get("motivo", "").trim_prefix("[MUESTRA] ")
+	if "tornillo_roto" in decision.get("eventos", []):
+		texto = "Pieza dañada: tornillo roto"
+	elif not decision.get("eventos", []).is_empty():
+		var evento: String = decision.eventos[0]
+		texto = PROBLEMAS.get(evento, datos.eventos[evento].descripcion.trim_prefix("[MUESTRA] "))
+	elif not decision.get("aplicada", false) and texto.begins_with("Se requiere "):
+		texto = "Acción no aplicada. Revisa los indicios y completa los pasos previos."
+	elif texto.is_empty():
+		texto = RESULTADOS.get(decision.get("accion"), "Acción completada")
+	avisar(texto)
+
+
+func avisar(texto: String) -> void:
+	resultado.text = texto
+	resultado.show()
+	duracion_aviso.start()
+
+
+func mostrar_estado(inmediato := false) -> void:
 	var estado: Dictionary = motor.estado()
 	var terminado: bool = not motor.fin().is_empty()
-	jugador.activo = not terminado and not pausa_visible
+	jugador.activo = not terminado and not pausa_visible and not menu_pieza.visible
 	if terminado:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var lineas := PackedStringArray()
@@ -123,11 +153,10 @@ func mostrar_estado() -> void:
 	lateral.get_node("Objetivo").text = datos.descripcion.trim_prefix("[MUESTRA] ")
 	lateral.get_node("Indicios").text = "\n".join(lineas)
 	var falla: bool = motor.hay_problemas() or motor.fin() == "falta-critica"
-	$Sector.reflejar_estado(estado, falla, modo_captura)
+	$Sector.reflejar_estado(estado, falla, inmediato or modo_captura)
 	panel.mostrar_leds({"energizado": estado.get("energizado"), "bloqueado": estado.get("bloqueo_puesto"),
 		"falla": falla})
 	actualizar_hud()
-	mostrar_acciones()
 	resumen.mostrar(motor)
 
 
@@ -150,80 +179,72 @@ func reintentar() -> void:
 		return
 	motor = nuevo
 	resultados_guardados = false
-	lateral.get_node("Causa").select(0)
-	componente = ""
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	causa_marcada = ""
+	cerrar_menu()
+	duracion_aviso.stop()
+	resultado.hide()
 	lateral.get_node("Aviso").text = ""
 	ultimo_ms = Time.get_ticks_msec()
 	mostrar_estado()
 
 
 func abrir_menu(pieza: Interactuable) -> void:
-	componente = pieza.componente
-	lateral.get_node("Pieza").text = pieza.nombre
-	mostrar_acciones()
+	if motor == null or not motor.fin().is_empty() or pausa_visible or not accion_pendiente.is_empty():
+		return
+	var opciones := MenuPieza.entradas(motor, datos, pieza.componente)
+	var lectura: String = $Sector.lectura_pieza(pieza.componente)
+	var causas: Array = datos.causas if motor.estado().get("inspeccionado",
+		motor.estado().get("sintomas_revisados", false)) else []
+	if opciones.is_empty():
+		lectura = "[MUESTRA] Sin falla en esta orden"
+	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada)
+	jugador.activo = false
+	$Apuntado.hide()
 
 
 func cerrar_menu() -> void:
-	componente = ""
-	mostrar_acciones()
+	accion_pendiente = ""
+	menu_pieza.cerrar()
+	jugador.mostrar_herramienta("")
+	if not pausa_visible and motor != null and motor.fin().is_empty():
+		jugador.activo = true
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
-func mostrar_acciones() -> void:
-	var lista: OptionButton = lateral.get_node("Accion")
-	var causa: OptionButton = lateral.get_node("Causa")
-	causa.visible = motor.estado().get("inspeccionado", true) and motor.fin().is_empty()
-	lista.visible = not componente.is_empty() and motor.fin().is_empty()
-	lateral.get_node("Pieza").visible = lista.visible
-	var lectura: String = $Sector.lectura_pieza(componente)
-	lateral.get_node("LecturaPieza").text = lectura
-	lateral.get_node("LecturaPieza").visible = lista.visible and not lectura.is_empty()
-	lateral.get_node("ConfirmarAccion").visible = lista.visible
-	lista.clear()
-	lista.add_item("Elegir acción")
-	lista.select(0)
-	var opciones := Practica.opciones(motor, datos, componente)
-	for id in opciones:
-		var regla: Dictionary = opciones[id]
-		var texto: String = regla.descripcion.trim_prefix("[MUESTRA] ")
-		if regla.has("costo"):
-			texto += " · costo %s · tiempo %s · riesgo %s" % [regla.costo.trim_prefix("[MUESTRA] "),
-				regla.tiempo.trim_prefix("[MUESTRA] "), regla.riesgo.trim_prefix("[MUESTRA] ")]
-		lista.add_item("%d. %s" % [lista.item_count, texto])
-		var indice := lista.item_count - 1
-		lista.set_item_metadata(indice, id)
-		lista.get_popup().set_item_tooltip(indice, texto)
-	if lista.visible and opciones.is_empty():
-		lista.set_item_text(0, "Sin acciones disponibles")
-	actualizar_accion_visible()
-
-
-func actualizar_accion_visible() -> void:
-	var lista: OptionButton = lateral.get_node("Accion")
-	var detalle: Label = lateral.get_node("DetalleAccion")
-	detalle.text = lista.get_item_text(lista.selected) if lista.selected > 0 else ""
-	jugador.mostrar_herramienta(str(lista.get_selected_metadata()) if lista.visible and lista.selected > 0 and not pausa_visible else "")
-	detalle.visible = lista.visible and not detalle.text.is_empty()
-	lateral.get_node("ConfirmarAccion").disabled = pausa_visible or lista.selected <= 0
+func elegir_accion(indice: int, fuente: String) -> void:
+	if not menu_pieza.visible or not accion_pendiente.is_empty() or panel.conexion.pausado() \
+			or indice < 0 or indice >= menu_pieza.entradas.size():
+		return
+	var entrada: Dictionary = menu_pieza.entradas[indice]
+	if entrada.requiere_panel:
+		accion_pendiente = entrada.id
+		if panel.conexion.fuente_panel() == "virtual":
+			panel_oculto = false
+			actualizar_panel(Time.get_ticks_msec())
+		menu_pieza.esperar_panel(entrada.texto)
+		jugador.mostrar_herramienta(entrada.id)
+	else:
+		cerrar_menu()
+		ejecutar(entrada.id, fuente)
 
 
 func recibir_accion(accion: Dictionary) -> void:
 	if panel.conexion.pausado() or motor == null or not motor.fin().is_empty():
 		return
-	var lista: OptionButton = lateral.get_node("Accion")
 	match accion.accion:
 		"inspeccionar":
-			if is_instance_valid(pieza_apuntada):
+			if not menu_pieza.visible and is_instance_valid(pieza_apuntada):
 				abrir_menu(pieza_apuntada)
 		"elegir-accion":
-			if lista.visible and int(accion.valor) in range(lista.item_count):
-				lista.select(int(accion.valor))
-				actualizar_accion_visible()
+			elegir_accion(int(accion.valor) - 1, accion.get("fuente_entrada", "teclado"))
 		"cancelar":
-			cerrar_menu()
+			if menu_pieza.visible:
+				cerrar_menu()
 		"confirmar":
-			if lista.visible and lista.selected > 0:
-				ejecutar(lista.get_selected_metadata(), accion.fuente_entrada)
+			if not accion_pendiente.is_empty():
+				var id := accion_pendiente
+				cerrar_menu()
+				ejecutar(id, accion.fuente_entrada)
 
 
 func _process(_delta: float) -> void:
@@ -256,12 +277,10 @@ func actualizar_panel(ahora: int) -> void:
 		pausa_visible = pausa
 		jugador.activo = not pausa and motor != null and motor.fin().is_empty()
 		if pausa:
+			cerrar_menu()
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		var continuar: Button = lateral.get_node("Continuar")
 		continuar.visible = pausa
-		for nombre in ["Causa", "Accion"]:
-			lateral.get_node(nombre).disabled = pausa
-		actualizar_accion_visible()
 		actualizar_hud()
 		if pausa:
 			continuar.grab_focus()
@@ -273,7 +292,8 @@ func actualizar_panel(ahora: int) -> void:
 
 func _unhandled_input(evento: InputEvent) -> void:
 	# Un clic en la escena (fuera de los paneles) recupera el ratón si la ventana no lo tenía capturado.
-	if motor != null and motor.fin().is_empty() and not pausa_visible and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED \
+	if motor != null and motor.fin().is_empty() and not pausa_visible and not menu_pieza.visible \
+			and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED \
 			and evento is InputEventMouseButton and evento.pressed and evento.button_index == MOUSE_BUTTON_LEFT:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		get_viewport().set_input_as_handled()
@@ -285,34 +305,39 @@ func _input(evento: InputEvent) -> void:
 	var capturado := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	var accion := {}
 	if evento is InputEventKey:
-		if evento.keycode == KEY_TAB and not pausa_visible:
+		if evento.keycode == KEY_TAB and not pausa_visible and not menu_pieza.visible:
 			var foco := get_viewport().gui_get_focus_owner()
 			if not capturado and foco != null:
 				foco.release_focus()
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if capturado else Input.MOUSE_MODE_CAPTURED
 			get_viewport().set_input_as_handled()
 			return
-		var tecla := OS.get_keycode_string(evento.keycode)
+		var tecla := "Enter" if evento.keycode == KEY_KP_ENTER else OS.get_keycode_string(evento.keycode)
 		accion = panel.entrada.traducir("teclado", tecla, 1)
 		if accion.get("accion") not in ["elegir-accion", "confirmar", "cancelar"]:
 			return
-		if tecla == "Enter" and not capturado and get_viewport().gui_get_focus_owner() != null:
+		if not menu_pieza.visible or (accion.accion == "confirmar" and accion_pendiente.is_empty()):
 			return
 	elif capturado and evento is InputEventMouseButton and evento.button_index == MOUSE_BUTTON_LEFT:
 		accion = panel.entrada.traducir("teclado", "clic", 1)
-	elif capturado and evento is InputEventJoypadButton:
-		var lista: OptionButton = lateral.get_node("Accion")
+	elif evento is InputEventJoypadButton:
 		match evento.button_index:
 			JOY_BUTTON_A:
-				accion = panel.entrada.traducir("control", "A", 1)
+				if menu_pieza.visible and not menu_pieza.causa.get_popup().visible \
+						and menu_pieza.elegir_con_control():
+					get_viewport().set_input_as_handled()
+					return
+				if capturado:
+					accion = panel.entrada.traducir("control", "A", 1)
+			JOY_BUTTON_DPAD_UP, JOY_BUTTON_DPAD_DOWN:
+				if menu_pieza.visible and not menu_pieza.causa.get_popup().visible:
+					menu_pieza.mover_foco(1 if evento.button_index == JOY_BUTTON_DPAD_DOWN else -1)
+					get_viewport().set_input_as_handled()
+					return
 			JOY_BUTTON_X:
 				accion = panel.entrada.traducir("control", "X", 1)
 			JOY_BUTTON_B:
 				accion = panel.entrada.traducir("control", "B", 1)
-			JOY_BUTTON_DPAD_UP, JOY_BUTTON_DPAD_DOWN:
-				var paso := 1 if evento.button_index == JOY_BUTTON_DPAD_DOWN else -1
-				accion = panel.entrada.traducir("control", "dpad",
-					posmod(lista.selected + paso, lista.item_count))
 	if not accion.is_empty():
 		recibir_accion(accion)
 		get_viewport().set_input_as_handled()

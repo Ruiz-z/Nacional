@@ -5,6 +5,7 @@
   "descripcion": "[MUESTRA] El bus virtual muestra un aviso genérico de aislamiento en un sector simulado.",
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
+  "zona": "gabinete",
   "dificultad": "media",
   "causas": [
     "aislamiento-degradado",
@@ -35,6 +36,7 @@
   ],
   "acciones": {
     "inspeccionar": {
+      "requiere_panel": false,
       "componente": "compuerta",
       "previas": {},
       "efectos": {
@@ -48,6 +50,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "evaluar_indicio": {
+      "requiere_panel": false,
       "componente": "monitor",
       "previas": {
         "inspeccionado": true,
@@ -65,6 +68,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_solucion": {
+      "requiere_panel": true,
       "componente": "bateria",
       "previas": {
         "indicio_confirmado": true,
@@ -94,6 +98,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "forzar_pieza": {
+      "requiere_panel": false,
       "componente": "terminal",
       "previas": {
         "inspeccionado": true,
@@ -179,6 +184,7 @@
   },
   "recuperaciones": {
     "reponer_pieza": {
+      "requiere_panel": true,
       "componente": "terminal",
       "previas": {
         "tornillo_roto": true
@@ -197,6 +203,7 @@
       "riesgo": "[MUESTRA] bajo"
     },
     "volver_al_sector": {
+      "requiere_panel": true,
       "componente": "bateria",
       "previas": {
         "sector_equivocado": true
@@ -215,6 +222,7 @@
       "riesgo": "[MUESTRA] bajo"
     },
     "recuperar_indicio": {
+      "requiere_panel": true,
       "componente": "bateria",
       "previas": {
         "indicio_descartado": true

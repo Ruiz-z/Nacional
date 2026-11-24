@@ -3,6 +3,7 @@ extends RefCounted
 const RutasContenido = preload("res://logica/rutas_contenido.gd")
 
 const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria"]
+const ZONAS := ["gabinete", "faros", "motor", "cabina"]
 const AISLAMIENTO := "escenarios/aislamiento.json"
 const Banco = preload("res://logica/competencias/banco.gd")
 
@@ -30,13 +31,15 @@ static func validar(datos: Variant, ruta: String) -> Dictionary:
 
 
 static func campo_invalido(datos: Dictionary) -> String:
-	for campo in ["id", "titulo", "version", "fuente"]:
+	for campo in ["id", "titulo", "descripcion", "version", "fuente"]:
 		if not Banco.texto_presente(datos.get(campo)):
 			return campo
 	if not datos.get("muestra") is bool or (datos.muestra and not datos.titulo.begins_with("[MUESTRA]")):
 		return "muestra"
 	if not fuente_valida(datos.fuente, datos.muestra):
 		return "fuente"
+	if datos.get("zona") not in ZONAS:
+		return "zona"
 	if datos.get("dificultad") not in Banco.DIFICULTADES:
 		return "dificultad"
 	for campo in ["estado", "acciones", "eventos", "recuperaciones", "terminacion", "variante"]:
@@ -112,6 +115,8 @@ static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> S
 			if not datos.recuperaciones.has(id) or regla.recuperaciones.count(id) != 1:
 				return ".recuperaciones"
 		return ""
+	if not regla.get("requiere_panel", false) is bool:
+		return ".requiere_panel"
 	if regla.has("componente") and regla.componente not in COMPONENTES:
 		return ".componente"
 	if not Banco.COMPETENCIAS.has(regla.get("competencia")):

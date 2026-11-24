@@ -1,7 +1,7 @@
 extends SceneTree
 
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
-# Argumentos opcionales: [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [--verificar]
+# Argumentos opcionales: [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [menu] [--verificar]
 func _initialize() -> void:
 	call_deferred("capturar")
 
@@ -11,12 +11,15 @@ func capturar() -> void:
 	var verificar := args.size() > 0 and args[-1] == "--verificar"
 	if verificar:
 		args.remove_at(args.size() - 1)
+	var menu := args.size() > 2 and args[-1] == "menu"
+	if menu:
+		args.remove_at(args.size() - 1)
 	var vista := ""
 	if args.size() >= 9 and args[-1] in ["entrada", "cerrado", "abierto", "danado"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
 	if args.size() not in [2, 4, 8, 9]:
-		fallar("Uso: -- <escena res://> <salida.png> [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [--verificar]")
+		fallar("Uso: -- <escena res://> <salida.png> [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [menu] [--verificar]")
 		return
 	var tam := Vector2i(1280, 720)
 	if args.size() >= 4:
@@ -96,6 +99,21 @@ func capturar() -> void:
 		print("Triángulos de malla (incluidas herramientas ocultas): ", triangulos)
 		if triangulos >= 80000:
 			fallar("La escena supera el presupuesto de triángulos.")
+			return
+	if menu:
+		if sector == null or not escena.has_method("abrir_menu"):
+			fallar("La escena no tiene un menú de piezas.")
+			return
+		await physics_frame
+		await physics_frame
+		escena.alcance.force_raycast_update()
+		var pieza := escena.alcance.get_collider() as StaticBody3D
+		if pieza == null or pieza.get("componente") == null:
+			fallar("La mira no está sobre una pieza. Ajusta la posición y el giro de la cámara.")
+			return
+		escena.abrir_menu(pieza)
+		if not escena.menu_pieza.visible:
+			fallar("No se pudo abrir el menú de la pieza.")
 			return
 	if verificar:
 		quit(0)

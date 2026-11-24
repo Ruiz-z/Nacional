@@ -27,7 +27,22 @@ static func recorrido(menu: Node, base: String) -> bool:
 		return false
 	menu.actualizar()
 	menu.botones.escenario.pressed.emit()
+	var tarjetas: Node = menu.pantalla.get_node("Centro/Columna/Tarjetas")
+	var elegida := false
+	for tarjeta in tarjetas.get_children():
+		if tarjeta.text.contains("Cabina"):
+			tarjeta.pressed.emit()
+			elegida = true
+			break
+	if not elegida:
+		return false
 	var bus: Node = menu.pantalla
+	if bus.archivo.get_file() != "comunicacion.json" or bus.datos.id != "comunicacion":
+		return false
+	bus.abrir_menu(bus.get_node("Sector").piezas.terminal)
+	if not bus.menu_pieza.entradas.is_empty() or bus.motor.estado().sintomas_revisados:
+		return false
+	bus.cerrar_menu()
 	for accion in bus.datos.ruta_ideal:
 		bus.ejecutar(accion, "teclado")
 	menu.volver()

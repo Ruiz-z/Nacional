@@ -10,6 +10,7 @@
   "codigo_falla": "[MUESTRA] Aviso genérico de comunicación",
   "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
   "muestra": true,
+  "zona": "cabina",
   "dificultad": "facil",
   "causas": [
     "modulo-sin-comunicacion",
@@ -28,6 +29,7 @@
   ],
   "acciones": {
     "revisar_sintomas": {
+      "requiere_panel": false,
       "componente": "monitor",
       "previas": {},
       "efectos": {
@@ -54,6 +56,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_diagnostico": {
+      "requiere_panel": true,
       "componente": "monitor",
       "previas": {
         "sintomas_revisados": true

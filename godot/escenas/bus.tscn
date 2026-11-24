@@ -13,6 +13,8 @@
 
 [ext_resource type="Script" path="res://escenas/compartimento.gd" id="Gabinete"]
 
+[ext_resource type="PackedScene" path="res://escenas/menu_pieza.tscn" id="MenuPieza"]
+
 [sub_resource type="Environment" id="AmbienteTaller"]
 background_mode = 1
 background_color = Color(0.18, 0.21, 0.24, 1)
@@ -1238,39 +1240,6 @@ autowrap_mode = 3
 theme_type_variation = &"Primario"
 visible = false
 
-[node name="Causa" type="OptionButton" parent="Interfaz/Lateral"]
-visible = false
-custom_minimum_size = Vector2(0, 52)
-fit_to_longest_item = false
-text_overrun_behavior = 3
-
-[node name="Pieza" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Seccion"
-autowrap_mode = 3
-visible = false
-
-[node name="LecturaPieza" type="Label" parent="Interfaz/Lateral"]
-visible = false
-autowrap_mode = 3
-theme_type_variation = &"Secundario"
-
-[node name="Accion" type="OptionButton" parent="Interfaz/Lateral"]
-visible = false
-custom_minimum_size = Vector2(0, 52)
-fit_to_longest_item = false
-text_overrun_behavior = 3
-
-[node name="DetalleAccion" type="Label" parent="Interfaz/Lateral"]
-visible = false
-autowrap_mode = 3
-theme_type_variation = &"Secundario"
-
-[node name="ConfirmarAccion" type="Button" parent="Interfaz/Lateral"]
-text = "Confirmar acción"
-custom_minimum_size = Vector2(0, 52)
-autowrap_mode = 3
-visible = false
-
 [node name="Aviso" type="RichTextLabel" parent="Interfaz/Lateral"]
 visible = false
 custom_minimum_size = Vector2(0, 56)
@@ -1315,3 +1284,25 @@ theme_override_styles/panel = SubResource("FondoApuntado")
 mouse_filter = 2
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
+
+[node name="MenuPieza" parent="." instance=ExtResource("MenuPieza")]
+
+[node name="AvisoCentral" type="CanvasLayer" parent="."]
+layer = 3
+
+[node name="Resultado" type="Label" parent="AvisoCentral"]
+visible = false
+anchor_left = 0.25
+anchor_right = 0.75
+anchor_top = 0.16
+anchor_bottom = 0.16
+mouse_filter = 2
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_outline_color = Color(0.04, 0.06, 0.08, 1)
+theme_override_constants/outline_size = 8
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Duracion" type="Timer" parent="AvisoCentral"]
+wait_time = 2.0
+one_shot = true

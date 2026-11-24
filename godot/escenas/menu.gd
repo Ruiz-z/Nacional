@@ -9,6 +9,7 @@ const Recorrido = preload("res://logica/flujo/recorrido.gd")
 const Esquema = preload("res://logica/datos/esquema.gd")
 const Conexion = preload("res://logica/entrada/conexion_panel.gd")
 const Tablero = preload("res://escenas/tablero.tscn")
+const Ordenes = preload("res://escenas/ordenes.tscn")
 const Bus = preload("res://escenas/bus.tscn")
 const Demo = preload("res://escenas/modo_demo.tscn")
 const Diagnostico = preload("res://escenas/diagnostico.tscn")
@@ -114,7 +115,7 @@ func abrir_paso(paso: String) -> void:
 		return
 	match paso:
 		"escenario":
-			abrir_bus(perfil.merged({"base": base}))
+			abrir_ordenes(perfil.merged({"base": base}))
 		"tablero":
 			abrir_tablero({"base": base, "alias": perfil.alias})
 		"diagnostico", "ruta", "post", "retest":
@@ -148,8 +149,15 @@ func abrir_tablero(tecnico: Dictionary) -> void:
 	abrir(tablero)
 
 
-func abrir_bus(tecnico: Dictionary) -> void:
+func abrir_ordenes(tecnico: Dictionary) -> void:
+	var ordenes := Ordenes.instantiate()
+	ordenes.orden_elegida.connect(func(archivo: String): abrir_bus(tecnico, archivo))
+	abrir(ordenes)
+
+
+func abrir_bus(tecnico: Dictionary, archivo: String = Escenario.AISLAMIENTO) -> void:
 	var bus := Bus.instantiate()
+	bus.archivo = archivo
 	if tecnico.base == base:
 		bus.decision_tomada.connect(func(_decision: Dictionary):
 			if bus.resultados_guardados:

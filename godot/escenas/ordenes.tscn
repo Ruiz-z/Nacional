@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://escenas/ordenes.gd" id="1"]
+
+[node name="Ordenes" type="ScrollContainer"]
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+script = ExtResource("1")
+
+[node name="Centro" type="CenterContainer" parent="."]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Columna" type="VBoxContainer" parent="Centro"]
+custom_minimum_size = Vector2(560, 0)
+theme_override_constants/separation = 16
+
+[node name="Titulo" type="Label" parent="Centro/Columna"]
+theme_type_variation = &"Titulo"
+text = "Órdenes de servicio"
+
+[node name="Tarjetas" type="VBoxContainer" parent="Centro/Columna"]
+theme_override_constants/separation = 12
+
+[node name="Aviso" type="Label" parent="Centro/Columna"]
+visible = false
+theme_type_variation = &"Aviso"
+autowrap_mode = 3
