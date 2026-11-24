@@ -112,3 +112,12 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-86 S — Pantalla de ruta y micro-lecciones: sesión de 3, fuente visible y recálculo (aprendizaje RF-8 a 10) — Hecho cuando: prueba de humo completa una sesión. — falta verificación manual
 - [x] T-87 S — Pantalla de evaluación post-test y retest, con aviso si falta adelantar el reloj (aprendizaje RF-15; flujo RF-2, 3) — Hecho cuando: prueba de humo recorre post-test y retest con reloj adelantado. — falta verificación manual
 - [x] T-88 S — Que el ejecutable exportado encuentre `contenido/` (junto al ejecutable o dentro del paquete) en vez de depender de la carpeta de trabajo — Hecho cuando: el binario de `build/linux/` ejecutado desde otra carpeta carga el banco y un escenario.
+
+## 10. Práctica en primera persona (plan aprobado)
+- [ ] T-89 S — Campo `componente` en acciones del escenario y validación (simulador RF-27) — Hecho cuando: prueba rechaza un componente inexistente y los dos escenarios validan.
+- [ ] T-90 S — Función pura de movimiento y límites del taller (RF-25) — Hecho cuando: pruebas de velocidad, diagonal y colisión con límites.
+- [ ] T-91 S — Jugador en primera persona con WASD, ratón, sticks y Tab (RF-25) — Hecho cuando: prueba de humo y captura desde la posición inicial.
+- [ ] T-92 S — Gabinete de servicio con puerta animada y piezas (RF-28) — Hecho cuando: captura con la puerta cerrada y abierta.
+- [ ] T-93 S — Raycast, resaltado y menú contextual por pieza (RF-26) — Hecho cuando: prueba que cada pieza lista solo sus acciones.
+- [ ] T-94 S — HUD en franja colapsable y reflejo del estado en la escena (RF-28) — Hecho cuando: captura con tornillo roto y LED en rojo.
+- [ ] T-95 S — Recorrido completo y actualizar README y checklist — Hecho cuando: ejecutable exportado recorre inspeccionar, fallo, recuperación, resumen y reintento.

@@ -58,6 +58,10 @@ Escena en Godot de un bus eléctrico donde el técnico inspecciona, diagnostica 
 - RF-22: EL SISTEMA entrega a `aprendizaje` y `tablero` por escenario: resultados por competencia, errores, faltas, brechas, tiempo por acción, fuente de entrada (`panel`, `virtual`, `teclado` o `control`) y versión del contenido.
 - RF-23: EL SISTEMA funciona sin conexión a internet.
 - RF-24: CUANDO no hay panel físico, EL SISTEMA calcula la brecha con el panel virtual y registra la fuente de entrada.
+- RF-25: EL SISTEMA presenta la práctica en primera persona: el técnico camina por el taller y mira con teclado y ratón o con los sticks, y puede liberar el cursor con Tab para usar los paneles.
+- RF-26: CUANDO el técnico apunta a una pieza a menos de 2,5 m, EL SISTEMA la resalta y muestra su nombre; AL pulsar inspeccionar, muestra solo las acciones válidas de esa pieza.
+- RF-27: CADA acción de un escenario puede declarar un `componente` (`compuerta`, `monitor`, `cables`, `terminal`, `bateria`); SI el valor no existe, ENTONCES el validador rechaza el escenario con archivo y campo.
+- RF-28: CUANDO cambia el estado del motor, EL SISTEMA refleja en la escena la compuerta abierta o cerrada, el LED del monitor y la pieza dañada.
 
 ## Requisitos no funcionales
 - Godot 4.7.2; modo escritorio; español.
