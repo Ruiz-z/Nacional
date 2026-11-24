@@ -3,6 +3,7 @@ extends SceneTree
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
+# Banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
 func _initialize() -> void:
 	call_deferred("capturar")
@@ -17,11 +18,11 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
 	var zona := ""
-	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor"]:
+	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
 		args.remove_at(args.size() - 1)
 		if zona == "comunicacion":
@@ -34,6 +35,12 @@ func capturar() -> void:
 			if vista not in ["tablero", "puerta"]:
 				fallar("Usa cabina|interior [tablero|puerta].")
 				return
+		elif zona == "banco":
+			if vista.is_empty():
+				vista = "cerrado"
+			if vista not in ["cerrado", "midiendo"]:
+				fallar("Usa banco [cerrado|midiendo].")
+				return
 		elif vista.is_empty():
 			vista = "cerrado"
 		elif vista not in ["cerrado", "abierto", "animacion"]:
@@ -42,6 +49,9 @@ func capturar() -> void:
 		if args.size() not in [2, 4]:
 			fallar("Indica la zona después de las dimensiones opcionales.")
 			return
+	if vista == "midiendo" and zona != "banco":
+		fallar("Usa banco para la vista midiendo.")
+		return
 	if vista == "animacion" and (zona.is_empty() or menu):
 		fallar("Usa faros|motor para la vista animacion, con el menú cerrado.")
 		return
@@ -82,7 +92,7 @@ func capturar() -> void:
 		escena.modo_captura = true
 	if not zona.is_empty():
 		if zona != "interior":
-			escena.archivo = "escenarios/%s.json" % ("comunicacion" if zona == "cabina" else zona)
+			escena.archivo = "escenarios/%s.json" % {"cabina": "comunicacion", "banco": "modulo_auxiliar"}.get(zona, zona)
 		escena.get_node("Jugador").set_physics_process(false)
 	vp.add_child(escena)
 
@@ -132,6 +142,23 @@ func capturar() -> void:
 			if sector.falla_red != (zona == "cabina") \
 					or ((vista == "tablero" or menu) and not comprobar_pieza(escena, objetivo)):
 				fallar("El estado o encuadre del interior no corresponde a la vista.")
+				return
+		elif zona == "banco":
+			sector = escena.zona_activa
+			escena.ubicar_jugador(sector.acceso)
+			await physics_frame
+			await physics_frame
+			if vista == "midiendo":
+				for punto in ["tp0", "tp1"]:
+					escena.apuntar_jugador(sector.piezas[punto].global_position)
+					if not comprobar_pieza(escena, punto):
+						fallar("La mira no alcanza %s." % punto.to_upper())
+						return
+					escena.recibir_accion(escena.panel.entrada.traducir("teclado", "clic", 1))
+			escena.apuntar_jugador(sector.piezas[sector.acceso].global_position)
+			var lectura := "0.0 V" if vista == "midiendo" else "—"
+			if sector.pantalla.text != lectura or not comprobar_pieza(escena, sector.acceso):
+				fallar("La lectura o el encuadre no corresponde al banco.")
 				return
 		elif not zona.is_empty():
 			sector = escena.zona_activa
@@ -212,7 +239,7 @@ func capturar() -> void:
 		await process_frame
 		var tarjeta: Control = escena.menu_pieza.get_node("Centro/Tarjeta")
 		if not vp.get_visible_rect().encloses(tarjeta.get_global_rect()) \
-				or tarjeta.get_global_rect().intersects(escena.panel.get_global_rect()):
+				or (escena.panel.visible and tarjeta.get_global_rect().intersects(escena.panel.get_global_rect())):
 			fallar("El menú queda recortado o invade el panel virtual.")
 			return
 	if verificar:

@@ -135,13 +135,13 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 
 ## 12. Arnés de diagnóstico con multímetro (SPEC-arnes.md, pendiente de aprobación)
 - [ ] T-105 E — Armar el banco en protoboard y comprobar con un multímetro las tres filas de la tabla (S1 y S2 cerrados, S1 abierto, S2 abierto) — Hecho cuando: TP1 y TP2 marcan ≈5 V, ≈0 V y ≈5 V, y ≈5 V y ≈0 V según el caso.
-- [ ] T-106 S — Modelo eléctrico del banco como función pura y su prueba (arnés RF-2, 5) — Hecho cuando: la prueba cubre las tres filas y la tolerancia de ±0,2 V.
-- [ ] T-107 S — Escenario `modulo_auxiliar.json` con dos variantes, acciones con `titulo` y tipos de error nuevos en el validador (RF-10 a 12, 16) — Hecho cuando: la ruta ideal de cada variante pasa por `motor.gd`.
-- [ ] T-108 S — Lógica de mediciones y lecturas reportadas: punto medido, lectura, comparación y errores (RF-7 a 12) — Hecho cuando: pruebas de `punto-de-medicion-incorrecto`, `lectura-mal-interpretada` y `paso-omitido`.
-- [ ] T-109 S — Zona `banco` en el taller con mesa, arnés, puntos de prueba y multímetro virtual con puntas (RF-1, 3, 4) — Hecho cuando: captura frente al banco y prueba de humo.
-- [ ] T-110 S — Menú para registrar lecturas y diagnosticar, y reparación con confirmación del panel (RF-8, 13) — Hecho cuando: prueba de flujo real (clic, medir, registrar, reparar).
-- [ ] T-111 S — Orden de servicio y cabina enlazadas con el banco, y variante alterna al reintentar (RF-5, 17) — Hecho cuando: la orden aparece en el catálogo y el aviso es idéntico en ambas fallas.
-- [ ] T-112 S — Resumen y entrega a `aprendizaje` y `tablero` con errores de medición separados de los de interpretación (RF-15) — Hecho cuando: indicador visible en el tablero con datos `[DEMO]`.
+- [x] T-106 S — Modelo eléctrico del banco como función pura y su prueba (arnés RF-2, 5) — Hecho cuando: la prueba cubre las tres filas y la tolerancia de ±0,2 V.
+- [x] T-107 S — Escenario `modulo_auxiliar.json` con dos variantes, acciones con `titulo` y tipos de error nuevos en el validador (RF-10 a 12, 16) — Hecho cuando: la ruta ideal de cada variante pasa por `motor.gd`.
+- [x] T-108 S — Lógica de mediciones y lecturas reportadas: punto medido, lectura, comparación y errores (RF-7 a 12) — Hecho cuando: pruebas de `punto-de-medicion-incorrecto`, `lectura-mal-interpretada` y `paso-omitido`.
+- [x] T-109 S — Zona `banco` en el taller con mesa, arnés, puntos de prueba y multímetro virtual con puntas (RF-1, 3, 4) — Hecho cuando: captura frente al banco y prueba de humo.
+- [x] T-110 S — Menú para registrar lecturas y diagnosticar, y reparación con confirmación del panel (RF-8, 13) — Hecho cuando: prueba de flujo real (clic, medir, registrar, reparar).
+- [x] T-111 S — Orden de servicio y cabina enlazadas con el banco, y variante alterna al reintentar (RF-5, 17) — Hecho cuando: la orden aparece en el catálogo y el aviso es idéntico en ambas fallas.
+- [x] T-112 S — Resumen y entrega a `aprendizaje` y `tablero` con errores de medición separados de los de interpretación (RF-15) — Hecho cuando: indicador visible en el tablero con datos `[DEMO]`.
 - [x] T-113 S+E — Actualizar `SPEC-panel.md` y `docs/protocolo-panel.md` con los controles `nodo_p` y `nodo_q` (RF-14, protocolo) — Hecho cuando: contrato versionado y aprobado antes de tocar el firmware.
 - [ ] T-114 E — Firmware de A1 y A2 con umbral y antirrebote, y su prueba de PC (RF-14) — Hecho cuando: las líneas generadas coinciden con los ejemplos del protocolo.
 - [ ] T-115 S — Detección del cierre de S1 o S2 como verificación de la reparación y paso al virtual si se desconecta (RF-14, 18) — Hecho cuando: prueba con el emisor de eventos.

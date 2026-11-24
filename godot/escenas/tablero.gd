@@ -67,6 +67,13 @@ func mostrar() -> void:
 	indicador(indicadores, "Faltas críticas", str(perfil.faltas_criticas.conteo),
 		"Última · %s" % perfil.faltas_criticas.ultima if perfil.faltas_criticas.ultima != null else "Sin faltas registradas")
 	indicador(indicadores, "Brechas registradas", str(perfil.brechas.size()), "Diagnóstico frente a acción")
+	if not perfil.errores_arnes.is_empty():
+		linea("Banco de arnés [DEMO]" if perfil.demo else "Banco de arnés", &"Seccion")
+		var fila_banco := fila_indicadores()
+		indicador(fila_banco, "Errores de medición", str(perfil.errores_arnes.medicion),
+			"Punto, lectura reportada o paso omitido")
+		indicador(fila_banco, "Errores de interpretación", str(perfil.errores_arnes.interpretacion),
+			"Causa elegida tras lecturas correctas")
 	linea("Dominio por competencia", &"Seccion")
 	var filas: Array[Array] = []
 	for competencia in perfil.competencias:

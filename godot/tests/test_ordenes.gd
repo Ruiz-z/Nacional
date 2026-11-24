@@ -17,5 +17,5 @@ static func ejecutar() -> bool:
 	datos.zona = "taller"
 	return listado.errores.is_empty() and zonas.get("aislamiento.json") == "gabinete" \
 		and zonas.get("comunicacion.json") == "cabina" \
-		and zonas.size() == 4 and zonas.get("faros.json") == "faros" and zonas.get("motor.json") == "motor" \
+		and zonas.size() == 5 and zonas.get("modulo_auxiliar.json") == "banco" and zonas.get("faros.json") == "faros" and zonas.get("motor.json") == "motor" \
 		and not Escenario.validar(datos, "prueba.json").errores.is_empty()

@@ -20,7 +20,8 @@ static func comprobar(base: String) -> bool:
 		if fila is ProgressBar and fila.value > 0:
 			correcto = true
 	var texto := leer(tablero)
-	correcto = correcto and texto.contains("[DEMO]") and texto.contains("Retención simulada")
+	correcto = correcto and texto.contains("[DEMO]") and texto.contains("Retención simulada") \
+		and texto.contains("Banco de arnés [DEMO]")
 	tablero.free()
 	return correcto
 

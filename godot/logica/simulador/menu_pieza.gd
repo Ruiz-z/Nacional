@@ -6,7 +6,9 @@ const Practica = preload("res://logica/simulador/practica.gd")
 static func entradas(motor: RefCounted, escenario: Dictionary, componente: String) -> Array[Dictionary]:
 	var resultado: Array[Dictionary] = []
 	var opciones := Practica.opciones(motor, escenario, componente)
-	for id in opciones:
+	for id: String in opciones:
+		if escenario.get("zona") == "banco" and id.begins_with("reportar_"):
+			continue
 		var regla: Dictionary = opciones[id]
 		var requiere_panel: bool = regla.get("requiere_panel", false)
 		resultado.append({

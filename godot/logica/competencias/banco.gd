@@ -14,6 +14,7 @@ const CRITICIDADES := ["normal", "leve", "critica"]
 const TIPOS_ERROR := [
 	"causa-equivocada", "paso-omitido", "orden-incorrecto", "accion-insegura",
 	"paso-innecesario", "valor-fuera-de-rango",
+	"punto-de-medicion-incorrecto", "lectura-mal-interpretada",
 ]
 const FUENTE_MUESTRA := "[MUESTRA] valor de ejemplo, sin fuente oficial"
 const FUENTE_OFICIAL := "material-oficial"

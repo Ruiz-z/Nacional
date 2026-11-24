@@ -11,6 +11,7 @@ const PASAMANOS := Color("#d4aa58")
 
 var pantalla: Label3D
 var falla_red := false
+var falla_auxiliar := false
 
 
 func _ready() -> void:
@@ -103,6 +104,12 @@ func reflejar_estado(estado: Dictionary, _falla: bool, _inmediato := false) -> v
 	falla_red = estado.has("resuelto") and not estado.resuelto
 	pantalla.text = "BMS · ESS 600 V · " + ("SIN COMUNICACIÓN" if falla_red else "NORMAL")
 	pantalla.modulate = Color("#ffab82") if falla_red else Color("#a5edcb")
+
+
+func mostrar_modulo_auxiliar(resuelto: bool) -> void:
+	falla_auxiliar = not resuelto
+	pantalla.text = "MÓDULO AUXILIAR · " + ("DISPONIBLE" if resuelto else "SIN RESPUESTA")
+	pantalla.modulate = Color("#a5edcb") if resuelto else Color("#ffab82")
 
 
 func lectura_pieza(componente: String) -> String:

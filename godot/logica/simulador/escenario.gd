@@ -5,8 +5,8 @@ const RutasContenido = preload("res://logica/rutas_contenido.gd")
 const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria",
 	"caja_fusibles", "fusible_faros", "conector_faros", "faro_izquierdo", "faro_derecho", "rele_faros",
 	"tapa_motor", "motor_traccion", "inversor_motor", "bomba_motor", "radiador_motor",
-	"monitor_temperatura", "abrazadera_motor", "fusibles_cabina"]
-const ZONAS := ["gabinete", "faros", "motor", "cabina"]
+	"monitor_temperatura", "abrazadera_motor", "fusibles_cabina", "multimetro", "tp0", "tp1", "tp2"]
+const ZONAS := ["gabinete", "faros", "motor", "cabina", "banco"]
 const FUENTE_BZR := "Volvo Buses, BZR Low Entry Eléctrico (página pública)"
 const AISLAMIENTO := "escenarios/aislamiento.json"
 const Banco = preload("res://logica/competencias/banco.gd")
@@ -83,17 +83,29 @@ static func campo_invalido(datos: Dictionary) -> String:
 	var limite: Variant = datos.terminacion.get("limite_intentos")
 	if not numero(limite) or limite < 1 or limite > 2147483647 or limite != floor(limite):
 		return "terminacion.limite_intentos"
-	if not datos.get("ruta_ideal") is Array or datos.ruta_ideal.is_empty():
+	if not ruta_valida(datos.get("ruta_ideal"), datos.acciones):
 		return "ruta_ideal"
-	for id in datos.ruta_ideal:
-		if not datos.acciones.has(id) or datos.acciones[id].criticidad != "normal":
-			return "ruta_ideal"
+	if datos.variante.has("ruta_ideal") and not ruta_valida(datos.variante.ruta_ideal, datos.acciones):
+		return "variante.ruta_ideal"
 	var cambio: Variant = datos.variante.get("estado")
 	if not asignacion_valida(cambio, datos.estado) or cambio.is_empty() \
 			or cumple(datos.estado, cambio) \
 			or imposible(datos.estado.merged(cambio, true), datos.estados_imposibles):
 		return "variante.estado"
+	if datos.zona == "banco":
+		for campo in ["s1_abierto", "s2_abierto", "resuelto"]:
+			if not datos.estado.get(campo) is bool:
+				return "estado." + campo
 	return ""
+
+
+static func ruta_valida(ruta: Variant, acciones: Dictionary) -> bool:
+	if not ruta is Array or ruta.is_empty():
+		return false
+	for id in ruta:
+		if not acciones.has(id) or acciones[id].criticidad != "normal":
+			return false
+	return true
 
 
 static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> String:

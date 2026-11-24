@@ -39,6 +39,8 @@ static func resumir(intentos: Array) -> Dictionary:
 			faltas.append({"item": intento.item, "fecha": intento.reloj_sim})
 		elif error == "diagnostico-vs-accion":
 			brechas += 1
+		if not Dominio.es_puntuado(intento):
+			continue
 		var mediciones: Array = tiempos.get(intento.item, [0.0, 0])
 		mediciones[0] += intento.tiempo_ms
 		mediciones[1] += 1

@@ -60,7 +60,7 @@ var fuente_seguridad := ""
 @onready var interior := $Interior
 @onready var puerta_pasajeros: Interactuable = $PuertaPasajeros
 @onready var negro: ColorRect = $Fundido/Negro
-@onready var zonas := {"gabinete": $Sector, "cabina": interior, "faros": $Faros, "motor": $Motor}
+@onready var zonas := {"gabinete": $Sector, "cabina": interior, "faros": $Faros, "motor": $Motor, "banco": $Banco}
 @onready var jugador := $Jugador
 @onready var alcance: RayCast3D = $Jugador/Camara/Alcance
 @onready var resumen := $Interfaz/Lateral/Resumen
@@ -98,6 +98,7 @@ func _ready() -> void:
 	ultimo_ms = Time.get_ticks_msec()
 	menu_pieza.elegida.connect(elegir_accion)
 	menu_pieza.cierre_solicitado.connect(cerrar_menu)
+	menu_pieza.lectura_reportada.connect(ejecutar)
 	menu_pieza.causa_marcada.connect(func(causa: String):
 		if motor.marcar_causa(causa):
 			causa_marcada = causa)
@@ -105,6 +106,8 @@ func _ready() -> void:
 	zona_activa = zonas[datos.zona]
 	puerta_pasajeros.componente = "puerta_pasajeros"
 	puerta_pasajeros.nombre = "Puerta de pasajeros"
+	if zona_activa != $Banco:
+		$Banco.mostrar_multimetro("—", "Módulo disponible", "virtual")
 	for zona in [$Faros, $Motor]:
 		if zona != zona_activa:
 			zona.reflejar_estado({}, false, true)
@@ -129,7 +132,7 @@ func ubicar_jugador(componente: String) -> void:
 		return
 	var objetivo: Node3D = zona_activa.piezas[componente]
 	var origen := zona_activa.to_global(Vector3(1.8, 0, 0))
-	if zona_activa == $Faros or zona_activa == $Motor:
+	if zona_activa in [$Faros, $Motor, $Banco]:
 		var centro := zona_activa.to_local(objetivo.global_position)
 		var desnivel: float = jugador.camara.position.y - objetivo.global_position.y
 		var distancia := sqrt(maxf(0.0, 1.6 * 1.6 - desnivel * desnivel))
@@ -207,6 +210,10 @@ func mostrar_resultado(decision: Dictionary) -> void:
 		var id: String = decision.get("accion", "")
 		if id == "inspeccionar" and zona_activa != $Sector:
 			texto = "%s abierta" % zona_activa.piezas[zona_activa.acceso].nombre
+		elif id.begins_with("diagnosticar_"):
+			texto = "Diagnóstico registrado"
+		elif id == "reconectar":
+			texto = "Conductor reconectado"
 		else:
 			texto = RESULTADOS.get(id, "Acción completada")
 	avisar(texto)
@@ -231,10 +238,14 @@ func mostrar_estado(inmediato := false) -> void:
 	var orden: Label = lateral.get_node("Estado")
 	orden.text = datos.titulo.trim_prefix("[MUESTRA] ")
 	orden.tooltip_text = orden.text
-	lateral.get_node("Indicios").text = "\n".join(lineas)
 	var falla: bool = motor.hay_problemas() or motor.fin() == "falta-critica"
 	# La captura cambia el encuadre. Las acciones conservan el Tween para mostrar fallos de apertura.
 	zona_activa.reflejar_estado(estado, falla, inmediato)
+	if zona_activa == $Banco:
+		actualizar_banco()
+		interior.mostrar_modulo_auxiliar(estado.resuelto)
+		lineas.append("Banco %s · TP0 primero, luego TP1 o TP2." % motor.mediciones.fuente)
+	lateral.get_node("Indicios").text = "\n".join(lineas)
 	actualizar_leds()
 	actualizar_hud()
 	resumen.mostrar(motor)
@@ -246,7 +257,8 @@ func actualizar_leds() -> void:
 	if datos.zona == "motor":
 		bloqueado = controles_seguridad().get("bloqueo", false)
 	panel.mostrar_leds({"energizado": estado.get("energizado"), "bloqueado": bloqueado,
-		"falla": motor.hay_problemas() or motor.fin() == "falta-critica"})
+		"falla": motor.hay_problemas() or motor.fin() == "falta-critica"
+			or (zona_activa == $Banco and not estado.resuelto)})
 
 
 func actualizar_hud() -> void:
@@ -302,12 +314,16 @@ func abrir_menu(pieza: Interactuable) -> void:
 		lectura = interior.lectura_pieza(pieza.componente)
 	salida_hasta = 0
 	resultado.hide()
-	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada, estado_pieza(pieza))
+	var banco := zona_activa == $Banco and pieza.zona == $Banco and pieza.componente == "multimetro"
+	var reportadas: Dictionary = motor.mediciones.reportadas if banco else {}
+	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada, estado_pieza(pieza), reportadas, banco)
 	jugador.activo = false
 	$Apuntado.hide()
 
 
 func estado_pieza(pieza: Interactuable) -> Dictionary:
+	if pieza.zona == interior and pieza.componente == "monitor" and interior.falla_auxiliar:
+		return {"texto": "Falla", "color": "rojo"}
 	if pieza.zona != zona_activa:
 		return {"texto": "Correcto", "color": "verde"}
 	var estado: Dictionary = motor.estado()
@@ -379,8 +395,14 @@ func recibir_accion(accion: Dictionary) -> void:
 				# del primer paso o justo después de mover la cámara.
 				alcance.force_raycast_update()
 				var pieza := alcance.get_collider() as Interactuable
-				if pieza != null:
-					abrir_menu(pieza)
+				if zona_activa == $Banco and (pieza != null and pieza.zona == $Banco
+						and pieza.componente in ["tp0", "tp1", "tp2"]):
+					tocar_borne(pieza.componente, accion.fuente_entrada)
+				else:
+					if zona_activa == $Banco and not motor.mediciones.punta_negra.is_empty():
+						tocar_borne("", accion.fuente_entrada)
+					if pieza != null:
+						abrir_menu(pieza)
 		"elegir-accion":
 			elegir_accion(int(accion.valor) - 1, accion.get("fuente_entrada", "teclado"))
 		"cancelar":
@@ -388,9 +410,30 @@ func recibir_accion(accion: Dictionary) -> void:
 				cerrar_menu()
 		"confirmar":
 			if not accion_pendiente.is_empty():
+				if zona_activa == $Banco and accion.fuente_entrada in ["teclado", "control"]:
+					if panel.conexion.fuente_panel() == "virtual":
+						panel.emitir("confirmar", 1)
+					return
 				var id := accion_pendiente
 				cerrar_menu()
 				ejecutar(id, accion.fuente_entrada)
+
+
+func tocar_borne(punto: String, fuente: String) -> void:
+	var id: String = motor.mediciones.tocar(punto)
+	jugador.mostrar_herramienta("medir_banco")
+	if not id.is_empty():
+		ejecutar(id, fuente)
+	else:
+		actualizar_banco()
+		if not motor.mediciones.aviso_puntas.is_empty():
+			avisar(motor.mediciones.aviso_puntas)
+
+
+func actualizar_banco() -> void:
+	var mediciones: RefCounted = motor.mediciones
+	var lectura: Dictionary = mediciones.leer.call(motor.estado())
+	$Banco.mostrar_multimetro(mediciones.pantalla, lectura.aviso, mediciones.fuente)
 
 
 func _process(_delta: float) -> void:
@@ -434,7 +477,8 @@ func actualizar_panel(ahora: int) -> void:
 	$AlternarPanel.visible = panel.conexion.fuente_panel() == "virtual" and not pausa \
 		and motor != null and motor.fin().is_empty()
 	$AlternarPanel.text = "Mostrar panel virtual" if panel_oculto else "Ocultar panel virtual"
-	panel.visible = $AlternarPanel.visible and not panel_oculto
+	var registro_banco: bool = zona_activa == $Banco and menu_pieza.visible and accion_pendiente.is_empty()
+	panel.visible = $AlternarPanel.visible and not panel_oculto and not registro_banco
 
 
 func controles_seguridad() -> Dictionary:
@@ -505,7 +549,8 @@ func _input(evento: InputEvent) -> void:
 			return
 		if not menu_pieza.visible or (accion.accion == "confirmar" and accion_pendiente.is_empty()):
 			return
-	elif capturado and evento is InputEventMouseButton and evento.button_index == MOUSE_BUTTON_LEFT:
+	elif (capturado or (modo_captura and not menu_pieza.visible)) \
+			and evento is InputEventMouseButton and evento.button_index == MOUSE_BUTTON_LEFT:
 		accion = panel.entrada.traducir("teclado", "clic", 1)
 	elif evento is InputEventJoypadButton:
 		match evento.button_index:

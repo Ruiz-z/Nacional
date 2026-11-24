@@ -41,6 +41,9 @@ func mostrar(actual: RefCounted) -> void:
 		if not metricas.is_empty():
 			lineas.append("%s: %d puntos · %d errores · %d ms" % [
 				intento.capitalize(), metricas.puntaje, metricas.errores, metricas.tiempo_ms])
+	if datos.has("errores_arnes"):
+		lineas.append("Errores de medición: %d · Errores de interpretación: %d" % [
+			datos.errores_arnes.medicion, datos.errores_arnes.interpretacion])
 	for decision in datos.linea_tiempo:
 		lineas.append("%s · %s · %s" % [decision.accion,
 			"Acierto" if decision.aplicada and decision.tipo_error.is_empty() else "Error",

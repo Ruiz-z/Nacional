@@ -5,6 +5,8 @@ const Protocolo = preload("res://logica/entrada/protocolo.gd")
 static func ejecutar() -> bool:
 	var ruta := ProjectSettings.globalize_path("res://").path_join("../docs/protocolo-panel.md")
 	var documento := FileAccess.get_file_as_string(ruta)
+	# Los sensores del Arduino opcional no pertenecen al vocabulario del panel.
+	documento = documento.get_slice("## Banco de arnés", 0)
 	var protocolo := Protocolo.new()
 	var controles := []
 	var leds := []

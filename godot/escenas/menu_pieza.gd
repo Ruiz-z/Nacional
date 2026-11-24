@@ -3,6 +3,9 @@ extends CanvasLayer
 signal elegida(indice: int, fuente: String)
 signal causa_marcada(causa: String)
 signal cierre_solicitado
+signal lectura_reportada(id: String, fuente: String)
+
+const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
 
 const COLORES := {
 	"gris": [Color("#303c49"), Color("#e3eaf1")],
@@ -20,7 +23,9 @@ const CAUSAS := {
 var entradas: Array[Dictionary] = []
 var botones: Array[Button] = []
 var causas: Array[Button] = []
+var lecturas: Array[Button] = []
 @onready var contenido := $Centro/Tarjeta/Contenido
+@onready var filas_lecturas := contenido.get_node("LecturasReportadas")
 @onready var diagnostico := contenido.get_node("Diagnostico")
 @onready var lista: ScrollContainer = contenido.get_node("Lista")
 @onready var acciones: VBoxContainer = lista.get_node("Acciones")
@@ -35,8 +40,9 @@ func _ready() -> void:
 
 
 func abrir(titulo: String, lectura: String, opciones: Array[Dictionary],
-		ids_causa: Array, marcada: String, estado: Dictionary) -> void:
+		ids_causa: Array, marcada: String, estado: Dictionary, reportadas: Dictionary = {}, banco := false) -> void:
 	entradas = opciones
+	preparar_lecturas(reportadas, banco)
 	contenido.get_node("Cabecera/Titulo").text = titulo
 	var chip_estado: Label = contenido.get_node("Cabecera/Estado")
 	chip_estado.text = estado.texto
@@ -64,26 +70,64 @@ func abrir(titulo: String, lectura: String, opciones: Array[Dictionary],
 		causas.append(boton)
 	diagnostico.visible = not causas.is_empty()
 	for indice in range(entradas.size()):
-		agregar_accion(indice, entradas[indice])
+		agregar_accion(indice, entradas[indice], banco)
 	lista.visible = not botones.is_empty()
 	ajustar_lista()
 	contenido.get_node("SinAcciones").visible = botones.is_empty()
+	contenido.get_node("AccionesTitulo").text = "Confirma la causa y repara" if banco else "Acciones"
 	contenido.get_node("AccionesTitulo").show()
 	contenido.get_node("Pendiente").hide()
 	show()
 	lista.set_deferred("scroll_vertical", 0)
 	var foco := botones[0] if not botones.is_empty() else (causas[0] if not causas.is_empty() else cerrar_boton)
-	foco.grab_focus()
+	(lecturas[0] if banco else foco).grab_focus()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
-func agregar_accion(indice: int, entrada: Dictionary) -> void:
+func preparar_lecturas(reportadas: Dictionary, banco: bool) -> void:
+	for fila in filas_lecturas.get_children():
+		filas_lecturas.remove_child(fila)
+		fila.queue_free()
+	lecturas.clear()
+	filas_lecturas.visible = banco
+	if not banco:
+		return
+	var titulo := Label.new()
+	titulo.text = "Lecturas reportadas"
+	filas_lecturas.add_child(titulo)
+	for punto: String in Mediciones.PUNTOS:
+		var fila := HBoxContainer.new()
+		filas_lecturas.add_child(fila)
+		var etiqueta := Label.new()
+		etiqueta.text = punto.to_upper()
+		fila.add_child(etiqueta)
+		var grupo := ButtonGroup.new()
+		for opcion: String in Mediciones.OPCIONES:
+			var boton := CheckBox.new()
+			boton.text = Mediciones.OPCIONES[opcion]
+			boton.accessibility_name = "%s · %s" % [etiqueta.text, boton.text]
+			boton.button_group = grupo
+			boton.set_pressed_no_signal(reportadas.get(punto) == opcion)
+			var id := "reportar_%s_%s" % [punto, opcion]
+			boton.pressed.connect(func(): lectura_reportada.emit(id, "teclado"))
+			boton.set_meta("accion", id)
+			fila.add_child(boton)
+			lecturas.append(boton)
+
+
+func agregar_accion(indice: int, entrada: Dictionary, compacto := false) -> void:
 	var boton := Button.new()
 	boton.accessibility_name = entrada.titulo
 	boton.accessibility_description = "%s. %s" % [entrada.ejecucion, entrada.descripcion]
 	boton.pressed.connect(func(): elegida.emit(indice, "teclado"))
 	acciones.add_child(boton)
 	botones.append(boton)
+	if compacto:
+		boton.text = "%d · %s" % [indice + 1, entrada.titulo]
+		if entrada.requiere_panel:
+			boton.text += " · Confirma en panel"
+		boton.custom_minimum_size.y = 36
+		return
 
 	var margen := MarginContainer.new()
 	margen.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -167,6 +211,7 @@ func estilo_chip(etiqueta: Label, color: String, tam := 13) -> void:
 
 func esperar_panel() -> void:
 	lista.hide()
+	filas_lecturas.hide()
 	diagnostico.hide()
 	contenido.get_node("AccionesTitulo").hide()
 	var aviso: Label = contenido.get_node("Pendiente")
@@ -186,6 +231,9 @@ func elegir_con_control() -> bool:
 	var foco := get_viewport().gui_get_focus_owner() as Button
 	if lista.visible and foco in botones:
 		elegida.emit(botones.find(foco), "control")
+	elif filas_lecturas.visible and foco in lecturas:
+		foco.button_pressed = true
+		lectura_reportada.emit(foco.get_meta("accion"), "control")
 	elif diagnostico.visible and foco in causas:
 		foco.button_pressed = true
 		foco.pressed.emit()
@@ -198,6 +246,8 @@ func elegir_con_control() -> bool:
 
 func mover_foco(paso: int) -> void:
 	var controles: Array[Button] = []
+	if filas_lecturas.visible:
+		controles.append_array(lecturas)
 	if diagnostico.visible:
 		controles.append_array(causas)
 	if lista.visible:

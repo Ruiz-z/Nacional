@@ -1,0 +1,202 @@
+{
+  "id": "modulo_auxiliar",
+  "version": "1",
+  "titulo": "[MUESTRA] Módulo auxiliar sin respuesta",
+  "descripcion": "[MUESTRA] Mide en el banco virtual, registra ambas lecturas y diagnostica la falla.",
+  "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+  "muestra": true,
+  "zona": "banco",
+  "dificultad": "media",
+  "causas": [
+    "alimentacion",
+    "senal",
+    "modulo"
+  ],
+  "estado": {
+    "s1_abierto": true,
+    "s2_abierto": false,
+    "resuelto": false
+  },
+  "estados_imposibles": [],
+  "acciones": {
+    "medir_tp1": {
+      "titulo": "Medir TP1",
+      "componente": "tp1",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Coloca la punta negra en TP0 y la roja en TP1.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp1_0": {
+      "titulo": "≈0 V",
+      "componente": "multimetro",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra ≈0 V en TP1.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp1_5": {
+      "titulo": "≈5 V",
+      "componente": "multimetro",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra ≈5 V en TP1.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp1_otra": {
+      "titulo": "Otra",
+      "componente": "multimetro",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra Otra en TP1.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "medir_tp2": {
+      "titulo": "Medir TP2",
+      "componente": "tp2",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Coloca la punta negra en TP0 y la roja en TP2.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp2_0": {
+      "titulo": "≈0 V",
+      "componente": "multimetro",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra ≈0 V en TP2.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp2_5": {
+      "titulo": "≈5 V",
+      "componente": "multimetro",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra ≈5 V en TP2.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reportar_tp2_otra": {
+      "titulo": "Otra",
+      "componente": "multimetro",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Registra Otra en TP2.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "diagnosticar_alimentacion": {
+      "titulo": "Falla de alimentación",
+      "componente": "multimetro",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "alimentacion",
+      "descripcion": "[MUESTRA] Confirma el diagnóstico: Falla de alimentación.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "diagnosticar_senal": {
+      "titulo": "Falla de señal",
+      "componente": "multimetro",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "senal",
+      "descripcion": "[MUESTRA] Confirma el diagnóstico: Falla de señal.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "diagnosticar_modulo": {
+      "titulo": "Módulo dañado",
+      "componente": "multimetro",
+      "previas": {},
+      "efectos": {},
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "modulo",
+      "descripcion": "[MUESTRA] Confirma el diagnóstico: Módulo dañado.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
+    },
+    "reconectar": {
+      "titulo": "Reconectar conductor",
+      "componente": "multimetro",
+      "previas": {},
+      "efectos": {
+        "resuelto": true,
+        "s1_abierto": false,
+        "s2_abierto": false
+      },
+      "competencia": "electronica-conectividad",
+      "criticidad": "normal",
+      "tipo_error": "",
+      "causa": "",
+      "descripcion": "[MUESTRA] Reconecta el conductor de la maqueta con el panel.",
+      "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial",
+      "requiere_panel": true
+    }
+  },
+  "eventos": {},
+  "recuperaciones": {},
+  "terminacion": {
+    "resuelto": {
+      "resuelto": true
+    },
+    "limite_intentos": 30
+  },
+  "ruta_ideal": [
+    "medir_tp1",
+    "medir_tp2",
+    "reportar_tp1_0",
+    "reportar_tp2_5",
+    "diagnosticar_alimentacion",
+    "reconectar"
+  ],
+  "variante": {
+    "estado": {
+      "s1_abierto": false,
+      "s2_abierto": true
+    },
+    "ruta_ideal": [
+      "medir_tp1",
+      "medir_tp2",
+      "reportar_tp1_5",
+      "reportar_tp2_0",
+      "diagnosticar_senal",
+      "reconectar"
+    ]
+  }
+}

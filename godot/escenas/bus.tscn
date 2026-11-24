@@ -20,6 +20,8 @@
 [ext_resource type="PackedScene" path="res://escenas/interior.tscn" id="Interior"]
 [ext_resource type="PackedScene" path="res://escenas/menu_pieza.tscn" id="MenuPieza"]
 
+[ext_resource type="Script" path="res://escenas/zona_banco.gd" id="Banco"]
+
 [sub_resource type="Environment" id="AmbienteTaller"]
 background_mode = 1
 background_color = Color(0.18, 0.21, 0.24, 1)
@@ -212,6 +214,10 @@ script = ExtResource("Motor")
 
 [node name="Interior" parent="." instance=ExtResource("Interior")]
 position = Vector3(100, 0, 0)
+
+[node name="Banco" type="Node3D" parent="."]
+position = Vector3(5.6, 0, -3.3)
+script = ExtResource("Banco")
 
 [node name="Taller" type="Node3D" parent="."]
 

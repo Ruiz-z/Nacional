@@ -4,7 +4,7 @@ signal orden_elegida(archivo: String)
 
 const Ordenes = preload("res://logica/simulador/ordenes.gd")
 const ZONAS := {"gabinete": "Gabinete lateral", "faros": "Faros", "motor": "Motor eléctrico",
-	"cabina": "Cabina"}
+	"cabina": "Cabina", "banco": "Banco de arnés"}
 const DIFICULTADES := {"facil": "Fácil", "media": "Media", "dificil": "Difícil"}
 
 

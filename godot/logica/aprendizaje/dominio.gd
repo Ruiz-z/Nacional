@@ -16,13 +16,16 @@ static func peso(dificultad: String, practica: bool = false) -> int:
 
 # Los intentos llegan ordenados del más antiguo al más reciente.
 static func calcular(intentos: Array) -> float:
-	return promedio(intentos.slice(maxi(0, intentos.size() - 10)))
+	var puntuados := intentos.filter(es_puntuado)
+	return promedio(puntuados.slice(maxi(0, puntuados.size() - 10)))
 
 
 static func promedio(intentos: Array) -> float:
 	var suma := 0.0
 	var pesos := 0.0
 	for intento in intentos:
+		if not es_puntuado(intento):
+			continue
 		suma += intento.valor * intento.peso
 		pesos += intento.peso
 	return clampf(suma / pesos, 0.0, 100.0) if pesos > 0.0 else 0.0
@@ -44,3 +47,7 @@ static func falta_critica() -> Dictionary:
 
 static func brecha() -> Dictionary:
 	return {"valor": 0, "peso": 1, "tipo_error": "diagnostico-vs-accion"}
+
+
+static func es_puntuado(intento: Dictionary) -> bool:
+	return intento.get("formato") != "detalle-escenario"

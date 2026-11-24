@@ -1,14 +1,16 @@
 extends RefCounted
 
 const Escenario = preload("res://logica/simulador/escenario.gd")
+const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
 const ENTRADAS := ["panel", "virtual", "teclado", "control"]
 
 # Estas cifras son reglas del juego, independientes de los valores del escenario.
 const PENALIZACIONES := {"paso-innecesario": 4, "orden-incorrecto": 8,
 	"valor-fuera-de-rango": 10, "causa-equivocada": 12, "paso-omitido": 12,
-	"accion-insegura": 30}
+	"punto-de-medicion-incorrecto": 8, "lectura-mal-interpretada": 12, "accion-insegura": 30}
 
 var enviar_brecha: Callable
+var mediciones: Mediciones
 
 var _causa_marcada := ""
 var _brechas: Array = []
@@ -25,9 +27,12 @@ var _intento_anterior := {}
 var _reflexion := ""
 
 
-func _init(escenario: Dictionary) -> void:
+func _init(escenario: Dictionary, lector_banco: Callable = Mediciones.leer_variante,
+		fuente_banco := "virtual") -> void:
 	_escenario = escenario.duplicate(true)
 	_estado = _escenario.estado.duplicate()
+	if _escenario.get("zona") == "banco":
+		mediciones = Mediciones.new(lector_banco, fuente_banco)
 	var inicio := activar_eventos({}, _estado)
 	if inicio.is_empty():
 		_fin = "estado-invalido"
@@ -62,6 +67,8 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 	var regla: Dictionary = reglas.get(id, {})
 	if regla.is_empty():
 		return rechazo("La acción no está disponible.")
+	if mediciones != null and regla.get("requiere_panel", false) and fuente_entrada not in ["panel", "virtual"]:
+		return rechazo("Confirma la reparación en el panel.")
 	var decision := {"accion": id, "estado_antes": estado(), "fuente_entrada": fuente_entrada,
 		"tiempo_ms": tiempo_ms, "competencia": regla.competencia, "fuente": regla.fuente,
 		"criticidad": regla.criticidad, "tipo_error": regla.tipo_error, "aplicada": false,
@@ -87,6 +94,11 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 		if cambio.is_empty():
 			decision.motivo = "La acción produciría un estado imposible."
 		else:
+			if mediciones != null:
+				decision.merge(mediciones.aplicar(id, _estado, regla.causa), true)
+				decision["fuente_falla"] = mediciones.fuente
+				if decision.motivo.is_empty():
+					decision.motivo = Mediciones.MOTIVOS.get(decision.tipo_error, "")
 			_estado = cambio.estado
 			decision.eventos = cambio.eventos
 			decision.aplicada = true
@@ -219,6 +231,14 @@ func reintentar() -> RefCounted:
 		return null
 	var variante := _escenario.duplicate(true)
 	variante.estado.merge(variante.variante.estado, true)
+	if mediciones != null:
+		variante.variante.estado = _escenario.estado.duplicate()
+		variante.ruta_ideal = _escenario.variante.get("ruta_ideal", _escenario.ruta_ideal)
+		variante.variante.ruta_ideal = _escenario.ruta_ideal
+		var nuevo_banco := get_script().new(variante, mediciones.leer, mediciones.fuente) as RefCounted
+		nuevo_banco._intento_anterior = metricas()
+		nuevo_banco.enviar_brecha = enviar_brecha
+		return nuevo_banco
 	var nuevo := get_script().new(variante) as RefCounted
 	if not nuevo.fin().is_empty() or nuevo.hay_problemas():
 		return null
@@ -264,6 +284,8 @@ func resumen() -> Dictionary:
 		"errores": _decisiones.filter(es_error).duplicate(true),
 		"brechas": brechas(), "pregunta": "¿Qué harías distinto?", "reflexion": _reflexion,
 		"comparacion": {"anterior": _intento_anterior.duplicate(), "actual": metricas()}}
+	if mediciones != null:
+		resultado["errores_arnes"] = Mediciones.contar_errores(resultado.errores)
 	if not _reflexion.is_empty():
 		resultado["ruta_ideal"] = []
 		for id in _escenario.ruta_ideal:
@@ -311,7 +333,14 @@ func resultados(reloj_sim: String) -> Dictionary:
 		intento.valor = clampi(intento.valor + decision.get("ajuste_puntos", 0), 0, 100)
 		if es_error(decision):
 			intento.resultado = "incorrecto"
-			intento.tipo_error = decision.tipo_error
+			if mediciones == null:
+				intento.tipo_error = decision.tipo_error
+			else:
+				var detalle := intento_de(decision.competencia, decision.accion, reloj_sim)
+				detalle.merge({"formato": "detalle-escenario", "resultado": "incorrecto",
+					"valor": 0, "tipo_error": decision.tipo_error, "tiempo_ms": decision.tiempo_ms,
+					"fuente_entrada": decision.fuente_entrada}, true)
+				intentos.append(detalle)
 		if decision.criticidad == "critica":
 			intento.tipo_error = "falta-critica"
 			intento.valor = 0

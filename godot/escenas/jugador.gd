@@ -74,7 +74,7 @@ func mostrar_herramienta(accion: String) -> void:
 	herramientas.llave.visible = accion in ["apretar", "apretar_terminal", "reponer_pieza",
 		"apretar_abrazadera", "ajustar_abrazadera", "reponer_abrazadera"]
 	herramientas.flexometro.visible = accion in ["medir", "inspeccionar"]
-	herramientas.multimetro.visible = accion in ["evaluar_indicio", "medir_continuidad"]
+	herramientas.multimetro.visible = accion in ["evaluar_indicio", "medir_continuidad", "medir_banco", "medir_tp1", "medir_tp2"]
 
 
 func configurar(traductor: RefCounted) -> void:
