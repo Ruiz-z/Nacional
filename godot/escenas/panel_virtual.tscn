@@ -1,0 +1,36 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://escenas/panel_virtual.gd" id="1"]
+
+[node name="PanelVirtual" type="VBoxContainer"]
+script = ExtResource("1")
+
+[node name="Titulo" type="Label" parent="."]
+text = "Panel virtual"
+
+[node name="Bloqueo" type="CheckButton" parent="."]
+text = "Bloqueo"
+
+[node name="Etiquetado" type="CheckButton" parent="."]
+text = "Etiquetado"
+
+[node name="Lectura" type="Label" parent="."]
+text = "Torque: 0 / 100"
+
+[node name="Torque" type="HSlider" parent="."]
+max_value = 100.0
+
+[node name="AplicarTorque" type="Button" parent="."]
+text = "Enviar torque"
+
+[node name="Confirmar" type="Button" parent="."]
+text = "Confirmar"
+
+[node name="Cancelar" type="Button" parent="."]
+text = "Cancelar"
+
+[node name="Energizado" type="Label" parent="."]
+
+[node name="Bloqueado" type="Label" parent="."]
+
+[node name="Falla" type="Label" parent="."]

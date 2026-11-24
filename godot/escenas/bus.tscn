@@ -1,0 +1,66 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://escenas/bus.gd" id="1"]
+[ext_resource type="PackedScene" path="res://escenas/panel_virtual.tscn" id="2"]
+
+[sub_resource type="StandardMaterial3D" id="carroceria"]
+albedo_color = Color(0.22, 0.49, 0.61, 1)
+
+[sub_resource type="BoxMesh" id="bus"]
+material = SubResource("carroceria")
+size = Vector3(2.5, 2.6, 6)
+
+[sub_resource type="CylinderMesh" id="rueda"]
+top_radius = 0.48
+bottom_radius = 0.48
+height = 0.3
+
+[sub_resource type="BoxMesh" id="sector"]
+size = Vector3(0.35, 0.8, 1.2)
+
+[node name="Bus" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Camara" type="Camera3D" parent="."]
+position = Vector3(7, 4, 8)
+rotation = Vector3(-0.29, 0.70, 0)
+current = true
+
+[node name="Luz" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.9, 0.5, 0)
+
+[node name="Carroceria" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.65, 0)
+mesh = SubResource("bus")
+
+[node name="RuedaDelantera" type="MeshInstance3D" parent="."]
+position = Vector3(1.29, 0.52, 2)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("rueda")
+
+[node name="RuedaTrasera" type="MeshInstance3D" parent="."]
+position = Vector3(1.29, 0.52, -2)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("rueda")
+
+[node name="Sector" type="MeshInstance3D" parent="."]
+position = Vector3(1.35, 1.6, 0)
+mesh = SubResource("sector")
+
+[node name="Etiqueta" type="Label3D" parent="Sector"]
+position = Vector3(0.35, 0.65, 0)
+billboard = 1
+text = "Sector de práctica"
+
+[node name="Interfaz" type="CanvasLayer" parent="."]
+
+[node name="Lateral" type="VBoxContainer" parent="Interfaz"]
+offset_left = 16.0
+offset_top = 16.0
+
+[node name="Estado" type="Label" parent="Interfaz/Lateral"]
+
+[node name="Inspeccionar" type="Button" parent="Interfaz/Lateral"]
+text = "Inspeccionar sector"
+
+[node name="PanelVirtual" parent="Interfaz/Lateral" instance=ExtResource("2")]

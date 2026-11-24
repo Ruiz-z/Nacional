@@ -2,6 +2,10 @@ extends SceneTree
 
 
 func _initialize() -> void:
+	ejecutar.call_deferred()
+
+
+func ejecutar() -> void:
 	var pruebas: Array[String] = []
 	if not buscar_pruebas("res://tests", pruebas) or pruebas.is_empty():
 		printerr("No se pudieron reunir las pruebas.")

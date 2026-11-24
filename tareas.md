@@ -4,7 +4,7 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 
 ## 0. Cimientos
 - [x] T-01 S — Crear proyecto Godot 4.7.2, carpetas del plan y `tests/run.gd` que ejecuta todos los `test_*.gd` y devuelve código de salida — Hecho cuando: `godot --headless --path godot -s tests/run.gd` sale con 0 y una prueba de ejemplo.
-- [ ] T-02 (BLOQUEADA: sin red, ver docs/bloqueos.md) S — Probar plugin SQLite en 4.7.2 (abrir, crear tabla, leer) — Hecho cuando: una prueba lo demuestra o se documenta el fallo y la alternativa.
+- [x] T-02 S — Probar plugin SQLite en 4.7.2 (abrir, crear tabla, leer) — Hecho cuando: una prueba lo demuestra o se documenta el fallo y la alternativa.
 - [x] T-03 S — Escribir `datos/esquema` con las 7 tablas, creación y copia de respaldo (tablero RF-1) — Hecho cuando: prueba crea la BD vacía y restaura el respaldo.
 - [x] T-04 S — Redactar `docs/modelo-datos.md` desde el esquema — Hecho cuando: lista tablas y campos como el plan.
 - [ ] T-05 S+E — Prueba de humo serial de 30 min (plugin o puente Python) — Hecho cuando: un botón enciende un LED y se registra la decisión en `panel`.
@@ -62,14 +62,14 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [x] T-49 S — Rango de perilla (RF-13) — Hecho cuando: prueba dentro y fuera de rango.
 - [x] T-50 S — `tools/emisor_eventos` (RF-14) — Hecho cuando: reproduce una secuencia contra el simulador.
 - [x] T-51 S — Latido y detección de desconexión a 3 s (RF-8) — Hecho cuando: prueba pausa y cambia a virtual.
-- [ ] T-52 S — Panel virtual en pantalla con los mismos eventos y LEDs (RF-9) — Hecho cuando: demo manual de un escenario con ratón.
+- [ ] T-52 S — Panel virtual en pantalla con los mismos eventos y LEDs (RF-9) — Hecho cuando: demo manual de un escenario con ratón. — falta verificación manual
 - [x] T-53 S — Redactar `docs/protocolo-panel.md` (RF-15) — Hecho cuando: campos, versión y ejemplos.
 - [ ] T-54 E — Firmware: leer controles, filtrar rebotes, enviar JSON, latido (RF-16) — Hecho cuando: el emisor y el firmware producen líneas iguales.
 - [ ] T-55 E — Firmware: recibir estado de LEDs — Hecho cuando: los 3 LEDs responden al simulador.
 - [ ] T-56 E — Montar la maqueta y etiquetas — Hecho cuando: checklist manual de cada control.
 
 ## 5. simulador (escena)
-- [ ] T-57 S — Escena esquemática del bus y componentes inspeccionables (RF-10, 11) — Hecho cuando: se camina y se inspecciona con el control.
+- [ ] T-57 S — Escena esquemática del bus y componentes inspeccionables (RF-10, 11) — Hecho cuando: se camina y se inspecciona con el control. — falta verificación manual
 - [ ] T-58 S — Menú de acciones del componente y selección de causa (RF-3, 16) — Hecho cuando: se juega el escenario con teclado y ratón (RF-12).
 - [ ] T-59 S — Indicador de estado del panel y pausa por desconexión (RF-14, 15) — Hecho cuando: demo manual con cable desconectado.
 - [ ] T-60 S — Pantalla de resumen y reintento — Hecho cuando: demo manual con error, recuperación y reintento.
