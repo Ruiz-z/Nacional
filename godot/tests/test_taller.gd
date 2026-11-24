@@ -1,5 +1,6 @@
 extends RefCounted
 
+const Resumen = preload("res://tests/test_resumen.gd")
 const Base = preload("res://tests/base_tablero.gd")
 const Alias = preload("res://logica/flujo/alias.gd")
 const Dominio = preload("res://logica/aprendizaje/dominio.gd")
@@ -336,9 +337,9 @@ static func comprobar_cierre(bus: Node3D, base: String, caso: Array) -> bool:
 	if bus.flashcard.titulo.text != caso[0].capitalize() 			or not bus.flashcard.cuerpo.text.contains("Causa real: Foco dañado") 			or bus.flashcard.fuente.text != "Fuente: ejemplo didáctico, sin fuente oficial" or not bus.resultados_guardados:
 		return false
 	bus.flashcard.confirmar()
-	var detalle: String = bus.resumen.get_node("%Detalle").text
-	var respuesta := "correcta" if caso[0] == "correcto" else "incorrecta"
-	if not bus.resumen.visible or not detalle.begins_with("Diagnóstico\nRespuesta " + respuesta + ": "):
+	var detalle := Resumen.textos_visibles(bus.resumen.get_node("%DiagnosticoContenido"))
+	if not bus.resumen.visible or not detalle.contains("Tu respuesta: ") \
+			or not detalle.contains("\n" + caso[0].capitalize() + "\n"):
 		return false
 	var intentos: Array = Base.consultar(base,
 		"SELECT formato, valor, peso, tipo_error FROM intento WHERE tecnico = ? ORDER BY id;", [bus.tecnico.id])

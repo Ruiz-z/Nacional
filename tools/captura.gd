@@ -5,7 +5,7 @@ extends SceneTree
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
 # Flashcard: [ancho alto] flashcard falta|aviso|error|critico [--verificar]
-# Resumen y éxito en caja de fusibles: [ancho alto] resumen|exito [--verificar]
+# Resumen y éxito en caja de fusibles: [ancho alto] resumen|resumen-critico|exito [--verificar]
 # Cierre: [ancho alto] cierre [correcto|incorrecto] [--verificar]
 # Inventario y título largo: [ancho alto] inventario [--verificar]
 # Taller: [ancho alto] taller|baliza|elevador|elevador-guia|bajos [--verificar]
@@ -38,10 +38,10 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "exito"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
-	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "exito"]
+	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito"]
 	var zona := ""
 	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
@@ -131,7 +131,7 @@ func capturar() -> void:
 			if not preparar_elevador(escena, vista):
 				fallar("El elevador o su encuadre no corresponde a la vista.")
 				return
-		elif vista in ["cierre", "inventario", "resumen", "exito"]:
+		elif vista in ["cierre", "inventario", "resumen", "resumen-critico", "exito"]:
 			if not preparar_orden(escena, vista, respuesta):
 				fallar("La orden no corresponde a la vista solicitada.")
 				return
@@ -307,7 +307,8 @@ func capturar() -> void:
 	if vista in ["cierre", "exito"] and not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect()):
 		fallar("El cierre de la orden queda recortado.")
 		return
-	if vista == "resumen" and not vp.get_visible_rect().encloses(escena.resumen.get_node("%Acciones").get_global_rect()):
+	if vista in ["resumen", "resumen-critico"] and (not escena.resumen.visible \
+			or not vp.get_visible_rect().encloses(escena.resumen.get_node("%Acciones").get_global_rect())):
 		fallar("Las acciones del resumen quedan recortadas.")
 		return
 	if vista == "inventario":
@@ -339,14 +340,14 @@ func preparar_orden(escena: Node3D, vista: String, respuesta: String) -> bool:
 			return false
 		escena.ejecutar("inspeccionar", "teclado")
 		return escena.flashcard.visible and escena.flashcard.cola[0].tipo == "exito"
-	if vista in ["cierre", "resumen"]:
+	if vista in ["resumen", "resumen-critico"]:
+		return preparar_resumen(escena, vista == "resumen-critico")
+	if vista == "cierre":
 		for id in escena.datos.ruta_ideal:
 			if not Acciones.equipar(escena, id):
 				return false
 			escena.ejecutar(id, "virtual")
 		Acciones.cerrar_exitos(escena)
-		if vista == "resumen":
-			return Acciones.cerrar_orden(escena) and escena.motor.fin() == "resuelto"
 		if not escena.flashcard.visible or escena.flashcard.opciones.size() != 2:
 			return false
 		if not respuesta.is_empty():
@@ -363,6 +364,27 @@ func preparar_orden(escena: Node3D, vista: String, respuesta: String) -> bool:
 			return false
 	Acciones.tecla(escena, 1)
 	return taller.mano == "destornillador" and taller.espacios_hud.size() == 8 and escena.carrito_cerca()
+
+
+func preparar_resumen(escena: Node3D, critico: bool) -> bool:
+	var motor: RefCounted = escena.motor
+	if critico:
+		motor.ejecutar("inspeccionar", "virtual", 27000)
+		motor.ejecutar("ignorar_aviso_seguridad", "virtual", 13500)
+		escena.mostrar_estado()
+		return motor.fin() == "falta-critica"
+	# Fija la referencia y los tiempos para que las capturas sean reproducibles.
+	motor._intento_anterior = {"puntaje": 80, "errores": 3, "tiempo_ms": 312000}
+	motor.marcar_causa("fusible-abierto")
+	for paso in [["inspeccionar", 35000], ["inspeccionar", 26000], ["medir_continuidad", 60000],
+			["confirmar_solucion", 70000], ["cambiar_foco_correcto", 15000], ["confirmar_solucion", 45595]]:
+		motor.ejecutar(paso[0], "virtual", paso[1])
+	if motor.registrar_diagnostico("foco-danado", "virtual", 12000).is_empty():
+		return false
+	if not motor.registrar_reflexion("Comprobaría el foco antes de confirmar la solución."):
+		return false
+	escena.mostrar_estado()
+	return motor.metricas().puntaje == 92 and not motor.brechas().is_empty()
 
 
 func preparar_flashcard(escena: Node3D, tipo: String) -> void:

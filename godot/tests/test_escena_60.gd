@@ -1,5 +1,6 @@
 extends RefCounted
 
+const Resumen = preload("res://tests/test_resumen.gd")
 const Taller = preload("res://tests/acciones_taller.gd")
 
 const Bus = preload("res://escenas/bus.tscn")
@@ -28,11 +29,11 @@ static func ejecutar() -> bool:
 	correcto = correcto and Taller.cerrar_orden(bus)
 	var resumen: Control = bus.resumen
 	correcto = correcto and resumen.visible and resumen.get_node("%Reintentar").visible
-	var detalle: String = resumen.get_node("%Detalle").text
-	correcto = correcto and detalle.contains("Inspeccionar: acierto") and detalle.contains("Forzar la pieza: error leve")
+	var detalle: String = Resumen.textos_visibles(resumen.get_node("%Detalle"))
+	correcto = correcto and detalle.contains("Inspeccionar\nAcierto") and detalle.contains("Forzar la pieza\nError leve")
 	resumen.get_node("%Reflexion").text = "Revisaría el aviso"
 	resumen.get_node("%Guardar").pressed.emit()
-	correcto = correcto and resumen.get_node("%Ruta").text.begins_with("Ruta ideal\n")
+	correcto = correcto and resumen.get_node("%Ruta").text.begins_with("1. ")
 	resumen.get_node("%Reintentar").pressed.emit()
 	correcto = correcto and not resumen.visible and bus.motor.fin().is_empty() \
 		and gabinete.abierta == bus.motor.estado().inspeccionado \
