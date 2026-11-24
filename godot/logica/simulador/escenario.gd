@@ -2,6 +2,7 @@ extends RefCounted
 
 const RutasContenido = preload("res://logica/rutas_contenido.gd")
 
+const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria"]
 const AISLAMIENTO := "escenarios/aislamiento.json"
 const Banco = preload("res://logica/competencias/banco.gd")
 
@@ -111,6 +112,8 @@ static func validar_regla(regla: Variant, grupo: String, datos: Dictionary) -> S
 			if not datos.recuperaciones.has(id) or regla.recuperaciones.count(id) != 1:
 				return ".recuperaciones"
 		return ""
+	if regla.has("componente") and regla.componente not in COMPONENTES:
+		return ".componente"
 	if not Banco.COMPETENCIAS.has(regla.get("competencia")):
 		return ".competencia"
 	if regla.get("criticidad") not in Banco.CRITICIDADES:

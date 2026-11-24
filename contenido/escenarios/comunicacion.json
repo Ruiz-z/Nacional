@@ -28,6 +28,7 @@
   ],
   "acciones": {
     "revisar_sintomas": {
+      "componente": "monitor",
       "previas": {},
       "efectos": {
         "sintomas_revisados": true
@@ -40,6 +41,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "seleccionar_otro_modulo": {
+      "componente": "monitor",
       "previas": {
         "sintomas_revisados": true
       },
@@ -52,6 +54,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_diagnostico": {
+      "componente": "monitor",
       "previas": {
         "sintomas_revisados": true
       },

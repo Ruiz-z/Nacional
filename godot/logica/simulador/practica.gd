@@ -4,12 +4,17 @@ const Acceso = preload("res://logica/datos/acceso_sqlite.gd")
 const Reloj = preload("res://logica/aprendizaje/reloj.gd")
 const Intentos = preload("res://logica/aprendizaje/registro.gd")
 const Eventos = preload("res://logica/tablero/registro_simulador.gd")
-static func opciones(motor: RefCounted, escenario: Dictionary) -> Dictionary:
+
+
+static func opciones(motor: RefCounted, escenario: Dictionary, componente: String) -> Dictionary:
 	if not motor.fin().is_empty():
 		return {}
-	var acciones: Dictionary = escenario.acciones.duplicate()
-	acciones.erase("inspeccionar")
-	return acciones.merged(motor.recuperaciones_disponibles())
+	var resultado := {}
+	var reglas: Dictionary = escenario.acciones.merged(motor.recuperaciones_disponibles())
+	for id in reglas:
+		if reglas[id].get("componente", "bateria") == componente:
+			resultado[id] = reglas[id]
+	return resultado
 
 
 static func guardar(base: String, tecnico: int, alias: String, motor: RefCounted, ahora: int) -> bool:

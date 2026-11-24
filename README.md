@@ -16,6 +16,18 @@ Juego de escritorio que entrena a técnicos de autobuses eléctricos con escenar
 
 Si Godot no puede escribir sus logs, antepón `XDG_DATA_HOME=/tmp/nacional-godot`.
 
+## Controles del simulador
+
+| Acción | Teclado y ratón | Pro Controller |
+|---|---|---|
+| Caminar y mirar | WASD y ratón | Sticks izquierdo y derecho |
+| Abrir el menú de una pieza | Apuntar y hacer clic izquierdo | Apuntar y pulsar A |
+| Elegir una acción | 1–9 o lista del menú | Cruceta arriba / abajo |
+| Confirmar o cancelar | Enter / Esc | X / B |
+| Liberar o capturar el cursor | Tab | Tab en el teclado |
+
+Confirma la acción elegida con el panel físico o virtual. Para usar con el ratón el panel virtual, **Marcar una causa** o los controles para ocultar los paneles, libera el cursor con **Tab**. En aislamiento, selecciona y confirma **Inspeccionar** en la compuerta para abrir el gabinete. En comunicación, las acciones están en el monitor.
+
 ## Estructura
 ```
 godot/       proyecto Godot: logica/ (sin nodos, con pruebas), escenas/, config/, tests/, addons/

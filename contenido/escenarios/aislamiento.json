@@ -35,6 +35,7 @@
   ],
   "acciones": {
     "inspeccionar": {
+      "componente": "compuerta",
       "previas": {},
       "efectos": {
         "inspeccionado": true
@@ -47,6 +48,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "evaluar_indicio": {
+      "componente": "monitor",
       "previas": {
         "inspeccionado": true,
         "indicio_descartado": false,
@@ -63,6 +65,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "confirmar_solucion": {
+      "componente": "bateria",
       "previas": {
         "indicio_confirmado": true,
         "tornillo_roto": false,
@@ -80,6 +83,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "ignorar_aviso_seguridad": {
+      "componente": "cables",
       "previas": {},
       "efectos": {},
       "competencia": "seguridad-alto-voltaje",
@@ -90,6 +94,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "forzar_pieza": {
+      "componente": "terminal",
       "previas": {
         "inspeccionado": true,
         "tornillo_roto": false
@@ -105,6 +110,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "elegir_otro_sector": {
+      "componente": "bateria",
       "previas": {
         "inspeccionado": true,
         "sector_equivocado": false
@@ -120,6 +126,7 @@
       "fuente": "[MUESTRA] valor de ejemplo, sin fuente oficial"
     },
     "descartar_indicio": {
+      "componente": "bateria",
       "previas": {
         "inspeccionado": true,
         "indicio_descartado": false
@@ -172,6 +179,7 @@
   },
   "recuperaciones": {
     "reponer_pieza": {
+      "componente": "terminal",
       "previas": {
         "tornillo_roto": true
       },
@@ -189,6 +197,7 @@
       "riesgo": "[MUESTRA] bajo"
     },
     "volver_al_sector": {
+      "componente": "bateria",
       "previas": {
         "sector_equivocado": true
       },
@@ -206,6 +215,7 @@
       "riesgo": "[MUESTRA] bajo"
     },
     "recuperar_indicio": {
+      "componente": "bateria",
       "previas": {
         "indicio_descartado": true
       },
