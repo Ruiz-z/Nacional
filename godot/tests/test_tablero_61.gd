@@ -10,7 +10,7 @@ static func comprobar(base: String) -> bool:
 	if Base.consultar(base, """
 		INSERT INTO tecnico (id, alias, demo) VALUES (1, '[DEMO]', 1);
 		INSERT INTO progreso VALUES (1, 'ruta', json_array('a','b'), 1);
-		INSERT INTO intento VALUES
+		INSERT INTO intento (id, tecnico, competencia, item, formato, dificultad, respuesta, valor, peso, resultado, tipo_error, tiempo_ms, fuente_entrada, momento, reloj_sim, version_contenido) VALUES
 			(1,1,'diagnostico-fallas','a','opcion-multiple','facil','x',50,1,'incorrecto','causa','20','teclado','pre','2026-01-01','1'),
 			(2,1,'diagnostico-fallas','b','caso-diagnostico','facil','x',80,1,'incorrecto','causa','30','teclado','post','2026-01-02','1'),
 			(3,1,'diagnostico-fallas','b','caso-diagnostico','facil','x',40,1,'incorrecto','causa','40','teclado','retest','2026-01-08','1');

@@ -26,7 +26,12 @@ CREATE TABLE IF NOT EXISTS intento (
 	fuente_entrada TEXT NOT NULL,
 	momento TEXT NOT NULL CHECK (momento IN ('pre', 'post', 'retest', 'practica')),
 	reloj_sim TEXT NOT NULL,
-	version_contenido TEXT NOT NULL
+	version_contenido TEXT NOT NULL,
+	sesion TEXT NOT NULL DEFAULT '',
+	caso TEXT NOT NULL DEFAULT '',
+	variante TEXT NOT NULL DEFAULT '',
+	numero_intento INTEGER NOT NULL DEFAULT 0,
+	ayudas INTEGER NOT NULL DEFAULT 0
 ) STRICT;
 CREATE TABLE IF NOT EXISTS evento (
 	id INTEGER PRIMARY KEY,
@@ -69,8 +74,30 @@ COMMIT;
 """
 
 
+# Columnas de intento añadidas después de la primera versión del esquema.
+const COLUMNAS_SESION := {"sesion": "TEXT NOT NULL DEFAULT ''", "caso": "TEXT NOT NULL DEFAULT ''",
+	"variante": "TEXT NOT NULL DEFAULT ''", "numero_intento": "INTEGER NOT NULL DEFAULT 0",
+	"ayudas": "INTEGER NOT NULL DEFAULT 0"}
+
+
 static func crear(ruta: String, consultar: Callable = AccesoSQLite.consultar) -> bool:
-	return consultar.call(ProjectSettings.globalize_path(ruta), CREAR_SQL) != null
+	var base := ProjectSettings.globalize_path(ruta)
+	if consultar.call(base, CREAR_SQL) == null:
+		return false
+	return migrar(base, consultar)
+
+
+# Añade a una base anterior las columnas de sesión sin perder sus intentos.
+static func migrar(base: String, consultar: Callable) -> bool:
+	var existentes: Variant = consultar.call(base, "SELECT name FROM pragma_table_info('intento');")
+	if existentes == null:
+		return false
+	var nombres: Array = existentes.map(func(fila: Dictionary) -> String: return fila.name)
+	for columna in COLUMNAS_SESION:
+		if columna not in nombres \
+				and consultar.call(base, "ALTER TABLE intento ADD COLUMN %s %s;" % [columna, COLUMNAS_SESION[columna]]) == null:
+			return false
+	return true
 
 
 static func respaldar(base: String, respaldo: String, consultar: Callable = AccesoSQLite.consultar) -> bool:

@@ -6,9 +6,9 @@ const Dominio = preload("res://logica/aprendizaje/dominio.gd")
 const COLUMNAS := """
 	INSERT INTO intento (tecnico, competencia, item, formato, dificultad, respuesta,
 		valor, peso, resultado, tipo_error, tiempo_ms, fuente_entrada, momento,
-		reloj_sim, version_contenido)
+		reloj_sim, version_contenido, sesion, caso, variante, numero_intento, ayudas)
 """
-const VALORES := "(SELECT id FROM tecnico WHERE alias = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+const VALORES := "(SELECT id FROM tecnico WHERE alias = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
 const INSERTAR := COLUMNAS + "VALUES (" + VALORES + ");"
 const INSERTAR_SI_AVANZO := COLUMNAS + "SELECT " + VALORES + " WHERE changes() = 1;"
 
@@ -47,7 +47,9 @@ static func preparar(alias: String, intento: Dictionary) -> Array:
 				valor = Dominio.valor_practica(puntaje)
 	return [alias, intento.competencia, intento.item, intento.formato, intento.dificultad,
 		intento.respuesta, valor, peso, intento.resultado, tipo_error, intento.tiempo_ms,
-		intento.fuente_entrada, intento.momento, intento.reloj_sim, intento.version_contenido]
+		intento.fuente_entrada, intento.momento, intento.reloj_sim, intento.version_contenido,
+		str(intento.get("sesion", "")), str(intento.get("caso", "")), str(intento.get("variante", "")),
+		int(intento.get("numero_intento", 0)), int(intento.get("ayudas", 0))]
 
 
 static func leer(base: String, alias: String, consultar: Callable = Acceso.consultar) -> Variant:

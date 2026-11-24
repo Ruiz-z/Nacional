@@ -24,10 +24,12 @@ var avisos := []
 var resultados := {}
 var ruta := []
 var reloj_simulado := false
+var sesion := ""
 
 
 func preparar(banco: Dictionary, ahora: int) -> bool:
 	estado = Recorrido.estado(base, perfil.id, ahora)
+	sesion = "%s-%s-%d" % [paso, perfil.get("alias", ""), ahora]
 	if paso not in estado.get("habilitados", []):
 		avisos.append(estado.get("aviso", "Este paso todavía no está disponible."))
 		return false
@@ -94,8 +96,10 @@ func responder(respuesta: Variant, tiempo_ms: int, fuente: String, ahora: int) -
 		Diagnostico.responder_media(plan, item.id, respuesta)
 		avisos.assign(plan.avisos)
 	var momento: String = {"diagnostico": "pre", "ruta": "practica"}.get(paso, paso)
-	intentos.append(Respuestas.intento(item, respuesta, tiempo_ms, fuente, momento,
-		Leitner.fecha(reloj.instante)))
+	var intento := Respuestas.intento(item, respuesta, tiempo_ms, fuente, momento,
+		Leitner.fecha(reloj.instante))
+	intento.merge({"sesion": sesion, "caso": item.id, "numero_intento": intentos.size() + 1})
+	intentos.append(intento)
 	return true
 
 
