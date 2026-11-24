@@ -23,7 +23,7 @@ static func ejecutar() -> bool:
 	correcto = correcto and raiz.gui_get_focus_owner() == bus.menu_pieza.causas[1]
 	control(raiz, JOY_BUTTON_A)
 	correcto = correcto and bus.causa_marcada == "aviso-inconsistente" \
-		and bus.menu_pieza.causas[1].text.begins_with("✓")
+		and bus.menu_pieza.causas[1].text.begins_with("[x]")
 	control(raiz, JOY_BUTTON_DPAD_UP)
 	control(raiz, JOY_BUTTON_A)
 	bus.menu_pieza.botones[0].pressed.emit()

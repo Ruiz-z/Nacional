@@ -20,7 +20,7 @@ static func comprobar(base: String) -> bool:
 	opciones[0].pressed.emit()
 	opciones[1].button_pressed = true
 	opciones[1].pressed.emit()
-	var marca_correcta: bool = not opciones[0].button_pressed and opciones[1].text.begins_with("✓")
+	var marca_correcta: bool = not opciones[0].button_pressed and opciones[1].text.begins_with("[x]")
 	bus.menu_pieza.botones[0].pressed.emit()
 	bus.abrir_menu(bus.get_node("Sector").piezas.bateria)
 	bus.menu_pieza.botones[0].pressed.emit()

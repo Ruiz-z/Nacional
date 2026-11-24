@@ -62,9 +62,9 @@ func abrir(titulo: String, lectura: String, opciones: Array[Dictionary],
 		boton.button_group = grupo
 		boton.add_theme_font_size_override("font_size", 15)
 		boton.set_pressed_no_signal(id == marcada)
-		boton.text = ("✓  " if boton.button_pressed else "○  ") + nombre
+		boton.text = ("[x]  " if boton.button_pressed else "[ ]  ") + nombre
 		boton.toggled.connect(func(activo: bool):
-			boton.text = ("✓  " if activo else "○  ") + nombre)
+			boton.text = ("[x]  " if activo else "[ ]  ") + nombre)
 		boton.pressed.connect(func(): causa_marcada.emit(id))
 		diagnostico.get_node("Causas").add_child(boton)
 		causas.append(boton)

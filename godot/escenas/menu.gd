@@ -91,11 +91,13 @@ func actualizar() -> void:
 	var razon: String = estado.get("aviso", "")
 	inicio.get_node("Aviso").text = razon if not razon.is_empty() else (
 		"Elige o registra un alias para desbloquear el diagnóstico." if perfil.is_empty()
-		else "Completa %s para seguir avanzando." % NOMBRES[siguiente])
+		else "Completa %s para seguir avanzando. Escenario está disponible como práctica libre y no cambia tu avance." % NOMBRES[siguiente]
+			if siguiente != "escenario" else "Completa %s para seguir avanzando." % NOMBRES[siguiente])
 	for paso in botones:
 		var boton: Button = botones[paso]
 		boton.disabled = paso not in estado.get("habilitados", []) \
-			and not (paso == "retest" and siguiente == "retest")
+			and not (paso == "retest" and siguiente == "retest") \
+			and not (paso == "escenario" and not perfil.is_empty())
 		boton.theme_type_variation = &"Primario" if paso == siguiente and razon.is_empty() else &""
 		boton.tooltip_text = ("Selecciona un alias para empezar." if perfil.is_empty() else
 			"Paso pendiente de habilitar por el recorrido.") if boton.disabled else razon
@@ -138,7 +140,7 @@ func abrir_demo() -> void:
 	var demo := Demo.instantiate()
 	demo.base_real = base
 	demo.tablero_solicitado.connect(abrir_tablero)
-	demo.escenario_solicitado.connect(abrir_bus)
+	demo.escenario_solicitado.connect(abrir_ordenes)
 	abrir(demo)
 
 

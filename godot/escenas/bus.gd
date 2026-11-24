@@ -248,7 +248,7 @@ func mostrar_estado(inmediato := false) -> void:
 	var lineas := PackedStringArray()
 	for clave in INDICIOS:
 		if estado.has(clave):
-			lineas.append("%s %s" % ["✓" if estado[clave] else "—", INDICIOS[clave]])
+			lineas.append("%s %s" % ["[x]" if estado[clave] else "[ ]", INDICIOS[clave]])
 	var orden: Label = lateral.get_node("Estado")
 	orden.text = datos.titulo.trim_prefix("[MUESTRA] ")
 	orden.tooltip_text = orden.text

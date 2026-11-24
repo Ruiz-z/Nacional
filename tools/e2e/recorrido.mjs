@@ -54,11 +54,15 @@ await clic(640, 318);                            // campo de alias
 await pagina.keyboard.type('T-0001', { delay: 60 });
 await clic(640, 438, 2500);                      // Registrar alias
 await captura('alias-registrado');
-await clic(880, 529, 1500);                      // Escenario: bloqueado hasta completar el diagnóstico
-await captura('escenario-bloqueado-sin-diagnostico');
+await clic(880, 529, 2500);                      // Escenario: práctica libre disponible desde el alias
+await captura('catalogo-ordenes');
+await clic(60, 40, 2000);                        // Volver al menú
+await captura('menu-tras-catalogo');
 await clic(640, 649, 3000);                      // Abrir modo demo
 await captura('modo-demo');
-await clic(640, 253, 3500);                      // Practicar en la demo: entra a la orden de aislamiento
+await clic(640, 253, 3000);                      // Practicar en la demo: abre el catálogo de órdenes
+await captura('catalogo-desde-demo');
+await clic(636, 213, 4000);                      // Pérdida de aislamiento
 await captura('practica-aislamiento');
 await pulsar();                                  // clic sobre la compuerta apuntada
 await captura('menu-compuerta');
