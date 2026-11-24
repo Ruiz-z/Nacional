@@ -12,10 +12,10 @@
     "fusible-abierto"
   ],
   "indicios": [
-    {"clave": "inspeccionado", "etiqueta": "Caja de fusibles inspeccionada"},
-    {"clave": "continuidad_medida", "etiqueta": "Continuidad medida"},
-    {"clave": "foco_repuesto", "etiqueta": "Foco izquierdo repuesto"},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta"}
+    {"clave": "inspeccionado", "etiqueta": "Caja de fusibles inspeccionada", "ayuda": "Inspecciona la caja de fusibles."},
+    {"clave": "continuidad_medida", "etiqueta": "Continuidad medida", "ayuda": "Mide la continuidad en el conector de los faros."},
+    {"clave": "foco_repuesto", "etiqueta": "Foco izquierdo repuesto", "ayuda": "Cambia el foco del faro izquierdo y confirma en el panel."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar la solución en el relé y confirma en el panel."}
   ],
   "estado": {
     "inspeccionado": false,

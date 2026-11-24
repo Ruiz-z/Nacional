@@ -39,7 +39,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	for paso in [["tp0", "—"], ["tp1", "0.0 V"], ["tp0", "—"], ["tp2", "5.0 V"]]:
 		if not apuntar_y_pulsar(bus, paso[0]) or zona.pantalla.text != paso[1]:
 			return "El clic en %s no produjo la lectura esperada." % paso[0]
-	if bus.resultado.text != "Medición registrada: TP2 = 5.0 V":
+	if bus.resultado.text != "Medición registrada: TP2 = 5.0 V. Ahora abre el multímetro y reporta la lectura de TP1.":
 		return "El aviso central no muestra el punto y la tensión."
 	if not bus.jugador.herramientas.multimetro.visible:
 		return "El jugador no tiene el multímetro en la mano."
@@ -52,7 +52,8 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 		pulsar(menu.lecturas[indice])
 	if bus.motor.mediciones.reportadas != {"tp1": "0", "tp2": "5"}:
 		return "Los botones de lectura no guardaron ambas opciones."
-	if bus.resultado.text != "Lecturas reportadas guardadas" or not bus.resultado.visible:
+	if bus.resultado.text != ("Lecturas reportadas guardadas. Ahora registra el diagnóstico "
+			+ "en el multímetro según tus lecturas.") or not bus.resultado.visible:
 		return "El registro no muestra su confirmación."
 	pulsar(menu.botones[0])
 	if bus.motor.mediciones.diagnostico != "alimentacion" or not bus.motor.mediciones.error_diagnostico.is_empty():

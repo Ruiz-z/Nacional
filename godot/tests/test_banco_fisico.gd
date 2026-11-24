@@ -75,6 +75,8 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	bus.ejecutar("reportar_tp1_0", "teclado")
 	bus.ejecutar("reportar_tp2_5", "teclado")
 	bus.ejecutar("diagnosticar_alimentacion", "teclado")
+	if not bus.lateral.get_node("Siguiente").text.ends_with("cierra el conductor abierto en el banco físico."):
+		return false
 	bus.ejecutar("reconectar", "virtual")
 	if not bus.motor.fin().is_empty() or not bus.motor.mediciones.error_diagnostico.is_empty():
 		return false

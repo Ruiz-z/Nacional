@@ -19,8 +19,13 @@ static func comprobar_indicios(datos: Dictionary) -> bool:
 	anterior.erase("indicios")
 	if not Escenario.validar(anterior, "prueba.json").errores.is_empty():
 		return false
+	anterior.indicios = [{"clave": "resuelto", "etiqueta": "Falla resuelta"}]
+	if not Escenario.validar(anterior, "prueba.json").errores.is_empty():
+		return false
 	for invalidos in [null, {}, [{}], [{"clave": "sector", "etiqueta": "Sector"}],
 			[{"clave": "desconocida", "etiqueta": "Paso"}],
+			[{"clave": "resuelto", "etiqueta": "Paso", "ayuda": "  "}],
+			[{"clave": "resuelto", "etiqueta": "Paso", "ayuda": 1}],
 			[{"clave": "resuelto", "etiqueta": "  "}], [datos.indicios[0], datos.indicios[0]]]:
 		anterior.indicios = invalidos
 		var errores: Array = Escenario.validar(anterior, "prueba.json").errores

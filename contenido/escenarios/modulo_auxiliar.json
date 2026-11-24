@@ -13,12 +13,12 @@
     "modulo"
   ],
   "indicios": [
-    {"clave": "tp1_medido", "etiqueta": "TP1 medido"},
-    {"clave": "tp2_medido", "etiqueta": "TP2 medido"},
-    {"clave": "tp1_reportado", "etiqueta": "Lectura de TP1 reportada"},
-    {"clave": "tp2_reportado", "etiqueta": "Lectura de TP2 reportada"},
-    {"clave": "diagnostico_registrado", "etiqueta": "Diagnóstico registrado"},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta"}
+    {"clave": "tp1_medido", "etiqueta": "TP1 medido", "ayuda": "Mide TP1 con referencia en TP0."},
+    {"clave": "tp2_medido", "etiqueta": "TP2 medido", "ayuda": "Mide TP2 con referencia en TP0."},
+    {"clave": "tp1_reportado", "etiqueta": "Lectura de TP1 reportada", "ayuda": "Abre el multímetro y reporta la lectura de TP1."},
+    {"clave": "tp2_reportado", "etiqueta": "Lectura de TP2 reportada", "ayuda": "Abre el multímetro y reporta la lectura de TP2."},
+    {"clave": "diagnostico_registrado", "etiqueta": "Diagnóstico registrado", "ayuda": "Registra el diagnóstico en el multímetro según tus lecturas."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Repara: abre el multímetro, elige Reconectar conductor y confirma en el panel."}
   ],
   "estado": {
     "s1_abierto": true,

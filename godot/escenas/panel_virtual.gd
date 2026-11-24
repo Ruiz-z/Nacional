@@ -37,6 +37,12 @@ func _ready() -> void:
 	mostrar_leds({})
 
 
+func resaltar_confirmar(pendiente: bool) -> void:
+	var estilo := &"Primario" if pendiente else &""
+	if $Confirmar.theme_type_variation != estilo:
+		$Confirmar.theme_type_variation = estilo
+
+
 func emitir(control: String, valor: float) -> void:
 	secuencia += 1
 	var tiempo := Time.get_ticks_msec()

@@ -255,6 +255,10 @@ func mostrar_resultado(decision: Dictionary) -> void:
 			texto = "Conductor reconectado"
 		else:
 			texto = RESULTADOS.get(id, "Acción completada")
+	if decision.get("aplicada", false) and decision.tipo_error.is_empty() and decision.eventos.is_empty():
+		var ayuda := siguiente_ayuda(progreso_indicios(motor.estado()))
+		if not ayuda.is_empty():
+			texto = texto.trim_suffix(".") + ". Ahora " + ayuda.left(1).to_lower() + ayuda.substr(1)
 	avisar(texto, decision.has("lectura-reportada") or decision.has("previas_faltantes"))
 
 
@@ -279,6 +283,24 @@ func avisar(texto: String, sobre_menu := false) -> void:
 	duracion_aviso.start()
 
 
+func progreso_indicios(estado: Dictionary) -> Dictionary:
+	return estado.merged(motor.mediciones.indicios()) if motor.mediciones != null else estado
+
+
+func siguiente_ayuda(progreso: Dictionary) -> String:
+	if not motor.fin().is_empty():
+		return ""
+	for indicio in datos.get("indicios", []):
+		if not progreso.get(indicio.clave, false):
+			var ayuda: String = indicio.get("ayuda", "")
+			if not ayuda.is_empty() and indicio.clave == "resuelto" \
+					and zona_activa == $Banco and fuente_banco.fuente() == "banco":
+				return ("Repara: abre el multímetro, elige Reconectar conductor "
+					+ "y cierra el conductor abierto en el banco físico.")
+			return ayuda
+	return ""
+
+
 func mostrar_estado(inmediato := false) -> void:
 	var estado: Dictionary = motor.estado()
 	var terminado: bool = not motor.fin().is_empty()
@@ -286,9 +308,7 @@ func mostrar_estado(inmediato := false) -> void:
 	if terminado:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var lineas := PackedStringArray()
-	var progreso := estado
-	if motor.mediciones != null:
-		progreso = estado.merged(motor.mediciones.indicios())
+	var progreso := progreso_indicios(estado)
 	for clave in indicios:
 		if progreso.has(clave):
 			lineas.append("%s %s" % ["[x]" if progreso[clave] else "[ ]", indicios[clave]])
@@ -304,6 +324,8 @@ func mostrar_estado(inmediato := false) -> void:
 		if not terminado:
 			lineas.append("Fuente: %s · TP0 primero, luego TP1 o TP2." % $Banco.etiqueta_fuente(motor.mediciones.fuente))
 	lateral.get_node("Indicios").text = "\n".join(lineas)
+	var ayuda := siguiente_ayuda(progreso)
+	lateral.get_node("Siguiente").text = "" if ayuda.is_empty() else "Siguiente: " + ayuda
 	actualizar_leds()
 	actualizar_hud()
 	resumen.mostrar(motor)
@@ -329,6 +351,8 @@ func actualizar_hud() -> void:
 	$Interfaz.anchor_bottom = 1.0 if terminado else 0.0
 	lateral.get_node("Estado").visible = detalle
 	lateral.get_node("Indicios").visible = detalle or (terminado and motor.fin() == "resuelto" and not hud_oculto)
+	var siguiente: Label = lateral.get_node("Siguiente")
+	siguiente.visible = detalle and not siguiente.text.is_empty()
 	lateral.get_node("Conexion").visible = pausa_visible
 	var margen: float = $Interfaz.get_theme_stylebox("panel").get_minimum_size().y
 	$Interfaz.offset_bottom = -12.0 if terminado else 12.0 + lateral.get_combined_minimum_size().y + margen
@@ -422,6 +446,7 @@ func estado_pieza(pieza: Interactuable) -> Dictionary:
 
 func cerrar_menu() -> void:
 	accion_pendiente = ""
+	panel.resaltar_confirmar(false)
 	zona_menu = null
 	menu_pieza.cerrar()
 	jugador.mostrar_herramienta("")
@@ -443,9 +468,7 @@ func elegir_accion(indice: int, fuente: String) -> void:
 			navegar(entrada.id)
 	elif entrada.requiere_panel:
 		accion_pendiente = entrada.id
-		if panel.conexion.fuente_panel() == "virtual":
-			panel_oculto = false
-			actualizar_panel(Time.get_ticks_msec())
+		actualizar_panel(Time.get_ticks_msec())
 		menu_pieza.esperar_panel(entrada.id == "reconectar" and fuente_banco.fuente() == "banco")
 		jugador.mostrar_herramienta(entrada.id)
 	else:
@@ -586,8 +609,12 @@ func actualizar_panel(ahora: int) -> void:
 	$AlternarPanel.visible = panel.conexion.fuente_panel() == "virtual" and not pausa \
 		and motor != null and motor.fin().is_empty()
 	$AlternarPanel.text = "Mostrar panel virtual" if panel_oculto else "Ocultar panel virtual"
-	var registro_banco: bool = zona_activa == $Banco and menu_pieza.visible and accion_pendiente.is_empty()
-	panel.visible = $AlternarPanel.visible and not panel_oculto and not registro_banco
+	var pendiente := not accion_pendiente.is_empty()
+	$AlternarPanel.disabled = pendiente
+	var registro_banco: bool = zona_activa == $Banco and menu_pieza.visible and not pendiente
+	panel.visible = $AlternarPanel.visible and (pendiente or not panel_oculto) and not registro_banco
+	panel.resaltar_confirmar(pendiente and panel.visible and not (
+		accion_pendiente == "reconectar" and fuente_banco.fuente() == "banco"))
 
 
 func controles_seguridad() -> Dictionary:

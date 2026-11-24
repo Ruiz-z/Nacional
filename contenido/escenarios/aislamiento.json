@@ -12,9 +12,9 @@
     "aviso-inconsistente"
   ],
   "indicios": [
-    {"clave": "inspeccionado", "etiqueta": "Gabinete inspeccionado"},
-    {"clave": "indicio_confirmado", "etiqueta": "Indicio de aislamiento confirmado"},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta"}
+    {"clave": "inspeccionado", "etiqueta": "Gabinete inspeccionado", "ayuda": "Inspecciona la compuerta del gabinete."},
+    {"clave": "indicio_confirmado", "etiqueta": "Indicio de aislamiento confirmado", "ayuda": "Abre el monitor y elige Evaluar el indicio."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar la solución en la batería y confirma en el panel."}
   ],
   "estado": {
     "sector": "Sector virtual A",

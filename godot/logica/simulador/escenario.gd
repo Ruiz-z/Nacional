@@ -110,6 +110,8 @@ static func indicios_validos(datos: Dictionary) -> bool:
 		if not indicio is Dictionary or not Banco.texto_presente(indicio.get("clave")) \
 				or not Banco.texto_presente(indicio.get("etiqueta")):
 			return false
+		if indicio.has("ayuda") and not Banco.texto_presente(indicio.ayuda):
+			return false
 		var clave: String = indicio.clave
 		if claves.has(clave) or not (datos.estado.get(clave) is bool \
 				or (datos.zona == "banco" and clave in Mediciones.INDICIOS)):

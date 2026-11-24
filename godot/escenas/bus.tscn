@@ -1242,6 +1242,12 @@ text = ""
 autowrap_mode = 2
 theme_override_font_sizes/font_size = 16
 
+[node name="Siguiente" type="Label" parent="Interfaz/Lateral"]
+visible = false
+theme_type_variation = &"Secundario"
+theme_override_font_sizes/font_size = 15
+autowrap_mode = 3
+
 [node name="Conexion" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Chip"
 text = ""

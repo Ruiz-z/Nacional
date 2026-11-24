@@ -12,12 +12,12 @@
     "lectura-inconsistente"
   ],
   "indicios": [
-    {"clave": "inspeccionado", "etiqueta": "Tapa del motor inspeccionada"},
-    {"clave": "refrigerante_revisado", "etiqueta": "Circuito de refrigerante revisado"},
-    {"clave": "temperatura_medida", "etiqueta": "Temperatura medida"},
-    {"clave": "bloqueo_confirmado", "etiqueta": "Bloqueo y etiquetado confirmados"},
-    {"clave": "abrazadera_ajustada", "etiqueta": "Abrazadera ajustada"},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta"}
+    {"clave": "inspeccionado", "etiqueta": "Tapa del motor inspeccionada", "ayuda": "Inspecciona la tapa del motor."},
+    {"clave": "refrigerante_revisado", "etiqueta": "Circuito de refrigerante revisado", "ayuda": "Revisa el refrigerante en la bomba."},
+    {"clave": "temperatura_medida", "etiqueta": "Temperatura medida", "ayuda": "Mide la temperatura en el monitor."},
+    {"clave": "bloqueo_confirmado", "etiqueta": "Bloqueo y etiquetado confirmados", "ayuda": "Activa Bloqueo y Etiquetado en el panel. Luego elige Bloquear y etiquetar en el inversor y confirma en el panel."},
+    {"clave": "abrazadera_ajustada", "etiqueta": "Abrazadera ajustada", "ayuda": "Elige Ajustar la abrazadera y confirma en el panel."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar la solución en el monitor de temperatura y confirma en el panel."}
   ],
   "estado": {
     "inspeccionado": false,

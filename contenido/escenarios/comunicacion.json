@@ -17,8 +17,8 @@
     "otro-modulo"
   ],
   "indicios": [
-    {"clave": "sintomas_revisados", "etiqueta": "Síntomas de red revisados"},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta"}
+    {"clave": "sintomas_revisados", "etiqueta": "Síntomas de red revisados", "ayuda": "Abre el monitor y elige Revisar los síntomas."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar el diagnóstico en los cables y confirma en el panel."}
   ],
   "estado": {
     "modulo": "Módulo virtual A",

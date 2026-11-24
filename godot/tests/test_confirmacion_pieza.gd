@@ -16,7 +16,8 @@ static func ejecutar() -> bool:
 	correcto = correcto and bus.get_node("Interfaz").visible
 	tecla(raiz, KEY_1)
 	correcto = correcto and sector.abierta and not bus.menu_pieza.visible \
-		and bus.resultado.text == "Compuerta abierta" and not bus.duracion_aviso.is_stopped()
+		and bus.resultado.text == "Compuerta abierta. Ahora abre el monitor y elige Evaluar el indicio." \
+		and not bus.duracion_aviso.is_stopped()
 	bus.abrir_menu(sector.piezas.monitor)
 	correcto = correcto and bus.menu_pieza.diagnostico.visible
 	tecla(raiz, KEY_UP)
