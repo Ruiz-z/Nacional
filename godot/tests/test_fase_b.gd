@@ -107,8 +107,7 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	bus.flashcard.ok.pressed.emit()
 	if bus.taller.objetivo != "calzas":
 		return false
-	bus.taller.cambiar_cajones(true, true)
-	if not elegir(bus, bus.taller.objetos.calzas, "tomar"):
+	if not Taller.tomar(bus, "calzas"):
 		return false
 	if not comprobar_guia(bus, Elevador.CALZAS, true):
 		return false
@@ -157,9 +156,11 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	bus.flashcard.confirmar()
 	decisiones.clear()
 	if elevador.arriba or elevador.calzas_colocadas or rueda.collision_layer != 0 \
-			or not bus.taller.inventario.accesibles().is_empty():
+			or not bus.taller.inventario.accesibles().is_empty() \
+			or bus.taller.cajon_abierto != -1 or bus.taller.cajones.any(func(cajon: Node3D) -> bool: return cajon.position.z != 0):
 		return false
-	bus.taller.tomar("calzas", false)
+	if not Taller.tomar(bus, "calzas"):
+		return false
 	if not await mover(bus, consola, elevador, "elevar_bus"):
 		return false
 	if not Taller.equipar(bus, "trabar_soporte"):
@@ -174,7 +175,8 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	bus.flashcard.ok.pressed.emit()
 	if bus.taller.objetivo != "manometro":
 		return false
-	bus.taller.tomar("manometro", false)
+	if not Taller.tomar(bus, "manometro"):
+		return false
 	if not elegir(bus, rueda, "medir_presion") or not Taller.equipar(bus, "localizar_pinchazo") \
 			or not elegir(bus, rueda, "localizar_pinchazo"):
 		return false
@@ -188,7 +190,8 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	Taller.cerrar_exitos(bus)
 	if "neumatico" in bus.taller.inventario.accesibles():
 		return false
-	bus.taller.tomar("llave_torque", false)
+	if not Taller.tomar(bus, "llave_torque"):
+		return false
 	var tuerca: StaticBody3D = bajos.piezas.tuerca_delantero_derecho_1
 	if not elegir(bus, tuerca, "apretar_tuerca_1"):
 		return false

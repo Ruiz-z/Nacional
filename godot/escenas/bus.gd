@@ -8,14 +8,15 @@ signal salida_solicitada
 
 const ANCHO_HUD := 440.0
 const FONDO_MISION := Color("#11507D")
+const Taller = preload("res://escenas/taller.gd")
 const Hoja = preload("res://escenas/hoja_diagnostico.gd")
 const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
 const PASOS_ELEVADOR := {
-	"colocar_calzas": "Coloca las calzas",
-	"elevar_bus": "Sube el autobús en la consola",
-	"trabar_soporte": "Traba el soporte",
-	"destrabar_soporte": "Destraba el soporte",
-	"descender_bus": "Baja el autobús en la consola",
+	"colocar_calzas": "Coloca las calzas sobre " + Taller.MARCAS_CALZAS,
+	"elevar_bus": "Sube el autobús desde " + Taller.UBICACION_CONSOLA,
+	"trabar_soporte": "Traba",
+	"destrabar_soporte": "Destraba",
+	"descender_bus": "Baja el autobús desde " + Taller.CONSOLA,
 }
 const FondoTarjeta = preload("res://escenas/fondo_tarjeta.gd")
 const INDICIOS := {
@@ -174,6 +175,12 @@ func _ready() -> void:
 	flashcard.opcion_elegida.connect(responder_cierre)
 	flashcard.terminada.connect(reanudar_tras_flashcard)
 	zona_activa = zonas[datos.zona]
+	var consola: Node3D = $Elevador.piezas[Elevador.CONSOLA]
+	taller.registrar_mueble(consola, "Consola del elevador",
+		Taller.UBICACION_CONSOLA, 0.20, Taller.ROTULO_CONSOLA)
+	var marcas: Node3D = $Elevador.piezas[Elevador.CALZAS]
+	taller.destinos[marcas] = "Marcas amarillas junto a las ruedas"
+	taller.ubicaciones[marcas] = Taller.MARCAS_CALZAS
 	puerta_pasajeros.componente = "puerta_pasajeros"
 	puerta_pasajeros.nombre = "Puerta de pasajeros"
 	if datos.get("ubicacion_inicial", {}).has("multimetro"):
@@ -217,7 +224,38 @@ func _ready() -> void:
 func mostrar_orden() -> void:
 	if datos.has("briefing"):
 		flashcard.encolar({"tipo": "orden", "titulo": datos.titulo, "briefing": datos.briefing,
-			"texto": "", "donde": "", "fuente": "", "objeto": ""})
+			"texto": "", "donde": "", "fuente": "", "objeto": "", "leyenda": leyenda_orden()})
+
+
+func leyenda_orden() -> PackedStringArray:
+	var ids: Array[String] = []
+	for accion in datos.ruta_ideal:
+		var requiere := requisitos(accion)
+		var objetos: Array = requiere.get("herramientas", []) + requiere.get("piezas", [])
+		if requiere.has("herramienta"):
+			objetos.append(requiere.herramienta)
+		for id in objetos:
+			if id not in ids:
+				ids.append(id)
+	var usa_elevador := zona_activa == $Bajos
+	if usa_elevador:
+		for id in ["calzas", "llave_ajustable"]:
+			if id not in ids:
+				ids.append(id)
+	var muebles: Array = ids.map(func(id: String): return taller.origenes[id].zona)
+	var leyenda := PackedStringArray()
+	if taller.caja_roja in muebles:
+		leyenda.append("Caja roja: herramientas")
+	if taller.estanteria in muebles:
+		leyenda.append("Estantería: repuestos")
+	if taller.mesa_banco != null and taller.mesa_banco in muebles:
+		leyenda.append("Banco de diagnóstico: multímetro y pruebas")
+	if Inventario.espacio(ids) > Inventario.CAPACIDAD:
+		leyenda.append("Mesa: dejar y preparar")
+		leyenda.append("Carrito: llevar más cosas")
+	if usa_elevador:
+		leyenda.append("Consola: subir y bajar el autobús")
+	return leyenda
 
 
 func ubicar_jugador(componente: String) -> void:
@@ -386,17 +424,20 @@ func comprobar_inventario(id: String, fuente := "teclado", solo_guia := false) -
 		requisito_pendiente = id
 		if menu_pieza.visible:
 			cerrar_menu()
-		avisar_objeto("Toma lo que te falta: " + taller.nombres(faltantes), "falta", "Te falta algo", faltantes[0])
+		var instrucciones := PackedStringArray()
+		for objeto in faltantes:
+			instrucciones.append(taller.instruccion_tomar(objeto))
+		avisar_objeto("\n".join(instrucciones), "falta", "Te falta algo", faltantes[0])
 		return false
 	if equipada:
 		return true
 	requisito_pendiente = id
 	if menu_pieza.visible:
 		cerrar_menu()
-	var nombre: String = Inventario.CATALOGO[herramienta].nombre
+	var nombre := Inventario.nombre_con_articulo(herramienta)
 	var mano: Dictionary = Inventario.objeto(taller.mano)
 	if not solo_guia and taller.mano != herramienta and mano.get("tipo") == "herramienta" 			and (cerca or taller.mano in taller.inventario.cinturon):
-		var texto := "Traes esta herramienta: %s. Cámbiala por esta: %s." % [mano.nombre, nombre]
+		var texto := "Traes %s. Cámbiala por %s." % [Inventario.nombre_con_articulo(taller.mano), nombre]
 		var ahora := Time.get_ticks_msec()
 		var decision: Dictionary = motor.registrar_herramienta_equivocada(id, fuente, ahora - ultimo_ms, texto)
 		ultimo_ms = ahora
@@ -405,10 +446,10 @@ func comprobar_inventario(id: String, fuente := "teclado", solo_guia := false) -
 			finalizar_orden()
 		decision_tomada.emit(decision)
 	elif numero > 4 and not cerca:
-		avisar_objeto("El carrito está lejos. Acércate y presiona %d para tomar %s." % [numero, nombre],
+		avisar_objeto("Acércate al carrito de herramientas. Pulsa %d para tomar %s." % [numero, nombre],
 			"aviso", "Toma la herramienta en la mano", herramienta)
 	else:
-		avisar("Presiona %d para tomar la herramienta." % numero,
+		avisar("Pulsa %d para tener %s en la mano." % [numero, nombre],
 			"aviso", "Selecciona " + nombre)
 	return false
 
@@ -718,7 +759,7 @@ func actualizar_mision(inmediato := false) -> void:
 	var ayuda := siguiente_ayuda(progreso)
 	var firma := [actual, cumplidas, controles.duplicate(), taller.inventario.cinturon.duplicate(),
 		taller.inventario.carrito.duplicate(), taller.hay_superficie(taller.mesa), taller.mano, accion_pendiente,
-		aciertos, ayuda, elevador, fuente_banco.fuente(), taller.cajones_abiertos, carrito_cerca(),
+		aciertos, ayuda, elevador, fuente_banco.fuente(), taller.cajon_abierto, carrito_cerca(),
 		motor.mediciones.punta_negra if motor.mediciones != null else ""]
 	if firma == firma_mision:
 		return
@@ -731,15 +772,15 @@ func actualizar_mision(inmediato := false) -> void:
 		var herramienta: String = requisitos(elevador.id).get("herramienta", "")
 		if not herramienta.is_empty():
 			objetos_requeridos.append(herramienta)
-		var texto: String = PASOS_ELEVADOR.get(elevador.id, "Cierra la orden en la consola")
+		var texto: String = PASOS_ELEVADOR.get(elevador.id, "Cierra la orden en " + Taller.CONSOLA)
 		var objetivo: String = elevador.objetivo
 		if elevador.id in ["trabar_soporte", "destrabar_soporte"]:
 			agregar_herramienta(filas, requisitos(elevador.id).herramienta, false, disponibles)
-			texto += " · " + $Elevador.piezas[objetivo].nombre
+			texto += " el %s, junto al autobús" % $Elevador.piezas[objetivo].nombre.to_lower()
 		if elevador.id == "colocar_calzas":
 			agregar_herramienta(filas, requisitos(elevador.id).herramienta, false, disponibles)
 		if objetivo != "calzas":
-			agregar_subpaso(filas, texto, false, {"pieza": $Elevador.piezas[objetivo], "columna": true})
+			agregar_subpaso(filas, texto + ".", false, {"pieza": $Elevador.piezas[objetivo], "columna": true})
 	for grupo in grupos:
 		var regla: Dictionary = grupo.regla
 		var id: String = grupo.ids[0]
@@ -767,19 +808,24 @@ func actualizar_mision(inmediato := false) -> void:
 				hecha or Motor.seguridad_confirmada(controles))
 		var componente: String = regla.componente
 		var pieza: Node3D = zona_activa.piezas.get(componente, $Elevador.piezas.get(componente))
-		var nombre_pieza: String = pieza.nombre if pieza != null else componente.capitalize()
-		var texto: String = "Elige %s en %s" % [grupo.titulo, nombre_pieza]
+		var nombre_pieza := nombre_pieza_mision(pieza)
+		var texto := "Elige %s en el panel." % grupo.titulo
+		if pieza != null:
+			texto = "Apunta %s, %s. Elige %s." % [("al " + nombre_pieza.trim_prefix("el ")) if nombre_pieza.begins_with("el ") else "a " + nombre_pieza,
+				lugar_pieza_mision(pieza), grupo.titulo]
+			if componente == Elevador.CONSOLA:
+				texto = "Elige %s en %s." % [grupo.titulo, Taller.UBICACION_CONSOLA]
 		if motor.mediciones != null:
 			if id.begins_with("medir_"):
 				if motor.mediciones.fuente == "banco":
-					texto = "Reporta la lectura de %s en la hoja" % nombre_pieza
+					texto = "Reporta la lectura de %s en la hoja del banco de diagnóstico." % pieza.nombre
 					pieza = zona_activa.piezas.get("hoja_diagnostico")
 				else:
-					agregar_subpaso(filas, "Coloca la punta negra en TP0",
+					agregar_subpaso(filas, "Pon la punta negra en TP0, el borne negro del banco de diagnóstico.",
 						hecha or motor.mediciones.punta_negra == "tp0", {"pieza": zona_activa.piezas.tp0})
-					texto = "Coloca la punta roja en %s" % nombre_pieza
+					texto = "Pon la punta roja en %s, en el banco de diagnóstico." % nombre_pieza
 			elif id.begins_with("reportar_"):
-				texto = "Reporta la lectura de %s en la hoja" % id.get_slice("_", 1).to_upper()
+				texto = "Reporta la lectura de %s en la hoja del banco de diagnóstico." % id.get_slice("_", 1).to_upper()
 		agregar_subpaso(filas, TextoLimpio.limpiar(texto).texto, hecha or accion_pendiente in grupo.ids,
 			{"pieza": pieza} if pieza != null else {})
 		if regla.get("requiere_panel", false):
@@ -808,33 +854,60 @@ func actualizar_mision(inmediato := false) -> void:
 			var candidatas := herramientas_para_dejar()
 			if not candidatas.is_empty() and taller.hay_superficie(taller.mesa):
 				var herramienta := candidatas[0]
-				var nombre: String = Inventario.CATALOGO[herramienta].nombre
-				var articulo: String = {
-					"calzas": "las ", "lampara": "la ", "llave_ajustable": "la ", "llave_torque": "la "
-				}.get(herramienta, "el ")
+				var nombre := Inventario.nombre_con_articulo(herramienta)
 				guia = {"pieza": taller.mesa.piezas.mesa_taller, "columna": true}
-				filas.insert(pendiente, {"texto": "Deja %s%s en la mesa" % [articulo, nombre], "hecho": false})
+				filas.insert(pendiente, {"texto": "Deja %s en la mesa de trabajo." % nombre, "hecho": false})
 	cambiar_subpaso_guia(guia)
 	if not hud_mision.celebrando:
 		hud_mision.mostrar(actual, titulo, cumplidas, filas, TextoLimpio.limpiar(ayuda).texto)
 
 
+func nombre_pieza_mision(pieza: Node3D) -> String:
+	if pieza == null:
+		return ""
+	var componente: String = pieza.componente
+	if componente in ["tp0", "tp1", "tp2"]:
+		return "el borne " + pieza.nombre
+	var nombre: String = pieza.nombre.to_lower()
+	var sustantivo := nombre.get_slice(" ", 0)
+	var articulo: String = {
+		"bolsa": "la", "tuerca": "la", "pastillas": "las", "caja": "la",
+		"tapa": "la", "compuerta": "la", "bomba": "la", "abrazadera": "la",
+		"batería": "la", "hoja": "la", "consola": "la", "mesa": "la",
+		"fusibles": "los", "cables": "los"
+	}.get(sustantivo, "el")
+	return articulo + " " + nombre
+
+
+func lugar_pieza_mision(pieza: Node3D) -> String:
+	if datos.zona == "faros" and pieza.componente == "faro_izquierdo":
+		return "al frente del autobús"
+	return {
+		"bajos": "debajo del autobús",
+		"motor": "en el compartimiento del motor, detrás del autobús",
+		"faros": "en el compartimiento de los faros, al frente del autobús",
+		"gabinete": "en el gabinete de baterías, al costado del autobús",
+		"cabina": "en la cabina",
+		"banco": "en el banco de diagnóstico",
+	}[datos.zona]
+
+
 func agregar_toma(filas: Array, id: String, hecho: bool) -> void:
-	agregar_subpaso(filas, taller.instruccion_tomar(id), hecho, {"objeto": id})
+	agregar_subpaso(filas, taller.instruccion_tomar(id, hecho), hecho, {"objeto": id})
 
 
 func agregar_herramienta(filas: Array, id: String, hecha: bool, disponibles: Array[String]) -> void:
 	agregar_toma(filas, id, hecha or id in disponibles)
 	agregar_acceso_carrito(filas, id, hecha)
 	var espacio: int = taller.espacio_de(id)
-	var tecla := " (%d)" % espacio if espacio > 0 else ""
-	agregar_subpaso(filas, "Ten %s en la mano%s" % [Inventario.CATALOGO[id].nombre, tecla],
+	var tecla := ": pulsa %d" % espacio if espacio > 0 else ""
+	agregar_subpaso(filas, "Ten %s en la mano%s." % [Inventario.nombre_con_articulo(id), tecla],
 		hecha or taller.mano == id, {"mano": id})
 
 
 func agregar_acceso_carrito(filas: Array, id: String, hecha: bool) -> void:
 	if id in taller.inventario.carrito:
-		agregar_subpaso(filas, "Acércate al carrito · " + Inventario.CATALOGO[id].nombre,
+		agregar_subpaso(filas, "Acércate al carrito de herramientas para alcanzar %s." % Inventario.nombre_con_articulo(id),
 			hecha or carrito_cerca(), {"objeto": id})
 
 
@@ -859,7 +932,9 @@ func aplicar_guia(manual := false) -> bool:
 		return false
 	if subpaso_guia.has("pieza"):
 		var pieza: Node3D = subpaso_guia.pieza
-		taller.senalar(pieza.componente, pieza, manual, subpaso_guia.get("columna", false))
+		var destino := nombre_pieza_mision(pieza)
+		destino = destino.left(1).to_upper() + destino.substr(1)
+		taller.senalar(pieza.componente, pieza, manual, subpaso_guia.get("columna", false), destino)
 	else:
 		var id: String = subpaso_guia.get("mano", subpaso_guia.get("objeto", ""))
 		var espacio: int = taller.espacio_de(id) if subpaso_guia.has("mano") else 0
@@ -943,6 +1018,12 @@ func abrir_menu(pieza: Interactuable) -> void:
 		jugador.activo = false
 		$Apuntado.hide()
 		return
+	var es_cajon := pieza.componente.begins_with("cajon_taller_")
+	if es_cajon:
+		var fila: int = taller.cajones.find(pieza.get_parent())
+		if fila != taller.cajon_abierto:
+			cambiar_cajon(fila)
+			return
 	var zona := pieza.zona as ZonaBase
 	pieza_menu = pieza
 	if zona != null and zona.es_pieza_interna(pieza.componente) and not zona.abierta:
@@ -975,23 +1056,24 @@ func abrir_menu(pieza: Interactuable) -> void:
 		"puerta_salida":
 			opciones.append(MenuPieza.navegacion("bajar", "Bajar del autobús"))
 			lectura = ""
-	if pieza.componente == "caja_taller" or pieza.componente.begins_with("cajon_taller_"):
-		var titulo := "Cerrar cajones" if taller.cajones_abiertos else "Abrir cajones"
-		opciones.append(MenuPieza.navegacion("cajones", titulo))
+	if es_cajon:
+		opciones.append(MenuPieza.navegacion("cerrar_cajon", "Cerrar el cajón"))
 		lectura = ""
+	elif pieza.componente == "caja_taller":
+		lectura = "Pulsa el frente del cajón que quieras abrir."
 	var mueble := mueble_para_dejar(pieza)
 	if mueble != null:
 		if not taller.mano.is_empty() and (mueble != $Banco or taller.mano == "multimetro") \
-				and (mueble != taller.caja_roja
-				or Inventario.CATALOGO[taller.mano].tipo == "herramienta"):
+				and (not es_cajon or Inventario.CATALOGO[taller.mano].tipo == "herramienta"):
 			opciones.append(MenuPieza.navegacion("dejar", "Dejar aquí: " + Inventario.CATALOGO[taller.mano].nombre))
-		var disponibles: Array[String] = taller.objetos_en(mueble)
-		if mueble == taller.carrito and carrito_cerca():
-			disponibles.append_array(taller.inventario.carrito)
-		for objeto in disponibles:
-			var opcion := MenuPieza.navegacion("tomar", "Tomar: " + Inventario.CATALOGO[objeto].nombre)
-			opcion["objeto"] = objeto
-			opciones.append(opcion)
+		if not es_cajon:
+			var disponibles: Array[String] = taller.objetos_en(mueble)
+			if mueble == taller.carrito and carrito_cerca():
+				disponibles.append_array(taller.inventario.carrito)
+			for objeto in disponibles:
+				var opcion := MenuPieza.navegacion("tomar", "Tomar: " + Inventario.CATALOGO[objeto].nombre)
+				opcion["objeto"] = objeto
+				opciones.append(opcion)
 	if mueble == taller.carrito:
 		opciones.append(MenuPieza.navegacion("carrito", "Estacionar carrito" if taller.lleva_carrito else "Empujar carrito"))
 	if pieza == $Banco.piezas.multimetro:
@@ -1093,7 +1175,7 @@ func elegir_accion(indice: int, fuente: String) -> void:
 			cerrar_menu()
 		elif entrada.id in ["elevar_bus", "descender_bus", "colocar_calzas", "trabar_soporte", "destrabar_soporte"]:
 			accion_elevador(entrada.id, pieza_menu.componente, fuente)
-		elif entrada.id in ["tomar", "dejar", "cajones", "carrito"]:
+		elif entrada.id in ["tomar", "dejar", "cerrar_cajon", "carrito"]:
 			accion_taller(entrada.id, entrada.get("objeto", ""))
 		else:
 			if taller.lleva_carrito and entrada.id == "subir":
@@ -1163,10 +1245,18 @@ func mueble_para_dejar(pieza: Interactuable) -> Node3D:
 		"mesa_banco": return taller.mesa_banco
 		"mesa_taller": return taller.mesa
 		"carrito_taller": return taller.carrito
-		"caja_taller": return taller.caja_roja
 	if pieza.componente.begins_with("cajon_taller_"):
 		return taller.caja_roja
 	return null
+
+
+func cambiar_cajon(fila: int) -> void:
+	var objetivo: String = taller.objetivo
+	var manual: bool = not taller.caducidad.is_stopped()
+	taller.mover_cajon(fila)
+	if manual and taller.objetos.has(objetivo):
+		senalar_guia(objetivo)
+	actualizar_mision()
 
 
 func accion_taller(id: String, objeto := "") -> void:
@@ -1182,9 +1272,15 @@ func accion_taller(id: String, objeto := "") -> void:
 				if not aviso.is_empty() and id_objeto not in taller.inventario.accesibles(true):
 					carga = Inventario.objeto(id_objeto).get("espacio", 0)
 		"dejar":
-			aviso = taller.dejar(taller.mano, carrito_cerca(), mueble_para_dejar(pieza_menu))
-		"cajones":
-			taller.cambiar_cajones(not taller.cajones_abiertos)
+			var mueble := mueble_para_dejar(pieza_menu)
+			var guardado: String = taller.mano
+			aviso = taller.dejar(guardado, carrito_cerca(), mueble)
+			if aviso.is_empty() and mueble == taller.caja_roja:
+				var fila: int = taller.fila_cajon(guardado)
+				if fila >= 0:
+					cambiar_cajon(fila)
+		"cerrar_cajon":
+			cambiar_cajon(-1)
 		"carrito":
 			taller.lleva_carrito = not taller.lleva_carrito
 	cerrar_menu()

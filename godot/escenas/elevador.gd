@@ -42,6 +42,9 @@ func _ready() -> void:
 		trabas[id] = false
 	var marca := pieza(self, CALZAS, "Punto de colocación de calzas",
 		Vector3(-1.08, 0.09, 3.60), Vector3(0.61, 0.16, 0.42), Color("#b79753"))
+	for lado in [-1, 1]:
+		caja(marca, Vector3(lado * 0.15, 0.082, 0),
+			Vector3(0.11, 0.008, 0.30), Color("#e5b641"))
 	indicadores_calzas = Node3D.new()
 	marca.add_child(indicadores_calzas)
 	for lado in [-1, 1]:

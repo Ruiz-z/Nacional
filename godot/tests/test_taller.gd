@@ -51,16 +51,15 @@ static func probar_carga(arbol: SceneTree) -> bool:
 
 static func comprobar_carga(bus: Node3D, arbol: SceneTree) -> String:
 	var taller: Node3D = bus.taller
-	var caja: StaticBody3D = taller.caja_roja.piezas.caja_taller
+	var caja: StaticBody3D = taller.pieza_cajon(0)
 	var mesa: StaticBody3D = taller.mesa.piezas.mesa_taller
 	var carrito: StaticBody3D = taller.carrito.piezas.carrito_taller
 	var bolsa: StaticBody3D = taller.objetos.bolsa_aire
 	await arbol.physics_frame
-	if not await usar_menu(bus, caja, "cajones", arbol, 1) or taller.animacion == null:
-		return "No se abrieron los cajones con clic."
-	await taller.animacion.finished
-	await arbol.physics_frame
 	for id in ["calzas", "manometro", "lampara"]:
+		var fila: int = taller.fila_cajon(id)
+		if fila >= 0 and not await abrir_cajon_con_clic(bus, fila, arbol):
+			return "No se abrió el cajón de %s con clic." % id
 		if not await usar_menu(bus, taller.objetos[id], "tomar", arbol) or taller.mano != id:
 			return "No se tomó %s con clic." % id
 	var elevador: Node3D = bus.get_node("Elevador")
@@ -95,7 +94,7 @@ static func comprobar_carga(bus: Node3D, arbol: SceneTree) -> String:
 	if not await usar_menu(bus, mesa, "dejar", arbol):
 		return "No se dejó la bolsa en la mesa."
 	Acciones.tecla(bus, 1)
-	if not await usar_menu(bus, caja, "dejar", arbol) or "calzas" in taller.inventario.cinturon:
+	if not await abrir_cajon_con_clic(bus, 0, arbol) or not await usar_menu(bus, caja, "dejar", arbol) or "calzas" in taller.inventario.cinturon:
 		return "La caja roja no liberó espacio."
 	taller.carrito.position = carrito_original
 	await arbol.physics_frame
@@ -111,7 +110,7 @@ static func comprobar_carga(bus: Node3D, arbol: SceneTree) -> String:
 	await arbol.physics_frame
 	if not await usar_menu(bus, carrito, "tomar", arbol) or taller.mano != "manometro":
 		return "No se volvió a tomar la herramienta desde el carrito."
-	if not await usar_menu(bus, caja, "tomar", arbol) or taller.mano != "calzas":
+	if not await usar_menu(bus, taller.objetos.calzas, "tomar", arbol) or taller.mano != "calzas":
 		return "No se recuperaron las calzas de la caja roja."
 	if not await usar_menu(bus, mesa, "tomar", arbol) or taller.mano != "lampara":
 		return "No se recuperó la lámpara de la mesa."
@@ -122,16 +121,20 @@ static func comprobar_carga(bus: Node3D, arbol: SceneTree) -> String:
 	var llave: StaticBody3D = taller.objetos.llave_ajustable
 	# La misión requiere la llave en la mano antes de pedir la bolsa.
 	Acciones.tecla(bus, 2)
-	if not await usar_menu(bus, caja, "dejar", arbol) \
+	# Con los cajones de uno en uno: se guarda en el cajón abierto y se abre el de la llave.
+	if taller.cajon_abierto < 0 or not await usar_menu(bus, taller.pieza_cajon(taller.cajon_abierto), "dejar", arbol):
+		return "No se guardó la herramienta en el cajón abierto."
+	var fila_llave: int = taller.cajones.find(llave.get_parent())
+	if not await abrir_cajon_con_clic(bus, fila_llave, arbol) \
 			or not await usar_menu(bus, llave, "tomar", arbol):
 		return "No se preparó la llave para cambiar la bolsa."
 	taller.carrito.position += Vector3.RIGHT * 12
 	bus.actualizar_mision()
 	if taller.pieza_guia != mesa or not taller.baliza.visible \
 			or not bus.hud_mision.filas.any(func(fila: Dictionary) -> bool:
-				return fila.texto == "Toma Bolsa de aire (ocupa 2 espacios)") \
+				return fila.texto == "Toma la bolsa de aire en la mesa de trabajo (ocupa 2 espacios).") \
 			or not bus.hud_mision.filas.any(func(fila: Dictionary) -> bool:
-				return fila.texto == "Deja la Lámpara en la mesa"):
+				return fila.texto == "Deja la lámpara en la mesa de trabajo."):
 		return "La guía no indicó qué soltar para tomar la bolsa."
 	Acciones.tecla(bus, taller.espacio_de("lampara"))
 	if taller.mano != "lampara" or taller.pieza_guia != mesa:
@@ -153,7 +156,7 @@ static func comprobar_carga(bus: Node3D, arbol: SceneTree) -> String:
 	if not await usar_menu(bus, carrito, "dejar", arbol, 1):
 		return "No se pudo preparar el caso de ambos almacenes llenos."
 	for id in ["flexometro", "destornillador", "llave_torque", "multimetro", "tech_tool"]:
-		if not taller.tomar(id, true).is_empty():
+		if not Acciones.tomar(bus, id):
 			return "No se pudieron llenar ambos almacenes."
 	await arbol.physics_frame
 	if not await usar_menu(bus, carrito, "tomar", arbol) \
@@ -162,6 +165,21 @@ static func comprobar_carga(bus: Node3D, arbol: SceneTree) -> String:
 			or not bus.flashcard.cuerpo.text.contains("Flexómetro o Lámpara"):
 		return "El aviso con ambos almacenes llenos mostró una cuenta o sugerencia incorrecta."
 	return ""
+
+
+static func abrir_cajon_con_clic(bus: Node3D, fila: int, arbol: SceneTree) -> bool:
+	# Si el cajón ya está abierto no hay nada que abrir.
+	if bus.taller.cajon_abierto == fila:
+		return true
+	if not apuntar(bus, bus.taller.pieza_cajon(fila)):
+		return false
+	bus.recibir_accion(bus.panel.entrada.traducir("teclado", "clic", 1))
+	if bus.menu_pieza.visible or bus.taller.cajon_abierto != fila:
+		return false
+	if bus.taller.animacion != null and bus.taller.animacion.is_valid():
+		await bus.taller.animacion.finished
+	await arbol.physics_frame
+	return true
 
 
 static func usar_menu(bus: Node3D, pieza: StaticBody3D, id: String, arbol: SceneTree, tecla := 0) -> bool:
@@ -185,15 +203,30 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	await arbol.physics_frame
 	var eventos: Array[Dictionary] = []
 	bus.decision_tomada.connect(func(decision: Dictionary): eventos.append(decision))
-	var caja: StaticBody3D = taller.caja_roja.piezas.caja_taller
-	if not apuntar(bus, caja) or not await elegir(bus, "cajones", arbol):
-		return "La caja roja no abrió desde el menú."
+	for fila in [2, 0, 1]:
+		if not await abrir_cajon_con_clic(bus, fila, arbol):
+			return "El frente del cajón %d no abrió con clic." % fila
+		for indice in taller.cajones.size():
+			if (taller.cajones[indice].position.z > 0) != (indice == fila):
+				return "El cajón anterior quedó abierto."
+		for id in taller.objetos:
+			var objeto: StaticBody3D = taller.objetos[id]
+			var accesible: bool = objeto.zona != taller.caja_roja or objeto.get_parent() == taller.cajones[fila]
+			if apuntar(bus, objeto) != accesible or objeto.visible != accesible:
+				return "Acceso incorrecto a %s con el cajón %d abierto." % [id, fila]
+		var calzas: StaticBody3D = taller.objetos.calzas
+		if fila != 0:
+			bus.abrir_menu(calzas)
+			if bus.menu_pieza.visible or taller.tomar("calzas", false).is_empty():
+				return "Las calzas se pueden tomar con el cajón de abajo cerrado."
+	var medio: StaticBody3D = taller.pieza_cajon(1)
+	if not apuntar(bus, medio) or not await elegir(bus, "cerrar_cajon", arbol):
+		return "El frente abierto no ofrece cerrar el cajón."
 	await taller.animacion.finished
-	await arbol.physics_frame
-	for id in taller.objetos:
-		if not apuntar(bus, taller.objetos[id]):
-			return "No se puede apuntar a %s desde el pasillo. La mira alcanza %s." % [
-				id, bus.alcance.get_collider().get("componente") if bus.alcance.is_colliding() else null]
+	if taller.cajon_abierto != -1 or not taller.objetos_en(taller.caja_roja).is_empty():
+		return "Cerrar dejó un cajón accesible."
+	if not await abrir_cajon_con_clic(bus, 1, arbol):
+		return "El cajón del medio no volvió a abrir."
 	var foco: StaticBody3D = taller.objetos.foco
 	var destornillador: StaticBody3D = taller.objetos.destornillador
 	if not apuntar(bus, destornillador) or not await elegir(bus, "tomar", arbol):
@@ -207,7 +240,13 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	bus.ejecutar("medir_continuidad", "teclado")
 	Acciones.cerrar_exitos(bus)
 	Acciones.tecla(bus, 2)
-	if not apuntar(bus, caja) or not await elegir(bus, "dejar", arbol) 			or "multimetro" in taller.inventario.cinturon 			or taller.objetos.multimetro.get_parent() != taller.origenes.multimetro.padre 			or taller.objetos.multimetro.position != taller.origenes.multimetro.posicion:
+	if not await abrir_cajon_con_clic(bus, 1, arbol):
+		return "No se pudo abrir el cajón del medio para guardar el multímetro."
+	if not apuntar(bus, medio) or not await elegir(bus, "dejar", arbol):
+		return "El cajón del medio no ofreció guardar el multímetro."
+	if taller.cajon_abierto != 2 or "multimetro" in taller.inventario.cinturon \
+			or taller.objetos.multimetro.get_parent() != taller.origenes.multimetro.padre \
+			or taller.objetos.multimetro.position != taller.origenes.multimetro.posicion:
 		return "El multímetro no volvió a su cajón."
 	Acciones.tecla(bus, 1)
 	bus.mostrar_estado(true)
@@ -217,8 +256,8 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 		return "Falta la opción de cambiar el foco."
 	if bus.accion_pendiente != "" or eventos.size() != 2 or bus.motor.puntaje() != puntaje \
 			or not bus.flashcard.visible or bus.flashcard.titulo.text != "Te falta algo" \
-			or bus.flashcard.cuerpo.text != "Toma lo que te falta: Foco de repuesto" \
-			or bus.flashcard.donde.text != "Dónde está: la estantería de piezas, a la izquierda de la mesa":
+			or bus.flashcard.cuerpo.text != "Toma el foco de repuesto en la estantería de repuestos, junto a la mesa de trabajo." \
+			or bus.flashcard.donde.text != "Dónde está: la estantería de repuestos, junto a la mesa de trabajo":
 		return "El rechazo por inventario no explicó el faltante o afectó la orden."
 	if taller.baliza.visible:
 		return "La guía se encendió antes de cerrar la tarjeta."
@@ -298,8 +337,7 @@ static func probar_carrito(bus: Node3D, arbol: SceneTree, eventos: Array[Diction
 	var ids := ["destornillador", "multimetro", "flexometro", "lampara",
 		"llave_torque", "llave_ajustable", "tech_tool", "calzas"]
 	for id in ids.slice(1):
-		bus.abrir_menu(taller.objetos[id])
-		if not Acciones.elegir(bus, "tomar"):
+		if not Acciones.tomar(bus, id):
 			return "No se pudo llenar el inventario."
 	bus.abrir_menu(carrito)
 	if not Acciones.elegir(bus, "tomar", "llave_torque") or taller.mano != "llave_torque":
@@ -317,9 +355,9 @@ static func probar_carrito(bus: Node3D, arbol: SceneTree, eventos: Array[Diction
 	Acciones.tecla(bus, 2)
 	if taller.mano != "multimetro":
 		return "El cinturón dejó de funcionar al alejarse."
-	bus.abrir_menu(taller.caja_roja.piezas.caja_taller)
+	bus.abrir_menu(taller.pieza_cajon(taller.cajon_abierto))
 	Acciones.tecla(bus, 1)
-	if taller.cajones_abiertos or bus.menu_pieza.visible or taller.mano != "multimetro":
+	if taller.cajon_abierto != -1 or bus.menu_pieza.visible or taller.mano != "multimetro":
 		return "El número no eligió la acción del menú abierto."
 	return ""
 
@@ -329,11 +367,15 @@ static func apuntar(bus: Node3D, pieza: StaticBody3D) -> bool:
 	var taller: Node3D = bus.taller
 	var frente := Vector3.BACK.rotated(Vector3.UP, pieza.zona.rotation.y)
 	var distancia := 1.20
-	if pieza.zona == taller.caja_roja and pieza.componente != "caja_taller":
+	if pieza.zona == taller.caja_roja and taller.objetos.get(pieza.componente) == pieza:
 		distancia = 0.48
-	var origen := pieza.global_position + frente * distancia
+	var blanco := pieza.global_position
+	var origen := blanco + frente * distancia
+	if pieza.componente.begins_with("cajon_taller_"):
+		blanco.x += 0.45
+		origen.x += 1.25
 	bus.jugador.ubicar(Vector3(origen.x, 0, origen.z))
-	bus.apuntar_jugador(pieza.global_position)
+	bus.apuntar_jugador(blanco)
 	bus.alcance.force_raycast_update()
 	return bus.alcance.get_collider() == pieza
 
@@ -418,7 +460,7 @@ static func probar_herramienta(bus: Node3D) -> bool:
 		return false
 	Acciones.tecla(bus, 4)
 	bus.ejecutar("inspeccionar", "teclado")
-	if not bus.flashcard.visible or bus.flashcard.cola[0].tipo != "aviso" 			or bus.flashcard.cuerpo.text != "Presiona 1 para tomar la herramienta." 			or bus.motor.puntaje() != 100 or bus.motor.estado() != antes:
+	if not bus.flashcard.visible or bus.flashcard.cola[0].tipo != "aviso" 			or bus.flashcard.cuerpo.text != "Pulsa 1 para tener el destornillador en la mano." 			or bus.motor.puntaje() != 100 or bus.motor.estado() != antes:
 		return false
 	bus.flashcard.confirmar()
 	if not Acciones.equipar(bus, "revisar_refrigerante"):
@@ -428,7 +470,7 @@ static func probar_herramienta(bus: Node3D) -> bool:
 		if decision.tipo_error == "herramienta-equivocada":
 			errores.append(decision))
 	bus.ejecutar("inspeccionar", "teclado")
-	if bus.flashcard.titulo.text != "Herramienta equivocada" 			or bus.flashcard.cuerpo.text != "Traes esta herramienta: Lámpara. Cámbiala por esta: Destornillador." 			or bus.motor.puntaje() != 96 or bus.motor.estado() != antes or errores.size() != 1 			or errores[0].aplicada or errores[0].criticidad != "leve":
+	if bus.flashcard.titulo.text != "Herramienta equivocada" 			or bus.flashcard.cuerpo.text != "Traes la lámpara. Cámbiala por el destornillador." 			or bus.motor.puntaje() != 96 or bus.motor.estado() != antes or errores.size() != 1 			or errores[0].aplicada or errores[0].criticidad != "leve":
 		return false
 	bus.flashcard.confirmar()
 	return true

@@ -5,9 +5,11 @@ const Inventario = preload("res://logica/simulador/inventario.gd")
 const Llave = preload("res://assets/modelos/herramientas/adjustable_wrench.glb")
 const Flexometro = preload("res://assets/modelos/herramientas/tape_measure.glb")
 const HERRAMIENTAS := [
-	["calzas", "lampara"], ["manometro", "llave_torque"],
-	["multimetro", "flexometro"], ["llave_ajustable", "destornillador", "tech_tool"],
+	["llave_torque", "calzas"],
+	["manometro", "lampara", "destornillador", "llave_ajustable"],
+	["multimetro", "tech_tool", "flexometro"],
 ]
+const NOMBRES_CAJONES := ["de abajo", "del medio", "de arriba"]
 const REPUESTOS := [
 	["neumatico", "bolsa_aire", "amortiguador"],
 	["abrazadera", "tuercas", "pastillas_freno"],
@@ -20,12 +22,20 @@ const GUIA := Color("#3FA9F5")
 const COLOR_MANO := Color("#54f5e3")
 const GUIA_TEXTO := Color("#9BD8FF")
 const LIMITE_SUPERFICIE := 6
+const CONSOLA := "la consola del elevador"
+const UBICACION_CONSOLA := CONSOLA + ", junto a las columnas"
+const MARCAS_CALZAS := "las marcas amarillas del suelo, junto a las ruedas"
+const ROTULO_CAJA := "CAJA DE HERRAMIENTAS"
+const ROTULO_MESA := "MESA DE TRABAJO"
+const ROTULO_REPUESTOS := "REPUESTOS"
+const ROTULO_CARRITO := "CARRITO"
+const ROTULO_CONSOLA := "CONSOLA DEL ELEVADOR"
 
 var inventario := Inventario.new()
 var objetos := {}
 var origenes := {}
 var cajones: Array[Node3D] = []
-var cajones_abiertos := false
+var cajon_abierto := -1
 var animacion: Tween
 var mano := ""
 var ultimo_inventario: Array = []
@@ -36,6 +46,7 @@ var contorno := StandardMaterial3D.new()
 var contorno_cercano: StandardMaterial3D
 var flecha: Control
 var distancia_guia: Label
+var nombre_guia := ""
 var direccion_guia := Vector2.ZERO
 var mueble_guia: Node3D
 var mallas_guia: Array[MeshInstance3D] = []
@@ -49,6 +60,8 @@ var superficies := {}
 var caducidad: Timer
 var alturas := {}
 var ubicaciones := {}
+var destinos := {}
+var rotulos := {}
 var mesa: Zona
 var caja_roja: Zona
 var estanteria: Zona
@@ -113,9 +126,38 @@ func etiqueta(padre: Node, texto: String, tam: int) -> Label:
 	return nodo
 
 
-func registrar_mueble(zona: Zona, descripcion: String, altura: float) -> void:
-	ubicaciones[zona] = descripcion
-	alturas[zona] = altura
+func registrar_mueble(nodo: Node3D, nombre: String, descripcion: String, altura: float,
+		texto_rotulo: String) -> void:
+	destinos[nodo] = nombre
+	ubicaciones[nodo] = descripcion
+	alturas[nodo] = altura
+
+	var rotulo := Label3D.new()
+	rotulo.text = texto_rotulo
+	rotulo.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	rotulo.font = ThemeDB.fallback_font
+	rotulo.font_size = 48
+	rotulo.pixel_size = 0.0028
+	rotulo.outline_size = 0
+	rotulo.position = Vector3.UP * (altura + 0.23)
+	nodo.add_child(rotulo)
+	rotulos[nodo] = rotulo
+
+	var placa := QuadMesh.new()
+	var tam := rotulo.font.get_string_size(texto_rotulo, HORIZONTAL_ALIGNMENT_LEFT, -1, rotulo.font_size)
+	placa.size = tam * rotulo.pixel_size + Vector2(0.12, 0.055)
+	var fondo := StandardMaterial3D.new()
+	fondo.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	fondo.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	fondo.albedo_color = Color("#162027")
+	fondo.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	fondo.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	fondo.render_priority = -1
+	var respaldo := MeshInstance3D.new()
+	respaldo.mesh = placa
+	respaldo.material_override = fondo
+	respaldo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	rotulo.add_child(respaldo)
 
 
 func crear_muebles() -> void:
@@ -127,7 +169,7 @@ func crear_muebles() -> void:
 			nodo.queue_free()
 	mesa.pieza(mesa, "mesa_taller", "Mesa de trabajo", Vector3(0, 1.03, 0),
 		Vector3(3.45, 0.13, 1.16), Zona.ACERO).superficie.hide()
-	registrar_mueble(mesa, "la mesa de trabajo, al fondo a la izquierda", 1.13)
+	registrar_mueble(mesa, "Mesa de trabajo", "la mesa de trabajo", 1.13, ROTULO_MESA)
 
 	$Gabinete.set_script(Zona)
 	caja_roja = $Gabinete
@@ -139,20 +181,22 @@ func crear_muebles() -> void:
 		cajones.append(cajon)
 		for prefijo in ["Cajon", "Tirador"]:
 			caja_roja.get_node(prefijo + str(fila)).reparent(cajon)
-		var tirador := cajon.get_node("Tirador" + str(fila)) as MeshInstance3D
-		caja_roja.pieza(cajon, "cajon_taller_%d" % fila, "Cajón de herramientas",
-			tirador.position, Vector3(0.89, 0.055, 0.055), Zona.ACERO).superficie.hide()
-		var altura := 0.27 + fila * 0.255
-		caja_roja.caja(cajon, Vector3(0, altura - 0.075, 0.11),
+		var frente := cajon.get_node("Cajon" + str(fila)) as MeshInstance3D
+		caja_roja.pieza(cajon, "cajon_taller_%d" % fila, "Cajón " + NOMBRES_CAJONES[fila],
+			frente.position + Vector3.BACK * 0.027, Vector3(frente.scale.x, frente.scale.y, 0.09),
+			ROJO).superficie.hide()
+		var altura := frente.position.y + frente.scale.y / 2.0 - 0.105
+		caja_roja.caja(cajon, Vector3(0, altura, 0.11),
 			Vector3(1.20, 0.04, 0.48), Zona.FONDO)
 		var ids: Array = HERRAMIENTAS[fila]
 		for columna in ids.size():
 			var id: String = ids[columna]
-			crear_objeto(caja_roja, cajon, id, Vector3(
-				remap(columna, 0, ids.size() - 1, -0.46, 0.46) if ids.size() == 3 else -0.32 + columna * 0.64,
-				altura - 0.055 + dimensiones(id).y / 2.0, 0.25))
-	cambiar_cajones(false, true)
-	registrar_mueble(caja_roja, "la caja roja de herramientas, junto a la mesa", 1.65)
+			var x := remap(columna, 0, 2, -0.42, 0.42) if ids.size() == 3 else -0.32 + (columna % 2) * 0.64
+			var z := 0.24 if columna < 2 or ids.size() == 3 else 0.035
+			crear_objeto(caja_roja, cajon, id, Vector3(x, altura + 0.02 + dimensiones(id).y / 2.0, z))
+			mostrar_objeto(id)
+	registrar_mueble(caja_roja, "Caja de herramientas",
+		"la caja roja de herramientas, junto a la mesa de trabajo", 1.65, ROTULO_CAJA)
 
 	estanteria = Zona.new()
 	estanteria.name = "Estanteria"
@@ -171,9 +215,8 @@ func crear_muebles() -> void:
 			var tam := dimensiones(id)
 			crear_objeto(estanteria, estanteria, id,
 				Vector3((columna - 1) * 0.68, altura + 0.03 + tam.y / 2.0, 0.32 - fila * 0.13))
-	var rotulo := estanteria.rotulo(estanteria, Vector3(0, 1.92, 0.31), "REPUESTOS", 0.005)
-	rotulo.rotation_degrees.y = 0
-	registrar_mueble(estanteria, "la estantería de piezas, a la izquierda de la mesa", 2.08)
+	registrar_mueble(estanteria, "Estantería de repuestos",
+		"la estantería de repuestos, junto a la mesa de trabajo", 1.93, ROTULO_REPUESTOS)
 
 	carrito = Zona.new()
 	carrito.name = "CarritoHerramientas"
@@ -189,7 +232,7 @@ func crear_muebles() -> void:
 			var esquina := Vector3(lado * 0.33, 0, fondo * 0.21)
 			carrito.caja(carrito, esquina + Vector3.UP * 0.54, Vector3(0.045, 0.75, 0.045), Zona.ACERO)
 			carrito.cilindro(carrito, esquina + Vector3.UP * 0.10, 0.10, 0.06, CAUCHO).rotation_degrees.z = 90
-	registrar_mueble(carrito, "el carrito de herramientas, en el taller", 1.12)
+	registrar_mueble(carrito, "Carrito de herramientas", "el carrito de herramientas", 1.10, ROTULO_CARRITO)
 
 
 func dimensiones(id: String) -> Vector3:
@@ -299,18 +342,24 @@ func crear_objeto(zona: Zona, padre: Node3D, id: String, centro: Vector3) -> voi
 	origenes[id] = {"padre": padre, "posicion": centro, "zona": zona}
 
 
-func cambiar_cajones(abrir: bool, inmediato := false) -> void:
-	cajones_abiertos = abrir
+func pieza_cajon(fila: int) -> StaticBody3D:
+	return caja_roja.piezas["cajon_taller_%d" % fila]
+
+
+func mover_cajon(fila: int, inmediato := false) -> void:
+	cajon_abierto = fila
 	if animacion != null:
 		animacion.kill()
-	if not inmediato:
-		animacion = create_tween().set_parallel()
-	for fila in cajones.size():
-		var destino := 0.55 + (cajones.size() - 1 - fila) * 0.25 if abrir else 0.0
+		animacion = null
+	for indice in cajones.size():
+		var destino := 0.68 if indice == fila else 0.0
+		var cajon := cajones[indice]
 		if inmediato:
-			cajones[fila].position.z = destino
-		else:
-			animacion.tween_property(cajones[fila], "position:z", destino, 0.30)
+			cajon.position.z = destino
+		elif not is_equal_approx(cajon.position.z, destino):
+			if animacion == null:
+				animacion = create_tween().set_parallel().set_trans(Tween.TRANS_SINE)
+			animacion.tween_property(cajon, "position:z", destino, 0.35)
 	for id in objetos:
 		if objetos[id].zona == caja_roja:
 			mostrar_objeto(id)
@@ -318,7 +367,7 @@ func cambiar_cajones(abrir: bool, inmediato := false) -> void:
 
 func ubicar_multimetro_en_banco(banco: Zona) -> void:
 	mesa_banco = banco
-	registrar_mueble(banco, "Mesa del banco", 0.92)
+	registrar_mueble(banco, "Banco de diagnóstico", "la mesa del banco de diagnóstico", 1.65, "BANCO DE DIAGNÓSTICO")
 	origen_caja_multimetro = origenes.multimetro
 	origenes.multimetro = {"padre": banco, "zona": banco, "posicion": banco.piezas.multimetro.position}
 	devolver("multimetro")
@@ -329,6 +378,8 @@ func cerca(posicion: Vector3) -> bool:
 
 
 func tomar(id: String, cerca_carrito: bool) -> String:
+	if objetos.has(id) and fila_cajon(id) >= 0:
+		return "Abre el cajón %s para tomar la herramienta." % detalle_cajon(id)
 	var aviso := inventario.tomar(id, cerca_carrito)
 	if aviso.is_empty():
 		if superficies.erase(id):
@@ -345,7 +396,8 @@ func tomar(id: String, cerca_carrito: bool) -> String:
 func objetos_en(mueble: Node3D) -> Array[String]:
 	var disponibles: Array[String] = []
 	for id in objetos:
-		if objetos[id].zona == mueble and id not in inventario.cinturon and id not in inventario.carrito:
+		if objetos[id].zona == mueble and fila_cajon(id) < 0 \
+				and id not in inventario.cinturon and id not in inventario.carrito:
 			disponibles.append(id)
 	return disponibles
 
@@ -434,7 +486,7 @@ func devolver(id: String, destino: Dictionary = {}) -> void:
 func mostrar_objeto(id: String) -> void:
 	var objeto: StaticBody3D = objetos[id]
 	objeto.visible = id not in inventario.cinturon \
-		and objeto.zona != mesa_banco and (objeto.zona != caja_roja or cajones_abiertos)
+		and objeto.zona != mesa_banco and (objeto.zona != caja_roja or cajones.find(objeto.get_parent()) == cajon_abierto)
 	objeto.set_deferred("collision_layer", 2 if objeto.visible and id not in inventario.carrito else 0)
 	if id == "multimetro" and mesa_banco != null:
 		var en_mesa: bool = objeto.zona == mesa_banco and id not in inventario.cinturon and id not in inventario.carrito
@@ -447,7 +499,7 @@ func reiniciar() -> void:
 	lleva_carrito = false
 	carrito.position = origen_carrito
 	inventario.reiniciar()
-	cambiar_cajones(false, true)
+	mover_cajon(-1, true)
 	for id in objetos:
 		devolver(id)
 
@@ -527,13 +579,6 @@ func actualizar_hud(cerca_carrito: bool, visible_hud: bool) -> void:
 	tecla_guia.text = "Pulsa %d" % espacio_guia
 
 
-func nombres(ids: Array[String]) -> String:
-	var lista := PackedStringArray()
-	for id in ids:
-		lista.append(Inventario.CATALOGO[id].nombre)
-	return ", ".join(lista) if not lista.is_empty() else "Vacío"
-
-
 func crear_guia() -> void:
 	baliza = estanteria.cilindro(self, Vector3.ZERO, 0.28, 2.1, Color(GUIA, 0.10), 16)
 	var material := baliza.material_override as StandardMaterial3D
@@ -564,35 +609,41 @@ func mueble_de(id: String) -> Node3D:
 
 
 func ubicacion(id: String) -> String:
-	return ubicaciones[mueble_de(id)]
+	var lugar: String = ubicaciones[mueble_de(id)]
+	var cajon := detalle_cajon(id)
+	return lugar if cajon.is_empty() else "%s, en el cajón %s" % [lugar, cajon]
+
+
+func detalle_cajon(id: String) -> String:
+	var fila := cajones.find(objetos[id].get_parent())
+	return NOMBRES_CAJONES[fila] if fila >= 0 else ""
 
 
 func fila_cajon(id: String) -> int:
-	if not cajones_abiertos and mueble_de(id) == caja_roja:
-		return cajones.find(objetos[id].get_parent())
-	return -1
+	var fila := cajones.find(objetos[id].get_parent())
+	return fila if fila != cajon_abierto else -1
 
 
-func instruccion_tomar(id: String) -> String:
-	var fila := fila_cajon(id)
-	if fila < 0:
-		var objeto := Inventario.objeto(id)
-		var texto := "Toma " + str(objeto.nombre)
-		if objeto.espacio > 1:
-			texto += " (ocupa %s)" % Inventario.cantidad_espacios(objeto.espacio)
-		return texto
-	var detalle := "de abajo" if fila == 0 else ("de arriba" if fila == cajones.size() - 1 else "del medio")
-	return "Abre el cajón %s · %s" % [detalle, Inventario.CATALOGO[id].nombre]
+func instruccion_tomar(id: String, hecho := false) -> String:
+	var nombre := Inventario.nombre_con_articulo(id)
+	var carga: int = Inventario.CATALOGO[id].espacio
+	var espacio := " (ocupa %s)" % Inventario.cantidad_espacios(carga) if carga > 1 else ""
+	var cajon := detalle_cajon(id)
+	if not cajon.is_empty():
+		if not hecho and fila_cajon(id) >= 0:
+			return "Abre el cajón %s de la caja roja de herramientas para tomar %s." % [cajon, nombre]
+		return "Toma %s del cajón %s de la caja roja de herramientas." % [nombre, cajon]
+	return "Toma %s en %s%s." % [nombre, ubicacion(id), espacio]
 
 
-func senalar(id: String, pieza: Node3D = null, manual := true, columna := true) -> void:
+func senalar(id: String, pieza: Node3D = null, manual := true, columna := true, destino := "") -> void:
 	var mueble: Node3D
 	var fila := -1
 	if pieza == null:
 		mueble = mueble_de(id)
 		fila = fila_cajon(id)
 		if fila >= 0:
-			pieza = caja_roja.piezas["cajon_taller_%d" % fila]
+			pieza = pieza_cajon(fila)
 		elif mueble == mesa_banco:
 			pieza = mesa_banco.piezas[id]
 		else:
@@ -614,6 +665,7 @@ func senalar(id: String, pieza: Node3D = null, manual := true, columna := true) 
 					mallas_guia.append(malla)
 		for malla in mallas_guia:
 			malla.material_overlay = contorno
+	nombre_guia = destinos.get(mueble, destinos.get(pieza, destino if not destino.is_empty() else pieza.nombre))
 	if manual:
 		caducidad.start()
 	var material := baliza.material_override as StandardMaterial3D
@@ -680,9 +732,13 @@ func actualizar_flecha(camara: Camera3D, mostrar: bool) -> void:
 	var borde := minf(margen.x / maxf(absf(direccion_guia.x), 0.001),
 		margen.y / maxf(absf(direccion_guia.y), 0.001))
 	flecha.position = rect.get_center() + direccion_guia * borde
-	distancia_guia.text = "%d m" % roundi(distancia)
-	distancia_guia.size = Vector2(56, 20)
-	distancia_guia.position = -direccion_guia * 26.0 - distancia_guia.size / 2.0
+	distancia_guia.text = "%s · %d m" % [nombre_guia, roundi(distancia)]
+	distancia_guia.size = distancia_guia.get_minimum_size()
+	var texto := flecha.position - direccion_guia * 26.0 - distancia_guia.size / 2.0
+	if absf(direccion_guia.x) > 0.5:
+		texto.x -= signf(direccion_guia.x) * distancia_guia.size.x / 2.0
+	distancia_guia.position = texto.clamp(rect.position + Vector2(8, 8),
+		rect.end - distancia_guia.size - Vector2(8, 8)) - flecha.position
 	flecha.queue_redraw()
 	flecha.show()
 

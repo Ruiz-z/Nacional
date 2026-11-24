@@ -82,6 +82,15 @@ unique_name_in_owner = true
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
 
+[node name="TituloLeyenda" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Briefing"]
+theme_type_variation = &"Secundario"
+text = "Dónde está todo"
+
+[node name="Leyenda" type="Label" parent="Fondo/Centro/Tarjeta/Contenido/Briefing"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
 [node name="Donde" type="Label" parent="Fondo/Centro/Tarjeta/Contenido"]
 unique_name_in_owner = true
 theme_override_font_sizes/font_size = 18

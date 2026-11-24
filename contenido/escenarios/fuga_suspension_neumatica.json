@@ -58,7 +58,7 @@
   "estados_imposibles": [],
   "acciones": {
     "medir_bolsa": {
-      "titulo": "Medir presión de la bolsa",
+      "titulo": "Medir presión",
       "componente": "bolsa_trasero_derecho",
       "previas": {
         "medir_bolsa": false

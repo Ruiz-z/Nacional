@@ -2,6 +2,7 @@ extends RefCounted
 
 const Bus = preload("res://escenas/bus.tscn")
 const Rutas = preload("res://logica/rutas_contenido.gd")
+const Inventario = preload("res://logica/simulador/inventario.gd")
 const Acciones = preload("res://tests/acciones_taller.gd")
 
 
@@ -46,7 +47,7 @@ static func comprobar_teclas_y_flecha(bus: Node3D) -> String:
 		return "La flecha debe ocultarse cuando el cajón está en cuadro."
 	bus.jugador.rotate_y(-PI / 2.0)
 	taller.actualizar_flecha(bus.jugador.camara, true)
-	if not taller.flecha.visible or taller.distancia_guia.text != "4 m" \
+	if not taller.flecha.visible or taller.distancia_guia.text != "Caja de herramientas · 4 m" \
 			or taller.flecha.position.x >= 100:
 		return "La flecha debe indicar el borde izquierdo y la distancia."
 	bus.jugador.rotate_y(PI)
@@ -78,9 +79,8 @@ static func comprobar_teclas_y_flecha(bus: Node3D) -> String:
 static func comprobar_muebles(bus: Node3D) -> String:
 	var taller: Node3D = bus.taller
 	bus.jugador.ubicar(taller.carrito.global_position + Vector3.BACK)
-	taller.cambiar_cajones(true, true)
 	for id in ["lampara", "multimetro", "flexometro", "llave_ajustable", "destornillador"]:
-		if not taller.tomar(id, true).is_empty():
+		if not Acciones.tomar(bus, id):
 			return "No se pudo llenar el cinturón y usar el carrito."
 	Acciones.tecla(bus, 1)
 	if taller.espacio_guia != 5 or taller.tecla_guia.text != "Pulsa 5":
@@ -105,8 +105,27 @@ static func comprobar_muebles(bus: Node3D) -> String:
 static func comprobar_requisitos(bus: Node3D) -> String:
 	var taller: Node3D = bus.taller
 	var grupos_por_mision: Array = bus.acciones_mision.values()
+	var rotulos: Array[String] = [
+		"CAJA DE HERRAMIENTAS", "MESA DE TRABAJO", "REPUESTOS", "CARRITO", "CONSOLA DEL ELEVADOR"
+	]
+	if bus.datos.zona == "banco":
+		rotulos.append("BANCO DE DIAGNÓSTICO")
+	for rotulo: Label3D in taller.rotulos.values():
+		if not rotulo.is_visible_in_tree() or rotulo.billboard != BaseMaterial3D.BILLBOARD_ENABLED \
+				or not rotulo.get_child(0) is MeshInstance3D:
+			return "El rótulo %s debe estar visible, con fondo, y mirar a la cámara." % rotulo.text
+		rotulos.erase(rotulo.text)
+	if not rotulos.is_empty():
+		return "Faltan rótulos: " + ", ".join(rotulos)
 	var elevador: Node3D = bus.get_node("Elevador")
 	if bus.datos.zona == "bajos":
+		if not Acciones.tomar(bus, "calzas"):
+			return "No se pudieron tomar las calzas para comprobar su ubicación."
+		bus.actualizar_mision(true)
+		if not bus.hud_mision.filas.any(func(paso: Dictionary) -> bool:
+				return paso.texto == "Coloca las calzas sobre las marcas amarillas del suelo, junto a las ruedas."):
+			return "Falta la ubicación de las calzas."
+		taller.reiniciar()
 		elevador.colocar_calzas()
 		elevador.mover(true, true)
 		for soporte in elevador.trabas:
@@ -120,25 +139,31 @@ static func comprobar_requisitos(bus: Node3D) -> String:
 			bus.firma_mision.clear()
 			bus.actualizar_mision(true)
 			var id: String = grupo.ids[0]
+			var fallo := comprobar_textos(bus)
+			if not fallo.is_empty():
+				return id + ": " + fallo
 			var requiere: Dictionary = bus.requisitos(id)
 			var herramientas: Array = [requiere.herramienta] if requiere.has("herramienta") else requiere.get("herramientas", [])
 			for objeto in herramientas + requiere.get("piezas", []):
 				var mueble: Node3D = taller.origenes[objeto].zona
 				var esperado: Node3D = taller.objetos[objeto]
-				if mueble == taller.caja_roja and not taller.cajones_abiertos:
+				if taller.fila_cajon(objeto) >= 0:
 					var fila: int = taller.cajones.find(taller.origenes[objeto].padre)
-					esperado = mueble.piezas["cajon_taller_%d" % fila]
+					esperado = taller.pieza_cajon(fila)
 					if not comprobar_marca(bus, esperado) or not bus.hud_mision.filas.any(
 							func(paso: Dictionary) -> bool: return paso.texto.begins_with("Abre el cajón") and not paso.hecho):
 						return "%s: cajón incorrecto para %s." % [id, objeto]
-					taller.cambiar_cajones(true, true)
+					Acciones.abrir_cajon(bus, fila)
 					bus.actualizar_mision()
 					esperado = taller.objetos[objeto]
+					if not bus.hud_mision.filas.any(func(paso: Dictionary) -> bool:
+							return paso.texto.begins_with("Toma " + Inventario.nombre_con_articulo(objeto)) and not paso.hecho):
+						return "%s: insiste en abrir un cajón que ya está abierto." % id
 				elif mueble == taller.mesa_banco:
 					esperado = mueble.piezas[objeto]
 				if taller.objetivo != objeto or not comprobar_marca(bus, esperado) or not taller.baliza.visible:
 					return "%s: marca incorrecta para tomar %s." % [id, objeto]
-				if not taller.tomar(objeto, true).is_empty():
+				if not Acciones.tomar(bus, objeto):
 					return "%s: no se pudo tomar %s." % [id, objeto]
 				bus.actualizar_mision()
 				if taller.objetivo == objeto or taller.mallas_guia.any(
@@ -161,6 +186,39 @@ static func comprobar_requisitos(bus: Node3D) -> String:
 				if not comprobar_marca(bus, bus.zona_activa.piezas[grupo.regla.componente]):
 					return "%s: falta la marca para la punta roja." % id
 				bus.motor.mediciones.reiniciar_puntas()
+	return ""
+
+
+static func comprobar_textos(bus: Node3D) -> String:
+	var taller: Node3D = bus.taller
+	var lugares := {
+		"bajos": "debajo del autobús",
+		"motor": "compartimiento del motor",
+		"faros": "autobús",
+		"gabinete": "gabinete de baterías",
+		"cabina": "cabina",
+		"banco": "banco de diagnóstico",
+	}
+	for paso in bus.hud_mision.filas:
+		var texto: String = paso.texto
+		if texto.contains("_") or texto.contains(" · "):
+			return "El subpaso contiene un identificador o un separador: " + texto
+		if texto.begins_with("Toma "):
+			var id: String = paso.guia.objeto
+			var mueble: Node3D = taller.mueble_de(id)
+			var nombre: String = taller.ubicaciones[mueble].get_slice(",", 0)
+			if not texto.begins_with("Toma " + Inventario.nombre_con_articulo(id)) \
+					or not texto.contains(nombre.trim_prefix("la ").trim_prefix("el ")) \
+					or not taller.rotulos.has(mueble):
+				return "Falta el artículo o la ubicación de " + texto
+		if texto.contains("Elige "):
+			if texto.begins_with("Apunta ") and (not texto.begins_with("Apunta al ") \
+					and not texto.begins_with("Apunta a la ") and not texto.begins_with("Apunta a las ") \
+					and not texto.begins_with("Apunta a los ")):
+				return "Falta el artículo de la pieza en " + texto
+			if not [lugares[bus.datos.zona], "compartimiento de los faros", "consola del elevador"].any(
+					func(lugar: String) -> bool: return texto.contains(lugar)):
+				return "Falta el lugar en " + texto
 	return ""
 
 

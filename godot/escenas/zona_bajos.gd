@@ -41,7 +41,7 @@ func _ready() -> void:
 
 func crear_rueda(eje: String, lado: String, z: float, signo: float) -> void:
 	var id := "%s_%s" % [eje, lado]
-	var nombre := " · rueda %s %s" % ["delantera" if eje == "delantero" else "trasera",
+	var nombre := " de la rueda %s %s" % ["delantera" if eje == "delantero" else "trasera",
 		"derecha" if lado == "derecho" else "izquierda"]
 	var rueda := pieza(self, "neumatico_" + id, "Neumático" + nombre,
 		Vector3(signo * 1.03, 0.42, z), Vector3(0.30, 0.82, 0.82), CAUCHO)

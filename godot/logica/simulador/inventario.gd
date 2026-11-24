@@ -3,23 +3,23 @@ extends RefCounted
 const CAPACIDAD := 4
 const CATALOGO := {
 	"tech_tool": {"nombre": "Tech Tool", "tipo": "herramienta", "espacio": 1},
-	"llave_ajustable": {"nombre": "Llave ajustable", "tipo": "herramienta", "espacio": 1},
+	"llave_ajustable": {"articulo": "la", "nombre": "Llave ajustable", "tipo": "herramienta", "espacio": 1},
 	"destornillador": {"nombre": "Destornillador", "tipo": "herramienta", "espacio": 1},
 	"multimetro": {"nombre": "Multímetro", "tipo": "herramienta", "espacio": 1},
-	"manometro": {"nombre": "Manómetro de neumáticos", "tipo": "herramienta", "espacio": 1},
-	"llave_torque": {"nombre": "Llave de torque", "tipo": "herramienta", "espacio": 1},
+	"manometro": {"nombre": "Manómetro de neumáticos", "nombre_corto": "manómetro", "tipo": "herramienta", "espacio": 1},
+	"llave_torque": {"articulo": "la", "nombre": "Llave de torque", "tipo": "herramienta", "espacio": 1},
 	"flexometro": {"nombre": "Flexómetro", "tipo": "herramienta", "espacio": 1},
-	"lampara": {"nombre": "Lámpara", "tipo": "herramienta", "espacio": 1},
-	"calzas": {"nombre": "Calzas", "tipo": "herramienta", "espacio": 1},
+	"lampara": {"articulo": "la", "nombre": "Lámpara", "tipo": "herramienta", "espacio": 1},
+	"calzas": {"articulo": "las", "nombre": "Calzas", "tipo": "herramienta", "espacio": 1},
 	"foco": {"nombre": "Foco de repuesto", "tipo": "pieza", "espacio": 1},
 	"fusible_correcto": {"nombre": "Fusible correcto", "tipo": "pieza", "espacio": 1},
 	"fusible_equivocado": {"nombre": "Fusible equivocado", "tipo": "pieza", "espacio": 1},
-	"abrazadera": {"nombre": "Abrazadera", "tipo": "pieza", "espacio": 1},
-	"tuercas": {"nombre": "Tuercas de rueda", "tipo": "pieza", "espacio": 1},
-	"bolsa_aire": {"nombre": "Bolsa de aire", "tipo": "pieza", "espacio": 2},
+	"abrazadera": {"articulo": "la", "nombre": "Abrazadera", "tipo": "pieza", "espacio": 1},
+	"tuercas": {"articulo": "las", "nombre": "Tuercas de rueda", "tipo": "pieza", "espacio": 1},
+	"bolsa_aire": {"articulo": "la", "nombre": "Bolsa de aire", "tipo": "pieza", "espacio": 2},
 	"amortiguador": {"nombre": "Amortiguador", "tipo": "pieza", "espacio": 2},
 	"neumatico": {"nombre": "Neumático", "tipo": "pieza", "espacio": 3},
-	"pastillas_freno": {"nombre": "Pastillas de freno", "tipo": "pieza", "espacio": 1},
+	"pastillas_freno": {"articulo": "las", "nombre": "Pastillas de freno", "tipo": "pieza", "espacio": 1},
 }
 
 var cinturon: Array[String] = []
@@ -28,6 +28,12 @@ var carrito: Array[String] = []
 
 static func objeto(id: String) -> Dictionary:
 	return CATALOGO.get(id, {}).merged({"id": id}) if CATALOGO.has(id) else {}
+
+
+static func nombre_con_articulo(id: String) -> String:
+	var dato: Dictionary = CATALOGO[id]
+	var nombre: String = dato.get("nombre_corto", dato.nombre.to_lower() if id != "tech_tool" else dato.nombre)
+	return "%s %s" % [dato.get("articulo", "el"), nombre]
 
 
 static func requisitos_validos(requiere: Variant) -> bool:

@@ -11,7 +11,8 @@ extends SceneTree
 # Misiones: [ancho alto] mision [motor|faros|neumatico] [--verificar]
 # Inventario: [ancho alto] inventario|inventario-lleno [--verificar]
 # Guía automática: [ancho alto] guia-objeto|guia-inventario [--verificar]
-# Taller: [ancho alto] taller|baliza|elevador|elevador-guia|bajos [--verificar]
+# Taller: [ancho alto] taller|cajon|rotulos|baliza|elevador|elevador-guia|bajos [--verificar]
+# Ubicaciones en la misión 1 de fuga de aire: [ancho alto] mision-ubicacion [--verificar]
 # Banco: [ancho alto] banco-mesa|banco-puntas|hoja|orden [--verificar]
 # Alias del banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
@@ -49,10 +50,10 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "inventario-lleno", "guia-objeto", "guia-inventario", "cierre", "resumen", "resumen-critico", "exito", "mision", "banco-mesa", "banco-puntas", "hoja", "orden"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "cajon", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "inventario-lleno", "guia-objeto", "guia-inventario", "cierre", "resumen", "resumen-critico", "exito", "mision", "banco-mesa", "banco-puntas", "hoja", "orden", "rotulos", "mision-ubicacion"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
-	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "inventario-lleno", "guia-objeto", "guia-inventario", "cierre", "resumen", "resumen-critico", "exito", "mision"]
+	var vista_taller := vista in ["taller", "cajon", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "inventario-lleno", "guia-objeto", "guia-inventario", "cierre", "resumen", "resumen-critico", "exito", "mision", "rotulos", "mision-ubicacion"]
 	var zona := ""
 	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
@@ -127,7 +128,7 @@ func capturar() -> void:
 		escena.modo_captura = true
 	if vista in ["elevador", "elevador-guia", "bajos"]:
 		escena.archivo = "escenarios/neumatico_pinchado.json"
-	elif vista == "inventario-lleno":
+	elif vista in ["inventario-lleno", "mision-ubicacion"]:
 		escena.archivo = "escenarios/fuga_suspension_neumatica.json"
 	elif vista == "mision":
 		var archivo := "neumatico_pinchado" if orden_mision == "neumatico" else orden_mision
@@ -167,6 +168,10 @@ func capturar() -> void:
 		elif vista in ["guia-objeto", "guia-inventario"]:
 			if not preparar_guia(escena, vista):
 				fallar("El estado de la guía automática no corresponde a la vista.")
+				return
+		elif vista in ["rotulos", "mision-ubicacion"]:
+			if not preparar_ubicaciones(escena, vista):
+				fallar("El encuadre o el estado de la misión no corresponde a la vista.")
 				return
 		elif vista_taller:
 			if not preparar_taller(escena, vista):
@@ -457,13 +462,11 @@ func preparar_mision(escena: Node3D, orden: String) -> bool:
 func preparar_inventario_lleno(escena: Node3D) -> bool:
 	var taller: Node3D = escena.taller
 	escena.jugador.set_physics_process(false)
-	taller.cambiar_cajones(true, true)
 	escena.jugador.ubicar(Vector3(-6.0, 0, -3.5))
 	var bolsa: Node3D = taller.objetos.bolsa_aire
 	escena.apuntar_jugador(bolsa.global_position)
 	for id in ["calzas", "manometro", "lampara"]:
-		escena.abrir_menu(taller.objetos[id])
-		if not Acciones.elegir(escena, "tomar"):
+		if not Acciones.tomar(escena, id):
 			return false
 	escena.abrir_menu(bolsa)
 	return Acciones.elegir(escena, "tomar") and escena.flashcard.visible \
@@ -498,10 +501,8 @@ func preparar_orden(escena: Node3D, vista: String, respuesta: String) -> bool:
 	var taller: Node3D = escena.taller
 	escena.jugador.ubicar(taller.carrito.global_position + Vector3.BACK * 1.6)
 	escena.apuntar_jugador(taller.carrito.global_position + Vector3.UP * 0.8)
-	taller.cambiar_cajones(true, true)
 	for id in ["destornillador", "multimetro", "lampara", "llave_ajustable", "tech_tool", "llave_torque"]:
-		escena.abrir_menu(taller.objetos[id])
-		if not Acciones.elegir(escena, "tomar"):
+		if not Acciones.tomar(escena, id):
 			return false
 	Acciones.tecla(escena, 1)
 	return taller.mano == "destornillador" and taller.espacios_hud.size() == 8 and escena.carrito_cerca()
@@ -582,6 +583,42 @@ func preparar_elevador(escena: Node3D, vista: String) -> bool:
 	return elevador.seguro() and bajos.visible
 
 
+func preparar_ubicaciones(escena: Node3D, vista: String) -> bool:
+	escena.jugador.set_physics_process(false)
+	escena.jugador.ubicar(Vector3(-7.4, 0, 3.5))
+	escena.apuntar_jugador(Vector3(-4.75, 1.55, -5.5))
+	if vista == "mision-ubicacion":
+		escena.guia_automatica = true
+		escena.aplicar_guia()
+		return escena.hud_mision.indice == 0 and escena.taller.objetivo == "calzas" \
+			and not escena.flashcard.visible
+	escena.hud_oculto = true
+	escena.actualizar_hud()
+	escena.set_process(false)
+	for ruta in ["Interfaz", "PistaControles", "AlineacionPanel", "AlternarPanel", "PistaOrden", "Mira", "Apuntado"]:
+		escena.get_node(ruta).hide()
+	escena.taller.apagar_guia()
+	var camara: Camera3D = escena.jugador.camara
+	var cuadro := camara.get_viewport().get_visible_rect()
+	var placas: Array[Rect2] = []
+	for rotulo: Label3D in escena.taller.rotulos.values():
+		var punto := rotulo.global_position
+		if not rotulo.is_visible_in_tree() or camara.is_position_behind(punto):
+			return false
+		var fondo := rotulo.get_child(0) as MeshInstance3D
+		var placa := fondo.mesh as QuadMesh
+		var mitad := placa.size / 2.0
+		var base := camara.global_basis
+		var diagonal := base.x * mitad.x - base.y * mitad.y
+		var inicio := camara.unproject_position(punto - diagonal)
+		var rect := Rect2(inicio, camara.unproject_position(punto + diagonal) - inicio)
+		if not cuadro.encloses(rect) or placas.any(func(otra: Rect2) -> bool: return otra.intersects(rect)):
+			printerr("Rótulo recortado o superpuesto: ", rotulo.text)
+			return false
+		placas.append(rect)
+	return true
+
+
 func preparar_taller(escena: Node3D, vista: String) -> bool:
 	var taller: Node3D = escena.taller
 	escena.jugador.set_physics_process(false)
@@ -590,16 +627,25 @@ func preparar_taller(escena: Node3D, vista: String) -> bool:
 	escena.get_node("AlternarPanel").hide()
 	escena.set_process(false)
 	escena.get_node("Interfaz").visible = vista == "baliza"
-	taller.cambiar_cajones(true, true)
 	var posicion := Vector3(-5.35, 0.35, -3.4)
 	var foco := Vector3(-5.35, 1.24, -8.02)
+	if vista == "cajon":
+		escena.guia_automatica = false
+		taller.apagar_guia()
+		Acciones.abrir_cajon(escena, 1)
+		if taller.animacion == null:
+			return false
+		taller.animacion.custom_step(0.35)
+		var gabinete: Vector3 = taller.caja_roja.global_position
+		posicion = gabinete + Vector3(1.0, 0.20, 2.75)
+		foco = gabinete + Vector3(0, 0.96, 0.30)
 	if vista == "baliza":
 		escena.guia_automatica = false
 		escena.taller.apagar_guia()
 		posicion = Vector3(-6.0, 0.35, -4.85)
 		foco = taller.estanteria.global_position + Vector3.UP * 1.85
-		escena.abrir_menu(taller.objetos.destornillador)
-		escena.menu_pieza.botones[0].pressed.emit()
+		if not Acciones.tomar(escena, "destornillador"):
+			return false
 		escena.ejecutar("cambiar_foco_correcto", "virtual")
 		if not escena.flashcard.visible or taller.baliza.visible:
 			return false
@@ -616,13 +662,28 @@ func preparar_taller(escena: Node3D, vista: String) -> bool:
 			puntos.append(mueble.global_position + Vector3.UP * 0.8)
 		for objeto in taller.objetos.values():
 			puntos.append(objeto.global_position)
+	elif vista == "cajon":
+		var rotulo: Label3D = taller.rotulos[taller.caja_roja]
+		if rotulo.text != "CAJA DE HERRAMIENTAS" or not rotulo.is_visible_in_tree():
+			return false
+		puntos.append(rotulo.global_position)
+		for fila in taller.cajones.size():
+			if (taller.cajones[fila].position.z > 0.0) != (fila == 1):
+				return false
+			puntos.append(taller.pieza_cajon(fila).global_position)
+			for id in taller.HERRAMIENTAS[fila]:
+				var objeto: Node3D = taller.objetos[id]
+				if objeto.visible != (fila == 1):
+					return false
+				if objeto.visible:
+					puntos.append(objeto.global_position)
 	else:
 		puntos.append(taller.objetos.foco.global_position)
 		puntos.append(taller.baliza.global_position + Vector3.UP)
 	for punto in puntos:
 		if camara.is_position_behind(punto) or not encuadre.has_point(camara.unproject_position(punto)):
 			return false
-	return taller.cajones_abiertos
+	return true
 
 
 func comprobar_estado(escena: Node3D, sector: Node3D, vista: String) -> bool:

@@ -761,61 +761,37 @@ mesh = SubResource("Caja")
 material_override = SubResource("Negro")
 
 [node name="Cajon0" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.27, 0.37)
-scale = Vector3(1.23, 0.23, 0.052)
+position = Vector3(0, 0.39, 0.37)
+scale = Vector3(1.23, 0.44, 0.052)
 mesh = SubResource("Caja")
 material_override = SubResource("Rojo")
 
 [node name="Tirador0" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.332, 0.41)
+position = Vector3(0, 0.4520, 0.41)
 scale = Vector3(0.88, 0.027, 0.043)
 mesh = SubResource("Caja")
 material_override = SubResource("Metal")
 
 [node name="Cajon1" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.525, 0.37)
-scale = Vector3(1.23, 0.23, 0.052)
+position = Vector3(0, 0.855, 0.37)
+scale = Vector3(1.23, 0.44, 0.052)
 mesh = SubResource("Caja")
 material_override = SubResource("Rojo")
 
 [node name="Tirador1" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.587, 0.41)
+position = Vector3(0, 0.9170, 0.41)
 scale = Vector3(0.88, 0.027, 0.043)
 mesh = SubResource("Caja")
 material_override = SubResource("Metal")
 
 [node name="Cajon2" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.78, 0.37)
-scale = Vector3(1.23, 0.23, 0.052)
+position = Vector3(0, 1.3025, 0.37)
+scale = Vector3(1.23, 0.405, 0.052)
 mesh = SubResource("Caja")
 material_override = SubResource("Rojo")
 
 [node name="Tirador2" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 0.8420000000000001, 0.41)
-scale = Vector3(0.88, 0.027, 0.043)
-mesh = SubResource("Caja")
-material_override = SubResource("Metal")
-
-[node name="Cajon3" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 1.0350000000000001, 0.37)
-scale = Vector3(1.23, 0.23, 0.052)
-mesh = SubResource("Caja")
-material_override = SubResource("Rojo")
-
-[node name="Tirador3" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 1.0970000000000002, 0.41)
-scale = Vector3(0.88, 0.027, 0.043)
-mesh = SubResource("Caja")
-material_override = SubResource("Metal")
-
-[node name="Cajon4" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 1.29, 0.37)
-scale = Vector3(1.23, 0.23, 0.052)
-mesh = SubResource("Caja")
-material_override = SubResource("Rojo")
-
-[node name="Tirador4" type="MeshInstance3D" parent="Taller/Gabinete"]
-position = Vector3(0, 1.352, 0.41)
+position = Vector3(0, 1.3645, 0.41)
 scale = Vector3(0.88, 0.027, 0.043)
 mesh = SubResource("Caja")
 material_override = SubResource("Metal")

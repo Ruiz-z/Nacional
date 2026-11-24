@@ -5,6 +5,24 @@ const Escenario = preload("res://logica/simulador/escenario.gd")
 const Rutas = preload("res://logica/rutas_contenido.gd")
 const Texto = preload("res://logica/texto_limpio.gd")
 
+const CAJA := "Caja roja: herramientas"
+const REPUESTOS := "Estantería: repuestos"
+const MESA := "Mesa: dejar y preparar"
+const CARRITO := "Carrito: llevar más cosas"
+const CONSOLA := "Consola: subir y bajar el autobús"
+const LEYENDAS := {
+	"aislamiento": [CAJA],
+	"amortiguador_danado": [CAJA, REPUESTOS, MESA, CARRITO, CONSOLA],
+	"comunicacion": [CAJA],
+	"faros": [CAJA, REPUESTOS],
+	"freno_desgastado": [CAJA, REPUESTOS, CONSOLA],
+	"fuga_suspension_neumatica": [CAJA, REPUESTOS, MESA, CARRITO, CONSOLA],
+	"modulo_auxiliar": [CAJA, "Banco de diagnóstico: multímetro y pruebas"],
+	"motor": [CAJA, REPUESTOS, MESA, CARRITO],
+	"neumatico_pinchado": [CAJA, REPUESTOS, MESA, CARRITO, CONSOLA],
+	"tuercas_rueda_flojas": [CAJA, CONSOLA],
+}
+
 
 static func ejecutar() -> bool:
 	var arbol := Engine.get_main_loop() as SceneTree
@@ -65,9 +83,11 @@ static func comprobar(bus: Node3D, visor: SubViewport) -> bool:
 static func coincide(bus: Node3D) -> bool:
 	var tarjeta: CanvasLayer = bus.flashcard
 	var briefing: Dictionary = bus.datos.get("briefing", {})
+	var orden: String = bus.archivo.get_file().get_basename()
 	return Escenario.briefing_valido(briefing) and tarjeta.visible and tarjeta.ok.visible \
 		and tarjeta.chip.text == "ORDEN DE TRABAJO" and tarjeta.titulo.text == Texto.limpiar(bus.datos.titulo).texto \
 		and tarjeta.get_node("%Sintoma").text == briefing.sintoma \
 		and tarjeta.get_node("%Objetivo").text == briefing.objetivo \
 		and tarjeta.get_node("%Como").text == "\n".join(briefing.como) \
+		and tarjeta.get_node("%Leyenda").text == "\n".join(LEYENDAS[orden]) \
 		and not "[MUESTRA]" in str(briefing)

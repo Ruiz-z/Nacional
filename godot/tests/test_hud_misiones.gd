@@ -25,18 +25,16 @@ static func ejecutar() -> bool:
 
 static func recorrer(bus: Node3D, arbol: SceneTree) -> bool:
 	var hud: Control = bus.hud_mision
-	if hud.contador.text != "MISIÓN 1 DE 6" or hud.titulo.text != "Inspecciona la tapa del motor" 			or not fila(hud, "Abre el cajón de arriba · Destornillador", false) or hud.progreso != [false, false, false, false, false, false]:
+	if hud.contador.text != "MISIÓN 1 DE 6" or hud.titulo.text != "Inspecciona la tapa del motor" 			or not fila(hud, "Abre el cajón del medio de la caja roja de herramientas para tomar el destornillador.", false) or hud.progreso != [false, false, false, false, false, false]:
 		return false
-	bus.taller.cambiar_cajones(true, true)
-	bus.abrir_menu(bus.taller.objetos.destornillador)
-	if not Acciones.elegir(bus, "tomar"):
+	if not Acciones.tomar(bus, "destornillador"):
 		return false
 	Acciones.tecla(bus, 4)
-	if not fila(hud, "Toma Destornillador", true) or not fila(hud, "Ten Destornillador en la mano (1)", false):
+	if not fila(hud, "Toma el destornillador del cajón del medio de la caja roja de herramientas.", true) or not fila(hud, "Ten el destornillador en la mano: pulsa 1.", false):
 		return false
 	Acciones.tecla(bus, 1)
 	bus.abrir_menu(bus.zona_activa.piezas.tapa_motor)
-	if not fila(hud, "Ten Destornillador en la mano (1)", true) or not Acciones.elegir(bus, "inspeccionar"):
+	if not fila(hud, "Ten el destornillador en la mano: pulsa 1.", true) or not Acciones.elegir(bus, "inspeccionar"):
 		return false
 	if not hud.celebrando or not hud.celebracion.visible or not hud.progreso[0] 			or bus.flashcard.visible or not bus.jugador.activo:
 		return false
@@ -69,13 +67,13 @@ static func recorrer(bus: Node3D, arbol: SceneTree) -> bool:
 	if not Acciones.elegir(bus, "bloquear_y_etiquetar") or bus.accion_pendiente != "bloquear_y_etiquetar":
 		return false
 	var eleccion: String = hud.filas[hud.filas.size() - 2].texto
-	if not eleccion.begins_with("Elige Bloquear y etiquetar en ") or not fila(hud, eleccion, true) 			or not fila(hud, "Confirma en el panel", false):
+	if not eleccion.ends_with("Elige Bloquear y etiquetar.") or not fila(hud, eleccion, true) 			or not fila(hud, "Confirma en el panel", false):
 		return false
 	bus.panel.get_node("Confirmar").pressed.emit()
 	if not hud.celebrando or not fila(hud, "Confirma en el panel", true) or bus.flashcard.visible:
 		return false
 	Acciones.mostrar_siguiente_mision(bus)
-	return hud.contador.text == "MISIÓN 5 DE 6" and fila(hud, "Toma Abrazadera", false)
+	return hud.contador.text == "MISIÓN 5 DE 6" and fila(hud, "Toma la abrazadera en la estantería de repuestos, junto a la mesa de trabajo.", false)
 
 
 static func comprobar_formato(bus: Node3D, visor: SubViewport, arbol: SceneTree) -> bool:

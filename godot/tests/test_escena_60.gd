@@ -38,7 +38,7 @@ static func ejecutar() -> bool:
 	resumen.get_node("%Reintentar").pressed.emit()
 	correcto = correcto and not resumen.visible and bus.motor.fin().is_empty() \
 		and gabinete.abierta == bus.motor.estado().inspeccionado \
-		and bus.taller.inventario.cinturon.is_empty() and not bus.taller.cajones_abiertos
+		and bus.taller.inventario.cinturon.is_empty() and bus.taller.cajon_abierto == -1
 	bus.free()
 	return correcto
 

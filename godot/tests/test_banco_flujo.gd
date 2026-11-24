@@ -37,7 +37,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 		await arbol.physics_frame
 		await arbol.physics_frame
 		if not apuntar_y_pulsar(bus, "tp0") or not bus.flashcard.visible \
-				or not bus.flashcard.cuerpo.text.contains("Multímetro"):
+				or not bus.flashcard.cuerpo.text.begins_with("Toma el multímetro en la mesa del banco de diagnóstico"):
 			return "El borne debe pedir el multímetro si falta."
 		bus.flashcard.confirmar()
 		if not apuntar_y_pulsar(bus, "multimetro") or not bus.menu_pieza.visible:

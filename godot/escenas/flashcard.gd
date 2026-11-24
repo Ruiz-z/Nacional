@@ -74,6 +74,7 @@ func mostrar_primera() -> void:
 		%Sintoma.text = briefing.sintoma
 		%Objetivo.text = briefing.objetivo
 		%Como.text = "\n".join(briefing.como)
+		%Leyenda.text = "\n".join(aviso.get("leyenda", []))
 	var textos := [aviso.titulo, aviso.texto, aviso.donde, aviso.fuente, aviso.get("marca", "")]
 	textos.append_array(aviso.get("opciones", []))
 	var marca: String = TextoLimpio.limpiar("\n".join(textos)).etiqueta
