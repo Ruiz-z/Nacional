@@ -11,7 +11,7 @@ Juego de escritorio que entrena a técnicos de autobuses eléctricos con escenar
 | Acción | Comando |
 |---|---|
 | Pruebas | `godot --headless --path godot -s tests/run.gd` |
-| Validar el banco de contenido | `godot --headless --path godot -s ../tools/validar_contenido.gd` |
+| Validar el banco de contenido | `godot --headless -s tools/validar_contenido.gd` |
 | Emitir eventos de prueba del panel | ver `docs/protocolo-panel.md` |
 
 Si Godot no puede escribir sus logs, antepón `XDG_DATA_HOME=/tmp/nacional-godot`.

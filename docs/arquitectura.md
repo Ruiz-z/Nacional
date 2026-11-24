@@ -24,7 +24,7 @@ Ver `README.md`. Pruebas: `godot --headless --path godot -s tests/run.gd`.
 ## Cómo agregar contenido
 1. Edita `contenido/banco.json`: cada ítem necesita `id`, `competencia`, `formato`, `dificultad` (`facil`/`media`/`dificil`), `criticidad`, `fuente`, `muestra` y `version`.
 2. Un valor técnico sin fuente pública usa la fuente `[MUESTRA] valor de ejemplo, sin fuente oficial` con `muestra=true`; nunca un ítem de seguridad.
-3. Valida: `godot --headless --path godot -s ../tools/validar_contenido.gd`. Debe imprimir `OK`.
+3. Valida: `godot --headless -s tools/validar_contenido.gd`. Debe imprimir `OK`.
 
 ## Cómo agregar un escenario
 1. Copia `contenido/escenarios/aislamiento.json` y cambia `estado`, `acciones`, `eventos`, `recuperaciones` y `terminacion`.
