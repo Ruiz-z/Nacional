@@ -23,8 +23,8 @@
     "otro-modulo": "[MUESTRA] El monitor muestra cuál módulo dejó de comunicarse."
   },
   "indicios": [
-    {"clave": "sintomas_revisados", "etiqueta": "Síntomas de red revisados", "ayuda": "Abre el monitor y elige Revisar los síntomas."},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar el diagnóstico en los cables y confirma en el panel."}
+    {"clave": "sintomas_revisados", "etiqueta": "Síntomas de red revisados", "mision": "Revisa los síntomas de la red", "ayuda": "Abre el monitor y elige Revisar los síntomas."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Confirma el diagnóstico", "ayuda": "Elige Confirmar el diagnóstico en los cables y confirma en el panel."}
   ],
   "estado": {
     "modulo": "Módulo virtual A",

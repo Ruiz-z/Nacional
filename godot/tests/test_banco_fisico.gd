@@ -81,7 +81,8 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	bus.ejecutar("reportar_tp2_5", "teclado")
 	Taller.cerrar_exitos(bus)
 	bus.ejecutar("diagnosticar_alimentacion", "teclado")
-	if not bus.lateral.get_node("Siguiente").text.ends_with("Cierra el conductor abierto en el banco físico."):
+	Taller.mostrar_siguiente_mision(bus)
+	if not bus.hud_mision.ayuda.text.ends_with("Cierra el conductor abierto en el banco físico."):
 		return false
 	if not Taller.equipar(bus, "reconectar"):
 		return false
@@ -98,10 +99,8 @@ static func practicar(bus: Node3D, lineas: PackedStringArray) -> bool:
 	if bus.motor.fin() != "resuelto" or bus.motor.puntaje() != 100 \
 			or not bus.accion_pendiente.is_empty():
 		return false
-	var hud: Label = bus.lateral.get_node("Indicios")
-	if hud.text != "\n".join(["Pasos", "[x] TP1 medido", "[x] TP2 medido",
-			"[x] Lectura de TP1 reportada", "[x] Lectura de TP2 reportada",
-			"[x] Diagnóstico registrado", "[x] Falla resuelta"]):
+	var progreso: Dictionary = bus.progreso_indicios(bus.motor.estado())
+	if not bus.misiones.all(func(mision: Dictionary): return progreso[mision.clave]):
 		return false
 	var decisiones: Array = bus.motor.resumen().linea_tiempo
 	if decisiones.back().fuente_entrada != "banco" or decisiones.back().fuente_falla != "banco" \

@@ -37,9 +37,9 @@ static func ruta_ideal(id: String) -> bool:
 		var bus := Bus.instantiate()
 		bus.archivo = "escenarios/%s.json" % id
 		raiz.add_child(bus)
-		var pasos: String = bus.lateral.get_node("Indicios").text
-		var marca: Label = bus.lateral.get_node("Marca")
-		if not pasos.ends_with("[ ] Cerrar la orden") or "Ejemplo didáctico" in pasos \
+		var marca: Label = bus.hud_mision.marca
+		if bus.hud_mision.contador.text != "MISIÓN 1 DE %d" % datos.indicios.size() \
+				or datos.indicios.back().mision != "Cierra la orden en la consola" \
 				or not marca.visible or marca.text != "Ejemplo didáctico":
 			bus.free()
 			return false
@@ -244,13 +244,10 @@ static func procedimiento(arbol: SceneTree, bus: Node3D) -> bool:
 	bus.flashcard.ok.pressed.emit()
 	if not await mover(bus, consola, elevador, "descender_bus"):
 		return false
-	if not bus.flashcard.visible or bus.taller.baliza.visible \
-			or bus.flashcard.chip.text != "BIEN HECHO" \
-			or bus.flashcard.cuerpo.text != "Solo falta cerrar la orden. Hazlo en la consola del elevador.":
-		return false
-	bus.flashcard.ok.pressed.emit()
-	if bus.taller.objetivo != Elevador.CONSOLA or not comprobar_guia(bus, Elevador.CONSOLA, true) \
-			or not bus.lateral.get_node("Siguiente").text.ends_with("Hazlo en la consola del elevador."):
+	Taller.mostrar_siguiente_mision(bus)
+	if bus.flashcard.visible or bus.taller.objetivo != Elevador.CONSOLA \
+			or not comprobar_guia(bus, Elevador.CONSOLA, true) \
+			or bus.hud_mision.titulo.text != "Cierra la orden en la consola":
 		return false
 	await arbol.physics_frame
 	await arbol.physics_frame

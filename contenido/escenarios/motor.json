@@ -18,12 +18,12 @@
     "lectura-inconsistente": "[MUESTRA] La revisión muestra un problema en el circuito de refrigerante."
   },
   "indicios": [
-    {"clave": "inspeccionado", "etiqueta": "Tapa del motor inspeccionada", "ayuda": "Inspecciona la tapa del motor."},
-    {"clave": "refrigerante_revisado", "etiqueta": "Circuito de refrigerante revisado", "ayuda": "Revisa el refrigerante en la bomba."},
-    {"clave": "temperatura_medida", "etiqueta": "Temperatura medida", "ayuda": "Mide la temperatura en el monitor."},
-    {"clave": "bloqueo_confirmado", "etiqueta": "Bloqueo y etiquetado confirmados", "ayuda": "Activa Bloqueo y Etiquetado en el panel. Elige Bloquear y etiquetar en el inversor. Confirma en el panel."},
-    {"clave": "abrazadera_ajustada", "etiqueta": "Abrazadera ajustada", "ayuda": "Elige Ajustar la abrazadera y confirma en el panel."},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar la solución en el monitor de temperatura y confirma en el panel."}
+    {"clave": "inspeccionado", "etiqueta": "Tapa del motor inspeccionada", "mision": "Inspecciona la tapa del motor", "ayuda": "Inspecciona la tapa del motor."},
+    {"clave": "refrigerante_revisado", "etiqueta": "Circuito de refrigerante revisado", "mision": "Revisa el circuito de refrigerante", "ayuda": "Revisa el refrigerante en la bomba."},
+    {"clave": "temperatura_medida", "etiqueta": "Temperatura medida", "mision": "Mide la temperatura", "ayuda": "Mide la temperatura en el monitor."},
+    {"clave": "bloqueo_confirmado", "etiqueta": "Bloqueo y etiquetado confirmados", "mision": "Bloquea y etiqueta el motor", "ayuda": "Activa Bloqueo y Etiquetado en el panel. Elige Bloquear y etiquetar en el inversor. Confirma en el panel."},
+    {"clave": "abrazadera_ajustada", "etiqueta": "Abrazadera ajustada", "mision": "Aprieta la abrazadera", "ayuda": "Elige Ajustar la abrazadera y confirma en el panel."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Comprueba la alerta de temperatura", "ayuda": "Elige Confirmar la solución en el monitor de temperatura y confirma en el panel."}
   ],
   "estado": {
     "inspeccionado": false,

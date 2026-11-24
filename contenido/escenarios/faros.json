@@ -18,10 +18,10 @@
     "fusible-abierto": "[MUESTRA] El problema inicial estaba en el foco izquierdo."
   },
   "indicios": [
-    {"clave": "inspeccionado", "etiqueta": "Caja de fusibles inspeccionada", "ayuda": "Inspecciona la caja de fusibles."},
-    {"clave": "continuidad_medida", "etiqueta": "Continuidad medida", "ayuda": "Mide la continuidad en el conector de los faros."},
-    {"clave": "foco_repuesto", "etiqueta": "Foco izquierdo repuesto", "ayuda": "Elige Cambiar el foco en el faro izquierdo. Confirma en el panel."},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar la solución en el relé y confirma en el panel."}
+    {"clave": "inspeccionado", "etiqueta": "Caja de fusibles inspeccionada", "mision": "Inspecciona la caja de fusibles", "ayuda": "Inspecciona la caja de fusibles."},
+    {"clave": "continuidad_medida", "etiqueta": "Continuidad medida", "mision": "Mide la continuidad", "ayuda": "Mide la continuidad en el conector de los faros."},
+    {"clave": "foco_repuesto", "etiqueta": "Foco izquierdo repuesto", "mision": "Cambia el foco izquierdo", "ayuda": "Elige Cambiar el foco en el faro izquierdo. Confirma en el panel."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Comprueba que enciendan los faros", "ayuda": "Elige Confirmar la solución en el relé y confirma en el panel."}
   ],
   "estado": {
     "inspeccionado": false,

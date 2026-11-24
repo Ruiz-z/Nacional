@@ -54,7 +54,7 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 			bus.flashcard.confirmar()
 		if paso[0] == "tp1":
 			Taller.cerrar_exitos(bus)
-	if bus.flashcard.cuerpo.text != "Medición registrada: TP2 = 5.0 V.\nSiguiente: Abre el multímetro y reporta la lectura de TP1.":
+	if bus.flashcard.cuerpo.text != "Medición registrada: TP2 = 5.0 V":
 		return "La tarjeta no muestra el punto y la tensión."
 	Taller.cerrar_exitos(bus)
 	if not bus.jugador.herramientas.multimetro.visible:
@@ -69,8 +69,9 @@ static func comprobar(bus: Node3D, arbol: SceneTree) -> String:
 	pulsar(menu.lecturas[4])
 	if bus.motor.mediciones.reportadas != {"tp1": "0", "tp2": "5"}:
 		return "Los botones de lectura no guardaron ambas opciones."
-	if bus.flashcard.cuerpo.text != ("Lecturas anotadas.\nSiguiente: Abre el multímetro y elige la causa que indiquen tus lecturas.") or not bus.flashcard.visible:
-		return "El registro no muestra su confirmación."
+	Taller.mostrar_siguiente_mision(bus)
+	if bus.flashcard.visible or bus.hud_mision.titulo.text != "Identifica la causa de la falla":
+		return "El registro no dio paso a la misión de diagnóstico."
 	Taller.cerrar_exitos(bus)
 	pulsar(menu.botones[0])
 	if bus.motor.mediciones.diagnostico != "alimentacion" or not bus.motor.mediciones.error_diagnostico.is_empty():

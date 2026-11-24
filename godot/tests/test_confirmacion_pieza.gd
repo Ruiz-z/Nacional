@@ -14,12 +14,12 @@ static func ejecutar() -> bool:
 	bus.abrir_menu(sector.piezas.compuerta)
 	var correcto: bool = equipado and not bus.menu_pieza.diagnostico.visible
 	tecla(raiz, KEY_H)
-	correcto = correcto and not bus.get_node("Interfaz").visible
+	correcto = correcto and bus.hud_mision.visible and not bus.hud_mision.detalle.visible
 	tecla(raiz, KEY_H)
-	correcto = correcto and bus.get_node("Interfaz").visible
+	correcto = correcto and bus.hud_mision.detalle.visible
 	tecla(raiz, KEY_1)
 	correcto = correcto and sector.abierta and not bus.menu_pieza.visible \
-		and bus.flashcard.cuerpo.text == "Compuerta abierta.\nSiguiente: Abre el monitor y elige Revisar el aislamiento."
+		and not bus.flashcard.visible and bus.hud_mision.celebrando
 	correcto = correcto and Taller.equipar(bus, "evaluar_indicio")
 	bus.abrir_menu(sector.piezas.monitor)
 	correcto = correcto and bus.menu_pieza.diagnostico.visible

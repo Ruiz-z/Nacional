@@ -6,14 +6,15 @@ signal decision_tomada(decision: Dictionary)
 signal resultados_registrados
 signal salida_solicitada
 
-const ANCHO_HUD := 352.0
+const ANCHO_HUD := 440.0
+const FONDO_MISION := Color("#11507D")
+const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
 const PASOS_ELEVADOR := {
-	"colocar_calzas": "Colocar calzas",
-	"elevar_bus": "Subir el autobús",
-	"trabar_soporte": "Trabar los soportes",
-	"destrabar_soporte": "Destrabar los soportes",
-	"descender_bus": "Bajar el autobús",
-	"cerrar_orden": "Cerrar la orden",
+	"colocar_calzas": "Coloca las calzas",
+	"elevar_bus": "Sube el autobús en la consola",
+	"trabar_soporte": "Traba el soporte",
+	"destrabar_soporte": "Destraba el soporte",
+	"descender_bus": "Baja el autobús en la consola",
 }
 const FondoTarjeta = preload("res://escenas/fondo_tarjeta.gd")
 const INDICIOS := {
@@ -44,16 +45,6 @@ const PROBLEMAS := {
 	"sector_equivocado": "Gabinete equivocado",
 	"indicio_descartado": "Lectura descartada",
 }
-const RESULTADOS := {
-	"inspeccionar": "Compuerta abierta",
-	"evaluar_indicio": "Aislamiento revisado",
-	"revisar_sintomas": "Síntomas de la red revisados",
-	"confirmar_solucion": "Falla resuelta",
-	"confirmar_diagnostico": "Diagnóstico confirmado",
-	"reponer_pieza": "Tornillo repuesto",
-	"volver_al_sector": "Gabinete correcto",
-	"recuperar_indicio": "Lectura recuperada",
-}
 const Inventario = preload("res://logica/simulador/inventario.gd")
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Practica = preload("res://logica/simulador/practica.gd")
@@ -69,6 +60,9 @@ const Interactuable = preload("res://escenas/interactuable.gd")
 var motor: RefCounted
 var datos: Dictionary
 var indicios := {}
+var misiones: Array = []
+var acciones_mision := {}
+var firma_mision: Array = []
 var ultimo_ms: int
 var accion_pendiente := ""
 var causa_marcada := ""
@@ -106,6 +100,7 @@ var pieza_menu: Interactuable
 @onready var alcance: RayCast3D = $Jugador/Camara/Alcance
 @onready var resumen := $Resumen
 @onready var lateral := $Interfaz/Lateral
+@onready var hud_mision := $Interfaz/Lateral/Mision
 @onready var menu_pieza := $MenuPieza
 @onready var flashcard := $Flashcard
 @onready var resultado: Label = $AvisoCentral/Resultado
@@ -122,6 +117,7 @@ func _ready() -> void:
 	var fondo := lateral.get_theme_stylebox("panel", "PanelContainer").duplicate() as StyleBoxFlat
 	for lado in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
 		fondo.set_content_margin(lado, 12)
+	fondo.bg_color = FONDO_MISION
 	$Interfaz.add_theme_stylebox_override("panel", fondo)
 	FondoTarjeta.aplicar(panel, 16)
 	var pista := create_tween()
@@ -176,6 +172,8 @@ func _ready() -> void:
 	for zona in [$Faros, $Motor]:
 		if zona != zona_activa:
 			zona.reflejar_estado({}, false, true)
+	configurar_misiones()
+	get_viewport().size_changed.connect(actualizar_hud)
 	if not modo_captura:
 		ubicar_jugador(zona_activa.acceso)
 	lateral.get_node("Continuar").pressed.connect(func():
@@ -286,7 +284,8 @@ func ejecutar(id: String, fuente: String, lectura_previa: Dictionary = {}) -> vo
 			zona.cambiar_acceso(true)
 	mostrar_resultado(decision)
 	actualizar_inventario()
-	if not motor.pendiente_diagnostico() or not flashcard.visible:
+	actualizar_mision()
+	if not hud_mision.celebrando and (not motor.pendiente_diagnostico() or not flashcard.visible):
 		finalizar_orden()
 	mostrar_estado()
 	decision_tomada.emit(decision)
@@ -482,39 +481,14 @@ func mostrar_resultado(decision: Dictionary) -> void:
 		avisar(consecuencia, "aviso", "Revisa el autobús", "", fuente)
 		return
 	if decision.has("punto_medido"):
-		texto = "Medición registrada: %s = %.1f V" % [
-			decision.punto_medido.to_upper(), decision.lectura_mostrada]
-	elif decision.has("lectura-reportada"):
-		texto = "Lecturas anotadas"
-	elif texto.is_empty():
-		var id: String = decision.get("accion", "")
-		if id == "inspeccionar" and zona_activa != $Sector:
-			texto = "%s abierta" % zona_activa.piezas[zona_activa.acceso].nombre
-		elif id.begins_with("diagnosticar_"):
-			texto = "Diagnóstico registrado"
-		elif id == "reconectar":
-			texto = "Conductor reconectado"
-		else:
-			texto = RESULTADOS.get(id, "Acción completada")
-	if zona_activa == $Bajos:
-		var regla: Dictionary = datos.acciones.get(decision.accion, datos.recuperaciones.get(decision.accion, {}))
-		texto = regla.get("descripcion", texto)
-	else:
-		var ayuda := siguiente_ayuda(progreso_indicios(motor.estado()))
-		if not ayuda.is_empty():
-			texto = texto.trim_suffix(".") + ".\nSiguiente: " + ayuda
-	if motor.fin().is_empty() and confirmacion_breve(texto):
-		avisar_temporal(texto)
-		return
-	var accion: String = decision.accion
-	var titulo := "Paso completado"
-	if motor.fin() == "resuelto":
-		titulo = "Orden resuelta"
-	elif accion.begins_with("medir_") or decision.has("lectura-reportada"):
-		titulo = "Medición registrada"
-	elif accion.begins_with("diagnosticar_") or accion == "confirmar_diagnostico":
-		titulo = "Diagnóstico registrado"
-	avisar(texto, "exito", titulo)
+		avisar("Medición registrada: %s = %.1f V" % [
+			decision.punto_medido.to_upper(), decision.lectura_mostrada], "exito", "Medición registrada")
+	elif zona_activa == $Bajos and decision.accion in [
+			"medir_presion", "localizar_pinchazo", "detectar_tuercas", "medir_bolsa",
+			"localizar_fuga", "revisar_amortiguador", "medir_pastillas"]:
+		avisar(datos.acciones[decision.accion].descripcion, "exito", "Hallazgo registrado")
+	elif decision.accion == "medir_temperatura":
+		avisar(datos.acciones[decision.accion].descripcion, "exito", "Medición registrada")
 
 
 func aviso_previas(faltantes: Dictionary) -> String:
@@ -545,14 +519,6 @@ func avisar_objeto(texto: String, tipo: String, titulo: String, objeto: String) 
 		"donde": taller.ubicacion(objeto), "fuente": "", "objeto": objeto})
 
 
-func confirmacion_breve(texto: String) -> bool:
-	var limpio: String = TextoLimpio.limpiar(texto).texto.to_lower()
-	var palabras := limpio.replace("\n", " ").split(" ", false)
-	return not palabras.is_empty() and palabras.size() <= 2 \
-		and not limpio.contains("ahora") and not limpio.contains("siguiente") \
-		and palabras[0].trim_suffix(":") not in ["luego", "después", "continúa"]
-
-
 func avisar_temporal(texto: String) -> void:
 	salida_hasta = 0
 	resultado.text = TextoLimpio.linea(texto)
@@ -579,7 +545,8 @@ func reanudar_tras_flashcard() -> void:
 		if flashcard.visible:
 			return
 		actualizar_hud()
-		resumen.mostrar(motor, datos, lateral.get_node("Aviso").text)
+		if not hud_mision.celebrando:
+			resumen.mostrar(motor, datos, lateral.get_node("Aviso").text)
 		return
 	actualizar_panel(Time.get_ticks_msec())
 	if pausa_visible:
@@ -618,87 +585,155 @@ func mostrar_estado(inmediato := false) -> void:
 	jugador.activo = not flashcard.visible and not terminado and not pausa_visible and not navegando and not menu_pieza.visible
 	if terminado:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	var lineas := PackedStringArray()
-	var progreso := progreso_indicios(estado)
-	lineas.append("Pasos")
-	var bajos: bool = zona_activa == $Bajos
-	var listo := bajos and listo_para_bajar(estado)
-	if bajos:
-		lineas.append(paso_hud(PASOS_ELEVADOR.colocar_calzas, $Elevador.calzas_colocadas))
-		lineas.append(paso_hud(PASOS_ELEVADOR.elevar_bus, $Elevador.arriba or listo))
-		lineas.append(paso_hud(PASOS_ELEVADOR.trabar_soporte, $Elevador.seguro() or listo))
-	for clave in indicios:
-		if progreso.has(clave) and (not bajos or clave != "resuelto"):
-			lineas.append(paso_hud(indicios[clave], progreso[clave]))
-	if bajos:
-		lineas.append(paso_hud(PASOS_ELEVADOR.destrabar_soporte, listo and not true in $Elevador.trabas.values()))
-		lineas.append(paso_hud(PASOS_ELEVADOR.descender_bus, listo and not $Elevador.arriba))
-		lineas.append(paso_hud(PASOS_ELEVADOR.cerrar_orden, estado.resuelto))
-		if $Elevador.piezas.has(taller.objetivo):
-			var paso := paso_elevador(estado)
-			if paso.is_empty():
-				taller.apagar_guia()
-			elif paso.objetivo != taller.objetivo:
-				senalar_guia(paso.objetivo)
-	TextoLimpio.mostrar_chip(lateral.get_node("Marca"), datos.titulo)
-	var orden: Label = lateral.get_node("Estado")
-	orden.text = TextoLimpio.limpiar(datos.titulo).texto
-	orden.tooltip_text = orden.text
+	if zona_activa == $Bajos and $Elevador.piezas.has(taller.objetivo):
+		var paso := paso_elevador(estado)
+		if paso.is_empty():
+			taller.apagar_guia()
+		elif paso.objetivo != taller.objetivo:
+			senalar_guia(paso.objetivo)
 	var falla: bool = motor.hay_problemas() or motor.fin() == "falta-critica"
 	# La captura cambia el encuadre. Las acciones conservan el Tween para mostrar fallos de apertura.
 	zona_activa.reflejar_estado(estado, falla, inmediato)
 	if zona_activa == $Banco:
 		actualizar_banco()
 		interior.mostrar_modulo_auxiliar(estado.resuelto)
-		if not terminado:
-			lineas.append("Fuente: %s · TP0 primero, luego TP1 o TP2." % $Banco.etiqueta_fuente(motor.mediciones.fuente))
-	lateral.get_node("Indicios").text = "\n".join(lineas)
-	actualizar_ayuda()
+	actualizar_mision(inmediato)
 	actualizar_leds()
 	actualizar_hud()
-	if not flashcard.visible:
+	if not flashcard.visible and not hud_mision.celebrando:
 		resumen.mostrar(motor, datos, lateral.get_node("Aviso").text)
 
 
-func paso_hud(etiqueta: String, completado: bool) -> String:
-	return "%s %s" % ["[x]" if completado else "[ ]", TextoLimpio.limpiar(etiqueta).texto]
+func configurar_misiones() -> void:
+	misiones = datos.get("indicios", [])
+	if not datos.has("indicios"):
+		for clave in indicios:
+			if progreso_indicios(motor.estado()).has(clave):
+				misiones.append({"clave": clave, "etiqueta": indicios[clave]})
+	TextoLimpio.mostrar_chip(hud_mision.marca, datos.titulo)
+	for mision in misiones:
+		var clave: String = mision.clave
+		var grupos := {}
+		for id in datos.acciones:
+			var regla: Dictionary = datos.acciones[id]
+			if regla.efectos.get(clave, false) == true:
+				grupos[id] = {"ids": [id], "regla": regla, "titulo": regla.titulo}
+			elif motor.mediciones != null and Mediciones.indicio_de_accion(id) == clave:
+				# Las respuestas del banco comparten un subpaso y la orden no revela cuál elegir.
+				if not grupos.has(clave):
+					grupos[clave] = {"ids": [], "regla": regla, "titulo": regla.titulo}
+				grupos[clave].ids.append(id)
+		acciones_mision[clave] = grupos.values()
 
 
-func actualizar_ayuda() -> void:
+func actualizar_mision(inmediato := false) -> void:
+	if misiones.is_empty():
+		return
 	var estado: Dictionary = motor.estado()
-	var terminado: bool = not motor.fin().is_empty()
 	var progreso := progreso_indicios(estado)
+	var cumplidas: Array = misiones.map(func(mision: Dictionary): return progreso.get(mision.clave, false))
+	var actual := cumplidas.find(false)
+	var anterior: int = hud_mision.indice
+	var fondo := $Interfaz.get_theme_stylebox("panel") as StyleBoxFlat
+	var color := FONDO_MISION.lerp(hud_mision.ACENTO, hud_mision.destello)
+	if fondo.bg_color != color:
+		fondo.bg_color = color
+	if hud_mision.celebrando and not inmediato:
+		if hud_mision.progreso != cumplidas:
+			hud_mision.progreso = cumplidas
+			hud_mision.puntos.queue_redraw()
+		return
+	if anterior >= 0 and actual != anterior and cumplidas[anterior] and not inmediato \
+			and not modo_captura and (motor.fin().is_empty() or motor.fin() == "resuelto"):
+		hud_mision.celebrar(cumplidas, func():
+			hud_mision.indice = -1
+			firma_mision.clear()
+			actualizar_mision(true)
+			hud_mision.entrada()
+			actualizar_hud()
+			if not flashcard.visible and not motor.fin().is_empty():
+				finalizar_orden()
+			if not flashcard.visible and not motor.fin().is_empty():
+				resumen.mostrar(motor, datos, lateral.get_node("Aviso").text))
+		return
+	if actual == -1:
+		return
+	var mision: Dictionary = misiones[actual]
+	var controles := controles_seguridad()
+	var elevador: Dictionary = paso_elevador(estado)
+	var disponibles: Array[String] = taller.inventario.accesibles(true)
+	var aciertos: Array[String] = motor.acciones_acertadas()
 	var ayuda := siguiente_ayuda(progreso)
-	var paso := paso_elevador(estado)
-	if not paso.is_empty():
-		ayuda = PASOS_ELEVADOR[paso.id]
-		match paso.id:
-			"colocar_calzas":
-				if paso.objetivo == "calzas":
-					ayuda += "\nToma las calzas de la caja roja."
-			"trabar_soporte", "destrabar_soporte":
-				var soporte: Node3D = $Elevador.piezas[paso.objetivo]
-				ayuda += "\n" + soporte.nombre
-				if taller.mano != "llave_ajustable":
-					ayuda += "\nUsa la llave ajustable."
-			"descender_bus":
-				ayuda += "\nDespeja los bajos."
-			"cerrar_orden":
-				ayuda += "\n" + siguiente_ayuda(progreso)
-	if not terminado and not ayuda.is_empty() and paso.is_empty():
-		var herramienta := ""
-		if zona_activa == $Banco:
-			herramienta = "llave_ajustable" if progreso.diagnostico_registrado else "multimetro"
-		else:
-			for id in datos.ruta_ideal:
-				var regla: Dictionary = datos.acciones[id]
-				if regla.efectos.is_empty() or Escenario.cumple(estado, regla.efectos):
-					continue
-				herramienta = requisitos(id).get("herramienta", "")
-				break
-		if not herramienta.is_empty() and taller.mano != herramienta:
-			ayuda = "Toma esta herramienta: %s. %s" % [Inventario.CATALOGO[herramienta].nombre, ayuda]
-	lateral.get_node("Siguiente").text = "" if ayuda.is_empty() else "Siguiente paso\n" + TextoLimpio.limpiar(ayuda).texto
+	var firma := [actual, cumplidas, controles.duplicate(), disponibles, taller.mano, accion_pendiente,
+		aciertos, ayuda, elevador, fuente_banco.fuente()]
+	if firma == firma_mision:
+		return
+	firma_mision = firma
+	var filas: Array = []
+	var clave: String = mision.clave
+	var grupos: Array = acciones_mision[clave]
+	if not elevador.is_empty() and elevador.id != "cerrar_orden":
+		var texto: String = PASOS_ELEVADOR[elevador.id]
+		if elevador.id in ["trabar_soporte", "destrabar_soporte"]:
+			texto += " · " + $Elevador.piezas[elevador.objetivo].nombre
+		if elevador.id == "colocar_calzas" and elevador.objetivo == "calzas":
+			texto = "Toma las calzas de la caja roja"
+		filas.append({"texto": texto, "hecho": false})
+	for grupo in grupos:
+		var regla: Dictionary = grupo.regla
+		var id: String = grupo.ids[0]
+		var hecha: bool = grupo.ids.any(func(accion: String): return accion in aciertos)
+		if motor.mediciones != null and motor.mediciones.fuente == "banco" and id.begins_with("medir_"):
+			# En el banco físico, reportar la lectura también acredita la medición.
+			var prefijo := "reportar_" + id.trim_prefix("medir_") + "_"
+			hecha = hecha or aciertos.any(func(accion: String): return accion.begins_with(prefijo))
+		var requiere := requisitos(id)
+		var herramientas: Array = requiere.get("herramientas", [])
+		if requiere.has("herramienta"):
+			herramientas = [requiere.herramienta]
+		for herramienta in herramientas:
+			var nombre: String = Inventario.CATALOGO[herramienta].nombre
+			agregar_subpaso(filas, "Toma " + nombre, hecha or herramienta in disponibles)
+			var espacio: int = taller.espacio_de(herramienta)
+			var tecla := " (%d)" % espacio if espacio > 0 else ""
+			agregar_subpaso(filas, "Ten %s en la mano%s" % [nombre, tecla], hecha or taller.mano == herramienta)
+		for pieza in requiere.get("piezas", []):
+			agregar_subpaso(filas, "Toma " + Inventario.CATALOGO[pieza].nombre, hecha or pieza in disponibles)
+		if not regla.get("seguridad_panel", "").is_empty():
+			agregar_subpaso(filas, "Activa Bloqueo y Etiquetado en el panel",
+				hecha or Motor.seguridad_confirmada(controles))
+		var componente: String = regla.componente
+		var pieza: Node3D = zona_activa.piezas.get(componente, $Elevador.piezas.get(componente))
+		var nombre_pieza: String = pieza.nombre if pieza != null else componente.capitalize()
+		var texto: String = "Elige %s en %s" % [grupo.titulo, nombre_pieza]
+		if motor.mediciones != null:
+			if id.begins_with("medir_"):
+				texto = "Toca %s con la punta roja después de TP0" % nombre_pieza
+				if motor.mediciones.fuente == "banco":
+					texto = "Reporta la lectura de %s en el multímetro" % nombre_pieza
+			elif id.begins_with("reportar_"):
+				texto = "Reporta la lectura de %s en el multímetro" % id.get_slice("_", 1).to_upper()
+			elif id.begins_with("diagnosticar_"):
+				texto = "Elige la causa de la falla en el multímetro"
+		filas.append({"texto": TextoLimpio.limpiar(texto).texto, "hecho": hecha or accion_pendiente in grupo.ids})
+		if regla.get("requiere_panel", false):
+			var confirmar := "Confirma en el panel"
+			if id == "reconectar" and fuente_banco.fuente() == "banco":
+				confirmar = "Cierra el conductor abierto en el banco físico"
+			filas.append({"texto": confirmar, "hecho": hecha})
+	var titulo: String = TextoLimpio.limpiar(mision.get("mision", mision.etiqueta)).texto
+	# Conserva las pistas que añaden contexto a los controles o a la pieza.
+	if ayuda.trim_suffix(".") == titulo or (not grupos.is_empty() and clave == "bloqueo_confirmado"):
+		ayuda = ""
+	hud_mision.mostrar(actual, titulo, cumplidas, filas, TextoLimpio.limpiar(ayuda).texto)
+
+
+func agregar_subpaso(filas: Array, texto: String, hecho: bool) -> void:
+	for fila in filas:
+		if fila.texto == texto:
+			fila.hecho = fila.hecho and hecho
+			return
+	filas.append({"texto": TextoLimpio.linea(texto), "hecho": hecho})
 
 
 func actualizar_leds() -> void:
@@ -715,19 +750,19 @@ func actualizar_hud() -> void:
 	var terminado: bool = motor != null and not motor.fin().is_empty()
 	var aviso: Control = lateral.get_node("Aviso")
 	aviso.visible = not aviso.text.is_empty()
-	var detalle := not terminado and not hud_oculto
-	$Interfaz.visible = detalle or terminado or pausa_visible or aviso.visible
-	$Interfaz.offset_right = 476.0 if terminado else 12.0 + ANCHO_HUD
-	$Interfaz.anchor_bottom = 1.0 if terminado else 0.0
-	lateral.get_node("Estado").visible = detalle
-	var marca: Label = lateral.get_node("Marca")
-	marca.visible = detalle and not marca.text.is_empty()
-	lateral.get_node("Indicios").visible = detalle or (terminado and motor.fin() == "resuelto" and not hud_oculto)
-	var siguiente: Label = lateral.get_node("Siguiente")
-	siguiente.visible = detalle and not siguiente.text.is_empty()
+	var mision_visible: bool = not misiones.is_empty() and (not terminado or hud_mision.celebrando)
+	hud_mision.visible = mision_visible
+	hud_mision.mostrando_detalle = not hud_oculto
+	hud_mision.actualizar_visibilidad()
+	$Interfaz.visible = mision_visible or terminado or pausa_visible or aviso.visible or datos.is_empty()
+	var ventana := get_viewport().get_visible_rect().size
+	$Interfaz.offset_right = minf(12.0 + ANCHO_HUD, ventana.x - 12.0)
+	$Interfaz.anchor_bottom = 1.0 if terminado and not mision_visible else 0.0
+	lateral.get_node("Estado").visible = datos.is_empty()
 	lateral.get_node("Conexion").visible = pausa_visible
 	var margen: float = $Interfaz.get_theme_stylebox("panel").get_minimum_size().y
-	$Interfaz.offset_bottom = -12.0 if terminado else 12.0 + lateral.get_combined_minimum_size().y + margen
+	$Interfaz.offset_bottom = -12.0 if terminado and not mision_visible else minf(
+		ventana.y - 84.0, 12.0 + lateral.get_combined_minimum_size().y + margen)
 	if motor != null:
 		actualizar_inventario()
 
@@ -739,6 +774,8 @@ func reintentar() -> void:
 	if nuevo == null:
 		return
 	motor = nuevo
+	hud_mision.reiniciar()
+	firma_mision.clear()
 	taller.reiniciar()
 	if $Elevador.arriba or $Elevador.en_movimiento():
 		jugador.ubicar(Vector3(-4, 0, 0.1))
@@ -910,6 +947,7 @@ func elegir_accion(indice: int, fuente: String) -> void:
 	elif entrada.requiere_panel:
 		accion_pendiente = entrada.id
 		actualizar_panel(Time.get_ticks_msec())
+		actualizar_mision()
 		menu_pieza.esperar_panel(entrada.id == "reconectar" and fuente_banco.fuente() == "banco")
 		var torque: Dictionary = datos.acciones.get(entrada.id, {}).get("torque", {})
 		if not torque.is_empty():
@@ -956,9 +994,7 @@ func accion_elevador(id: String, componente: String, fuente := "teclado") -> voi
 			await $Elevador.recorrido.finished
 			navegando = false
 			if not subir and zona_activa == $Bajos and listo_para_bajar(motor.estado()):
-				taller.apagar_guia()
-				flashcard.encolar({"texto": "Solo falta cerrar la orden. Hazlo en la consola del elevador.",
-					"tipo": "exito", "titulo": "Cerrar la orden", "donde": "", "fuente": "", "objeto": Elevador.CONSOLA})
+				senalar_guia(Elevador.CONSOLA)
 	if requisito_pendiente == id:
 		requisito_pendiente = ""
 	mostrar_estado()
@@ -991,7 +1027,7 @@ func accion_taller(id: String, objeto := "") -> void:
 			taller.lleva_carrito = not taller.lleva_carrito
 	cerrar_menu()
 	actualizar_inventario()
-	actualizar_ayuda()
+	actualizar_mision()
 	if not aviso.is_empty():
 		avisar(aviso, "aviso", "Revisa el inventario")
 
@@ -1091,6 +1127,7 @@ func _process(_delta: float) -> void:
 	actualizar_panel(ahora)
 	if motor != null:
 		actualizar_inventario()
+		actualizar_mision()
 	taller.actualizar_flecha(jugador.camara, not flashcard.visible and not menu_pieza.visible and not hud_oculto)
 	if zona_activa != $Banco:
 		return
@@ -1265,7 +1302,7 @@ func entrada_inventario(evento: InputEvent) -> bool:
 			else:
 				taller.mano = taller.objeto_en_espacio(numero)
 				actualizar_inventario()
-				actualizar_ayuda()
+				actualizar_mision()
 			return true
 		if evento.keycode == KEY_G:
 			orientar_requisitos()
@@ -1284,5 +1321,5 @@ func entrada_inventario(evento: InputEvent) -> bool:
 		return false
 	taller.seleccionar(paso, carrito_cerca())
 	actualizar_inventario()
-	actualizar_ayuda()
+	actualizar_mision()
 	return true

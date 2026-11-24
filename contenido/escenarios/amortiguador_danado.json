@@ -19,16 +19,19 @@
     {
       "clave": "revisar_amortiguador",
       "etiqueta": "Revisar inclinación y ruido",
+      "mision": "Revisa la inclinación y el ruido",
       "ayuda": "Revisa si el amortiguador trasero derecho explica la inclinación y el golpeteo."
     },
     {
       "clave": "reponer_amortiguador",
       "etiqueta": "Reponer el amortiguador",
+      "mision": "Cambia el amortiguador",
       "ayuda": "Lleva el amortiguador de repuesto. Confirma el cambio en el panel."
     },
     {
       "clave": "resuelto",
       "etiqueta": "Cerrar la orden",
+      "mision": "Cierra la orden en la consola",
       "ayuda": "Hazlo en la consola del elevador."
     }
   ],

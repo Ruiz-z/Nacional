@@ -55,8 +55,14 @@ static func equipar(bus: Node3D, accion: String) -> bool:
 	return herramienta.is_empty() or taller.mano == herramienta
 
 
+static func mostrar_siguiente_mision(bus: Node3D) -> void:
+	if bus.hud_mision.celebrando:
+		bus.hud_mision.animacion.custom_step(1.21)
+
+
 static func cerrar_orden(bus: Node3D, numero := 1) -> bool:
 	cerrar_exitos(bus)
+	mostrar_siguiente_mision(bus)
 	if not bus.flashcard.visible or bus.flashcard.opciones.is_empty():
 		return false
 	tecla(bus, numero)

@@ -35,6 +35,17 @@ static func leer_variante(estado: Dictionary) -> Dictionary:
 	return Banco.calcular(estado.s1_abierto, estado.s2_abierto)
 
 
+static func indicio_de_accion(id: String) -> String:
+	var campos := id.split("_")
+	match campos[0]:
+		"medir", "reportar":
+			if campos.size() >= 2 and campos[1] in PUNTOS:
+				return campos[1] + ("_medido" if campos[0] == "medir" else "_reportado")
+		"diagnosticar":
+			return "diagnostico_registrado"
+	return ""
+
+
 func indicios() -> Dictionary:
 	var evidencia := reportadas if fuente == "banco" else medidas
 	return {"tp1_medido": evidencia.has("tp1"), "tp2_medido": evidencia.has("tp2"),

@@ -19,21 +19,25 @@
     {
       "clave": "medir_bolsa",
       "etiqueta": "Medir presión de la bolsa",
+      "mision": "Mide la presión de la bolsa",
       "ayuda": "Mide la presión de la bolsa de aire trasera derecha con el manómetro."
     },
     {
       "clave": "localizar_fuga",
       "etiqueta": "Localizar fuga",
+      "mision": "Localiza la fuga",
       "ayuda": "Inspecciona la bolsa de aire trasera derecha para localizar la fuga."
     },
     {
       "clave": "reponer_bolsa",
       "etiqueta": "Reponer la bolsa de aire",
+      "mision": "Cambia la bolsa de aire",
       "ayuda": "Lleva la bolsa de aire de repuesto. Confirma el cambio en el panel."
     },
     {
       "clave": "resuelto",
       "etiqueta": "Cerrar la orden",
+      "mision": "Cierra la orden en la consola",
       "ayuda": "Hazlo en la consola del elevador."
     }
   ],

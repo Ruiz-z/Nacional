@@ -20,12 +20,12 @@
     "modulo": "[MUESTRA] Las lecturas te ayudan a distinguir si la falla está en el arnés o dentro del módulo."
   },
   "indicios": [
-    {"clave": "tp1_medido", "etiqueta": "TP1 medido", "ayuda": "Mide TP1 con referencia en TP0."},
-    {"clave": "tp2_medido", "etiqueta": "TP2 medido", "ayuda": "Mide TP2 con referencia en TP0."},
-    {"clave": "tp1_reportado", "etiqueta": "Lectura de TP1 reportada", "ayuda": "Abre el multímetro y reporta la lectura de TP1."},
-    {"clave": "tp2_reportado", "etiqueta": "Lectura de TP2 reportada", "ayuda": "Abre el multímetro y reporta la lectura de TP2."},
-    {"clave": "diagnostico_registrado", "etiqueta": "Diagnóstico registrado", "ayuda": "Abre el multímetro y elige la causa que indiquen tus lecturas."},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Abre el multímetro y elige Reconectar conductor. Confirma en el panel."}
+    {"clave": "tp1_medido", "etiqueta": "TP1 medido", "mision": "Mide TP1", "ayuda": "Mide TP1 con referencia en TP0."},
+    {"clave": "tp2_medido", "etiqueta": "TP2 medido", "mision": "Mide TP2", "ayuda": "Mide TP2 con referencia en TP0."},
+    {"clave": "tp1_reportado", "etiqueta": "Lectura de TP1 reportada", "mision": "Reporta la lectura de TP1", "ayuda": "Abre el multímetro y reporta la lectura de TP1."},
+    {"clave": "tp2_reportado", "etiqueta": "Lectura de TP2 reportada", "mision": "Reporta la lectura de TP2", "ayuda": "Abre el multímetro y reporta la lectura de TP2."},
+    {"clave": "diagnostico_registrado", "etiqueta": "Diagnóstico registrado", "mision": "Identifica la causa de la falla", "ayuda": "Abre el multímetro y elige la causa que indiquen tus lecturas."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Reconecta el conductor", "ayuda": "Abre el multímetro y elige Reconectar conductor. Confirma en el panel."}
   ],
   "estado": {
     "s1_abierto": true,

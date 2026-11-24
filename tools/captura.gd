@@ -5,9 +5,10 @@ extends SceneTree
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
 # Flashcard: [ancho alto] flashcard falta|aviso|error|critico [--verificar]
-# Resumen y éxito en caja de fusibles: [ancho alto] resumen|resumen-critico|exito [--verificar]
+# Resumen y hallazgo del motor: [ancho alto] resumen|resumen-critico|exito [--verificar]
 # Cierre: [ancho alto] cierre [correcto|incorrecto] [--verificar]
-# Inventario y título largo: [ancho alto] inventario [--verificar]
+# Misiones: [ancho alto] mision [motor|faros|neumatico] [--verificar]
+# Inventario: [ancho alto] inventario [--verificar]
 # Taller: [ancho alto] taller|baliza|elevador|elevador-guia|bajos [--verificar]
 # Banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
@@ -22,6 +23,13 @@ func capturar() -> void:
 	var args := OS.get_cmdline_user_args()
 	var verificar := args.size() > 0 and args[-1] == "--verificar"
 	if verificar:
+		args.remove_at(args.size() - 1)
+	var orden_mision := "motor"
+	if args.size() > 3 and args[-2] == "mision":
+		orden_mision = args[-1]
+		if orden_mision not in ["motor", "faros", "neumatico"]:
+			fallar("Usa mision [motor|faros|neumatico].")
+			return
 		args.remove_at(args.size() - 1)
 	var tipo_flashcard := ""
 	if args.size() >= 4 and args[-2] == "flashcard":
@@ -38,10 +46,10 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta", "midiendo", "taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito", "mision"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
-	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito"]
+	var vista_taller := vista in ["taller", "baliza", "elevador", "elevador-guia", "bajos", "inventario", "cierre", "resumen", "resumen-critico", "exito", "mision"]
 	var zona := ""
 	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor", "banco"]:
 		zona = args[-1]
@@ -113,9 +121,12 @@ func capturar() -> void:
 		escena.modo_captura = true
 	if vista in ["elevador", "elevador-guia", "bajos"]:
 		escena.archivo = "escenarios/neumatico_pinchado.json"
-	elif vista in ["baliza", "cierre", "resumen", "exito"]:
+	elif vista == "mision":
+		var archivo := "neumatico_pinchado" if orden_mision == "neumatico" else orden_mision
+		escena.archivo = "escenarios/%s.json" % archivo
+	elif vista in ["baliza", "cierre", "resumen"]:
 		escena.archivo = "escenarios/faros.json"
-	elif vista == "inventario":
+	elif vista in ["inventario", "exito"]:
 		escena.archivo = "escenarios/motor.json"
 	if not zona.is_empty():
 		if zona != "interior":
@@ -130,6 +141,10 @@ func capturar() -> void:
 		if vista in ["elevador", "elevador-guia", "bajos"]:
 			if not preparar_elevador(escena, vista):
 				fallar("El elevador o su encuadre no corresponde a la vista.")
+				return
+		elif vista == "mision":
+			if not preparar_mision(escena, orden_mision):
+				fallar("No se pudo preparar la misión.")
 				return
 		elif vista in ["cierre", "inventario", "resumen", "resumen-critico", "exito"]:
 			if not preparar_orden(escena, vista, respuesta):
@@ -311,10 +326,12 @@ func capturar() -> void:
 			or not vp.get_visible_rect().encloses(escena.resumen.get_node("%Acciones").get_global_rect())):
 		fallar("Las acciones del resumen quedan recortadas.")
 		return
+	if vista == "mision" and not vp.get_visible_rect().encloses(escena.hud_mision.get_global_rect()):
+		fallar("La tarjeta de misión queda recortada.")
+		return
 	if vista == "inventario":
-		var titulo: Label = escena.lateral.get_node("Estado")
-		if titulo.get_line_count() < 2 or not vp.get_visible_rect().encloses(escena.taller.hud.get_global_rect()):
-			fallar("El título debe envolver y el inventario debe caber en el encuadre.")
+		if not vp.get_visible_rect().encloses(escena.taller.hud.get_global_rect()):
+			fallar("El inventario debe caber en el encuadre.")
 			return
 	if verificar:
 		quit(0)
@@ -332,13 +349,36 @@ func capturar() -> void:
 	quit(0)
 
 
+func preparar_mision(escena: Node3D, orden: String) -> bool:
+	escena.jugador.set_physics_process(false)
+	var previas := {"motor": 3, "faros": 2, "neumatico": 0}
+	for id in escena.datos.ruta_ideal.slice(0, previas[orden]):
+		if not Acciones.equipar(escena, id):
+			return false
+		escena.ejecutar(id, "virtual")
+		Acciones.cerrar_exitos(escena)
+	if orden == "neumatico":
+		var elevador := escena.get_node("Elevador")
+		elevador.colocar_calzas()
+		elevador.mover(true, true)
+		for soporte in elevador.trabas:
+			elevador.cambiar_traba(soporte, true)
+	var id: String = escena.datos.ruta_ideal[previas[orden]]
+	if not Acciones.equipar(escena, id):
+		return false
+	escena.mostrar_estado(true)
+	escena.ubicar_jugador(escena.datos.acciones[id].componente)
+	return escena.hud_mision.indice == previas[orden] and not escena.flashcard.visible
+
+
 func preparar_orden(escena: Node3D, vista: String, respuesta: String) -> bool:
 	escena.jugador.set_physics_process(false)
 	escena.ubicar_jugador(escena.zona_activa.acceso)
 	if vista == "exito":
-		if not Acciones.equipar(escena, "inspeccionar"):
-			return false
-		escena.ejecutar("inspeccionar", "teclado")
+		for id in escena.datos.ruta_ideal.slice(0, 3):
+			if not Acciones.equipar(escena, id):
+				return false
+			escena.ejecutar(id, "virtual")
 		return escena.flashcard.visible and escena.flashcard.cola[0].tipo == "exito"
 	if vista in ["resumen", "resumen-critico"]:
 		return preparar_resumen(escena, vista == "resumen-critico")

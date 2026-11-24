@@ -19,16 +19,19 @@
     {
       "clave": "medir_pastillas",
       "etiqueta": "Medir desgaste de pastillas",
+      "mision": "Mide el desgaste de las pastillas",
       "ayuda": "Mide las pastillas delanteras derechas con el flexómetro."
     },
     {
       "clave": "reponer_pastillas",
       "etiqueta": "Reponer las pastillas",
+      "mision": "Cambia las pastillas",
       "ayuda": "Lleva las pastillas de repuesto. Confirma el cambio en el panel."
     },
     {
       "clave": "resuelto",
       "etiqueta": "Cerrar la orden",
+      "mision": "Cierra la orden en la consola",
       "ayuda": "Hazlo en la consola del elevador."
     }
   ],

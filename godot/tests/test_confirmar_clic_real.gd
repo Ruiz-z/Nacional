@@ -19,11 +19,11 @@ static func ejecutar() -> bool:
 
 static func probar_ordenes(arbol: SceneTree) -> bool:
 	var inicio := {
-		"aislamiento": "Abre la compuerta del gabinete.",
-		"comunicacion": "Abre el monitor y elige Revisar los síntomas.",
-		"faros": "Inspecciona la caja de fusibles.",
+		"aislamiento": "Inspecciona el gabinete",
+		"comunicacion": "Revisa los síntomas de la red",
+		"faros": "Inspecciona la caja de fusibles",
 		"modulo_auxiliar": "Mide TP1 con referencia en TP0.",
-		"motor": "Inspecciona la tapa del motor.",
+		"motor": "Inspecciona la tapa del motor",
 	}
 	for orden in inicio:
 		var bus := Bus.instantiate()
@@ -79,9 +79,7 @@ static func recorrer_banco(bus: Node3D, arbol: SceneTree) -> bool:
 	if not comprobar_ayuda(bus, "Abre el multímetro y elige la causa que indiquen tus lecturas.") \
 			or not elegir(bus, "multimetro", "diagnosticar_alimentacion") \
 			or not comprobar_ayuda(bus, REPARAR) \
-			or not bus.flashcard.visible \
-			or bus.flashcard.cuerpo.text != ("Diagnóstico registrado.\nSiguiente: Abre el multímetro y "
-				+ "elige Reconectar conductor. Confirma en el panel."):
+			or bus.flashcard.visible:
 		return false
 	Taller.cerrar_exitos(bus)
 	if not elegir(bus, "multimetro", "reconectar"):
@@ -130,11 +128,11 @@ static func confirmar(bus: Node3D, arbol: SceneTree, id: String) -> bool:
 
 
 static func comprobar_ayuda(bus: Node3D, texto: String) -> bool:
-	var ayuda := bus.lateral.get_node_or_null("Siguiente") as Label
-	return ayuda != null and ayuda.is_visible_in_tree() and ayuda.text.begins_with("Siguiente paso\n") and ayuda.text.ends_with(texto)
+	Taller.mostrar_siguiente_mision(bus)
+	return bus.hud_mision.visible and (bus.hud_mision.titulo.text == texto \
+		or (bus.hud_mision.ayuda.visible and bus.hud_mision.ayuda.text == texto))
 
 
 static func comprobar_resuelto(bus: Node3D) -> bool:
-	return bus.motor.fin() == "resuelto" \
-		and "[x] Falla resuelta" in bus.lateral.get_node("Indicios").text \
-		and not bus.lateral.get_node("Siguiente").is_visible_in_tree()
+	Taller.mostrar_siguiente_mision(bus)
+	return bus.motor.fin() == "resuelto" and not bus.hud_mision.visible

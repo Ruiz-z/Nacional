@@ -3,8 +3,6 @@ extends RefCounted
 const Taller = preload("res://tests/acciones_taller.gd")
 
 const Bus = preload("res://escenas/bus.tscn")
-const INDICIOS := ["Caja de fusibles inspeccionada", "Continuidad medida",
-	"Foco izquierdo repuesto", "Falla resuelta"]
 
 
 static func ejecutar() -> bool:
@@ -59,8 +57,7 @@ static func recorrer(bus: Node3D, variante: String, arbol: SceneTree) -> bool:
 		return false
 	if not await paso(bus, "rele_faros", "confirmar_solucion", arbol):
 		return false
-	return bus.motor.fin() == "resuelto" and bus.lateral.get_node("Indicios").is_visible_in_tree() \
-		and comprobar_indicios(bus, 4)
+	return bus.motor.fin() == "resuelto" and comprobar_indicios(bus, 4)
 
 
 static func paso(bus: Node3D, pieza: String, id: String, arbol: SceneTree, aplicada := true) -> bool:
@@ -86,7 +83,10 @@ static func paso(bus: Node3D, pieza: String, id: String, arbol: SceneTree, aplic
 
 
 static func comprobar_indicios(bus: Node3D, completados: int) -> bool:
-	var lineas := PackedStringArray(["Pasos"])
-	for indice in range(INDICIOS.size()):
-		lineas.append(("[x] " if indice < completados else "[ ] ") + INDICIOS[indice])
-	return bus.lateral.get_node("Indicios").text == "\n".join(lineas)
+	Taller.mostrar_siguiente_mision(bus)
+	var progreso: Dictionary = bus.progreso_indicios(bus.motor.estado())
+	for indice in bus.misiones.size():
+		if progreso[bus.misiones[indice].clave] != (indice < completados):
+			return false
+	return not bus.hud_mision.visible if completados == bus.misiones.size() \
+		else bus.hud_mision.indice == completados

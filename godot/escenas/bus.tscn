@@ -1,5 +1,6 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://escenas/hud_mision.gd" id="hud_mision"]
 [ext_resource type="Script" path="res://escenas/interactuable.gd" id="Puerta"]
 [ext_resource type="Script" path="res://escenas/bus.gd" id="1"]
 [ext_resource type="PackedScene" path="res://escenas/panel_virtual.tscn" id="2"]
@@ -1222,7 +1223,7 @@ text = "PELIGRO\nALTO VOLTAJE"
 anchor_bottom = 1.0
 offset_left = 12.0
 offset_top = 12.0
-offset_right = 364.0
+offset_right = 452.0
 offset_bottom = -12.0
 horizontal_scroll_mode = 0
 follow_focus = true
@@ -1261,23 +1262,8 @@ offset_bottom = 48.0
 autowrap_mode = 3
 theme_override_font_sizes/font_size = 15
 
-[node name="Marca" type="Label" parent="Interfaz/Lateral"]
-unique_name_in_owner = true
-visible = false
-size_flags_horizontal = 0
-theme_type_variation = &"ChipOrden"
-
-[node name="Indicios" type="Label" parent="Interfaz/Lateral"]
-theme_type_variation = &"Secundario"
-text = ""
-autowrap_mode = 2
-theme_override_font_sizes/font_size = 16
-
-[node name="Siguiente" type="Label" parent="Interfaz/Lateral"]
-visible = false
-theme_type_variation = &"Secundario"
-theme_override_font_sizes/font_size = 15
-autowrap_mode = 3
+[node name="Mision" type="VBoxContainer" parent="Interfaz/Lateral"]
+script = ExtResource("hud_mision")
 
 [node name="Conexion" type="Label" parent="Interfaz/Lateral"]
 theme_type_variation = &"Chip"

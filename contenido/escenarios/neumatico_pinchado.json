@@ -19,46 +19,55 @@
     {
       "clave": "medir_presion",
       "etiqueta": "Medir presión del neumático",
+      "mision": "Mide la presión del neumático",
       "ayuda": "Mide la presión en el neumático delantero derecho con el manómetro."
     },
     {
       "clave": "localizar_pinchazo",
       "etiqueta": "Localizar pinchazo",
+      "mision": "Localiza el pinchazo",
       "ayuda": "Inspecciona ese neumático para localizar el pinchazo."
     },
     {
       "clave": "cambiar_rueda",
       "etiqueta": "Cambiar la rueda",
+      "mision": "Cambia la rueda",
       "ayuda": "Lleva el neumático de repuesto. Confirma el cambio de rueda en el panel."
     },
     {
       "clave": "apretar_tuerca_1",
       "etiqueta": "Apretar tuerca 1",
+      "mision": "Aprieta la tuerca 1",
       "ayuda": "Empieza por la tuerca 1 de la rueda delantera derecha. Sigue en cruz: 1, 3, 5, 2, 4. Ajusta la perilla al rango marcado [MUESTRA]."
     },
     {
       "clave": "apretar_tuerca_3",
       "etiqueta": "Apretar tuerca 3",
+      "mision": "Aprieta la tuerca 3",
       "ayuda": "Elige la tuerca 3 de la rueda delantera derecha. Ajusta la perilla de 40 a 60 en la escala del panel [MUESTRA]."
     },
     {
       "clave": "apretar_tuerca_5",
       "etiqueta": "Apretar tuerca 5",
+      "mision": "Aprieta la tuerca 5",
       "ayuda": "Elige la tuerca 5 de la rueda delantera derecha. Ajusta la perilla de 40 a 60 en la escala del panel [MUESTRA]."
     },
     {
       "clave": "apretar_tuerca_2",
       "etiqueta": "Apretar tuerca 2",
+      "mision": "Aprieta la tuerca 2",
       "ayuda": "Elige la tuerca 2 de la rueda delantera derecha. Ajusta la perilla de 40 a 60 en la escala del panel [MUESTRA]."
     },
     {
       "clave": "apretar_tuerca_4",
       "etiqueta": "Apretar tuerca 4",
+      "mision": "Aprieta la tuerca 4",
       "ayuda": "Elige la tuerca 4 de la rueda delantera derecha. Ajusta la perilla de 40 a 60 en la escala del panel [MUESTRA]."
     },
     {
       "clave": "resuelto",
       "etiqueta": "Cerrar la orden",
+      "mision": "Cierra la orden en la consola",
       "ayuda": "Hazlo en la consola del elevador."
     }
   ],

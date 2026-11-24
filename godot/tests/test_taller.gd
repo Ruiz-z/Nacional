@@ -258,8 +258,8 @@ static func probar_motor(arbol: SceneTree) -> bool:
 
 static func probar_herramienta(bus: Node3D) -> bool:
 	var antes: Dictionary = bus.motor.estado()
-	var titulo: Label = bus.lateral.get_node("Estado")
-	if titulo.autowrap_mode == TextServer.AUTOWRAP_OFF or titulo.text_overrun_behavior != TextServer.OVERRUN_NO_TRIMMING 			or titulo.text != bus.datos.titulo.trim_prefix("[MUESTRA] "):
+	var titulo: Label = bus.hud_mision.titulo
+	if titulo.autowrap_mode == TextServer.AUTOWRAP_OFF or titulo.text_overrun_behavior != TextServer.OVERRUN_NO_TRIMMING 			or titulo.text != "Inspecciona la tapa del motor":
 		return false
 	bus.ejecutar("inspeccionar", "teclado")
 	if not bus.flashcard.visible or bus.flashcard.cola[0].tipo != "falta" or bus.flashcard.donde.text.is_empty():
@@ -324,6 +324,7 @@ static func comprobar_cierre(bus: Node3D, base: String, caso: Array) -> bool:
 			return false
 		bus.ejecutar(accion, "virtual")
 	Acciones.cerrar_exitos(bus)
+	Acciones.mostrar_siguiente_mision(bus)
 	if not bus.flashcard.visible or bus.flashcard.titulo.text != "¿Qué causó la falla?" 			or bus.flashcard.opciones.size() != 2 or bus.resultados_guardados or bus.resumen.visible:
 		return false
 	if caso[1] == 0:

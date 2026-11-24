@@ -62,6 +62,18 @@ func faltas() -> Array:
 	return _faltas.duplicate(true)
 
 
+static func seguridad_confirmada(controles: Dictionary) -> bool:
+	return controles.get("bloqueo", false) == true and controles.get("etiquetado", false) == true
+
+
+func acciones_acertadas() -> Array[String]:
+	var acciones: Array[String] = []
+	for decision in _progreso_previo + _decisiones:
+		if es_acierto(decision) and decision.accion not in acciones:
+			acciones.append(decision.accion)
+	return acciones
+
+
 func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dictionary = {},
 		lectura_previa: Dictionary = {}) -> Dictionary:
 	if not _fin.is_empty():
@@ -100,8 +112,7 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 	if not faltantes.is_empty():
 		decision.motivo = "Intentaste hacer este paso antes de tiempo. Revisa el siguiente paso de la orden."
 	var seguridad: String = regla.get("seguridad_panel", "")
-	if not seguridad.is_empty() and not (controles.get("bloqueo", false) == true
-			and controles.get("etiquetado", false) == true):
+	if not seguridad.is_empty() and not seguridad_confirmada(controles):
 		faltantes.clear()
 		decision.motivo = regla.explicacion_seguridad
 		if seguridad == "critica":

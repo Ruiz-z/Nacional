@@ -18,9 +18,9 @@
     "aviso-inconsistente": "[MUESTRA] La lectura del gabinete coincide con el aviso."
   },
   "indicios": [
-    {"clave": "inspeccionado", "etiqueta": "Gabinete inspeccionado", "ayuda": "Abre la compuerta del gabinete."},
-    {"clave": "indicio_confirmado", "etiqueta": "Aislamiento revisado", "ayuda": "Abre el monitor y elige Revisar el aislamiento."},
-    {"clave": "resuelto", "etiqueta": "Falla resuelta", "ayuda": "Elige Confirmar la solución en la batería y confirma en el panel."}
+    {"clave": "inspeccionado", "etiqueta": "Gabinete inspeccionado", "mision": "Inspecciona el gabinete", "ayuda": "Abre la compuerta del gabinete."},
+    {"clave": "indicio_confirmado", "etiqueta": "Aislamiento revisado", "mision": "Revisa el aislamiento", "ayuda": "Abre el monitor y elige Revisar el aislamiento."},
+    {"clave": "resuelto", "etiqueta": "Falla resuelta", "mision": "Confirma la solución", "ayuda": "Elige Confirmar la solución en la batería y confirma en el panel."}
   ],
   "estado": {
     "sector": "Sector virtual A",
