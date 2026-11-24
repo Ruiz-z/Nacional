@@ -51,6 +51,20 @@ Las coordenadas indican la posición de los pies en metros y los ángulos de gir
 
 - [ ] En ambas resoluciones, comprobar el encuadre desde la entrada, la compuerta cerrada y el monitor con el gabinete abierto. En la captura de daño, comprobar también el tornillo roto y el LED rojo.
 
+Para generar las vistas de faros y motor a 1280×720, ejecutar desde la raíz del repositorio con un servidor gráfico.
+
+```bash
+mkdir -p build/capturas
+for zona in faros motor; do
+  for vista in cerrado animacion abierto; do
+    godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn \
+      "$PWD/build/capturas/${zona}-${vista}.png" 1280 720 "$zona" "$vista"
+  done
+done
+```
+
+`animacion` captura la tapa a los 0,21 s. `abierto` espera el final de la animación disparada por «Inspeccionar».
+
 ## Tablero (T-63 a T-65)
 - [ ] Vista del técnico: dominio y nivel por competencia, ruta pendiente, errores repetidos, intento actual frente al anterior.
 - [ ] Vista del instructor: lista de técnicos, detalle con línea de tiempo y brechas.

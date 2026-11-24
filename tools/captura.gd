@@ -2,7 +2,7 @@ extends SceneTree
 
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
-# Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto] [menu] [--verificar]
+# Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
 func _initialize() -> void:
 	call_deferred("capturar")
@@ -17,7 +17,7 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "danado", "tablero", "puerta"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "animacion", "danado", "tablero", "puerta"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
 	var zona := ""
@@ -36,12 +36,15 @@ func capturar() -> void:
 				return
 		elif vista.is_empty():
 			vista = "cerrado"
-		elif vista not in ["cerrado", "abierto"]:
-			fallar("Usa faros|motor [cerrado|abierto].")
+		elif vista not in ["cerrado", "abierto", "animacion"]:
+			fallar("Usa faros|motor [cerrado|abierto|animacion].")
 			return
 		if args.size() not in [2, 4]:
 			fallar("Indica la zona después de las dimensiones opcionales.")
 			return
+	if vista == "animacion" and (zona.is_empty() or menu):
+		fallar("Usa faros|motor para la vista animacion, con el menú cerrado.")
+		return
 	if args.size() not in [2, 4, 8, 9]:
 		fallar("Uso: -- <escena res://> <salida.png> [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [menu] [--verificar]")
 		return
@@ -83,28 +86,33 @@ func capturar() -> void:
 		escena.get_node("Jugador").set_physics_process(false)
 	vp.add_child(escena)
 
-	if args.size() >= 8:
-		var jugador := escena.get_node_or_null("Jugador") as CharacterBody3D
-		if jugador == null:
-			fallar("La escena no tiene un nodo Jugador.")
-			return
-		jugador.set_physics_process(false)
-		jugador.position = Vector3(float(args[4]), float(args[5]), float(args[6]))
-		jugador.rotation_degrees.y = float(args[7])
-		var camara: Camera3D = jugador.get_node("Camara")
-		if args.size() == 9:
-			camara.rotation_degrees.x = float(args[8])
-		elif vista in ["cerrado", "abierto", "danado"]:
-			var id := pieza_gabinete(vista, menu)
-			var objetivo: Vector3 = camara.to_local(sector.piezas[id].global_position)
-			camara.rotation.x = atan2(objetivo.y, -objetivo.z)
-		print("Cámara ", camara.global_position, ", giro ", args[7], "°, inclinación ", camara.rotation_degrees.x, "°")
 	if not vista.is_empty():
 		if escena.motor == null:
 			fallar("El simulador no se inicializó.")
 			return
-		if vista in ["abierto", "danado"]:
-			escena.ejecutar("inspeccionar", "teclado")
+		if vista in ["abierto", "animacion", "danado"]:
+			sector = escena.zona_activa
+			escena.ubicar_jugador(sector.acceso)
+			await physics_frame
+			await physics_frame
+			if not comprobar_pieza(escena, sector.acceso):
+				fallar("La mira no alcanza la tapa antes de abrir.")
+				return
+			escena.recibir_accion(escena.panel.entrada.traducir("teclado", "clic", 1))
+			var indice: int = escena.menu_pieza.entradas.find_custom(
+				func(entrada: Dictionary) -> bool: return entrada.id == "inspeccionar")
+			if not escena.menu_pieza.visible or indice < 0:
+				fallar("Inspeccionar no aparece en el menú de la tapa.")
+				return
+			escena.menu_pieza.botones[indice].pressed.emit()
+			if not is_instance_valid(sector.animacion) or not sector.animacion.is_running():
+				fallar("Inspeccionar no inició la animación.")
+				return
+			if vista == "animacion":
+				await create_timer(0.21).timeout
+				sector.animacion.pause()
+			else:
+				await sector.animacion.finished
 		if vista == "danado":
 			escena.ejecutar("forzar_pieza", "teclado")
 		if zona in ["cabina", "interior"]:
@@ -130,11 +138,16 @@ func capturar() -> void:
 			var objetivo: String = sector.acceso
 			if vista == "abierto":
 				objetivo = {"faros": "conector_faros", "motor": "monitor_temperatura"}[zona]
-			escena.ubicar_jugador(objetivo)
+			if vista != "animacion":
+				escena.ubicar_jugador(objetivo)
 			await physics_frame
 			await physics_frame
-			var abierto := vista == "abierto"
-			if sector.abierta != abierto or not comprobar_pieza(escena, objetivo):
+			var giro: Vector3 = sector.bisagra.rotation_degrees
+			var destino: Vector3 = sector.giro_abierto
+			var giro_correcto := (not giro.is_zero_approx() and not giro.is_equal_approx(destino)) \
+				if vista == "animacion" else giro.is_equal_approx(destino if vista == "abierto" else Vector3.ZERO)
+			if sector.abierta != (vista != "cerrado") or not giro_correcto \
+					or (vista != "animacion" and not comprobar_pieza(escena, objetivo)):
 				fallar("El estado o el encuadre de la zona no corresponde a la vista %s." % vista)
 				return
 		elif not comprobar_estado(escena, sector, vista):
@@ -149,11 +162,6 @@ func capturar() -> void:
 			escena.get_node("AlineacionPanel").hide()
 			escena.get_node("AlternarPanel").hide()
 			escena.set_process(false)
-		await physics_frame
-		await physics_frame
-		if zona.is_empty() and not comprobar_encuadre(escena, vista, menu):
-			fallar("El encuadre no corresponde a la vista %s." % vista)
-			return
 		var triangulos := 0
 		for nodo in escena.find_children("*", "MeshInstance3D", true, false):
 			if nodo.mesh != null:
@@ -161,6 +169,29 @@ func capturar() -> void:
 		print("Triángulos de malla (incluidas herramientas ocultas): ", triangulos)
 		if triangulos >= 80000:
 			fallar("La escena supera el presupuesto de triángulos.")
+			return
+	if args.size() >= 8:
+		var jugador := escena.get_node_or_null("Jugador") as CharacterBody3D
+		if jugador == null:
+			fallar("La escena no tiene un nodo Jugador.")
+			return
+		jugador.set_physics_process(false)
+		jugador.position = Vector3(float(args[4]), float(args[5]), float(args[6]))
+		jugador.rotation_degrees.y = float(args[7])
+		var camara: Camera3D = jugador.get_node("Camara")
+		if args.size() == 9:
+			camara.rotation_degrees.x = float(args[8])
+		elif vista in ["cerrado", "abierto", "danado"]:
+			var id := pieza_gabinete(vista, menu)
+			camara.rotation = Vector3.ZERO
+			var objetivo: Vector3 = camara.to_local(sector.piezas[id].global_position)
+			camara.rotation.x = atan2(objetivo.y, -objetivo.z)
+		print("Cámara ", camara.global_position, ", giro ", args[7], "°, inclinación ", camara.rotation_degrees.x, "°")
+	if zona.is_empty() and not vista.is_empty():
+		await physics_frame
+		await physics_frame
+		if not comprobar_encuadre(escena, vista, menu):
+			fallar("El encuadre no corresponde a la vista %s." % vista)
 			return
 	if menu:
 		if sector == null or not escena.has_method("abrir_menu"):

@@ -13,37 +13,56 @@ func _ready() -> void:
 	# y [0.866,1.056], z [5.480,5.524]. El frente mira a +Z.
 	for id in ["faro_izquierdo", "faro_derecho"]:
 		var izquierdo: bool = id == "faro_izquierdo"
+		# El alcance toca el volumen del casco en z=5.635 antes de llegar al cristal del FBX.
+		# El volumen seleccionable sobresale del casco y la óptica queda sobre el faro real.
 		var faro := pieza(self, id, "Faro izquierdo" if izquierdo else "Faro derecho",
-			Vector3(-0.072, 0, -0.932 if izquierdo else 0.918),
-			Vector3(0.105, 0.21, 0.39), FONDO)
-		lentes[id] = caja(faro, Vector3(0.057, 0, 0), Vector3(0.022, 0.158, 0.33), MARFIL)
-	chispa = caja(piezas.faro_izquierdo, Vector3(0.086, 0.12, 0), Vector3(0.025, 0.11, 0.025),
+			Vector3(-0.052, 0, -0.932 if izquierdo else 0.918),
+			Vector3(0.118, 0.192, 0.37), FONDO)
+		faro.superficie.visible = false
+		var aro := metal(cilindro(faro, Vector3(-0.055, 0, 0), 0.09, 0.038, MARFIL, 24), 0.68)
+		aro.rotation_degrees.z = 90
+		aro.scale.z = 2.04
+		var reflector := metal(cilindro(faro, Vector3(-0.031, 0, 0), 0.079, 0.02, Color("#626e77"), 24))
+		reflector.rotation_degrees.z = 90
+		reflector.scale.z = 2.03
+		var lente := cilindro(faro, Vector3(-0.015, 0, 0), 0.073, 0.019, MARFIL, 24)
+		lente.rotation_degrees.z = 90
+		lente.scale.z = 2.02
+		lente.material_override.roughness = 0.21
+		lente.material_override.emission_energy_multiplier = 0.53
+		lentes[id] = lente
+	chispa = caja(piezas.faro_izquierdo, Vector3(0.012, 0.105, 0), Vector3(0.021, 0.075, 0.021),
 		Color("#ffd37a"))
 	chispa.rotation_degrees.x = 35
 	chispa.material_override.emission_enabled = true
 	chispa.material_override.emission = Color("#ffd37a")
 
-	caja(self, Vector3(0.025, 0.05, 0), Vector3(0.07, 0.44, 1.22), FONDO)
+	var ancho := 0.79
+	var alto := 0.33
+	metal(caja(self, Vector3(0.015, 0.085, 0), Vector3(0.04, alto, ancho), FONDO))
 	for lado in [-1, 1]:
-		caja(self, Vector3(0.09, 0.05, lado * 0.595), Vector3(0.16, 0.44, 0.03), ACERO)
-		caja(self, Vector3(0.09, 0.05 + lado * 0.205, 0), Vector3(0.16, 0.03, 1.16), ACERO)
+		metal(caja(self, Vector3(0.071, 0.085, lado * 0.386), Vector3(0.12, alto, 0.018), ACERO))
+		metal(caja(self, Vector3(0.071, 0.085 + lado * 0.154, 0), Vector3(0.12, 0.022, ancho), ACERO))
 
-	var conector := pieza(self, "conector_faros", "Conector del circuito", Vector3(0.104, 0.05, -0.36),
-		Vector3(0.09, 0.15, 0.24), Color("#6c8490"))
-	for altura in [-0.04, 0.04]:
-		cilindro(conector, Vector3(0.049, altura, 0), 0.014, 0.029, MARFIL).rotation_degrees.z = 90
-	fusible = pieza(self, "fusible_faros", "Fusible", Vector3(0.105, 0.05, 0),
-		Vector3(0.09, 0.16, 0.19), NARANJA)
-	var rele := pieza(self, "rele_faros", "Relé de faros", Vector3(0.105, 0.05, 0.35),
-		Vector3(0.09, 0.16, 0.24), ACERO)
-	rotulo(rele, Vector3(0.049, 0, 0), "RELÉ", 0.0014)
-	bisagra = Node3D.new()
-	bisagra.position = Vector3(0.19, 0.27, 0)
-	add_child(bisagra)
-	var tapa := pieza(bisagra, acceso, "Caja de fusibles", Vector3(0, -0.22, 0),
-		Vector3(0.045, 0.44, 1.22), ACERO)
-	rotulo(tapa, Vector3(0.025, 0, 0), "CAJA DE FUSIBLES", 0.0020)
-	caja(tapa, Vector3(0.027, -0.17, 0), Vector3(0.025, 0.026, 0.19), MARFIL)
+	var conector := pieza(self, "conector_faros", "Conector del circuito", Vector3(0.071, 0.08, -0.262),
+		Vector3(0.078, 0.108, 0.151), Color("#475662"))
+	for altura in [-0.027, 0.027]:
+		metal(cilindro(conector, Vector3(0.039, altura, 0), 0.011, 0.016, MARFIL)).rotation_degrees.z = 90
+	fusible = pieza(self, "fusible_faros", "Fusibles", Vector3(0.069, 0.08, 0),
+		Vector3(0.071, 0.195, 0.293), FONDO)
+	var colores := [Color("#d45246"), Color("#3e8ab6"), Color("#e8bc4b"), Color("#69a57e")]
+	for fila in range(2):
+		for columna in range(colores.size()):
+			var centro := Vector3(0.043, (fila - 0.5) * 0.075, (columna - 1.5) * 0.065)
+			caja(fusible, centro, Vector3(0.026, 0.046, 0.046), colores[columna])
+			for lado in [-1, 1]:
+				metal(caja(fusible, centro + Vector3(0.012, lado * 0.009, 0),
+					Vector3(0.005, 0.006, 0.028), MARFIL))
+	var rele := pieza(self, "rele_faros", "Relé de faros", Vector3(0.078, 0.08, 0.252),
+		Vector3(0.087, 0.126, 0.132), ACERO)
+	rotulo(rele, Vector3(0.045, 0, 0), "RELÉ", 0.00066)
+	tapa_superior("Caja de fusibles", Vector3(0.143, 0.25, 0), alto, ancho, "⚠  ELÉCTRICO")
+
 
 
 func reflejar_estado(estado: Dictionary, falla: bool, inmediato := false) -> void:
@@ -54,7 +73,8 @@ func reflejar_estado(estado: Dictionary, falla: bool, inmediato := false) -> voi
 		material.albedo_color = MARFIL if material.emission_enabled else Color("#63747c")
 		material.emission = Color("#fff0bd")
 	chispa.visible = estado.get("chispa", false)
-	fusible.superficie.material_override.albedo_color = FONDO if estado.get("fusible_quemado", false) else NARANJA
+	fusible.superficie.material_override.albedo_color = (
+		Color("#692d27") if estado.get("fusible_quemado", false) else FONDO)
 	continuidad = estado.get("continuidad_medida", false)
 
 

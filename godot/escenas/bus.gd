@@ -129,6 +129,11 @@ func ubicar_jugador(componente: String) -> void:
 		return
 	var objetivo: Node3D = zona_activa.piezas[componente]
 	var origen := zona_activa.to_global(Vector3(1.8, 0, 0))
+	if zona_activa == $Faros or zona_activa == $Motor:
+		var centro := zona_activa.to_local(objetivo.global_position)
+		var desnivel: float = jugador.camara.position.y - objetivo.global_position.y
+		var distancia := sqrt(maxf(0.0, 1.6 * 1.6 - desnivel * desnivel))
+		origen = zona_activa.to_global(centro + Vector3(distancia, 0, 0))
 	jugador.ubicar(Vector3(origen.x, 0, origen.z))
 	if zona_activa == $Sector:
 		jugador.global_position.z = objetivo.global_position.z
@@ -228,7 +233,8 @@ func mostrar_estado(inmediato := false) -> void:
 	orden.tooltip_text = orden.text
 	lateral.get_node("Indicios").text = "\n".join(lineas)
 	var falla: bool = motor.hay_problemas() or motor.fin() == "falta-critica"
-	zona_activa.reflejar_estado(estado, falla, inmediato or modo_captura)
+	# La captura cambia el encuadre. Las acciones conservan el Tween para mostrar fallos de apertura.
+	zona_activa.reflejar_estado(estado, falla, inmediato)
 	actualizar_leds()
 	actualizar_hud()
 	resumen.mostrar(motor)
@@ -368,8 +374,13 @@ func recibir_accion(accion: Dictionary) -> void:
 				if datos.zona == "motor":
 					actualizar_leds()
 		"inspeccionar":
-			if not menu_pieza.visible and is_instance_valid(pieza_apuntada):
-				abrir_menu(pieza_apuntada)
+			if not menu_pieza.visible and jugador.activo:
+				# El aviso usa el rayo del último paso físico. El clic puede llegar antes
+				# del primer paso o justo después de mover la cámara.
+				alcance.force_raycast_update()
+				var pieza := alcance.get_collider() as Interactuable
+				if pieza != null:
+					abrir_menu(pieza)
 		"elegir-accion":
 			elegir_accion(int(accion.valor) - 1, accion.get("fuente_entrada", "teclado"))
 		"cancelar":

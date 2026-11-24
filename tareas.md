@@ -126,9 +126,9 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-96 S — Menú contextual en pantalla junto a la mira, con lógica pura `menu_pieza.gd` (RF-29, 30, 31) — Hecho cuando: pruebas de la lógica y captura con el menú abierto sobre el gabinete.
 - [x] T-97 S — Campo `requiere_panel`, ejecución inmediata de diagnóstico y aviso central (RF-30, 31) — Hecho cuando: prueba de que inspeccionar abre la puerta sin confirmar y reponer espera el panel.
 - [x] T-98 S — Pantalla de órdenes de servicio y campo `zona` (RF-32) — Hecho cuando: prueba lista los escenarios válidos y la escena arranca el elegido.
-- [ ] T-99 S — Zona de faros y escenario `faros.json` (RF-33) — Hecho cuando: ruta ideal pasa en prueba y captura de la zona.
-- [ ] T-100 S — Zona del motor eléctrico y escenario `motor.json` con falta crítica sin bloqueo (RF-33) — Hecho cuando: ruta ideal y falta crítica pasan en prueba y captura.
+- [x] T-99 S — Zona de faros y escenario `faros.json` (RF-33) — Hecho cuando: ruta ideal pasa en prueba y captura de la zona.
+- [x] T-100 S — Zona del motor eléctrico y escenario `motor.json` con falta crítica sin bloqueo (RF-33) — Hecho cuando: ruta ideal y falta crítica pasan en prueba y captura.
 - [x] T-101 S — Interior y cabina con entrada por la puerta de pasajeros (RF-33) — Hecho cuando: prueba de entrada y salida y captura de la cabina.
 - [ ] T-102 S — Recorrido manual de las cuatro órdenes, README y checklist — Hecho cuando: ejecutable exportado completa cada orden.
-- [ ] T-103 S — Prueba de flujo real de las tapas (clic, Inspeccionar, animación) y corrección de por qué no abren en faros y motor (RF-31) — Hecho cuando: la prueba pasa en faros, motor y aislamiento.
-- [ ] T-104 S — Rehacer el aspecto de faros y motor: tapas integradas, interior iluminado y rótulos limpios (RF-33) — Hecho cuando: capturas a 1280x720 cerradas, abiertas y a mitad de animación revisadas.
+- [x] T-103 S — Prueba de flujo real de las tapas (clic, Inspeccionar, animación) y corrección de por qué no abren en faros y motor (RF-31) — Hecho cuando: la prueba pasa en faros, motor y aislamiento.
+- [x] T-104 S — Rehacer el aspecto de faros y motor: tapas integradas, interior iluminado y rótulos limpios (RF-33) — Hecho cuando: capturas a 1280x720 cerradas, abiertas y a mitad de animación revisadas.
