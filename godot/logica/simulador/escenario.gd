@@ -5,7 +5,7 @@ const RutasContenido = preload("res://logica/rutas_contenido.gd")
 const COMPONENTES := ["compuerta", "monitor", "cables", "terminal", "bateria",
 	"caja_fusibles", "fusible_faros", "conector_faros", "faro_izquierdo", "faro_derecho", "rele_faros",
 	"tapa_motor", "motor_traccion", "inversor_motor", "bomba_motor", "radiador_motor",
-	"monitor_temperatura", "abrazadera_motor"]
+	"monitor_temperatura", "abrazadera_motor", "fusibles_cabina"]
 const ZONAS := ["gabinete", "faros", "motor", "cabina"]
 const FUENTE_BZR := "Volvo Buses, BZR Low Entry Eléctrico (página pública)"
 const AISLAMIENTO := "escenarios/aislamiento.json"

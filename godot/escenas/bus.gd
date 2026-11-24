@@ -54,9 +54,13 @@ var salida_hasta := 0
 var panel_oculto := false
 var modo_captura := false
 var zona_activa: Node3D
+var navegando := false
 var seguridad_panel := {}
 var fuente_seguridad := ""
-@onready var zonas := {"gabinete": $Sector, "cabina": $Sector, "faros": $Faros, "motor": $Motor}
+@onready var interior := $Interior
+@onready var puerta_pasajeros: Interactuable = $PuertaPasajeros
+@onready var negro: ColorRect = $Fundido/Negro
+@onready var zonas := {"gabinete": $Sector, "cabina": interior, "faros": $Faros, "motor": $Motor}
 @onready var jugador := $Jugador
 @onready var alcance: RayCast3D = $Jugador/Camara/Alcance
 @onready var resumen := $Interfaz/Lateral/Resumen
@@ -99,11 +103,13 @@ func _ready() -> void:
 			causa_marcada = causa)
 	duracion_aviso.timeout.connect(resultado.hide)
 	zona_activa = zonas[datos.zona]
+	puerta_pasajeros.componente = "puerta_pasajeros"
+	puerta_pasajeros.nombre = "Puerta de pasajeros"
 	for zona in [$Faros, $Motor]:
 		if zona != zona_activa:
 			zona.reflejar_estado({}, false, true)
 	if not modo_captura:
-		ubicar_jugador("monitor" if datos.zona == "cabina" else zona_activa.acceso)
+		ubicar_jugador(zona_activa.acceso)
 	lateral.get_node("Continuar").pressed.connect(func():
 		panel.conexion.reanudar()
 		ultimo_ms = Time.get_ticks_msec()
@@ -118,13 +124,49 @@ func _ready() -> void:
 
 
 func ubicar_jugador(componente: String) -> void:
+	if zona_activa == interior:
+		ubicar_interior(interior.CABINA, componente)
+		return
 	var objetivo: Node3D = zona_activa.piezas[componente]
 	var origen := zona_activa.to_global(Vector3(1.8, 0, 0))
-	jugador.global_position = Vector3(origen.x, 0, origen.z)
+	jugador.ubicar(Vector3(origen.x, 0, origen.z))
 	if zona_activa == $Sector:
 		jugador.global_position.z = objetivo.global_position.z
-	jugador.look_at(Vector3(objetivo.global_position.x, jugador.global_position.y, objetivo.global_position.z))
-	jugador.camara.look_at(objetivo.global_position)
+	apuntar_jugador(objetivo.global_position)
+
+
+func ubicar_interior(origen: Vector3, componente: String) -> void:
+	jugador.ubicar(interior.to_global(origen), interior.position,
+		Rect2(interior.MINIMO, interior.MAXIMO - interior.MINIMO))
+	apuntar_jugador(interior.piezas[componente].global_position)
+
+
+func apuntar_jugador(objetivo: Vector3) -> void:
+	jugador.look_at(Vector3(objetivo.x, jugador.global_position.y, objetivo.z))
+	jugador.camara.look_at(objetivo)
+
+
+func navegar(destino: String) -> void:
+	navegando = true
+	cerrar_menu()
+	jugador.activo = false
+	negro.modulate.a = 0.0
+	negro.show()
+	var fundido := create_tween()
+	fundido.tween_property(negro, "modulate:a", 1.0, 0.2)
+	fundido.tween_callback(func():
+		if destino == "subir":
+			ubicar_interior(interior.ENTRADA, "puerta_salida")
+		else:
+			jugador.ubicar(Vector3(-2.65, 0, puerta_pasajeros.global_position.z))
+			apuntar_jugador(puerta_pasajeros.global_position))
+	fundido.tween_property(negro, "modulate:a", 0.0, 0.2)
+	await fundido.finished
+	negro.hide()
+	navegando = false
+	if not pausa_visible:
+		jugador.activo = true
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func ejecutar(id: String, fuente: String) -> void:
@@ -167,14 +209,14 @@ func mostrar_resultado(decision: Dictionary) -> void:
 
 func avisar(texto: String) -> void:
 	resultado.text = texto
-	resultado.show()
+	resultado.visible = not menu_pieza.visible
 	duracion_aviso.start()
 
 
 func mostrar_estado(inmediato := false) -> void:
 	var estado: Dictionary = motor.estado()
 	var terminado: bool = not motor.fin().is_empty()
-	jugador.activo = not terminado and not pausa_visible and not menu_pieza.visible
+	jugador.activo = not terminado and not pausa_visible and not navegando and not menu_pieza.visible
 	if terminado:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var lineas := PackedStringArray()
@@ -232,18 +274,28 @@ func reintentar() -> void:
 
 
 func abrir_menu(pieza: Interactuable) -> void:
-	if motor == null or not motor.fin().is_empty() or pausa_visible or not accion_pendiente.is_empty():
+	if motor == null or not motor.fin().is_empty() or pausa_visible or navegando or not accion_pendiente.is_empty():
 		return
 	var opciones: Array[Dictionary] = []
 	var causas: Array = []
 	var lectura := "[MUESTRA] Sin falla en esta orden"
-	if pieza.zona == zona_activa:
+	match pieza.componente:
+		"puerta_pasajeros":
+			opciones.append(MenuPieza.navegacion("subir", "Subir al autobús"))
+			lectura = ""
+		"puerta_salida":
+			opciones.append(MenuPieza.navegacion("bajar", "Bajar del autobús"))
+			lectura = ""
+	if opciones.is_empty() and pieza.zona == zona_activa:
 		opciones = MenuPieza.entradas(motor, datos, pieza.componente)
 		if zona_activa != $Sector or not opciones.is_empty():
 			lectura = zona_activa.lectura_pieza(pieza.componente)
 		if motor.estado().get("inspeccionado", motor.estado().get("sintomas_revisados", false)):
 			causas = datos.causas
+	elif opciones.is_empty() and pieza.zona == interior:
+		lectura = interior.lectura_pieza(pieza.componente)
 	salida_hasta = 0
+	resultado.hide()
 	menu_pieza.abrir(pieza.nombre, lectura, opciones, causas, causa_marcada, estado_pieza(pieza))
 	jugador.activo = false
 	$Apuntado.hide()
@@ -266,8 +318,8 @@ func estado_pieza(pieza: Interactuable) -> Dictionary:
 			if not estado.get(componente, true):
 				return {"texto": "Falla", "color": "rojo"}
 		"monitor":
-			if datos.zona == "cabina":
-				return {"texto": "Falla", "color": "rojo"}
+			if pieza.zona == interior:
+				return {"texto": "Falla", "color": "rojo"} if interior.falla_red else {"texto": "Correcto", "color": "verde"}
 			match zona_activa.lectura:
 				"Rojo": return {"texto": "Falla", "color": "rojo"}
 				"Ámbar": return {"texto": "Alerta", "color": "ambar"}
@@ -281,7 +333,7 @@ func cerrar_menu() -> void:
 	accion_pendiente = ""
 	menu_pieza.cerrar()
 	jugador.mostrar_herramienta("")
-	if not pausa_visible and motor != null and motor.fin().is_empty():
+	if not navegando and not pausa_visible and motor != null and motor.fin().is_empty():
 		jugador.activo = true
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -291,7 +343,9 @@ func elegir_accion(indice: int, fuente: String) -> void:
 			or indice < 0 or indice >= menu_pieza.entradas.size():
 		return
 	var entrada: Dictionary = menu_pieza.entradas[indice]
-	if entrada.requiere_panel:
+	if entrada.get("navegacion", false):
+		navegar(entrada.id)
+	elif entrada.requiere_panel:
 		accion_pendiente = entrada.id
 		if panel.conexion.fuente_panel() == "virtual":
 			panel_oculto = false
@@ -357,7 +411,7 @@ func actualizar_panel(ahora: int) -> void:
 	var pausa: bool = panel.conexion.pausado()
 	if pausa != pausa_visible:
 		pausa_visible = pausa
-		jugador.activo = not pausa and motor != null and motor.fin().is_empty()
+		jugador.activo = not pausa and not navegando and motor != null and motor.fin().is_empty()
 		if pausa:
 			cerrar_menu()
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -400,7 +454,7 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 
 func _input(evento: InputEvent) -> void:
-	if motor == null or not evento.is_pressed() or evento.is_echo():
+	if navegando or motor == null or not evento.is_pressed() or evento.is_echo():
 		return
 	if evento is InputEventKey:
 		if evento.keycode == KEY_ESCAPE and not menu_pieza.visible:

@@ -27,4 +27,7 @@ static func ejecutar() -> bool:
 	if not Practica.opciones(motor, datos, "bateria").has("confirmar_solucion"):
 		return false
 	var comunicacion: Dictionary = Escenario.cargar("escenarios/comunicacion.json").escenario
-	return Practica.opciones(Motor.new(comunicacion), comunicacion, "monitor").size() == 3
+	var red := Motor.new(comunicacion)
+	return Practica.opciones(red, comunicacion, "monitor").keys() == ["revisar_sintomas"] \
+		and Practica.opciones(red, comunicacion, "cables").keys() == [
+			"seleccionar_otro_modulo", "confirmar_diagnostico"]

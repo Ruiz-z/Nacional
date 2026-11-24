@@ -7,6 +7,8 @@ const Llave = preload("res://assets/modelos/herramientas/adjustable_wrench.glb")
 const Flexometro = preload("res://assets/modelos/herramientas/tape_measure.glb")
 
 var activo := true
+var origen_zona := Vector3.ZERO
+var limites_zona := Movimiento.TALLER
 var entrada: RefCounted
 var teclas := {}
 var mover_stick := false
@@ -113,9 +115,17 @@ func _physics_process(delta: float) -> void:
 	velocity = Vector3(horizontal.x, 0.0 if is_on_floor() else velocity.y - gravedad * delta,
 		horizontal.z)
 	move_and_slide()
-	var limitada := Movimiento.limitar(position)
+	var limitada := origen_zona + Movimiento.limitar(position - origen_zona, limites_zona)
 	if limitada != position:
 		position = limitada
+
+
+func ubicar(destino: Vector3, origen := Vector3.ZERO, limites := Movimiento.TALLER) -> void:
+	origen_zona = origen
+	limites_zona = limites
+	velocity = Vector3.ZERO
+	global_position = destino
+	reset_physics_interpolation()
 
 
 func eje_tecla(direccion: String) -> float:

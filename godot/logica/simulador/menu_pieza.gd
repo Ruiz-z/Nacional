@@ -20,3 +20,8 @@ static func entradas(motor: RefCounted, escenario: Dictionary, componente: Strin
 			"requiere_panel": requiere_panel,
 		})
 	return resultado
+
+
+static func navegacion(id: String, titulo: String) -> Dictionary:
+	return {"id": id, "titulo": titulo, "descripcion": "", "ejecucion": "inmediata",
+		"costo": "—", "tiempo": "—", "riesgo": "—", "requiere_panel": false, "navegacion": true}

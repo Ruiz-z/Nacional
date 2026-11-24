@@ -1,7 +1,8 @@
 extends SceneTree
 
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
-# Zonas nuevas: [ancho alto] comunicacion|faros|motor [cerrado|abierto] [menu] [--verificar]
+# Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
+# Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
 func _initialize() -> void:
 	call_deferred("capturar")
@@ -16,18 +17,30 @@ func capturar() -> void:
 	if menu:
 		args.remove_at(args.size() - 1)
 	var vista := ""
-	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "danado"]:
+	if args.size() > 2 and args[-1] in ["entrada", "cerrado", "abierto", "danado", "tablero", "puerta"]:
 		vista = args[-1]
 		args.remove_at(args.size() - 1)
 	var zona := ""
-	if args.size() > 2 and args[-1] in ["comunicacion", "faros", "motor"]:
+	if args.size() > 2 and args[-1] in ["cabina", "interior", "comunicacion", "faros", "motor"]:
 		zona = args[-1]
 		args.remove_at(args.size() - 1)
-		if vista.is_empty():
-			vista = "abierto" if zona == "comunicacion" else "cerrado"
-		if vista not in ["cerrado", "abierto"] or args.size() not in [2, 4] \
-				or (zona == "comunicacion" and vista != "abierto"):
-			fallar("Usa [ancho alto] comunicacion|faros|motor [cerrado|abierto].")
+		if zona == "comunicacion":
+			zona = "cabina"
+			if vista == "abierto":
+				vista = "tablero"
+		if zona in ["cabina", "interior"]:
+			if vista.is_empty():
+				vista = "tablero" if zona == "cabina" else "puerta"
+			if vista not in ["tablero", "puerta"]:
+				fallar("Usa cabina|interior [tablero|puerta].")
+				return
+		elif vista.is_empty():
+			vista = "cerrado"
+		elif vista not in ["cerrado", "abierto"]:
+			fallar("Usa faros|motor [cerrado|abierto].")
+			return
+		if args.size() not in [2, 4]:
+			fallar("Indica la zona después de las dimensiones opcionales.")
 			return
 	if args.size() not in [2, 4, 8, 9]:
 		fallar("Uso: -- <escena res://> <salida.png> [ancho alto [x y z yaw [pitch] [entrada|cerrado|abierto|danado]]] [menu] [--verificar]")
@@ -65,7 +78,8 @@ func capturar() -> void:
 			return
 		escena.modo_captura = true
 	if not zona.is_empty():
-		escena.archivo = "escenarios/%s.json" % zona
+		if zona != "interior":
+			escena.archivo = "escenarios/%s.json" % ("comunicacion" if zona == "cabina" else zona)
 		escena.get_node("Jugador").set_physics_process(false)
 	vp.add_child(escena)
 
@@ -90,15 +104,32 @@ func capturar() -> void:
 			fallar("El simulador no se inicializó.")
 			return
 		if vista in ["abierto", "danado"]:
-			escena.ejecutar("revisar_sintomas" if zona == "comunicacion" else "inspeccionar", "teclado")
+			escena.ejecutar("inspeccionar", "teclado")
 		if vista == "danado":
 			escena.ejecutar("forzar_pieza", "teclado")
-		if not zona.is_empty():
+		if zona in ["cabina", "interior"]:
+			sector = escena.interior
+			var objetivo := "monitor"
+			if vista == "puerta":
+				if menu:
+					objetivo = "puerta_salida"
+					escena.ubicar_interior(sector.ENTRADA, objetivo)
+				else:
+					escena.ubicar_interior(sector.ENTRADA, "cables")
+					escena.apuntar_jugador(sector.to_global(Vector3(0, 1.32, 4.6)))
+			else:
+				escena.ubicar_interior(sector.CABINA, objetivo)
+			await physics_frame
+			await physics_frame
+			if sector.falla_red != (zona == "cabina") \
+					or ((vista == "tablero" or menu) and not comprobar_pieza(escena, objetivo)):
+				fallar("El estado o encuadre del interior no corresponde a la vista.")
+				return
+		elif not zona.is_empty():
 			sector = escena.zona_activa
 			var objetivo: String = sector.acceso
 			if vista == "abierto":
-				objetivo = {"faros": "conector_faros", "motor": "monitor_temperatura",
-					"comunicacion": "monitor"}[zona]
+				objetivo = {"faros": "conector_faros", "motor": "monitor_temperatura"}[zona]
 			escena.ubicar_jugador(objetivo)
 			await physics_frame
 			await physics_frame

@@ -45,7 +45,7 @@
     },
     "seleccionar_otro_modulo": {
       "titulo": "Seleccionar otro módulo",
-      "componente": "monitor",
+      "componente": "cables",
       "previas": {
         "sintomas_revisados": true
       },
@@ -60,7 +60,7 @@
     "confirmar_diagnostico": {
       "titulo": "Confirmar el diagnóstico",
       "requiere_panel": true,
-      "componente": "monitor",
+      "componente": "cables",
       "previas": {
         "sintomas_revisados": true
       },

@@ -130,3 +130,5 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [ ] T-100 S — Zona del motor eléctrico y escenario `motor.json` con falta crítica sin bloqueo (RF-33) — Hecho cuando: ruta ideal y falta crítica pasan en prueba y captura.
 - [ ] T-101 S — Interior y cabina con entrada por la puerta de pasajeros (RF-33) — Hecho cuando: prueba de entrada y salida y captura de la cabina.
 - [ ] T-102 S — Recorrido manual de las cuatro órdenes, README y checklist — Hecho cuando: ejecutable exportado completa cada orden.
+- [ ] T-103 S — Prueba de flujo real de las tapas (clic, Inspeccionar, animación) y corrección de por qué no abren en faros y motor (RF-31) — Hecho cuando: la prueba pasa en faros, motor y aislamiento.
+- [ ] T-104 S — Rehacer el aspecto de faros y motor: tapas integradas, interior iluminado y rótulos limpios (RF-33) — Hecho cuando: capturas a 1280x720 cerradas, abiertas y a mitad de animación revisadas.
