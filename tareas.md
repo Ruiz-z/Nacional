@@ -3,7 +3,7 @@
 Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba. Formato: `[ ] T-n — qué (RF) — Hecho cuando`. Responsable: S = sistemas, E = electrónica.
 
 ## 0. Cimientos
-- [ ] T-01 S — Crear proyecto Godot 4.7.2, carpetas del plan y `tests/run.gd` que ejecuta todos los `test_*.gd` y devuelve código de salida — Hecho cuando: `godot --headless --path godot -s tests/run.gd` sale con 0 y una prueba de ejemplo.
+- [x] T-01 S — Crear proyecto Godot 4.7.2, carpetas del plan y `tests/run.gd` que ejecuta todos los `test_*.gd` y devuelve código de salida — Hecho cuando: `godot --headless --path godot -s tests/run.gd` sale con 0 y una prueba de ejemplo.
 - [ ] T-02 S — Probar plugin SQLite en 4.7.2 (abrir, crear tabla, leer) — Hecho cuando: una prueba lo demuestra o se documenta el fallo y la alternativa.
 - [ ] T-03 S — Escribir `datos/esquema` con las 7 tablas, creación y copia de respaldo (tablero RF-1) — Hecho cuando: prueba crea la BD vacía y restaura el respaldo.
 - [ ] T-04 S — Redactar `docs/modelo-datos.md` desde el esquema — Hecho cuando: lista tablas y campos como el plan.
