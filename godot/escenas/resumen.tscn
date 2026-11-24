@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://escenas/resumen.gd" id="1"]
+
+[node name="Resumen" type="VBoxContainer"]
+visible = false
+script = ExtResource("1")
+
+[node name="Detalle" type="RichTextLabel" parent="."]
+custom_minimum_size = Vector2(420, 150)
+
+[node name="Pregunta" type="Label" parent="."]
+
+[node name="Reflexion" type="LineEdit" parent="."]
+
+[node name="Guardar" type="Button" parent="."]
+text = "Guardar reflexión y ver ruta ideal"
+
+[node name="Reintentar" type="Button" parent="."]
+text = "Reintentar con variante"

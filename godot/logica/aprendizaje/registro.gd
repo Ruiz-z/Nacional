@@ -3,16 +3,28 @@ extends RefCounted
 const Acceso = preload("res://logica/datos/acceso_sqlite.gd")
 const Dominio = preload("res://logica/aprendizaje/dominio.gd")
 
+const INSERTAR := """
+	INSERT INTO intento (tecnico, competencia, item, formato, dificultad, respuesta,
+		valor, peso, resultado, tipo_error, tiempo_ms, fuente_entrada, momento,
+		reloj_sim, version_contenido)
+	VALUES ((SELECT id FROM tecnico WHERE alias = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+"""
+
 static func guardar(base: String, alias: String, intento: Dictionary,
 		consultar: Callable = Acceso.consultar) -> bool:
+	var valores := preparar(alias, intento)
+	return not valores.is_empty() and consultar.call(base, INSERTAR, valores) != null
+
+
+static func preparar(alias: String, intento: Dictionary) -> Array:
 	for campo in ["competencia", "item", "formato", "dificultad", "respuesta", "resultado",
 			"fuente_entrada", "momento", "reloj_sim", "version_contenido"]:
 		if not intento.get(campo) is String:
-			return false
+			return []
 	if not intento.get("tiempo_ms") is int or intento.tiempo_ms < 0:
-		return false
+		return []
 	if not Dominio.PESOS.has(intento.dificultad) or intento.momento not in ["pre", "post", "retest", "practica"]:
-		return false
+		return []
 	var practica: bool = intento.formato != "opcion-multiple"
 	var valor: float = Dominio.valor_pregunta(intento.resultado == "correcto")
 	var peso := Dominio.peso(intento.dificultad, practica)
@@ -28,16 +40,11 @@ static func guardar(base: String, alias: String, intento: Dictionary,
 			if practica:
 				var puntaje: Variant = intento.get("valor")
 				if not (puntaje is float or puntaje is int) or not is_finite(puntaje):
-					return false
+					return []
 				valor = Dominio.valor_practica(puntaje)
-	return consultar.call(base, """
-		INSERT INTO intento (tecnico, competencia, item, formato, dificultad, respuesta,
-			valor, peso, resultado, tipo_error, tiempo_ms, fuente_entrada, momento,
-			reloj_sim, version_contenido)
-		VALUES ((SELECT id FROM tecnico WHERE alias = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-	""", [alias, intento.competencia, intento.item, intento.formato, intento.dificultad,
+	return [alias, intento.competencia, intento.item, intento.formato, intento.dificultad,
 		intento.respuesta, valor, peso, intento.resultado, tipo_error, intento.tiempo_ms,
-		intento.fuente_entrada, intento.momento, intento.reloj_sim, intento.version_contenido]) != null
+		intento.fuente_entrada, intento.momento, intento.reloj_sim, intento.version_contenido]
 
 
 static func leer(base: String, alias: String, consultar: Callable = Acceso.consultar) -> Variant:

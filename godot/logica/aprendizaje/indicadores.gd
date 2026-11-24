@@ -51,13 +51,17 @@ static func resumir(intentos: Array) -> Dictionary:
 	for item in tiempos:
 		tiempos[item] = tiempos[item][0] / tiempos[item][1]
 
-	var post := Dominio.promedio(evaluaciones.post)
+	var dominios := {}
+	for momento in evaluaciones:
+		if not evaluaciones[momento].is_empty():
+			dominios[momento] = Dominio.promedio(evaluaciones[momento])
 	var ganancia: Variant = "pendiente"
 	var retencion: Variant = "pendiente"
-	if not evaluaciones.pre.is_empty() and not evaluaciones.post.is_empty():
-		ganancia = Evaluacion.ganancia(Dominio.promedio(evaluaciones.pre), post)
-	if not evaluaciones.post.is_empty() and not evaluaciones.retest.is_empty():
-		retencion = Evaluacion.retencion(post, Dominio.promedio(evaluaciones.retest))
+	if dominios.has_all(["pre", "post"]):
+		ganancia = Evaluacion.ganancia(dominios.pre, dominios.post)
+	if dominios.has_all(["post", "retest"]):
+		retencion = Evaluacion.retencion(dominios.post, dominios.retest)
 	return {"ganancia": ganancia, "retencion": retencion, "ganancia_indicativa": true,
+		"dominios_evaluaciones": dominios,
 		"brechas": brechas, "faltas_criticas": faltas, "errores_recurrentes": recurrentes,
 		"tiempo_promedio_por_accion_ms": tiempos}

@@ -65,6 +65,7 @@ static func tecnico(base: String, alias: String, consultar: Callable = Acceso.co
 		"intentos": intentos, "eventos": eventos, "brechas": brechas, "faltas_criticas": faltas,
 		"estado": "sin_sesiones" if intentos.is_empty() and eventos.is_empty() and brechas.is_empty() else "con_sesiones",
 		"tiempos_por_escenario": tiempos, "retencion_simulada": true,
+		"ruta": ruta if ruta is Array else [],
 		"avance_ruta": {"completadas": int(perfil[0].microlecciones_hechas),
 			"pendientes": ruta.size() if ruta is Array else 0}}
 

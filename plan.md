@@ -48,7 +48,7 @@ Dominio, nivel y errores recurrentes se calculan al consultar a partir de `inten
 | Entrada | Una acción única (`entrada`) con mapeo en JSON | Leer teclas en cada escena: duplica reglas y rompe la intercambiabilidad panel/teclado. |
 | Panel físico | Plugin serial de Godot si pasa la prueba de 30 min | Puente Python por UDP: otro proceso que arrancar; se usa solo si el plugin falla. |
 | Panel virtual | Escena que emite los mismos JSON por el mismo bus de eventos | Eventos internos distintos: no probaría el protocolo. |
-| Asistente LLM | Ollama local opcional, RAG con FTS5 de SQLite | Embeddings y base vectorial: más dependencias y peso para una demo offline. |
+| Asistente LLM | Ollama local opcional, RAG con búsqueda por palabras clave en GDScript | Embeddings y base vectorial: más dependencias y peso para una demo offline. |
 | Reloj | Desplazamiento guardado en días, solo hacia adelante | Reloj del sistema operativo: no se puede demostrar la retención. |
 | Exportación | Windows y Linux con plantillas de Godot | Solo Linux: no cumple `entrega` RF-6; Windows queda declarado como no probado si no hay máquina. |
 

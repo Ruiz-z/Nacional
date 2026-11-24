@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://escenas/modo_demo.gd" id="1"]
+
+[node name="ModoDemo" type="VBoxContainer"]
+script = ExtResource("1")
+
+[node name="Estado" type="Label" parent="."]
+
+[node name="Adelantar" type="Button" parent="."]
+text = "Adelantar reloj 7 días"
+
+[node name="Restablecer" type="Button" parent="."]
+text = "Restablecer demo"
+
+[node name="Tablero" type="Button" parent="."]
+text = "Abrir tablero de la demo"
+
+[node name="Escenario" type="Button" parent="."]
+text = "Practicar en la demo"
+
+[node name="Aviso" type="Label" parent="."]

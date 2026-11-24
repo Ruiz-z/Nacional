@@ -43,8 +43,12 @@ func recibir(linea: String, fuente: String = "panel") -> Dictionary:
 
 
 func reiniciar_panel() -> void:
-	_secuencias.panel.clear()
-	_tiempos.panel.clear()
+	reiniciar_fuente("panel")
+
+
+func reiniciar_fuente(fuente: String) -> void:
+	_secuencias[fuente].clear()
+	_tiempos[fuente].clear()
 
 
 func errores() -> Array[Dictionary]:

@@ -1,6 +1,6 @@
 extends RefCounted
 
-const Base = preload("res://tests/base_tablero.gd")
+const Asistente = preload("res://logica/tablero/asistente.gd")
 
 class ModeloFalso:
 	extends RefCounted
@@ -15,28 +15,24 @@ class ModeloFalso:
 
 
 static func ejecutar() -> bool:
-	return Base.con_base(comprobar)
-
-
-static func comprobar(base: String) -> bool:
-	var asistente = load("res://logica/tablero/asistente.gd")
-	if asistente == null:
-		return false
-	var archivo := base + ".txt"
+	var asistente := Asistente.new()
+	var archivo := "user://fuente_asistente_%d.txt" % Time.get_ticks_usec()
 	var fuente := FileAccess.open(archivo, FileAccess.WRITE)
 	if fuente == null or not fuente.store_string("contexto ".repeat(500) + "El indicador muestra la carga simulada."):
 		return false
 	fuente.close()
-	if not asistente.indexar(base, [{"ruta": archivo, "cita": "[MUESTRA] Indicadores, p. 1"}], Base.consultar):
+	var indexado := asistente.indexar([{"ruta": archivo, "cita": "[MUESTRA] Indicadores, p. 1"}])
+	DirAccess.remove_absolute(archivo)
+	if not indexado:
 		return false
 	var modelo := ModeloFalso.new()
-	var respuesta: Dictionary = asistente.responder(base, "¿cárga?", modelo.generar,
-		{"alias": "T-01", "nombre": "dato ajeno"}, Base.consultar)
+	var respuesta: Dictionary = asistente.responder("¿CÁRGA?", modelo.generar,
+		{"alias": "T-01", "nombre": "dato ajeno"})
 	if respuesta.texto != "El indicador muestra la carga simulada." or respuesta.cita != "[MUESTRA] Indicadores, p. 1":
 		return false
-	respuesta = asistente.responder(base, "neumático NEAR *", modelo.generar, {}, Base.consultar)
+	respuesta = asistente.responder("¿Qué descarga? NEAR *", modelo.generar)
 	if respuesta.texto != "no tengo esa información" or modelo.llamadas != 1:
 		return false
 	modelo.inventar = true
-	respuesta = asistente.responder(base, "carga", modelo.generar, {}, Base.consultar)
+	respuesta = asistente.responder("carga", modelo.generar)
 	return respuesta.texto == "no tengo esa información" and respuesta.cita.is_empty()

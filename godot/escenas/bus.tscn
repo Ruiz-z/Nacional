@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://escenas/bus.gd" id="1"]
 [ext_resource type="PackedScene" path="res://escenas/panel_virtual.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://escenas/resumen.tscn" id="3"]
 
 [sub_resource type="StandardMaterial3D" id="carroceria"]
 albedo_color = Color(0.22, 0.49, 0.61, 1)
@@ -57,10 +58,41 @@ text = "Sector de práctica"
 [node name="Lateral" type="VBoxContainer" parent="Interfaz"]
 offset_left = 16.0
 offset_top = 16.0
+offset_right = 436.0
 
 [node name="Estado" type="Label" parent="Interfaz/Lateral"]
+autowrap_mode = 3
 
 [node name="Inspeccionar" type="Button" parent="Interfaz/Lateral"]
 text = "Inspeccionar sector"
 
-[node name="PanelVirtual" parent="Interfaz/Lateral" instance=ExtResource("2")]
+[node name="PanelVirtual" parent="Interfaz" instance=ExtResource("2")]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_right = -16.0
+offset_top = 16.0
+
+[node name="Conexion" type="Label" parent="Interfaz/Lateral"]
+
+[node name="Continuar" type="Button" parent="Interfaz/Lateral"]
+visible = false
+text = "Continuar con panel virtual"
+
+[node name="Causa" type="OptionButton" parent="Interfaz/Lateral"]
+visible = false
+
+[node name="Accion" type="OptionButton" parent="Interfaz/Lateral"]
+fit_to_longest_item = false
+text_overrun_behavior = 3
+visible = false
+
+[node name="Aviso" type="Label" parent="Interfaz/Lateral"]
+custom_minimum_size = Vector2(400, 0)
+autowrap_mode = 3
+
+[node name="Resumen" parent="Interfaz/Lateral" instance=ExtResource("3")]
+
+[node name="ConfirmarAccion" type="Button" parent="Interfaz/Lateral"]
+visible = false
+text = "Confirmar con teclado o ratón"

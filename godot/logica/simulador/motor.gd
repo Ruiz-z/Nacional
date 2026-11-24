@@ -176,7 +176,7 @@ func puntuar(decision: Dictionary) -> void:
 
 
 func marcar_causa(causa: String) -> bool:
-	if not _fin.is_empty() or causa not in _escenario.causas:
+	if not _fin.is_empty() or (not causa.is_empty() and causa not in _escenario.causas):
 		return false
 	_causa_marcada = causa
 	return true

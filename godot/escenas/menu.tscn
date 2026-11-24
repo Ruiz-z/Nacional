@@ -1,0 +1,49 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://escenas/menu.gd" id="1"]
+
+[node name="Menu" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Marco" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 16.0
+offset_right = -20.0
+offset_bottom = -16.0
+
+[node name="Volver" type="Button" parent="Marco"]
+visible = false
+text = "Volver al menú"
+
+[node name="Inicio" type="VBoxContainer" parent="Marco"]
+
+[node name="Titulo" type="Label" parent="Marco/Inicio"]
+theme_override_font_sizes/font_size = 26
+text = "Entrenamiento de taller"
+
+[node name="Entrada" type="Label" parent="Marco/Inicio"]
+
+[node name="Siguiente" type="Label" parent="Marco/Inicio"]
+
+[node name="Alias" type="LineEdit" parent="Marco/Inicio"]
+placeholder_text = "Alias T-00"
+
+[node name="Elegir" type="Button" parent="Marco/Inicio"]
+text = "Entrar con alias"
+
+[node name="Alta" type="Button" parent="Marco/Inicio"]
+text = "Registrar alias"
+
+[node name="Pasos" type="VBoxContainer" parent="Marco/Inicio"]
+
+[node name="Demo" type="Button" parent="Marco/Inicio"]
+text = "Modo demo"
+
+[node name="Aviso" type="Label" parent="Marco/Inicio"]
+autowrap_mode = 3

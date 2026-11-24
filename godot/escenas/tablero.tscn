@@ -1,0 +1,33 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://escenas/tablero.gd" id="1"]
+
+[node name="Tablero" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = -16.0
+offset_bottom = -12.0
+script = ExtResource("1")
+
+[node name="Vistas" type="HBoxContainer" parent="."]
+
+[node name="Tecnico" type="Button" parent="Vistas"]
+text = "Vista del técnico"
+
+[node name="Instructor" type="Button" parent="Vistas"]
+text = "Vista del instructor"
+
+[node name="Ayuda" type="Button" parent="Vistas"]
+text = "Fórmulas de los indicadores"
+toggle_mode = true
+
+[node name="Alias" type="OptionButton" parent="."]
+
+[node name="Contenido" type="ScrollContainer" parent="."]
+size_flags_vertical = 3
+
+[node name="Datos" type="VBoxContainer" parent="Contenido"]
+size_flags_horizontal = 3

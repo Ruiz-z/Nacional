@@ -53,3 +53,9 @@ func fuente_panel() -> String:
 
 func aviso() -> String:
 	return _aviso
+
+
+func etiqueta() -> String:
+	if pausado():
+		return aviso()
+	return "Panel físico" if fuente_panel() == "panel" else "Panel virtual"

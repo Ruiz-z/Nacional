@@ -70,39 +70,44 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 
 ## 5. simulador (escena)
 - [ ] T-57 S — Escena esquemática del bus y componentes inspeccionables (RF-10, 11) — Hecho cuando: se camina y se inspecciona con el control. — falta verificación manual
-- [ ] T-58 S — Menú de acciones del componente y selección de causa (RF-3, 16) — Hecho cuando: se juega el escenario con teclado y ratón (RF-12).
-- [ ] T-59 S — Indicador de estado del panel y pausa por desconexión (RF-14, 15) — Hecho cuando: demo manual con cable desconectado.
-- [ ] T-60 S — Pantalla de resumen y reintento — Hecho cuando: demo manual con error, recuperación y reintento.
+- [ ] T-58 S — Menú de acciones del componente y selección de causa (RF-3, 16) — Hecho cuando: se juega el escenario con teclado y ratón (RF-12). — falta verificación manual
+- [ ] T-59 S — Indicador de estado del panel y pausa por desconexión (RF-14, 15) — Hecho cuando: demo manual con cable desconectado. — falta verificación manual
+- [ ] T-60 S — Pantalla de resumen y reintento — Hecho cuando: demo manual con error, recuperación y reintento. — falta verificación manual
 
 ## 6. tablero
 - [x] T-61 S — Consultas de los 9 indicadores (RF-4) — Hecho cuando: pruebas con el técnico `[DEMO]`.
 - [x] T-62 S — Datos `[DEMO]` precargados (RF-15, 16) — Hecho cuando: historial con pre, post y retest.
-- [ ] T-63 S — Vista del técnico (RF-3, 6, 8) — Hecho cuando: demo manual.
-- [ ] T-64 S — Vista del instructor y detalle con línea de tiempo (RF-7, 9, 10, 12) — Hecho cuando: demo manual.
-- [ ] T-65 S — Fórmulas en ayuda, color solo con texto (RF-5, 11) — Hecho cuando: checklist manual.
+- [ ] T-63 S — Vista del técnico (RF-3, 6, 8) — Hecho cuando: demo manual. — falta verificación manual
+- [ ] T-64 S — Vista del instructor y detalle con línea de tiempo (RF-7, 9, 10, 12) — Hecho cuando: demo manual. — falta verificación manual
+- [ ] T-65 S — Fórmulas en ayuda, color solo con texto (RF-5, 11) — Hecho cuando: checklist manual. — falta verificación manual
 - [x] T-66 S — Exportar CSV y JSON; borrar técnico con confirmación (RF-13, 14) — Hecho cuando: pruebas de contenido y de borrado.
 - [x] T-67 S — Estados vacíos y "pendiente" — Hecho cuando: técnico sin sesiones sin errores.
-- [x] T-68 S — Asistente: FTS5 de las fuentes, prompt y respuesta con cita, "no tengo esa información" (RF-18 a 21, 23) — Hecho cuando: prueba con pregunta con y sin respaldo.
+- [x] T-68 S — Asistente: búsqueda por palabras clave en fuentes locales, prompt y respuesta con cita, "no tengo esa información" (RF-18 a 21, 23) — Hecho cuando: prueba con pregunta con y sin respaldo.
 - [x] T-69 S — Asistente desactivado sin modelo (RF-22) — Hecho cuando: aviso y el resto funciona.
 
 ## 7. flujo
 - [x] T-70 S — Alias único y sin nombres reales (RF-1) — Hecho cuando: prueba de alias repetido.
 - [x] T-71 S — Siguiente paso recomendado y diagnóstico obligatorio (RF-2, 3) — Hecho cuando: pruebas por estado.
 - [x] T-72 S — Guardado por paso y reanudación (RF-4, 5) — Hecho cuando: prueba cierra y reabre a mitad de un paso.
-- [ ] T-73 S — Menú principal navegable con teclado, control y ratón — Hecho cuando: checklist manual.
-- [ ] T-74 S — Modo demo: base separada, adelantar reloj, restablecer (RF-6, 7, 8) — Lógica probada. Falta la pantalla con los controles, mostrar el estado de entrada en el menú (RF-8) y verificar la demo manual.
+- [ ] T-73 S — Menú principal navegable con teclado, control y ratón — Hecho cuando: checklist manual. — falta verificación manual
+- [ ] T-74 S — Modo demo: base separada, adelantar reloj, restablecer (RF-6, 7, 8) — Lógica y pantalla probadas headless, incluido el estado de entrada del menú. — falta verificación manual
 
 ## 8. entrega
-- [ ] T-75 S — README con instalación en 3 pasos y estructura (RF-5) — Hecho cuando: otra persona lo sigue sin ayuda.
-- [ ] T-76 S — Documentación técnica y arquitectura (RF-1) — Hecho cuando: incluye cómo agregar contenido y escenarios.
-- [ ] T-77 S — Propuesta de escalabilidad con diagrama actual y objetivo (RF-2) — Hecho cuando: tres fases y riesgos.
-- [ ] T-78 S — Nota de privacidad y contenido (RF-3) — Hecho cuando: declara alias, datos locales, fuentes y marcas.
-- [ ] T-79 S — Guion de demo con plan B (RF-4) — Hecho cuando: 5 minutos medidos.
+- [x] T-75 S — README con instalación en 3 pasos y estructura (RF-5) — Hecho cuando: otra persona lo sigue sin ayuda.
+- [x] T-76 S — Documentación técnica y arquitectura (RF-1) — Hecho cuando: incluye cómo agregar contenido y escenarios.
+- [x] T-77 S — Propuesta de escalabilidad con diagrama actual y objetivo (RF-2) — Hecho cuando: tres fases y riesgos.
+- [x] T-78 S — Nota de privacidad y contenido (RF-3) — Hecho cuando: declara alias, datos locales, fuentes y marcas.
+- [x] T-79 S — Guion de demo con plan B (RF-4) — Hecho cuando: 5 minutos medidos.
 - [ ] T-80 S — Exportar ejecutables Windows y Linux (RF-6) — Hecho cuando: corre en Linux; Windows probado o declarado no probado.
-- [ ] T-81 S — Lista de dependencias y versiones (RF-8) — Hecho cuando: incluida en el paquete.
+- [x] T-81 S — Lista de dependencias y versiones (RF-8) — Hecho cuando: incluida en el paquete.
 - [ ] T-82 S+E — Prueba de usabilidad con 2 ajenos y correcciones (RF-10, 11) — Hecho cuando: hallazgos con severidad y corregidos.
 - [ ] T-83 S+E — Checklist de los 6 entregables (RF-12) — Hecho cuando: sin pendientes.
 - [ ] T-84 S+E — Dos ensayos completos con plan B y USB de respaldo (RF-9, 13) — Hecho cuando: ambos registrados.
 
 ## Marcha paralela
 Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en paralelo a T-18 en adelante. Sistemas: el resto en orden.
+
+## 9. Pantallas faltantes (detectadas al integrar el flujo)
+- [ ] T-85 S — Pantalla de diagnóstico: 8 preguntas y 2 tareas prácticas, con reemplazo por fácil (aprendizaje RF-4, 5, 6) — Hecho cuando: prueba de humo recorre el diagnóstico y guarda los intentos.
+- [ ] T-86 S — Pantalla de ruta y micro-lecciones: sesión de 3, fuente visible y recálculo (aprendizaje RF-8 a 10) — Hecho cuando: prueba de humo completa una sesión.
+- [ ] T-87 S — Pantalla de evaluación post-test y retest, con aviso si falta adelantar el reloj (aprendizaje RF-15; flujo RF-2, 3) — Hecho cuando: prueba de humo recorre post-test y retest con reloj adelantado.

@@ -13,7 +13,8 @@ static func comprobar(base: String) -> bool:
 	if not Demo.precargar(base, Base.consultar):
 		return false
 	var antes := Consultas.tecnico(base, Demo.ALIAS, Base.consultar)
-	var respuesta := Asistente.responder(base, "carga", Callable(), antes, Base.consultar)
+	var asistente := Asistente.new()
+	var respuesta := asistente.responder("carga", Callable(), antes)
 	if respuesta.get("disponible", true) or respuesta.texto != "Asistente no disponible":
 		return false
 	var fuente := base + ".txt"
@@ -21,9 +22,11 @@ static func comprobar(base: String) -> bool:
 	if archivo == null or not archivo.store_string("Carga de ejemplo."):
 		return false
 	archivo.close()
-	if not Asistente.indexar(base, [{"ruta": fuente, "cita": "Ejemplo"}], Base.consultar):
+	var indexado := asistente.indexar([{"ruta": fuente, "cita": "Ejemplo"}])
+	DirAccess.remove_absolute(fuente)
+	if not indexado:
 		return false
 	var desconectado := func(_peticion: Dictionary) -> Variant: return null
-	respuesta = Asistente.responder(base, "carga", desconectado, antes, Base.consultar)
+	respuesta = asistente.responder("carga", desconectado, antes)
 	return not respuesta.disponible and respuesta.texto == "Asistente no disponible" \
 		and Consultas.tecnico(base, Demo.ALIAS, Base.consultar) == antes
