@@ -491,4 +491,4 @@ func intento_de(competencia: String, respuesta: String, reloj_sim: String) -> Di
 		"dificultad": _escenario.dificultad, "respuesta": respuesta, "valor": 100,
 		"resultado": "correcto", "tipo_error": null, "tiempo_ms": 0, "fuente_entrada": "",
 		"momento": "practica", "reloj_sim": reloj_sim, "version_contenido": _escenario.version,
-		"sesion": _sesion, "caso": _escenario.id, "variante": _variante}
+		"sesion_id": _sesion, "caso": _escenario.id, "variante": _variante}

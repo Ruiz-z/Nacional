@@ -195,6 +195,6 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-161 S — Adaptador del ESP32 (UDP 4210 → eventos del simulador con latido) y prueba (arnés RF nuevo) — Hecho cuando: prueba de lógica y recorrido de punta a punta con una placa simulada.
 - [x] T-162 S — Nivel alto configurable (3.3 V o 5 V) en banco, opciones, textos y calificación — Hecho cuando: prueba con 3.3 V y suite en verde.
 - [x] T-163 S — Identidad de sesión en los intentos (`sesion_id`, caso, variante, número de intento, ayudas) y agrupación por sesión en el tablero.
-- [ ] T-164 S — Error concreto → práctica de refuerzo con motivo visible en la ruta.
+- [x] T-164 S — Error concreto → práctica de refuerzo con motivo visible en la ruta.
 - [ ] T-165 S — Evidencia y errores/oportunidades junto al dominio en el tablero.
 - [ ] T-166 H — Prueba en mesa con el ESP32 real: sano, alimentación abierta, señal abierta y desconexión a mitad de un intento; comparar multímetro, monitor serial y Godot.

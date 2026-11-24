@@ -29,8 +29,8 @@ static func migracion() -> bool:
 	var correcto: bool = Base.consultar(base, ANTIGUA) != null and Esquema.migrar(base, Base.consultar) \
 		and Esquema.migrar(base, Base.consultar)
 	if correcto:
-		var filas: Variant = Base.consultar(base, "SELECT sesion, numero_intento, ayudas FROM intento;")
-		correcto = filas != null and filas.size() == 1 and filas[0].sesion == "" \
+		var filas: Variant = Base.consultar(base, "SELECT sesion_id, numero_intento, ayudas FROM intento;")
+		correcto = filas != null and filas.size() == 1 and filas[0].sesion_id == "" \
 			and filas[0].numero_intento == 0 and filas[0].ayudas == 0
 	for archivo in DirAccess.get_files_at(carpeta):
 		DirAccess.remove_absolute(carpeta.path_join(archivo))
@@ -42,7 +42,7 @@ static func intento(sesion: String, numero: int, momento := "practica") -> Dicti
 	return {"competencia": "diagnostico-fallas", "item": "x", "formato": "escenario", "dificultad": "facil",
 		"respuesta": "r", "valor": 100, "peso": 1, "resultado": "correcto", "tipo_error": null, "tiempo_ms": 0,
 		"fuente_entrada": "", "momento": momento, "reloj_sim": "2026-01-0%d" % numero,
-		"version_contenido": "1", "sesion": sesion, "caso": "modulo_auxiliar",
+		"version_contenido": "1", "sesion_id": sesion, "caso": "modulo_auxiliar",
 		"variante": "alimentacion", "numero_intento": numero}
 
 
@@ -63,6 +63,6 @@ static func guardado(base: String) -> bool:
 	if Base.consultar(base, Registro.INSERTAR, valores) == null:
 		return false
 	var filas: Variant = Registro.leer(base, "nuevo", Base.consultar)
-	return filas != null and filas.size() == 1 and filas[0].sesion == "s9" \
+	return filas != null and filas.size() == 1 and filas[0].sesion_id == "s9" \
 		and filas[0].caso == "modulo_auxiliar" and filas[0].variante == "alimentacion" \
 		and filas[0].numero_intento == 4

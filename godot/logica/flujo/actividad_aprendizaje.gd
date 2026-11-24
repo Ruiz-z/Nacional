@@ -77,6 +77,14 @@ func preparar(banco: Dictionary, ahora: int) -> bool:
 	return true
 
 
+func motivos_ruta() -> Array:
+	var dominios := {}
+	var instantanea := Diagnostico.resultado(historial, true)
+	for competencia in instantanea:
+		dominios[competencia] = instantanea[competencia].dominio
+	return Ruta.motivos(ruta, dominios, historial, 1)
+
+
 func leccion(indice: int) -> Dictionary:
 	return plan.lecciones[numero_leccion(indice) - 1] if paso == "ruta" else {}
 
@@ -98,7 +106,7 @@ func responder(respuesta: Variant, tiempo_ms: int, fuente: String, ahora: int) -
 	var momento: String = {"diagnostico": "pre", "ruta": "practica"}.get(paso, paso)
 	var intento := Respuestas.intento(item, respuesta, tiempo_ms, fuente, momento,
 		Leitner.fecha(reloj.instante))
-	intento.merge({"sesion": sesion, "caso": item.id, "numero_intento": intentos.size() + 1})
+	intento.merge({"sesion_id": sesion, "caso": item.id, "numero_intento": intentos.size() + 1})
 	intentos.append(intento)
 	return true
 

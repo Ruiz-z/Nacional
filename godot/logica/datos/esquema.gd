@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS intento (
 	momento TEXT NOT NULL CHECK (momento IN ('pre', 'post', 'retest', 'practica')),
 	reloj_sim TEXT NOT NULL,
 	version_contenido TEXT NOT NULL,
-	sesion TEXT NOT NULL DEFAULT '',
+	sesion_id TEXT NOT NULL DEFAULT '',
 	caso TEXT NOT NULL DEFAULT '',
 	variante TEXT NOT NULL DEFAULT '',
 	numero_intento INTEGER NOT NULL DEFAULT 0,
@@ -75,7 +75,7 @@ COMMIT;
 
 
 # Columnas de intento añadidas después de la primera versión del esquema.
-const COLUMNAS_SESION := {"sesion": "TEXT NOT NULL DEFAULT ''", "caso": "TEXT NOT NULL DEFAULT ''",
+const COLUMNAS_SESION := {"sesion_id": "TEXT NOT NULL DEFAULT ''", "caso": "TEXT NOT NULL DEFAULT ''",
 	"variante": "TEXT NOT NULL DEFAULT ''", "numero_intento": "INTEGER NOT NULL DEFAULT 0",
 	"ayudas": "INTEGER NOT NULL DEFAULT 0"}
 

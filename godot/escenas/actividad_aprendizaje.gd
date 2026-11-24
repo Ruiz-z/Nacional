@@ -75,10 +75,13 @@ func texto_intro() -> String:
 		"diagnostico":
 			return "Este diagnóstico mide lo que ya sabes en cuatro temas. Son %d preguntas, unos %d minutos. No es una calificación: sirve para armar tu ruta de aprendizaje." % [total, maxi(5, total)]
 		"ruta":
-			var temas := PackedStringArray()
-			for competencia in actividad.ruta.slice(0, 3):
-				temas.append(Actividad.Banco.COMPETENCIAS[competencia])
-			return "Tu ruta tiene %d preguntas con lecciones cortas. Empiezas por lo que más necesitas repasar: %s." % [total, ", ".join(temas)]
+			var lineas := PackedStringArray(["Tu ruta tiene %d preguntas con lecciones cortas. Empiezas por lo que más necesitas repasar:" % total])
+			for tema in actividad.motivos_ruta().slice(0, 3):
+				var linea: String = "• %s. %s" % [Actividad.Banco.COMPETENCIAS[tema.competencia], tema.motivo]
+				if not tema.refuerzo.is_empty():
+					linea += " " + tema.refuerzo
+				lineas.append(linea)
+			return "\n".join(lineas)
 	return ""
 
 

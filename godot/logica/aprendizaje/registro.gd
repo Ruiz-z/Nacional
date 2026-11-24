@@ -6,7 +6,7 @@ const Dominio = preload("res://logica/aprendizaje/dominio.gd")
 const COLUMNAS := """
 	INSERT INTO intento (tecnico, competencia, item, formato, dificultad, respuesta,
 		valor, peso, resultado, tipo_error, tiempo_ms, fuente_entrada, momento,
-		reloj_sim, version_contenido, sesion, caso, variante, numero_intento, ayudas)
+		reloj_sim, version_contenido, sesion_id, caso, variante, numero_intento, ayudas)
 """
 const VALORES := "(SELECT id FROM tecnico WHERE alias = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
 const INSERTAR := COLUMNAS + "VALUES (" + VALORES + ");"
@@ -48,7 +48,7 @@ static func preparar(alias: String, intento: Dictionary) -> Array:
 	return [alias, intento.competencia, intento.item, intento.formato, intento.dificultad,
 		intento.respuesta, valor, peso, intento.resultado, tipo_error, intento.tiempo_ms,
 		intento.fuente_entrada, intento.momento, intento.reloj_sim, intento.version_contenido,
-		str(intento.get("sesion", "")), str(intento.get("caso", "")), str(intento.get("variante", "")),
+		str(intento.get("sesion_id", "")), str(intento.get("caso", "")), str(intento.get("variante", "")),
 		int(intento.get("numero_intento", 0)), int(intento.get("ayudas", 0))]
 
 

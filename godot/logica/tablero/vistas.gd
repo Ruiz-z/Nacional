@@ -25,7 +25,7 @@ static func sesiones(intentos: Array) -> Array[Dictionary]:
 	var grupos := {}
 	var grupos_fecha := {}
 	for intento in intentos:
-		var sesion: String = intento.get("sesion", "")
+		var sesion: String = intento.get("sesion_id", "")
 		# Una sesión forma un punto por competencia, aunque sus respuestas tengan relojes distintos.
 		var clave := [intento.reloj_sim, intento.momento, intento.competencia] if sesion.is_empty() \
 			else [intento.reloj_sim, intento.momento, intento.competencia, sesion]
