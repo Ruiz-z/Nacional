@@ -41,6 +41,7 @@ custom_minimum_size = Vector2(0, 52)
 [node name="Guardar" type="Button" parent="."]
 custom_minimum_size = Vector2(0, 52)
 text = "Guardar reflexión y ver ruta ideal"
+autowrap_mode = 3
 visible = false
 theme_type_variation = &"Primario"
 

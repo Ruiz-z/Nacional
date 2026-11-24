@@ -27,12 +27,19 @@ var conexion_panel: RefCounted
 var tecnico := {}
 var resultados_guardados := false
 var pausa_visible := false
+var azimut := deg_to_rad(45.0)
+var elevacion := deg_to_rad(14.0)
+var distancia := 19.02
+var giro_stick := Vector2.ZERO
+var mando_camara := -1
+@onready var camara: Camera3D = $Camara
 @onready var resumen := $Interfaz/Lateral/Resumen
 @onready var lateral := $Interfaz/Lateral
 @onready var panel := $AlineacionPanel/PanelVirtual
 
 
 func _ready() -> void:
+	encuadrar_bus()
 	$Interfaz.add_theme_stylebox_override("panel", lateral.get_theme_stylebox("panel", "PanelContainer"))
 	FondoTarjeta.aplicar(panel, 16)
 	lateral.get_node("Accion").item_selected.connect(func(_indice: int):
@@ -111,7 +118,6 @@ func mostrar_estado() -> void:
 	lateral.get_node("Objetivo").text = datos.descripcion.trim_prefix("[MUESTRA] ")
 	lateral.get_node("Indicios").text = "\n".join(lineas)
 	lateral.get_node("Aviso").visible = not lateral.get_node("Aviso").text.is_empty()
-	$Interfaz.offset_right = 592 if terminado else 396
 	lateral.get_node("Inspeccionar").visible = not terminado
 	for nombre in ["Tipo", "Estado", "ObjetivoTitulo", "Objetivo", "IndiciosTitulo", "Indicios", "Conexion"]:
 		lateral.get_node(nombre).visible = not terminado
@@ -192,8 +198,13 @@ func recibir_accion(accion: Dictionary) -> void:
 				ejecutar(lista.get_selected_metadata(), accion.fuente_entrada)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	actualizar_panel(Time.get_ticks_msec())
+	if giro_stick != Vector2.ZERO:
+		if pausa_visible or mando_camara not in Input.get_connected_joypads():
+			giro_stick = Vector2.ZERO
+		else:
+			orbitar(-giro_stick * delta * 0.8)
 
 
 func actualizar_panel(ahora: int) -> void:
@@ -226,22 +237,43 @@ func _input(evento: InputEvent) -> void:
 
 
 func _unhandled_input(evento: InputEvent) -> void:
-	if motor == null or panel.conexion.pausado():
+	if motor == null or pausa_visible:
 		return
-	if evento is InputEventJoypadMotion:
+	if evento is InputEventMouseMotion and evento.button_mask & MOUSE_BUTTON_MASK_LEFT:
+		var accion: Dictionary = panel.entrada.traducir("teclado", "raton", evento.relative)
+		if accion.get("accion") == "mirar":
+			orbitar(-evento.relative * 0.004)
+	elif evento is InputEventJoypadMotion:
 		var control := "stick-izquierdo" if evento.axis <= JOY_AXIS_LEFT_Y else "stick-derecho"
 		if evento.axis <= JOY_AXIS_RIGHT_Y:
 			var accion: Dictionary = panel.entrada.traducir("control", control, evento.axis_value)
 			if not accion.is_empty():
 				var eje: int = evento.axis % 2
-				if accion.accion == "mover":
-					$Camara.translate(Vector3(evento.axis_value, 0, 0) if eje == 0 else Vector3(0, 0, evento.axis_value))
-				elif accion.accion == "mirar":
-					if eje == 0:
-						$Camara.rotate_y(-evento.axis_value * 0.1)
-					else:
-						$Camara.rotate_x(-evento.axis_value * 0.1)
+				var giro: float = -evento.axis_value * 0.045
+				if accion.accion == "mirar":
+					if mando_camara != evento.device:
+						giro_stick = Vector2.ZERO
+						mando_camara = evento.device
+					giro_stick[eje] = signf(evento.axis_value) * maxf(absf(evento.axis_value) - 0.2, 0.0) / 0.8
+				elif accion.accion == "mover" and absf(evento.axis_value) >= 0.2:
+					if eje == 1:
+						distancia = clampf(distancia + evento.axis_value * 0.4, 18.0, 21.0)
+					orbitar(Vector2(giro, 0) if eje == 0 else Vector2.ZERO)
 	elif evento is InputEventJoypadButton and evento.pressed and evento.button_index == JOY_BUTTON_A:
 		var accion: Dictionary = panel.entrada.traducir("control", "A", 1)
 		if not accion.is_empty():
 			ejecutar(accion.accion, accion.fuente_entrada)
+
+
+func orbitar(giro: Vector2) -> void:
+	azimut = clampf(azimut + giro.x, deg_to_rad(34.0), deg_to_rad(60.0))
+	elevacion = clampf(elevacion + giro.y, deg_to_rad(10.0), deg_to_rad(16.0))
+	encuadrar_bus()
+
+
+func encuadrar_bus() -> void:
+	var centro := Vector3(0, 1.55, 0)
+	var horizontal := cos(elevacion) * distancia
+	camara.position = centro + Vector3(sin(azimut) * horizontal, sin(elevacion) * distancia,
+		cos(azimut) * horizontal)
+	camara.look_at(to_global(centro))
