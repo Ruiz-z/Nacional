@@ -14,6 +14,10 @@ Brechas y faltas críticas = conteo de registros. Última falta = fecha más rec
 Tiempo promedio = suma de los milisegundos ÷ número de acciones registradas.
 Avance = microlecciones completadas y pendientes en la ruta guardada."""
 
+const AYUDA_JEFE := """Oportunidades = respuestas y prácticas registradas. Un intento incorrecto cuenta como un error.
+Intentos sin ayuda = oportunidades con cero ayudas registradas.
+Los casos con banco requieren que el historial identifique el banco físico."""
+
 
 static func aliases(base: String) -> Array:
 	var filas: Variant = Acceso.consultar(base, "SELECT alias FROM tecnico ORDER BY alias;")

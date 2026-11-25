@@ -78,7 +78,7 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [x] T-61 S — Consultas de los 9 indicadores (RF-4) — Hecho cuando: pruebas con el técnico `[DEMO]`.
 - [x] T-62 S — Datos `[DEMO]` precargados (RF-15, 16) — Hecho cuando: historial con pre, post y retest.
 - [ ] T-63 S — Vista del técnico (RF-3, 6, 8) — Hecho cuando: demo manual. — falta verificación manual
-- [ ] T-64 S — Vista del instructor y detalle con línea de tiempo (RF-7, 9, 10, 12) — Hecho cuando: demo manual. — falta verificación manual
+- [ ] T-64 S — Vista «Jefe directo» y detalle con línea de tiempo (RF-7, 9, 10, 12) — Hecho cuando: demo manual. — falta verificación manual
 - [ ] T-65 S — Fórmulas en ayuda, color solo con texto (RF-5, 11) — Hecho cuando: checklist manual. — falta verificación manual
 - [x] T-66 S — Exportar CSV y JSON; borrar técnico con confirmación (RF-13, 14) — Hecho cuando: pruebas de contenido y de borrado.
 - [x] T-67 S — Estados vacíos y "pendiente" — Hecho cuando: técnico sin sesiones sin errores.
@@ -196,7 +196,7 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-162 S — Nivel alto configurable (3.3 V o 5 V) en banco, opciones, textos y calificación — Hecho cuando: prueba con 3.3 V y suite en verde.
 - [x] T-163 S — Identidad de sesión en los intentos (`sesion_id`, caso, variante, número de intento, ayudas) y agrupación por sesión en el tablero.
 - [x] T-164 S — Error concreto → práctica de refuerzo con motivo visible en la ruta.
-- [ ] T-165 S — Evidencia y errores/oportunidades junto al dominio en el tablero.
+- [x] T-165 S — Evidencia y errores/oportunidades junto al dominio en el tablero. Cubierto por T-180.
 - [ ] T-166 H — Prueba en mesa con el ESP32 real: sano, alimentación abierta, señal abierta y desconexión a mitad de un intento; comparar multímetro, monitor serial y Godot.
 - [x] T-167 S — Ruta de aprendizaje como roadmap: camino numerado por competencia según el diagnóstico, con "Hoy" o "Después", barra de dominio, motivo y práctica sugerida (aprendizaje RF-21).
 - [x] T-168 S — Foundry: contexto, esquema y validación de la ruta (`ruta_ia.gd`) y spec/privacidad (aprendizaje RF-23, RF-24).
@@ -211,3 +211,5 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-177 — Abrir el detalle de cada nodo del mapa de aprendizaje, enlazar al taller y verificar el panel con pruebas y una vista de captura (aprendizaje RF-26).
 - [x] T-178 — La ruta se muestra solo como mapa, sin preguntas; «Continuar» cierra el paso (RF-27). Se quita la práctica de seis preguntas de la ruta.
 - [x] T-179 — Rediseñar el mapa de aprendizaje y su panel de detalle (RF-25 y RF-26). Camino numerado, cuatro estados con color, fichas compactas con acceso al detalle y pie fijo. Suite y geometría verificadas a 1280 × 720 y 1920 × 1080. Revisión de PNG pendiente por falta de acceso a una sesión gráfica.
+
+- [x] T-180 S — Tablero para el jefe directo (tablero RF-3, RF-24 a RF-26). Lista por prioridad, ficha con evidencia y recomendación, y exportación por alias. Suite y geometría verificadas a 1280 × 720 y 1920 × 1080. Los PNG requieren una sesión gráfica.

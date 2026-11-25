@@ -37,3 +37,12 @@ El camino enlaza las competencias con una línea sólida y flechas descendentes.
 Cada tarjeta se activa con clic, Enter o Espacio. Al pasar el ratón se aclara el relleno y aparece el cursor de mano. Un borde blanco de 3 px marca el foco de teclado.
 
 El panel se abre a la derecha y se desplaza por separado. Tiene fondo oscuro, un borde izquierdo de 4 px del color del estado, título de 22 px y texto de 16 px. «Cerrar» recibe el foco al abrir. Escape y «Cerrar» devuelven el foco a la tarjeta. Al elegir otra tarjeta visible, el panel actualiza su contenido. Los errores muestran los intentos disponibles. La acción de una competencia abre el catálogo filtrado y la de una orden abre su práctica. «Volver» retoma la ruta.
+
+
+## Tablero de progreso
+
+«Jefe directo» abre la lista de técnicos. El alias es el acceso a la ficha y el estado combina una marca de color con una palabra. Las cuatro barras usan un relleno neutro y muestran el nombre del nivel. La última columna indica la fecha del historial más reciente.
+
+La ficha usa el título más grande para la recomendación. Debajo quedan sus evidencias y la frase que atribuye la decisión al jefe directo. Las competencias se leen en dos columnas, con separadores finos, texto breve y barras de 6 px sobre el fondo oscuro. Los tiempos, las brechas y el historial se pueden desplegar. «Volver a la lista» y «Exportar» están en la barra fija. Al volver, el foco regresa al alias abierto.
+
+Las vistas admiten desplazamiento vertical a 1280 × 720 y 1920 × 1080. Los botones usan el foco visible del tema Poppins.

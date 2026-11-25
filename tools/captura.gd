@@ -3,6 +3,7 @@ extends SceneTree
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
 # Mapa: godot --path godot -s ../tools/captura.gd -- mapa-ruta salida.png 1280 720
 # Tramo final: usa mapa-ruta-final como escena. Panel abierto: usa mapa-ruta-detalle.
+# Tablero: godot --path godot -s ../tools/captura.gd -- tablero-jefe-lista|tablero-jefe-ficha salida.png 1280 720
 # Órdenes: godot --path godot -s ../tools/captura.gd -- ordenes salida.png 1280 720
 # Menú: godot --path godot -s ../tools/captura.gd -- escenas/menu.tscn salida.png 1280 720
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
@@ -18,6 +19,8 @@ extends SceneTree
 # Banco: [ancho alto] banco-mesa|banco-puntas|hoja|orden [--verificar]
 # Alias del banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
+const EsquemaTablero = preload("res://logica/datos/esquema.gd")
+const DemoTablero = preload("res://logica/tablero/demo.gd")
 const Acciones = preload("res://tests/acciones_taller.gd")
 
 
@@ -114,7 +117,10 @@ func capturar() -> void:
 	var mapa := args[0] in ["mapa-ruta", "mapa-ruta-final", "mapa-ruta-detalle"]
 	if mapa:
 		OS.set_environment("NACIONAL_SIN_NUBE", "1")
-	var rutas_captura := {"ordenes": "escenas/ordenes.tscn",
+	var tablero := args[0] in ["tablero-jefe-lista", "tablero-jefe-ficha"]
+	var ficha := args[0] == "tablero-jefe-ficha"
+	var rutas_captura := {"tablero-jefe-lista": "escenas/tablero.tscn",
+		"tablero-jefe-ficha": "escenas/tablero.tscn", "ordenes": "escenas/ordenes.tscn",
 		"mapa-ruta": "escenas/ruta.tscn", "mapa-ruta-final": "escenas/ruta.tscn",
 		"mapa-ruta-detalle": "escenas/ruta.tscn"}
 	var ruta: String = rutas_captura.get(args[0], args[0])
@@ -149,7 +155,22 @@ func capturar() -> void:
 		if zona != "interior":
 			escena.archivo = "escenarios/%s.json" % {"cabina": "comunicacion", "banco": "modulo_auxiliar"}.get(zona, zona)
 		escena.get_node("Jugador").set_physics_process(false)
+	if tablero:
+		escena.base = OS.get_temp_dir().path_join("nacional-captura-tablero-%s.sqlite" %
+			Crypto.new().generate_random_bytes(8).hex_encode())
+		if not EsquemaTablero.crear(escena.base) or not DemoTablero.precargar(escena.base):
+			DirAccess.remove_absolute(escena.base)
+			escena.free()
+			fallar("No se pudo preparar el historial de demostración.")
+			return
 	vp.add_child(escena)
+	if tablero:
+		escena.get_node("Vistas/JefeDirecto").pressed.emit()
+		if ficha:
+			escena.botones_tecnicos[DemoTablero.ALIAS].pressed.emit()
+		else:
+			escena.botones_tecnicos[DemoTablero.ALIAS].grab_focus()
+		DirAccess.remove_absolute(escena.base)
 	if mapa:
 		preparar_mapa(escena)
 	if vista != "orden" and escena.get_node_or_null("Flashcard") != null:
@@ -445,6 +466,23 @@ func capturar() -> void:
 		if not vp.get_visible_rect().encloses(escena.taller.hud.get_global_rect()):
 			fallar("El inventario debe caber en el encuadre.")
 			return
+	if tablero:
+		if not comprobar_tablero(escena, vp.get_visible_rect(), ficha):
+			fallar("El tablero tiene controles recortados o solapados.")
+			return
+		if ficha:
+			var area_tablero: ScrollContainer = escena.get_node("Contenido")
+			var desplazamiento := area_tablero.get_v_scroll_bar()
+			area_tablero.scroll_vertical = ceili(desplazamiento.max_value)
+			await process_frame
+			var historial: Control = escena.datos.find_child("AbrirHistorial", false, false)
+			if not area_tablero.get_global_rect().encloses(historial.get_global_rect()) \
+					or not escena.get_node("Vistas/Exportar").is_visible_in_tree():
+				fallar("El historial o la exportación quedan fuera del alcance.")
+				return
+			print("Ficha: historial accesible con desplazamiento ", area_tablero.scroll_vertical)
+			area_tablero.scroll_vertical = 0
+			await process_frame
 	if verificar:
 		quit(0)
 		return
@@ -459,6 +497,47 @@ func capturar() -> void:
 		return
 	print("Guardado ", args[1], " ", img.get_size())
 	quit(0)
+
+
+func comprobar_tablero(escena: Control, ventana: Rect2, ficha: bool) -> bool:
+	var barra: HBoxContainer = escena.get_node("Vistas")
+	var area: ScrollContainer = escena.get_node("Contenido")
+	if not ventana.encloses(barra.get_global_rect()) or not ventana.encloses(area.get_global_rect()) \
+			or barra.get_global_rect().intersects(area.get_global_rect()) \
+			or not comprobar_celdas_tablero(barra) or not comprobar_celdas_tablero(escena.datos):
+		return false
+	var principal: Button = escena.get_node("Vistas/VolverLista") if ficha else escena.botones_tecnicos[DemoTablero.ALIAS]
+	if not principal.has_focus() or not ventana.encloses(principal.get_global_rect()):
+		return false
+	if ficha:
+		var exportar: Button = escena.get_node("Vistas/Exportar")
+		if not exportar.visible or not ventana.encloses(exportar.get_global_rect()):
+			return false
+		for hijo in escena.datos.get_children():
+			if hijo is Label and hijo.text.begins_with("Es una recomendación") \
+					and not area.get_global_rect().encloses(hijo.get_global_rect()):
+				return false
+	print("Tablero ", ventana.size, " · barra ", barra.get_global_rect(), " · contenido ", area.get_global_rect(),
+		" · acción enfocada ", principal.get_global_rect())
+	return true
+
+
+func comprobar_celdas_tablero(padre: Control) -> bool:
+	var limites := padre.get_global_rect()
+	var celdas: Array[Rect2] = []
+	for hijo in padre.get_children():
+		if not hijo is Control or not hijo.visible:
+			continue
+		var caja: Rect2 = hijo.get_global_rect()
+		if not limites.grow(0.01).encloses(caja):
+			return false
+		for anterior in celdas:
+			if caja.intersects(anterior):
+				return false
+		celdas.append(caja)
+		if hijo is Container and not comprobar_celdas_tablero(hijo):
+			return false
+	return true
 
 
 func preparar_mapa(escena: VBoxContainer) -> void:

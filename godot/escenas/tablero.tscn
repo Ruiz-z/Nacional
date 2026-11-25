@@ -30,17 +30,27 @@ text = "Revisa tu progreso y tus errores por tema."
 custom_minimum_size = Vector2(0, 52)
 text = "Vista del técnico"
 
-[node name="Instructor" type="Button" parent="Vistas"]
+[node name="JefeDirecto" type="Button" parent="Vistas"]
 custom_minimum_size = Vector2(0, 52)
-text = "Vista del instructor"
+text = "Jefe directo"
 
 [node name="Ayuda" type="Button" parent="Vistas"]
 custom_minimum_size = Vector2(0, 52)
 text = "Cómo se calcula tu progreso"
 toggle_mode = true
 
-[node name="Alias" type="OptionButton" parent="."]
+[node name="Espacio" type="Control" parent="Vistas"]
+size_flags_horizontal = 3
+
+[node name="VolverLista" type="Button" parent="Vistas"]
+visible = false
 custom_minimum_size = Vector2(0, 52)
+text = "Volver a la lista"
+
+[node name="Exportar" type="Button" parent="Vistas"]
+visible = false
+custom_minimum_size = Vector2(0, 52)
+text = "Exportar"
 
 [node name="Contenido" type="ScrollContainer" parent="."]
 size_flags_vertical = 3
@@ -50,3 +60,14 @@ follow_focus = true
 [node name="Datos" type="VBoxContainer" parent="Contenido"]
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
+
+
+[node name="GuardarResultados" type="FileDialog" parent="."]
+title = "Exportar resultados"
+size = Vector2i(740, 480)
+file_mode = 4
+access = 2
+filters = PackedStringArray("*.csv ; Resultados CSV", "*.json ; Resultados JSON")
+
+[node name="AvisoExportacion" type="AcceptDialog" parent="."]
+title = "Exportar resultados"
