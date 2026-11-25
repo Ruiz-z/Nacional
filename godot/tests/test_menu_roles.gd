@@ -14,13 +14,19 @@ static func comprobar(base: String) -> bool:
 	var menu := Menu.instantiate()
 	menu.base = base
 	(Engine.get_main_loop() as SceneTree).root.add_child(menu)
-	var esperado := {"admin": ["tablero", "administracion"], "jefe": ["tablero"], "tecnico": Recorrido.PASOS}
+	var esperado := {"admin": ["tablero", "materiales", "administracion"], "jefe": ["tablero", "materiales"],
+		"tecnico": Recorrido.PASOS + ["materiales"]}
 	var correcto := true
 	for rol in esperado:
 		correcto = Pantallas.entrar(menu, rol + "01", "clave-de-prueba", rol) and correcto
 		var visibles: Array = menu.botones.keys().filter(func(paso: String) -> bool: return menu.botones[paso].visible)
 		correcto = correcto and visibles == esperado[rol] \
 			and menu.columna.get_node("Destacados").visible == (rol == "tecnico")
+		# La tarjeta de materiales abre la página local con la dirección del servidor, sin lanzar procesos en la prueba.
+		var direcciones := []
+		menu.lanzar_materiales = func(url: String): direcciones.append(url)
+		menu.botones.materiales.pressed.emit()
+		correcto = correcto and direcciones == ["http://127.0.0.1:8765"] and not menu.botones.materiales.disabled
 		menu.botones.tablero.pressed.emit()
 		correcto = correcto and menu.pantalla != null and menu.pantalla.perfil.rol == rol
 		if rol == "jefe" and menu.pantalla != null:

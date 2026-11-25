@@ -19,7 +19,7 @@ const Demo = preload("res://escenas/modo_demo.tscn")
 const Diagnostico = preload("res://escenas/diagnostico.tscn")
 const Ruta = preload("res://escenas/ruta.tscn")
 const Evaluacion = preload("res://escenas/evaluacion.tscn")
-const NOMBRES := {"alias": "Iniciar sesión", "administracion": "Administración", "diagnostico": "Diagnóstico", "ruta": "Ruta de aprendizaje",
+const NOMBRES := {"alias": "Iniciar sesión", "administracion": "Administración", "materiales": "Materiales de estudio", "diagnostico": "Diagnóstico", "ruta": "Ruta de aprendizaje",
 	"escenario": "Práctica", "post": "Evaluación", "retest": "Repetir la evaluación", "tablero": "Tablero"}
 
 var base := "user://nacional.sqlite"
@@ -37,6 +37,9 @@ var etapa := "ingreso"
 var espera_hasta := 0
 var volver_al_tablero := false
 var aviso: AcceptDialog
+# Abre la página de materiales (servidor local + navegador). Las pruebas lo sustituyen para no lanzar procesos.
+var lanzar_materiales: Callable = abrir_pagina_materiales
+const PUERTO_MATERIALES := 8765
 @onready var entrada_inicio: ScrollContainer = $Marco/EntradaInicio
 @onready var columna := $Marco/EntradaInicio/Columna
 @onready var barra := columna.get_node("Barra/Margen/Fila")
@@ -99,6 +102,10 @@ func preparar_inicio(disponible: bool) -> void:
 		recorrido.get_node("Pasos").add_child(boton)
 		boton.get_node("Contenido/Insignia").text = "%02d" % (indice + 1)
 		botones[paso] = boton
+	var materiales := crear_tarjeta("materiales", NOMBRES.materiales, "", false)
+	recorrido.get_node("Pasos").add_child(materiales)
+	materiales.get_node("Contenido/Insignia").text = "WEB"
+	botones["materiales"] = materiales
 	var gestion := crear_tarjeta("administracion", NOMBRES.administracion, "", false)
 	recorrido.get_node("Pasos").add_child(gestion)
 	gestion.get_node("Contenido/Insignia").text = "AD"
@@ -348,11 +355,11 @@ func ahora() -> int:
 func pasos_del_rol() -> Array:
 	match perfil.get("rol", ""):
 		"tecnico":
-			return Recorrido.PASOS
+			return Recorrido.PASOS + ["materiales"]
 		"jefe":
-			return ["tablero"]
+			return ["tablero", "materiales"]
 		"admin":
-			return ["tablero", "administracion"]
+			return ["tablero", "materiales", "administracion"]
 	return []
 
 
@@ -403,7 +410,7 @@ func actualizar() -> void:
 		var boton: Button = botones[paso]
 		boton.visible = not con_sesion or paso in permitidos
 		boton.disabled = not con_sesion or (rol == "tecnico" and paso not in estado.get("habilitados", [])
-			and not (paso == "retest" and siguiente == "retest") and paso != "escenario" and paso != "tablero")
+			and not (paso == "retest" and siguiente == "retest") and paso not in ["escenario", "tablero", "materiales"])
 		var estado_paso := "Bloqueado"
 		if not boton.disabled:
 			if paso == siguiente and rol == "tecnico":
@@ -449,6 +456,8 @@ func abrir_paso(paso: String) -> void:
 			abrir_tablero(perfil.merged({"base": base}))
 		"administracion":
 			abrir_administracion()
+		"materiales":
+			abrir_materiales()
 		"diagnostico", "ruta", "post", "retest":
 			paso_solicitado.emit(paso, perfil.duplicate())
 			var recurso := {"diagnostico": Diagnostico, "ruta": Ruta}.get(paso, Evaluacion) as PackedScene
@@ -465,6 +474,25 @@ func abrir_paso(paso: String) -> void:
 			abrir(actividad)
 			if actividad.item.is_empty():
 				$Marco/Volver.grab_focus()
+
+
+func abrir_materiales() -> void:
+	lanzar_materiales.call("http://127.0.0.1:%d" % PUERTO_MATERIALES)
+
+
+# Levanta `python web/servidor.py` (si ya corre, el nuevo proceso termina solo) y abre el navegador.
+func abrir_pagina_materiales(url: String) -> void:
+	var raiz := ProjectSettings.globalize_path("res://").path_join("..").simplify_path()
+	var servidor := raiz.path_join("web/servidor.py")
+	if not FileAccess.file_exists(servidor):
+		aviso = UI.aviso(self, "No se encontró la página de materiales en esta instalación.")
+		return
+	var python := "python" if OS.get_name() == "Windows" else "python3"
+	if OS.create_process(python, [servidor, "--puerto", str(PUERTO_MATERIALES)]) < 0:
+		aviso = UI.aviso(self, "No se pudo iniciar la página de materiales. Comprueba que Python 3 está instalado.")
+		return
+	await get_tree().create_timer(1.2).timeout
+	OS.shell_open(url)
 
 
 func abrir_demo() -> void:
