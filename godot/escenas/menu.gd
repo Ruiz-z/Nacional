@@ -477,12 +477,12 @@ func abrir_paso(paso: String) -> void:
 
 
 func abrir_materiales() -> void:
-	lanzar_materiales.call(perfil.get("rol", ""))
+	lanzar_materiales.call(perfil.get("rol", ""), perfil.get("alias", ""))
 
 
 # Levanta `python web/servidor.py` (si ya corre, el nuevo proceso termina solo) y abre el navegador. Jefe directo y
 # admin entran con el permiso de autor que el servidor guarda en web/.token-autor; el técnico entra sin él.
-func abrir_pagina_materiales(rol: String) -> void:
+func abrir_pagina_materiales(rol: String, usuario: String) -> void:
 	var raiz := ProjectSettings.globalize_path("res://").path_join("..").simplify_path()
 	var servidor := raiz.path_join("web/servidor.py")
 	if not FileAccess.file_exists(servidor):
@@ -498,7 +498,7 @@ func abrir_pagina_materiales(rol: String) -> void:
 		token = Materiales.leer_token(raiz)
 		if not token.is_empty() or rol not in Materiales.ROLES_AUTOR:
 			break
-	OS.shell_open(Materiales.url(rol, token))
+	OS.shell_open(Materiales.url(rol, token, usuario))
 
 
 func abrir_demo() -> void:

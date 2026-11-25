@@ -6,6 +6,7 @@ const estado = {
   catalogo: null,
   ia: false,
   autor: false,
+  usuario: "", // cuenta con la que se entró desde la app; quien revisa queda registrado con ella
   formatoCrear: "tarjetas",
   niveles: [], // vacío = todos
   materiales: [],
@@ -43,6 +44,10 @@ const GLIFOS = {
   pareo: ["circle:6,7,2.5", "circle:18,17,2.5", "poly:8.5,7,13,7,13,17,15.5,17"],
   secuencia: ["line:10,6,20,6", "line:10,12,20,12", "line:10,18,20,18", "circle:5,6,1", "circle:5,12,1", "circle:5,18,1"],
   ahorcado: ["line:4,21,13,21", "line:7,21,7,3", "line:7,3,16,3", "line:16,3,16,6", "circle:16,9,3", "line:16,12,16,17"],
+  verdadero_falso: ["poly:3,8,6,11,11,5", "line:14,14,20,20", "line:20,14,14,20"],
+  completar: ["line:3,8,11,8", "line:15,8,21,8", "line:3,16,7,16", "line:11,16,21,16"],
+  clasificar: ["rect:3,4,7,16,1", "rect:14,4,7,16,1", "line:5,8,8,8", "line:16,8,19,8"],
+  caso: ["rect:5,3,14,18,2", "circle:11,10,3", "line:13,12,16,15"],
 };
 const ESPACIO_SVG = "http://www.w3.org/2000/svg";
 
@@ -70,7 +75,9 @@ function contenidoDe(m) {
   const por = { tarjetas: ["tarjetas", "tarjeta", "tarjetas"], presentacion: ["diapositivas", "diapositiva", "diapositivas"],
     infografia: ["bloques", "bloque", "bloques"], quiz: ["preguntas", "pregunta", "preguntas"],
     pareo: ["pares", "par", "pares"], secuencia: ["pasos", "paso", "pasos"],
-    ahorcado: ["palabras", "término", "términos"] }[m.formato];
+    ahorcado: ["palabras", "término", "términos"],
+    verdadero_falso: ["afirmaciones", "afirmación", "afirmaciones"], completar: ["frases", "frase", "frases"],
+    clasificar: ["elementos", "elemento", "elementos"], caso: ["pasos", "paso", "pasos"] }[m.formato];
   if (!por || !Array.isArray(c[por[0]])) return "";
   const n = c[por[0]].length;
   return `${n} ${n === 1 ? por[1] : por[2]}`;
@@ -287,7 +294,9 @@ function accionesAutor(m) {
   const ruta = `/api/materiales/${encodeURIComponent(m.id)}`;
   return el("div", { clase: "acciones-autor" },
     m.estado !== "revisado" ? el("div", { clase: "fila" },
-      el("label", { clase: "campo" }, "Revisión humana", revisor),
+      estado.usuario
+        ? el("p", { clase: "revisor-cuenta" }, `Revisarás como ${estado.usuario}. Marca el material como revisado solo después de leerlo completo.`)
+        : el("label", { clase: "campo" }, "Revisión humana", revisor),
       el("button", { type: "button", clase: "boton", onclick: (e) => ejecutar(e.currentTarget, "Guardando…",
         () => api(`${ruta}/revisar`, { method: "POST", body: { revisor: revisor.value } })) },
         "Marcar como revisado")) : null,
@@ -330,6 +339,7 @@ async function iniciar() {
     estado.catalogo = catalogo;
     estado.ia = estadoIa.ia;
     estado.autor = estadoIa.autor !== false;
+    estado.usuario = estadoIa.usuario || "";
   } catch (error) {
     $("catalogo").replaceChildren(el("div", { clase: "vacio" }, `No se pudo cargar el catálogo: ${error.message}`));
     return;

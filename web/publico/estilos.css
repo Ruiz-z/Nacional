@@ -211,3 +211,36 @@ main { max-width: 1160px; margin: 0 auto; padding: 24px 28px 64px; }
 .tecla.bien { background: var(--exito-fondo); border: 2px solid var(--exito); color: var(--exito); }
 .tecla.mal { background: var(--peligro-fondo); border: 2px solid var(--peligro); color: var(--peligro); }
 .tecla:disabled { cursor: default; }
+.revisor-cuenta { flex: 1; min-width: 240px; color: var(--texto-2); font-size: .9375rem; align-self: center; }
+
+/* Verdadero o falso, Completa la frase, Clasifica y Caso de falla */
+.juego-material .opcion { min-height: 44px; overflow-wrap: anywhere; }
+.juego-material .opcion:disabled { color: var(--texto-2); opacity: 1; }
+.juego-material .opcion[aria-pressed="true"] { border: 2px solid var(--petroleo); }
+.juego-material .pregunta { overflow-wrap: anywhere; }
+.juego-material .juego-retro:empty { margin: 0; padding: 0; }
+.juego-controles:not(:empty) { display: flex; justify-content: flex-end; margin-top: 12px; }
+.juego-situacion, .juego-resumen {
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio);
+  padding: 12px 16px;
+  overflow-wrap: anywhere;
+}
+.juego-situacion { margin-bottom: 16px; }
+.juego-clasificar {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+.juego-clasificar h3, .juego-resumen h3 { margin-bottom: 8px; }
+/* Las categorías acompañan al desplazarse, para clasificar sin subir y bajar. */
+.juego-clasificar > section:last-child { position: sticky; top: 12px; align-self: start; }
+.juego-resumen ol { margin: 0; padding-left: 24px; }
+.juego-resumen li + li { margin-top: 8px; }
+.visor-fondo .juego-material :focus-visible { outline-color: var(--petroleo); }
+.juego-material .resultado p { margin-bottom: 12px; }
+@media (max-width: 620px) {
+  .juego-clasificar { grid-template-columns: minmax(0, 1fr); }
+  .juego-clasificar > section:last-child { position: static; }
+}

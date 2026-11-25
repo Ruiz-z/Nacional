@@ -1,0 +1,70 @@
+{
+  "id": "verdadero-falso-protegerte-del-alto-voltaje-e9f28b",
+  "formato": "verdadero_falso",
+  "titulo": "Protegerte del alto voltaje",
+  "modelo": "general",
+  "nivel": "basico",
+  "competencia": "seguridad-alto-voltaje",
+  "tema": "Protegerte del alto voltaje",
+  "contenido": {
+    "afirmaciones": [
+      {
+        "afirmacion": "Un impacto fuerte puede dañar el cableado de alto voltaje y las baterías del piso.",
+        "verdadero": true,
+        "explicacion": "Volvo identifica el cableado de alto voltaje y las baterías del piso como componentes expuestos a daños."
+      },
+      {
+        "afirmacion": "Un daño grave en las baterías del techo tras un vuelco solo afecta al sistema de enfriamiento.",
+        "verdadero": false,
+        "explicacion": "El daño puede causar fugas o un incendio por cortocircuitos internos."
+      },
+      {
+        "afirmacion": "Si se interrumpe el interbloqueo de alto voltaje (HVIL), la batería se desconecta desde la fuente.",
+        "verdadero": true,
+        "explicacion": "La interrupción del interbloqueo activa la desconexión de la batería desde la fuente."
+      },
+      {
+        "afirmacion": "Si la resistencia de aislamiento cae demasiado, la protección mantiene el sistema alimentado.",
+        "verdadero": false,
+        "explicacion": "La protección corta la alimentación del sistema cuando la resistencia de aislamiento cae demasiado."
+      },
+      {
+        "afirmacion": "El bloqueo impide que se vuelva a conectar el circuito.",
+        "verdadero": true,
+        "explicacion": "Así se controla la reenergización mientras se trabaja."
+      },
+      {
+        "afirmacion": "Si el tablero está apagado, ya comprobaste que no hay tensión.",
+        "verdadero": false,
+        "explicacion": "Mide en los puntos indicados con un instrumento verificado."
+      },
+      {
+        "afirmacion": "Elige el equipo de protección personal según el riesgo y el procedimiento de la tarea.",
+        "verdadero": true,
+        "explicacion": "El riesgo identificado y el procedimiento indican qué equipo necesitas."
+      },
+      {
+        "afirmacion": "Con el equipo de protección personal puesto, puedes omitir la confirmación de la condición segura.",
+        "verdadero": false,
+        "explicacion": "Aplica el procedimiento y confirma la condición segura antes de trabajar en el circuito."
+      }
+    ]
+  },
+  "fuentes": [
+    "Volvo Buses: Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf, p. 4",
+    "Volvo Buses: Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf, p. 8",
+    "NOM-029-STPS: Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad, Control de la reenergización",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Verificación de una condición eléctricamente segura",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Selección del equipo de protección personal",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Equipo de protección personal y desenergización"
+  ],
+  "origen": "manual",
+  "muestra": true,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T01:33:31-06:00",
+  "actualizado": "2026-11-25T01:33:31-06:00",
+  "historial": []
+}

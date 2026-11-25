@@ -93,6 +93,10 @@
     {"id": "quiz", "nombre": "Quiz", "tipo": "juego", "descripcion": "Preguntas con puntaje y explicación de cada respuesta.", "sin_ia": true},
     {"id": "pareo", "nombre": "Pareo", "tipo": "juego", "descripcion": "Une cada término con su definición.", "sin_ia": false},
     {"id": "secuencia", "nombre": "Ordena los pasos", "tipo": "juego", "descripcion": "Pon en orden los pasos de un procedimiento.", "sin_ia": true},
-    {"id": "ahorcado", "nombre": "Ahorcado", "tipo": "juego", "descripcion": "Adivina el término técnico letra por letra con una pista.", "sin_ia": false}
+    {"id": "ahorcado", "nombre": "Ahorcado", "tipo": "juego", "descripcion": "Adivina el término técnico letra por letra con una pista.", "sin_ia": false},
+    {"id": "verdadero_falso", "nombre": "Verdadero o falso", "tipo": "juego", "descripcion": "Decide si cada afirmación técnica es verdadera o falsa.", "sin_ia": true},
+    {"id": "completar", "nombre": "Completa la frase", "tipo": "juego", "descripcion": "Elige la opción que completa cada frase.", "sin_ia": false},
+    {"id": "clasificar", "nombre": "Clasifica", "tipo": "juego", "descripcion": "Coloca cada elemento en la categoría que le corresponde.", "sin_ia": false},
+    {"id": "caso", "nombre": "Caso de falla", "tipo": "juego", "descripcion": "Toma decisiones para diagnosticar una falla paso a paso.", "sin_ia": false}
   ]
 }

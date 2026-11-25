@@ -2,6 +2,7 @@
 
 ## Contexto y objetivo
 Página web donde un autor genera, con el agente de Azure AI Foundry y su búsqueda en los manuales de Volvo (RAG), materiales de estudio en varios formatos: tarjetas, presentación, infografía y cuatro juegos (quiz, pareo, ordenar pasos y ahorcado). Cada material se cataloga por **modelo de autobús**, **nivel** y **competencia**, y el enfoque por defecto son los **básicos** (Novato y Básico). El técnico solo ve los materiales que una persona revisó.
+Página web donde un autor genera, con el agente de Azure AI Foundry y su búsqueda en los manuales de Volvo (RAG), materiales de estudio en varios formatos: tarjetas, presentación, infografía y siete juegos. Cada material se cataloga por **modelo de autobús**, **nivel** y **competencia**, y el enfoque por defecto son los **básicos** (Novato y Básico). El técnico solo ve los materiales que una persona revisó.
 
 Complementa a `competencias`: los materiales **no** son ítems del banco de evaluación y no cambian dominio ni ruta.
 
@@ -31,6 +32,10 @@ Complementa a `competencias`: los materiales **no** son ítems del banco de eval
 | `pareo` | Juego de 4 a 8 pares término–definición. |
 | `secuencia` | Juego de ordenar 3 a 8 pasos de un procedimiento, con explicación. |
 | `ahorcado` | Juego de adivinar 4 a 10 términos técnicos (1 a 3 palabras, solo letras, hasta 24 caracteres) con pista y explicación; 6 errores por término, sin distinguir acentos. |
+| `verdadero_falso` | 6 a 12 afirmaciones técnicas con valor verdadero o falso y explicación. |
+| `completar` | 5 a 10 frases con un solo marcador `____`, 3 o 4 opciones, índice de la correcta y explicación. |
+| `clasificar` | 2 o 3 categorías con identificador y nombre, y 6 a 12 elementos asociados a una categoría existente. |
+| `caso` | Una situación de taller y 3 a 6 decisiones de diagnóstico con tres opciones, índice de la correcta y explicación. |
 
 Campos comunes de un material: `id`, `formato`, `titulo`, `modelo`, `nivel`, `competencia`, `tema`, `contenido`, `fuentes` (nombres de PDF o referencias), `origen` (`ia` | `banco` | `manual`), `estado` (`borrador` | `revisado`), `revisado_por`, `version`, `creado`, `actualizado`, `historial` (versiones anteriores con su motivo).
 
@@ -46,16 +51,23 @@ Campos comunes de un material: `id`, `formato`, `titulo`, `modelo`, `nivel`, `co
 - RF-9: CUANDO el autor edita el contenido a mano, EL SISTEMA lo valida con el mismo esquema, sube la versión y lo deja en `borrador`.
 - RF-10: CUANDO el autor marca un material como revisado con su alias, EL SISTEMA guarda `estado=revisado`, `revisado_por` y la fecha.
 - RF-11: EL SISTEMA muestra al técnico solo materiales `revisado`; el autor ve todos, con el estado visible.
-- RF-12: SI Foundry no está configurado o falla, ENTONCES EL SISTEMA genera `tarjetas`, `quiz` y `secuencia` a partir del banco (`origen=banco`, con la fuente de cada ítem) y lo rotula "Generado sin IA".
+- RF-12: SI Foundry no está configurado o falla, ENTONCES EL SISTEMA genera `tarjetas`, `quiz`, `secuencia` y `verdadero_falso` a partir del banco (`origen=banco`, con la fuente de cada ítem) y lo rotula "Generado sin IA".
 - RF-13: EL SISTEMA muestra en cada material sus fuentes, su origen, su estado y quién lo revisó.
 - RF-14: Un material de `seguridad-alto-voltaje` generado por IA muestra "Requiere revisión de ambos subequipos" mientras sea borrador (constitución 4).
 - RF-15: EL SISTEMA no envía al agente alias, nombres ni datos de técnicos; solo los datos del material pedido.
+
+- RF-16: CUANDO el técnico juega Verdadero o falso, EL SISTEMA ofrece dos botones, explica cada respuesta y muestra el puntaje final con la línea de aprobación del quiz (91 %).
+- RF-17: CUANDO el técnico juega Completa la frase, EL SISTEMA presenta un hueco por frase, acepta una opción y explica la respuesta.
+- RF-18: CUANDO el técnico juega Clasifica, EL SISTEMA permite elegir un elemento y luego su categoría con botones, da retroalimentación por elemento y muestra el puntaje final.
+- RF-19: CUANDO el técnico toma una decisión incorrecta en Caso de falla, EL SISTEMA le permite reintentar una vez antes de mostrar la decisión correcta. Al terminar, muestra el recorrido ideal.
+- RF-20: SI Foundry no está configurado, EL SISTEMA arma Verdadero o falso con un par de afirmaciones por pregunta de opción múltiple del banco y cita la fuente de cada pregunta. Completa la frase, Clasifica y Caso de falla requieren IA para la generación.
 
 ## Requisitos no funcionales
 - Sin dependencias nuevas: servidor con la biblioteca estándar de Python 3 y página en HTML, CSS y JavaScript sin compilación.
 - Funciona sin internet con los materiales guardados y la generación desde el banco.
 - Escucha solo en `127.0.0.1` por defecto.
 - Español claro, misma paleta y tipografía que el juego (`docs/diseno-ui.md`).
+- Los nuevos visores se operan con teclado, muestran el foco y anuncian los resultados.
 
 ## Casos límite
 - JSON del agente con vallas de código: se limpian antes de validar.

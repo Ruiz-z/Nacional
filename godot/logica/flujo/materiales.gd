@@ -12,9 +12,11 @@ static func base_url() -> String:
 
 
 # Dirección que abre el navegador. Con permiso pasa por /acceso, que guarda una cookie y quita el token de la barra.
-static func url(rol: String, token: String) -> String:
+static func url(rol: String, token: String, usuario: String = "") -> String:
 	if rol in ROLES_AUTOR and not token.strip_edges().is_empty():
-		return "%s/acceso?token=%s" % [base_url(), token.strip_edges().uri_encode()]
+		var direccion := "%s/acceso?token=%s" % [base_url(), token.strip_edges().uri_encode()]
+		# Quien revisa un material queda registrado con su cuenta, no con un texto libre.
+		return direccion + ("&usuario=" + usuario.uri_encode() if not usuario.is_empty() else "")
 	return base_url()
 
 

@@ -47,7 +47,7 @@ class Almacen:
 
     def nuevo_id(self, formato, tema):
         while True:
-            candidato = f"{formato}-{slug(tema)}-{secrets.token_hex(3)}"
+            candidato = f"{slug(formato)}-{slug(tema)}-{secrets.token_hex(3)}"
             if not self._ruta(candidato).exists():
                 return candidato
 
