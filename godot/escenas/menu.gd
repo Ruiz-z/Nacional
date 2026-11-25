@@ -46,7 +46,7 @@ var aviso: AcceptDialog
 @onready var clave: LineEdit = inicio.get_node("Clave")
 @onready var repeticion: LineEdit = inicio.get_node("Repetir")
 @onready var enviar: Button = inicio.get_node("Elegir")
-@onready var demo_boton: Button = texto_hero.get_node("Acciones/DemoHero")
+@onready var demo_boton: Button = inicio.get_node("DemoTarjeta")
 @onready var espera: Label = inicio.get_node("Aviso")
 @onready var recorrido := columna.get_node("Recorrido/Margen/Contenido")
 
@@ -81,6 +81,8 @@ func preparar_inicio(disponible: bool) -> void:
 	acciones.get_node("IrAlias").disabled = not disponible
 	acciones.get_node("IrAlias").pressed.connect(entrar_desde_hero)
 	acciones.get_node("DemoHero").pressed.connect(abrir_demo)
+	inicio.get_node("DemoTarjeta").pressed.connect(abrir_demo)
+	entrada_inicio.resized.connect(ajustar_hero)
 	recorrido.get_node("Demo").pressed.connect(abrir_demo)
 	var fichas := columna.get_node("Destacados/Tarjetas")
 	for datos in [
@@ -111,6 +113,12 @@ func entrar_desde_hero() -> void:
 		usuario.grab_focus()
 	else:
 		enviar_ingreso()
+
+
+# Sin sesión, el inicio es solo un ingreso: la foto del taller a pantalla completa y la tarjeta al centro.
+func ajustar_hero() -> void:
+	var hero: Control = columna.get_node("Hero")
+	hero.custom_minimum_size.y = maxf(480.0, entrada_inicio.size.y - 72.0) if perfil.is_empty() else 0.0
 
 
 func ajustar_margenes() -> void:
@@ -247,7 +255,7 @@ func preparar_tarjeta() -> void:
 	inicio.get_node("EtiquetaRepetir").visible = con_repeticion
 	repeticion.visible = con_repeticion
 	inicio.get_node("EtiquetaClave").text = "Nueva contraseña" if etapa == "cambio" else "Contraseña"
-	inicio.get_node("Cabecera/Titulo").text = {"ingreso": "Tu cuenta", "primer-admin": "Crea la administración",
+	inicio.get_node("Cabecera/Titulo").text = {"ingreso": "Entrar al taller", "primer-admin": "Crea la administración",
 		"cambio": "Cambia tu contraseña"}.get(etapa, "Tu cuenta")
 	inicio.get_node("Elegir").text = {"ingreso": "Entrar", "primer-admin": "Crear cuenta",
 		"cambio": "Guardar contraseña"}.get(etapa, "Entrar")
@@ -359,12 +367,24 @@ func actualizar() -> void:
 		TextoLimpio.linea(perfil.get("alias", ""))] if con_sesion else "Sin sesión"
 	barra.get_node("Salir").visible = con_sesion
 	var tarjeta: Control = columna.get_node("Hero/Margen/Fila/Tarjeta")
+	var solo_ingreso := perfil.is_empty()
+	texto_hero.visible = not solo_ingreso
+	columna.get_node("Recorrido").visible = not solo_ingreso
+	for nombre in ["Perfil", "Entrada", "Salir"]:
+		barra.get_node(nombre).visible = not solo_ingreso and (nombre != "Salir" or con_sesion)
+	columna.get_node("Hero/Margen/Fila").alignment = BoxContainer.ALIGNMENT_CENTER if solo_ingreso else BoxContainer.ALIGNMENT_BEGIN
+	tarjeta.custom_minimum_size.x = 400.0 if solo_ingreso else 342.0
+	tarjeta.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if solo_ingreso else Control.SIZE_FILL
+	demo_boton.visible = solo_ingreso and etapa == "ingreso"
+	ajustar_hero()
 	var formulario := not con_sesion or etapa == "cambio"
 	for nombre in ["EtiquetaAlias", "Alias", "EtiquetaClave", "Clave", "EtiquetaRepetir", "Repetir", "Elegir", "Alta"]:
 		inicio.get_node(nombre).visible = formulario
 	if formulario:
 		preparar_tarjeta()
-	texto_hero.get_node("Acciones/IrAlias").visible = not con_sesion
+	else:
+		inicio.get_node("Cabecera/Titulo").text = "Tu cuenta"
+	texto_hero.get_node("Acciones/IrAlias").visible = false
 	texto_hero.get_node("Acciones/IrAlias").disabled = not disponible
 	inicio.get_node("Siguiente").visible = rol == "tecnico" and etapa != "cambio"
 	inicio.get_node("Siguiente").text = "Siguiente paso · %s" % NOMBRES.get(siguiente, "Tablero")
@@ -376,8 +396,8 @@ func actualizar() -> void:
 			{"jefe": "Revisa el progreso del equipo y la recomendación para cada técnico en el tablero.",
 			"admin": "Administra las cuentas y revisa el estado del taller."}.get(rol,
 				"Sigue con esta actividad: %s." % NOMBRES.get(siguiente, "Tablero"))))
-	columna.get_node("Destacados").visible = rol == "tecnico" or not con_sesion
-	recorrido.get_node("Titulo").text = "Tu recorrido" if rol == "tecnico" or not con_sesion else "Tu panel"
+	columna.get_node("Destacados").visible = rol == "tecnico"
+	recorrido.get_node("Titulo").text = "Tu recorrido" if rol == "tecnico" else "Tu panel"
 	var permitidos := pasos_del_rol()
 	for paso in botones:
 		var boton: Button = botones[paso]

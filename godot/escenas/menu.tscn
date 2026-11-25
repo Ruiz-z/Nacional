@@ -223,6 +223,12 @@ text = "Mostrar contraseña"
 toggle_mode = true
 theme_type_variation = &"BotonClaro"
 
+[node name="DemoTarjeta" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+visible = false
+custom_minimum_size = Vector2(0, 50)
+text = "Abrir modo demo"
+theme_type_variation = &"BotonClaro"
+
 [node name="Aviso" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
 theme_type_variation = &"DetalleClaro"
 autowrap_mode = 3
