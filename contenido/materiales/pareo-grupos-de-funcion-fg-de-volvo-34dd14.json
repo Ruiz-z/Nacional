@@ -1,0 +1,53 @@
+{
+  "id": "pareo-grupos-de-funcion-fg-de-volvo-34dd14",
+  "formato": "pareo",
+  "titulo": "Une cada grupo de función con su sistema",
+  "modelo": "general",
+  "nivel": "novato",
+  "competencia": "diagnostico-fallas",
+  "tema": "Grupos de función (FG) de Volvo",
+  "contenido": {
+    "pares": [
+      {
+        "termino": "FG 0",
+        "definicion": "General: familiarización, operación segura y comprensión de los sistemas."
+      },
+      {
+        "termino": "FG 2",
+        "definicion": "Motor: funcionamiento y emisiones; en eléctricos, el motor de tracción."
+      },
+      {
+        "termino": "FG 3",
+        "definicion": "Sistema eléctrico: circuitos, localización de fallas, alta tensión, baterías y carga."
+      },
+      {
+        "termino": "FG 4",
+        "definicion": "Transmisión: transmisión de potencia, control electrónico y servicio."
+      },
+      {
+        "termino": "FG 5",
+        "definicion": "Frenos: frenos neumáticos y electrónicos, ABS y desgaste."
+      },
+      {
+        "termino": "FG 7",
+        "definicion": "Bastidor, resortes, amortiguadores y ruedas; suspensión electrónica y control de altura."
+      },
+      {
+        "termino": "FG 8",
+        "definicion": "Carrocería e interior: puertas, climatización y accesibilidad."
+      }
+    ]
+  },
+  "fuentes": [
+    "Volvo Buses: material entregado en la asesoría HackaTec 2026, grupos de función FG 0 a FG 9 (24/11/2026)"
+  ],
+  "origen": "manual",
+  "muestra": false,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-24T23:16:10-06:00",
+  "actualizado": "2026-11-24T23:16:10-06:00",
+  "historial": []
+}

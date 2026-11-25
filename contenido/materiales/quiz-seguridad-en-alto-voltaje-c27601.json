@@ -1,0 +1,111 @@
+{
+  "id": "quiz-seguridad-en-alto-voltaje-c27601",
+  "formato": "quiz",
+  "titulo": "Quiz: Seguridad en alto voltaje",
+  "modelo": "general",
+  "nivel": "basico",
+  "competencia": "seguridad-alto-voltaje",
+  "tema": "Seguridad en alto voltaje",
+  "contenido": {
+    "preguntas": [
+      {
+        "pregunta": "¿Qué puede dañar un impacto fuerte en un autobús eléctrico Volvo?",
+        "opciones": [
+          "Los cables de alto voltaje y las baterías del piso.",
+          "Solo los cables de baja tensión y sus conectores.",
+          "Solo los soportes externos de las baterías del piso."
+        ],
+        "correcta": 0,
+        "explicacion": "Respuesta: Los cables de alto voltaje y las baterías del piso. Fuente: Volvo Buses: Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx, p. 4"
+      },
+      {
+        "pregunta": "En un eléctrico Volvo, ¿qué ocurre si se interrumpe el interbloqueo de alto voltaje (HVIL)?",
+        "opciones": [
+          "El sistema cambia la fuente de alimentación del equipo de carga.",
+          "La batería se desconecta desde la fuente.",
+          "El sistema activa la refrigeración del paquete de baterías."
+        ],
+        "correcta": 1,
+        "explicacion": "Respuesta: La batería se desconecta desde la fuente. Fuente: Volvo Buses: Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx, p. 8"
+      },
+      {
+        "pregunta": "¿Qué riesgo describe Volvo si un vuelco daña gravemente las baterías del techo?",
+        "opciones": [
+          "Una fuga del sistema de enfriamiento sin daño eléctrico interno.",
+          "Un corte de alimentación que elimina el riesgo de incendio.",
+          "Una fuga en las baterías o un incendio por cortocircuitos internos."
+        ],
+        "correcta": 2,
+        "explicacion": "Respuesta: Una fuga en las baterías o un incendio por cortocircuitos internos. Fuente: Volvo Buses: Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx, p. 4"
+      },
+      {
+        "pregunta": "¿Para qué sirve el bloqueo en el procedimiento LOTO?",
+        "opciones": [
+          "Para evitar que alguien vuelva a conectar el circuito sin permiso.",
+          "Para medir cuánta energía queda almacenada.",
+          "Para saber qué equipo de protección personal (EPP) necesitas."
+        ],
+        "correcta": 0,
+        "explicacion": "Respuesta: Para evitar que alguien vuelva a conectar el circuito sin permiso. Fuente: NOM-029-STPS: Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad, Control de la reenergización"
+      },
+      {
+        "pregunta": "¿Qué indica la etiqueta en el procedimiento LOTO?",
+        "opciones": [
+          "Mantiene fijo el dispositivo de aislamiento.",
+          "Avisa que hay trabajo en curso y que nadie debe operar el dispositivo.",
+          "Confirma que se abrieron todos los contactos del dispositivo de aislamiento."
+        ],
+        "correcta": 1,
+        "explicacion": "Respuesta: Avisa que hay trabajo en curso y que nadie debe operar el dispositivo. Fuente: NOM-029-STPS: Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad, Señalización durante el mantenimiento"
+      },
+      {
+        "pregunta": "¿Cómo eliges el EPP para un trabajo eléctrico?",
+        "opciones": [
+          "Según la carga que marca el tablero.",
+          "Según el equipo que usaste en el trabajo anterior.",
+          "Según los peligros que identificaste y el procedimiento de la tarea."
+        ],
+        "correcta": 2,
+        "explicacion": "Respuesta: Según los peligros que identificaste y el procedimiento de la tarea. Fuente: NFPA 70E: Standard for Electrical Safety in the Workplace, Selección del equipo de protección personal"
+      },
+      {
+        "pregunta": "El tablero está apagado. ¿Cómo compruebas que no hay tensión?",
+        "opciones": [
+          "Mide en los puntos indicados con el instrumento que pide el procedimiento.",
+          "Vuelve a mirar el indicador apagado.",
+          "Anota en la orden que el tablero se apagó."
+        ],
+        "correcta": 0,
+        "explicacion": "Respuesta: Mide en los puntos indicados con el instrumento que pide el procedimiento. Fuente: NFPA 70E: Standard for Electrical Safety in the Workplace, Verificación de una condición eléctricamente segura"
+      },
+      {
+        "pregunta": "Ya aislaste el circuito de su alimentación principal. ¿Qué falta revisar para saber si es seguro?",
+        "opciones": [
+          "Cuánto tiempo lleva en uso el equipo desde el último servicio.",
+          "Si hay otras fuentes de alimentación o queda energía almacenada.",
+          "Cuánta energía consumía el circuito antes de apagarlo."
+        ],
+        "correcta": 1,
+        "explicacion": "Respuesta: Si hay otras fuentes de alimentación o queda energía almacenada. Fuente: NFPA 70E: Standard for Electrical Safety in the Workplace, Fuentes de energía y energía almacenada"
+      }
+    ]
+  },
+  "fuentes": [
+    "Volvo Buses: Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx, p. 4",
+    "Volvo Buses: Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx, p. 8",
+    "NOM-029-STPS: Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad, Control de la reenergización",
+    "NOM-029-STPS: Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad, Señalización durante el mantenimiento",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Selección del equipo de protección personal",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Verificación de una condición eléctricamente segura",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Fuentes de energía y energía almacenada"
+  ],
+  "origen": "banco",
+  "muestra": true,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-24T23:18:29-06:00",
+  "actualizado": "2026-11-24T23:18:29-06:00",
+  "historial": []
+}

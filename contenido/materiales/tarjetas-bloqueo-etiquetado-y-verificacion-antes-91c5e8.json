@@ -1,0 +1,57 @@
+{
+  "id": "tarjetas-bloqueo-etiquetado-y-verificacion-antes-91c5e8",
+  "formato": "tarjetas",
+  "titulo": "Bloqueo, etiquetado y verificación para trabajar en alto voltaje",
+  "modelo": "general",
+  "nivel": "novato",
+  "competencia": "seguridad-alto-voltaje",
+  "tema": "Bloqueo, etiquetado y verificación antes de trabajar en alto voltaje",
+  "contenido": {
+    "tarjetas": [
+      {
+        "frente": "¿Por qué solo técnicos autorizados trabajan en sistemas HV?",
+        "reverso": "Trabajar en componentes de alto voltaje (HV) es peligroso. Solo técnicos certificados y con autorización pueden hacerlo para evitar descargas eléctricas que causen lesiones graves o muerte."
+      },
+      {
+        "frente": "¿Qué es la puesta fuera de servicio en HV?",
+        "reverso": "Es un procedimiento obligatorio para desconectar de forma segura el sistema de alto voltaje antes de cualquier trabajo. Garantiza que las partes conductoras no queden energizadas ni expuestas."
+      },
+      {
+        "frente": "¿Quién puede realizar el bloqueo y etiquetado en HV?",
+        "reverso": "Solo la persona autorizada y responsable del mantenimiento realiza el bloqueo, etiquetado y verificación del equipo. Esta persona delega la responsabilidad y controla la seguridad."
+      },
+      {
+        "frente": "¿Qué significa verificar antes de trabajar en HV?",
+        "reverso": "Implica comprobar que el sistema está desenergizado y bloqueado correctamente para evitar riesgos eléctricos antes de iniciar cualquier intervención en alto voltaje."
+      },
+      {
+        "frente": "¿Cuál es la regla básica de seguridad para alto voltaje?",
+        "reverso": "Nunca trabajar en sistemas HV sin poner fuera de servicio y verificar el bloqueo y etiquetado. Seguir procedimientos estrictos es vital para evitar accidentes eléctricos."
+      },
+      {
+        "frente": "¿Qué monitorea el sistema HVIL en autobuses Volvo?",
+        "reverso": "El circuito HVIL (bucle de interbloqueo de voltaje peligroso) monitoriza el cableado HV. Si se abre o daña, desconecta automáticamente la batería para evitar riesgos."
+      },
+      {
+        "frente": "¿Qué sucede si se detecta una fuga térmica en la batería?",
+        "reverso": "El sistema desconecta todo el paquete de baterías y activa advertencias. Esto protege al técnico y conductor de un posible incendio por sobrecalentamiento."
+      },
+      {
+        "frente": "¿Por qué es importante el etiquetado en HV?",
+        "reverso": "El etiquetado indica que el sistema está bloqueado y no debe ser energizado o manipulado. Evita errores y protege a todos en el taller de accidentes eléctricos."
+      }
+    ]
+  },
+  "fuentes": [
+    "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"
+  ],
+  "origen": "ia",
+  "muestra": false,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T00:40:56-06:00",
+  "actualizado": "2026-11-25T00:40:56-06:00",
+  "historial": []
+}
