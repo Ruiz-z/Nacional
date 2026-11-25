@@ -10,7 +10,7 @@ static func ejecutar() -> bool:
 
 static func comprobar(base: String) -> bool:
 	if not Demo.precargar(base, Base.consultar) or Base.consultar(base,
-			"INSERT INTO tecnico(alias) VALUES ('A-01');
+			"INSERT INTO tecnico(alias, clave_hash) VALUES ('A-01', 'x');
 			INSERT INTO intento(tecnico, competencia, item, formato, dificultad, respuesta, valor, peso,
 				resultado, tipo_error, tiempo_ms, fuente_entrada, momento, reloj_sim, version_contenido)
 			SELECT id, 'seguridad-alto-voltaje', 'aislar', 'escenario', 'media', 'aislar',
@@ -19,6 +19,7 @@ static func comprobar(base: String) -> bool:
 		return false
 	var tablero := Tablero.instantiate()
 	tablero.base = base
+	tablero.rol = "jefe"
 	(Engine.get_main_loop() as SceneTree).root.add_child(tablero)
 	var jefe: Button = tablero.get_node("Vistas/JefeDirecto")
 	jefe.pressed.emit()

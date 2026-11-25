@@ -265,7 +265,7 @@ func abrir_paso(paso: String) -> void:
 		"escenario":
 			abrir_ordenes(perfil.merged({"base": base}))
 		"tablero":
-			abrir_tablero({"base": base, "alias": perfil.alias})
+			abrir_tablero({"base": base, "alias": perfil.alias, "rol": perfil.get("rol", "")})
 		"diagnostico", "ruta", "post", "retest":
 			paso_solicitado.emit(paso, perfil.duplicate())
 			var recurso := {"diagnostico": Diagnostico, "ruta": Ruta}.get(paso, Evaluacion) as PackedScene
@@ -296,6 +296,7 @@ func abrir_tablero(tecnico: Dictionary) -> void:
 	var tablero := Tablero.instantiate()
 	tablero.base = tecnico.base
 	tablero.alias_actual = tecnico.alias
+	tablero.rol = tecnico.get("rol", "")
 	abrir(tablero)
 
 

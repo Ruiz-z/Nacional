@@ -14,13 +14,20 @@ Brechas y faltas críticas = conteo de registros. Última falta = fecha más rec
 Tiempo promedio = suma de los milisegundos ÷ número de acciones registradas.
 Avance = microlecciones completadas y pendientes en la ruta guardada."""
 
+const Permisos = preload("res://logica/tablero/permisos.gd")
+
 const AYUDA_JEFE := """Oportunidades = respuestas y prácticas registradas. Un intento incorrecto cuenta como un error.
 Intentos sin ayuda = oportunidades con cero ayudas registradas.
 Los casos con banco requieren que el historial identifique el banco físico."""
 
 
-static func aliases(base: String) -> Array:
-	var filas: Variant = Acceso.consultar(base, "SELECT alias FROM tecnico ORDER BY alias;")
+# El técnico solo recibe su propio usuario; sin rol válido no se entrega nada.
+static func aliases(base: String, rol: String = "", actor: String = "") -> Array:
+	if rol == Permisos.TECNICO and not actor.is_empty():
+		return [actor]
+	if not Permisos.puede_ver_equipo(rol):
+		return []
+	var filas: Variant = Acceso.consultar(base, "SELECT alias FROM tecnico WHERE clave_hash <> '' OR demo = 1 ORDER BY alias;")
 	return [] if filas == null else filas.map(func(fila: Dictionary) -> String: return fila.alias)
 
 

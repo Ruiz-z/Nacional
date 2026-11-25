@@ -8,7 +8,7 @@ const Indicadores = preload("res://logica/aprendizaje/indicadores.gd")
 
 static func tecnico(base: String, alias: String, consultar: Callable = Acceso.consultar) -> Dictionary:
 	var perfil: Variant = consultar.call(base, """
-		SELECT tecnico.*, progreso.ruta, coalesce(progreso.microlecciones_hechas, 0) AS microlecciones_hechas
+		SELECT tecnico.id, tecnico.alias, tecnico.demo, tecnico.creado, tecnico.rol, progreso.ruta, coalesce(progreso.microlecciones_hechas, 0) AS microlecciones_hechas
 		FROM tecnico LEFT JOIN progreso ON progreso.tecnico = tecnico.id WHERE alias = ?;
 	""", [alias])
 	if perfil == null or perfil.is_empty():

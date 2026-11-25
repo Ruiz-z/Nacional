@@ -22,6 +22,8 @@ const COLORES_NIVEL := {
 var base := ""
 var alias_actual := ""
 var jefe_directo := false
+# Rol de quien abre el tablero (tecnico, jefe o admin). Sin rol no se entrega nada.
+var rol := ""
 var alias_ficha := ""
 var ordenes := {}
 var botones_tecnicos := {}
@@ -301,7 +303,7 @@ func mostrar_lista() -> void:
 	linea("Técnicos", &"Titulo")
 	var perfiles: Array[Dictionary] = []
 	if not base.is_empty():
-		for nombre in Vistas.aliases(base):
+		for nombre in Vistas.aliases(base, rol, alias_actual):
 			var perfil := perfil_jefe(nombre)
 			if not perfil.is_empty():
 				perfiles.append(perfil)
@@ -519,7 +521,7 @@ func abrir_exportacion() -> void:
 
 
 func exportar(destino: String) -> void:
-	var correcto := Resultados.exportar(base, destino, destino.get_extension(), alias_ficha)
+	var correcto := Resultados.exportar(base, destino, destino.get_extension(), alias_ficha, rol)
 	$AvisoExportacion.dialog_text = "Guardaste los resultados." if correcto else "No se pudo guardar. Elige otra carpeta e inténtalo de nuevo."
 	$AvisoExportacion.popup_centered()
 
