@@ -8,6 +8,7 @@ const Banco = preload("res://logica/competencias/banco.gd")
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Cuentas = preload("res://logica/flujo/cuentas.gd")
 const UI = preload("res://escenas/cuenta_ui.gd")
+const Materiales = preload("res://logica/flujo/materiales.gd")
 const Administracion = preload("res://escenas/administracion.tscn")
 const Recorrido = preload("res://logica/flujo/recorrido.gd")
 const Esquema = preload("res://logica/datos/esquema.gd")
@@ -39,7 +40,6 @@ var volver_al_tablero := false
 var aviso: AcceptDialog
 # Abre la página de materiales (servidor local + navegador). Las pruebas lo sustituyen para no lanzar procesos.
 var lanzar_materiales: Callable = abrir_pagina_materiales
-const PUERTO_MATERIALES := 8765
 @onready var entrada_inicio: ScrollContainer = $Marco/EntradaInicio
 @onready var columna := $Marco/EntradaInicio/Columna
 @onready var barra := columna.get_node("Barra/Margen/Fila")
@@ -477,22 +477,28 @@ func abrir_paso(paso: String) -> void:
 
 
 func abrir_materiales() -> void:
-	lanzar_materiales.call("http://127.0.0.1:%d" % PUERTO_MATERIALES)
+	lanzar_materiales.call(perfil.get("rol", ""))
 
 
-# Levanta `python web/servidor.py` (si ya corre, el nuevo proceso termina solo) y abre el navegador.
-func abrir_pagina_materiales(url: String) -> void:
+# Levanta `python web/servidor.py` (si ya corre, el nuevo proceso termina solo) y abre el navegador. Jefe directo y
+# admin entran con el permiso de autor que el servidor guarda en web/.token-autor; el técnico entra sin él.
+func abrir_pagina_materiales(rol: String) -> void:
 	var raiz := ProjectSettings.globalize_path("res://").path_join("..").simplify_path()
 	var servidor := raiz.path_join("web/servidor.py")
 	if not FileAccess.file_exists(servidor):
 		aviso = UI.aviso(self, "No se encontró la página de materiales en esta instalación.")
 		return
 	var python := "python" if OS.get_name() == "Windows" else "python3"
-	if OS.create_process(python, [servidor, "--puerto", str(PUERTO_MATERIALES)]) < 0:
+	if OS.create_process(python, [servidor, "--puerto", str(Materiales.PUERTO)]) < 0:
 		aviso = UI.aviso(self, "No se pudo iniciar la página de materiales. Comprueba que Python 3 está instalado.")
 		return
-	await get_tree().create_timer(1.2).timeout
-	OS.shell_open(url)
+	var token := ""
+	for _intento in range(10):
+		await get_tree().create_timer(0.4).timeout
+		token = Materiales.leer_token(raiz)
+		if not token.is_empty() or rol not in Materiales.ROLES_AUTOR:
+			break
+	OS.shell_open(Materiales.url(rol, token))
 
 
 func abrir_demo() -> void:

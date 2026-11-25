@@ -8,13 +8,16 @@ Sin dependencias: solo la biblioteca estándar de Python 3.
 """
 
 import argparse
+import hmac
 import json
 import mimetypes
+import os
+import secrets
 import sys
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -27,11 +30,32 @@ PUBLICO = Path(__file__).resolve().parent / "publico"
 FUENTES = Path(__file__).resolve().parents[1] / "godot" / "assets" / "fuentes"
 MAX_CUERPO = 256 * 1024
 MAX_REVISOR = 40
+RUTA_TOKEN = Path(__file__).resolve().parent / ".token-autor"
+COOKIE = "autor"
+SOLO_AUTOR = "Solo el jefe directo o la administración pueden hacer esto. Entra desde la app con tu cuenta."
 FILTROS = ("modelo", "nivel", "competencia", "formato", "estado")
 
 
+def cargar_token(ruta=RUTA_TOKEN):
+    """Permiso de autor: lo lee la app de Godot para jefe directo y admin. Se crea una vez, solo legible por su dueño."""
+    try:
+        token = Path(ruta).read_text(encoding="utf-8").strip()
+        if len(token) >= 32:
+            return token
+    except OSError:
+        pass
+    token = secrets.token_urlsafe(32)
+    descriptor = os.open(ruta, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as archivo:
+        archivo.write(token + "\n")
+    return token
+
+
 class Aplicacion:
-    def __init__(self, catalogo=None, almacen=None, cliente=None):
+    """`token_autor=None` deja todo abierto (pruebas y uso por código); `main` siempre exige el permiso."""
+
+    def __init__(self, catalogo=None, almacen=None, cliente=None, token_autor=None):
+        self.token_autor = token_autor
         self.catalogo = catalogo or Catalogo()
         self.almacen = almacen or Almacen()
         self.generador = Generador(self.catalogo, self.almacen, ClienteFoundry() if cliente is None else cliente)
@@ -66,6 +90,29 @@ class Manejador(BaseHTTPRequestHandler):
 
     def log_message(self, formato, *args):  # Sin datos de la petición en consola.
         pass
+
+    # --- Permiso de autor ---
+
+    def _es_autor(self):
+        esperado = self.app.token_autor
+        if esperado is None:
+            return True
+        for cookie in (self.headers.get("Cookie") or "").split(";"):
+            nombre, _, valor = cookie.strip().partition("=")
+            if nombre == COOKIE and hmac.compare_digest(valor.encode(), esperado.encode()):
+                return True
+        return False
+
+    def _acceso(self, consulta):
+        """Entrada desde la app: guarda el permiso en una cookie y lleva a la página sin el token en la dirección."""
+        token = (consulta.get("token") or [""])[0]
+        esperado = self.app.token_autor
+        self.send_response(HTTPStatus.SEE_OTHER)
+        if esperado is not None and hmac.compare_digest(token.encode(), esperado.encode()):
+            self.send_header("Set-Cookie", f"{COOKIE}={quote(esperado)}; Path=/; HttpOnly; SameSite=Strict")
+        self.send_header("Location", "/")
+        self.send_header("Content-Length", "0")
+        self.end_headers()
 
     # --- Respuestas ---
 
@@ -119,6 +166,8 @@ class Manejador(BaseHTTPRequestHandler):
         partes = [p for p in url.path.split("/") if p]
         app = self.app
         try:
+            if partes == ["acceso"] and metodo == "GET":
+                return self._acceso(parse_qs(url.query))
             if not partes or partes[0] != "api":
                 if metodo != "GET":
                     return self._error(HTTPStatus.METHOD_NOT_ALLOWED, "Método no permitido.")
@@ -127,8 +176,11 @@ class Manejador(BaseHTTPRequestHandler):
                     return self.end_headers()
                 return self._estatico(url.path)
             ruta = partes[1:]
+            autor = self._es_autor()
             if metodo == "GET" and ruta == ["estado"]:
-                return self._json(HTTPStatus.OK, {"ia": app.generador.ia_disponible()})
+                return self._json(HTTPStatus.OK, {"ia": app.generador.ia_disponible(), "autor": autor})
+            if not autor and (metodo != "GET" or "vista=autor" in url.query):
+                return self._error(HTTPStatus.FORBIDDEN, SOLO_AUTOR)
             if metodo == "GET" and ruta == ["catalogo"]:
                 return self._json(HTTPStatus.OK, app.catalogo.publico())
             if metodo == "GET" and ruta == ["materiales"]:
@@ -145,7 +197,10 @@ class Manejador(BaseHTTPRequestHandler):
                 if len(ruta) > 3:
                     return self._error(HTTPStatus.NOT_FOUND, "No existe.")
                 if metodo == "GET" and not accion:
-                    return self._json(HTTPStatus.OK, app.con_marcas(app.almacen.obtener(id_material)))
+                    material = app.almacen.obtener(id_material)
+                    if not autor and material.get("estado") != "revisado":
+                        raise NoEncontrado(id_material)  # El técnico no ve borradores ni por dirección directa.
+                    return self._json(HTTPStatus.OK, app.con_marcas(material))
                 if metodo == "PUT" and not accion:
                     datos = self._cuerpo()
                     material = app.generador.editar(id_material, datos.get("titulo"), datos.get("contenido"),
@@ -195,10 +250,12 @@ def main():
     argumentos.add_argument("--puerto", type=int, default=8765)
     argumentos.add_argument("--materiales", help="Carpeta de materiales (por defecto contenido/materiales)")
     opciones = argumentos.parse_args()
-    app = Aplicacion(almacen=Almacen(opciones.materiales) if opciones.materiales else None)
+    token = cargar_token()
+    app = Aplicacion(almacen=Almacen(opciones.materiales) if opciones.materiales else None, token_autor=token)
     servidor = crear_servidor(app, opciones.host, opciones.puerto)
     ia = "con IA (Foundry)" if app.generador.ia_disponible() else "sin IA (respaldo desde el banco)"
     print(f"Materiales de estudio {ia}: http://{opciones.host}:{opciones.puerto}")
+    print("Vista de autor: se abre desde la app de Godot con una cuenta de jefe directo o admin.")
     try:
         servidor.serve_forever()
     except KeyboardInterrupt:

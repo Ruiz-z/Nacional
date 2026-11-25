@@ -13,6 +13,13 @@ python web/servidor.py            # abre http://127.0.0.1:8765
 - **Autor:** genera, actualiza con IA, edita a mano (JSON), marca como revisado o elimina. Ve también los borradores.
 - Opciones: `--puerto 9000`, `--host` (por defecto solo `127.0.0.1`) y `--materiales <carpeta>` para trabajar sobre una copia.
 
+## Quién puede generar, revisar y editar
+La vista **Autor** (generar, actualizar con IA, editar, marcar como revisado, eliminar) solo existe para **jefe directo y admin**; el técnico solo ve los materiales revisados.
+- Al abrir la página desde la tarjeta **Materiales de estudio** de la app, jefe directo y admin entran con un **permiso de autor**: el servidor lo guarda en `web/.token-autor` (se crea la primera vez, permisos `600`, fuera de git) y la app lo lee y abre `/acceso?token=…`. El servidor lo cambia por una cookie `HttpOnly` y `SameSite=Strict` y redirige a `/`, así que el token no queda en la barra de direcciones.
+- Sin permiso, el servidor responde 403 a la vista de autor y a cualquier alta, edición, revisión o borrado, y no muestra borradores ni por su dirección directa. La página oculta el selector Técnico/Autor.
+- Al ejecutar `python web/servidor.py` a mano, la vista de autor no se abre sola: se entra desde la app. Para trabajar solo sin la app, abre `http://127.0.0.1:8765/acceso?token=` con el contenido de `web/.token-autor`.
+- Límite: el archivo del permiso lo puede leer quien tenga acceso a la sesión del sistema operativo, igual que la base de datos local. El control completo llega con el servidor central de la fase 3.
+
 ## Con IA y sin IA
 - **Con IA:** usa la misma configuración que la ruta del juego ([foundry.md](foundry.md)): `.env` con `NACIONAL_FOUNDRY_ENDPOINT` y `az login`. La cabecera dice "IA conectada (Foundry)".
 - **Agente:** se recomienda crear el agente `materiales` ([foundry/agente-materiales.yaml](../foundry/agente-materiales.yaml)) con la **misma base de conocimiento que Faro** y poner `NACIONAL_FOUNDRY_AGENTE_MATERIALES=materiales` en el `.env`. Si no existe, se usa `NACIONAL_FOUNDRY_AGENTE` (Faro); funciona porque la instrucción y el esquema viajan en el mensaje, pero las instrucciones fijas de Faro hablan de la ruta.

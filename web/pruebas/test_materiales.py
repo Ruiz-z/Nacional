@@ -295,7 +295,7 @@ class PruebaServidor(Base):
         return estado, json.loads(datos)
 
     def test_flujo_completo(self):
-        self.assertEqual(self.json("GET", "/api/estado"), (200, {"ia": True}))
+        self.assertEqual(self.json("GET", "/api/estado"), (200, {"ia": True, "autor": True}))
         estado, catalogo = self.json("GET", "/api/catalogo")
         self.assertEqual(catalogo["enfoque_por_defecto"], "basicos")
         estado, m = self.json("POST", "/api/materiales", {"formato": "quiz", "modelo": "general", "nivel": "novato",
@@ -337,6 +337,88 @@ class PruebaServidor(Base):
         for malo in ("/../servidor.py", "/%2e%2e/servidor.py", "/fuentes/../../project.godot",
                      "/fuentes/Poppins-Regular.ttf.import"):
             self.assertEqual(self.pedir("GET", malo)[0], 404, malo)
+
+
+class PruebaPermisoDeAutor(Base):
+    """Con permiso configurado, solo quien entra desde la app (cookie) hace acciones de autor."""
+
+    TOKEN = "t" * 43
+
+    def setUp(self):
+        super().setUp()
+        app = servidor.Aplicacion(self.catalogo, self.almacen, ClienteFalso(respuesta_ia("quiz")), token_autor=self.TOKEN)
+        self.http = servidor.crear_servidor(app, puerto=0)
+        threading.Thread(target=self.http.serve_forever, daemon=True).start()
+        self.addCleanup(self.http.server_close)
+        self.addCleanup(self.http.shutdown)
+        self.base = f"http://127.0.0.1:{self.http.server_address[1]}"
+
+    def pedir(self, metodo, ruta, cuerpo=None, cookie=None):
+        datos = json.dumps(cuerpo).encode() if cuerpo is not None else None
+        cabeceras = {"Content-Type": "application/json"}
+        if cookie:
+            cabeceras["Cookie"] = cookie
+        peticion = urllib.request.Request(self.base + ruta, data=datos, method=metodo, headers=cabeceras)
+        try:
+            with urllib.request.urlopen(peticion, timeout=10) as r:
+                return r.status, r.read()
+        except urllib.error.HTTPError as error:
+            return error.code, error.read()
+
+    def test_sin_permiso_solo_hay_vista_de_tecnico(self):
+        estado, datos = self.pedir("GET", "/api/estado")
+        self.assertEqual((estado, json.loads(datos)["autor"]), (200, False))
+        self.assertEqual(self.pedir("GET", "/api/materiales")[0], 200)
+        self.assertEqual(self.pedir("GET", "/api/materiales?vista=autor")[0], 403)
+        for metodo, ruta, cuerpo in [
+                ("POST", "/api/materiales", {"formato": "quiz", "modelo": "general", "nivel": "novato",
+                                              "competencia": "seguridad-alto-voltaje", "tema": "EPP"}),
+                ("PUT", "/api/materiales/x-1", {"titulo": "x", "contenido": {}}),
+                ("DELETE", "/api/materiales/x-1", None),
+                ("POST", "/api/materiales/x-1/revisar", {"revisor": "yo"}),
+                ("POST", "/api/materiales/x-1/actualizar", {"indicacion": "x"})]:
+            self.assertEqual(self.pedir(metodo, ruta, cuerpo)[0], 403, f"{metodo} {ruta}")
+        # Una cookie equivocada no sirve.
+        self.assertEqual(self.pedir("GET", "/api/materiales?vista=autor", cookie="autor=otro")[0], 403)
+
+    def test_acceso_con_token_da_la_cookie_y_el_permiso(self):
+        class SinSeguir(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *args, **kwargs):
+                return None
+        abridor = urllib.request.build_opener(SinSeguir)
+        for token, debe_dar_cookie in [(self.TOKEN, True), ("incorrecto", False)]:
+            try:
+                abridor.open(f"{self.base}/acceso?token={token}", timeout=10)
+                self.fail("debía redirigir")
+            except urllib.error.HTTPError as respuesta:
+                self.assertEqual((respuesta.code, respuesta.headers["Location"]), (303, "/"))
+                cookie = respuesta.headers.get("Set-Cookie")
+                self.assertEqual(cookie is not None, debe_dar_cookie)
+                if cookie:
+                    self.assertIn("HttpOnly", cookie)
+                    self.assertIn("SameSite=Strict", cookie)
+        cookie = f"autor={self.TOKEN}"
+        self.assertEqual(json.loads(self.pedir("GET", "/api/estado", cookie=cookie)[1])["autor"], True)
+        self.assertEqual(self.pedir("GET", "/api/materiales?vista=autor", cookie=cookie)[0], 200)
+
+    def test_el_tecnico_no_ve_un_borrador_ni_por_su_direccion(self):
+        estado, creado = self.pedir("POST", "/api/materiales", {"formato": "quiz", "modelo": "general", "nivel": "novato",
+                                    "competencia": "seguridad-alto-voltaje", "tema": "EPP"}, cookie=f"autor={self.TOKEN}")
+        self.assertEqual(estado, 201)
+        identificador = json.loads(creado)["id"]
+        self.assertEqual(self.pedir("GET", f"/api/materiales/{identificador}")[0], 404)
+        self.assertEqual(self.pedir("GET", f"/api/materiales/{identificador}", cookie=f"autor={self.TOKEN}")[0], 200)
+        self.pedir("POST", f"/api/materiales/{identificador}/revisar", {"revisor": "jefe-1"}, cookie=f"autor={self.TOKEN}")
+        self.assertEqual(self.pedir("GET", f"/api/materiales/{identificador}")[0], 200)
+
+    def test_el_token_se_crea_una_vez_y_con_permisos_cerrados(self):
+        with tempfile.TemporaryDirectory() as carpeta:
+            ruta = Path(carpeta) / ".token"
+            primero = servidor.cargar_token(ruta)
+            self.assertGreaterEqual(len(primero), 32)
+            self.assertEqual(servidor.cargar_token(ruta), primero)
+            if os.name == "posix":
+                self.assertEqual(ruta.stat().st_mode & 0o077, 0)
 
 
 class PruebaAgente(unittest.TestCase):

@@ -23,10 +23,10 @@ static func comprobar(base: String) -> bool:
 		correcto = correcto and visibles == esperado[rol] \
 			and menu.columna.get_node("Destacados").visible == (rol == "tecnico")
 		# La tarjeta de materiales abre la página local con la dirección del servidor, sin lanzar procesos en la prueba.
-		var direcciones := []
-		menu.lanzar_materiales = func(url: String): direcciones.append(url)
+		var roles_enviados := []
+		menu.lanzar_materiales = func(rol_actual: String): roles_enviados.append(rol_actual)
 		menu.botones.materiales.pressed.emit()
-		correcto = correcto and direcciones == ["http://127.0.0.1:8765"] and not menu.botones.materiales.disabled
+		correcto = correcto and roles_enviados == [rol] and not menu.botones.materiales.disabled
 		menu.botones.tablero.pressed.emit()
 		correcto = correcto and menu.pantalla != null and menu.pantalla.perfil.rol == rol
 		if rol == "jefe" and menu.pantalla != null:

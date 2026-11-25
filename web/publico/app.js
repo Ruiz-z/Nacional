@@ -5,6 +5,7 @@ const estado = {
   vista: "tecnico",
   catalogo: null,
   ia: false,
+  autor: false,
   formatoCrear: "tarjetas",
   niveles: [], // vacío = todos
   materiales: [],
@@ -326,6 +327,7 @@ async function iniciar() {
     const [catalogo, estadoIa] = await Promise.all([api("/api/catalogo"), api("/api/estado")]);
     estado.catalogo = catalogo;
     estado.ia = estadoIa.ia;
+    estado.autor = estadoIa.autor !== false;
   } catch (error) {
     $("catalogo").replaceChildren(el("div", { clase: "vacio" }, `No se pudo cargar el catálogo: ${error.message}`));
     return;
@@ -345,6 +347,8 @@ async function iniciar() {
   pintarFormatosCrear();
   for (const campo of ["modelo", "competencia", "formato", "estado"]) $(`filtro-${campo}`).addEventListener("change", cargarMateriales);
   document.querySelectorAll("[data-vista]").forEach((b) => b.addEventListener("click", () => cambiarVista(b.dataset.vista)));
+  // La vista de autor solo existe con el permiso que entrega la app a jefe directo y admin.
+  if (!estado.autor) document.querySelector(".vista").classList.add("oculto");
   $("generar").addEventListener("click", generar);
   $("visor-fondo").addEventListener("click", (e) => { if (e.target === $("visor-fondo")) cerrarVisor(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("visor-fondo").classList.contains("oculto")) cerrarVisor(); });

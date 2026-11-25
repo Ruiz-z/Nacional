@@ -9,3 +9,6 @@ godot/contenido/
 
 # Python
 __pycache__/
+
+# Permiso de autor de la página de materiales (se crea al abrirla; nunca en git)
+web/.token-autor
