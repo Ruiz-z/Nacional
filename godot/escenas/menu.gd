@@ -277,6 +277,7 @@ func abrir_paso(paso: String) -> void:
 			if paso in ["post", "retest"]:
 				actividad.titulo_preparado = NOMBRES[paso]
 			actividad.finalizada.connect($Marco/Volver.grab_focus)
+			actividad.ruta_cerrada.connect(volver)
 			actividad.practica_mapa_solicitada.connect(practicar_desde_ruta)
 			abrir(actividad)
 			if actividad.item.is_empty():

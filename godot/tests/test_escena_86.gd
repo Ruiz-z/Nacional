@@ -24,7 +24,7 @@ static func comprobar(base: String) -> bool:
 			and not pantalla.desplazamiento.is_ancestor_of(pantalla.enviar) and not pantalla.progreso.visible \
 			and pantalla.fuente.text.is_empty() and pantalla.item.is_empty()
 		pantalla.enviar.pressed.emit()
-		correcto = correcto and pantalla.guardado and pantalla.detalle.text.contains("Temas para repasar")
+		correcto = correcto and pantalla.guardado and menu.get_node("Marco").visible and not menu.get_node("Marco/Volver").visible
 	var estado := Recorrido.estado(base, menu.perfil.id, ahora)
 	var filas: Variant = Registro.leer(base, "T-85")
 	menu.free()

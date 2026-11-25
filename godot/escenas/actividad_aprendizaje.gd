@@ -3,6 +3,7 @@ extends VBoxContainer
 const TextoLimpio = preload("res://logica/texto_limpio.gd")
 
 signal finalizada
+signal ruta_cerrada
 signal practica_mapa_solicitada(accion: Dictionary)
 
 const Actividad = preload("res://logica/flujo/actividad_aprendizaje.gd")
@@ -349,6 +350,12 @@ func confirmar() -> void:
 		return
 	guardado = true
 	enviar.hide()
+	# La ruta es solo el mapa: al continuar se vuelve al menú, que ya muestra el siguiente paso.
+	if actividad.paso == "ruta":
+		if not cierre.respaldo:
+			actividad.avisos.append("Tu avance quedó guardado. Falló la copia de respaldo.")
+		ruta_cerrada.emit()
+		return
 	if is_instance_valid(pie_ruta):
 		pie_ruta.hide()
 		for control in [contenido.get_node("Titulo"), detalle, pregunta_visible]:
