@@ -404,7 +404,7 @@ func actualizar() -> void:
 		var boton: Button = botones[paso]
 		boton.visible = not con_sesion or paso in permitidos
 		boton.disabled = not con_sesion or (rol == "tecnico" and paso not in estado.get("habilitados", [])
-			and not (paso == "retest" and siguiente == "retest") and paso not in ["escenario", "tablero", "materiales"])
+			and not (paso == "retest" and siguiente == "retest") and paso not in ["tablero", "materiales"] and not (paso == "escenario" and siguiente != "diagnostico"))
 		# Los pasos anteriores al siguiente ya se hicieron: no están bloqueados, están completados.
 		var hecho: bool = rol == "tecnico" and Recorrido.PASOS.has(paso) and Recorrido.PASOS.has(siguiente) \
 			and Recorrido.PASOS.find(paso) < Recorrido.PASOS.find(siguiente) and paso != "tablero"
@@ -413,7 +413,7 @@ func actualizar() -> void:
 			if paso == siguiente and rol == "tecnico":
 				estado_paso = "Siguiente"
 			elif paso == "escenario":
-				estado_paso = "Práctica libre"
+				estado_paso = "Práctica por niveles"
 			else:
 				estado_paso = "Disponible"
 		boton.get_node("Contenido/Insignia").visible = rol == "tecnico" or not con_sesion

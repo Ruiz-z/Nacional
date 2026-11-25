@@ -5,6 +5,7 @@ signal orden_elegida(archivo: String)
 const Banco = preload("res://logica/competencias/banco.gd")
 const Ordenes = preload("res://logica/simulador/ordenes.gd")
 const TextoLimpio = preload("res://logica/texto_limpio.gd")
+const Niveles = preload("res://logica/flujo/niveles.gd")
 const ZONAS := {"gabinete": "Gabinete lateral", "faros": "Faros", "motor": "Motor",
 	"cabina": "Cabina", "banco": "Banco de arnés", "bajos": "Bajos del autobús"}
 const DIFICULTADES := {"facil": "Fácil", "media": "Media", "dificil": "Difícil"}
@@ -18,6 +19,7 @@ const ANCHO_TARJETA := 268
 
 var tecnico: Dictionary = {}
 var resueltas: Dictionary = {}
+var dominios: Dictionary = {}
 var catalogo: Array = []
 var competencia_filtro := ""
 
@@ -30,6 +32,8 @@ func _ready() -> void:
 	draw.connect(func(): draw_rect(Rect2(Vector2.ZERO, size), Color("#ECFAFA")))
 	resized.connect(ajustar_columnas)
 	resueltas = Ordenes.resueltas_por(tecnico)
+	if tecnico.get("rol") == "tecnico" and tecnico.has_all(["base", "alias"]):
+		dominios = Niveles.dominios(tecnico.base, tecnico.alias)
 	mostrar(Ordenes.listar())
 
 
@@ -67,6 +71,13 @@ func mostrar(listado: Dictionary) -> void:
 	elif not listado.errores.is_empty():
 		aviso.text = "Algunas órdenes no abrieron. Elige una de la lista."
 	aviso.visible = not aviso.text.is_empty()
+
+
+# Con dominios cargados, una orden se abre si su dificultad está al alcance de la competencia.
+func bloqueada(orden: Dictionary) -> bool:
+	if dominios.is_empty():
+		return false
+	return not Niveles.desbloqueada(orden.dificultad, dominios.get(orden.get("competencia_id", ""), 0.0))
 
 
 func agregar_filtro(etiqueta: String, fg: String, seleccion: ButtonGroup) -> Button:
@@ -126,6 +137,8 @@ func crear_tarjeta(orden: Dictionary) -> Button:
 	var tarjeta := Button.new()
 	tarjeta.theme_type_variation = &"BotonOrden"
 	tarjeta.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	var cerrada := bloqueada(orden)
+	tarjeta.disabled = cerrada
 	tarjeta.pressed.connect(func(): orden_elegida.emit(orden.archivo))
 
 	var margen := MarginContainer.new()
@@ -168,6 +181,15 @@ func crear_tarjeta(orden: Dictionary) -> Button:
 	var resuelta := resueltas.has(orden.get("id", ""))
 	if resuelta:
 		pie.add_child(chip("Resuelta", VERDE))
+	var motivo := ""
+	if cerrada:
+		motivo = Niveles.motivo(orden.dificultad, dominios.get(orden.competencia_id, 0.0), competencia)
+		pie.add_child(chip("Bloqueada", [Color("#E3E7EA"), Color("#46525A")]))
+		var nota := texto(motivo, &"DetalleClaro", 14)
+		nota.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		contenido.add_child(nota)
+		contenido.modulate.a = 0.72
+		tarjeta.tooltip_text = motivo
 
 	tarjeta.accessibility_name = titulo.text
 	var detalles := PackedStringArray()
@@ -176,6 +198,8 @@ func crear_tarjeta(orden: Dictionary) -> Button:
 	detalles.append_array([zona, competencia, misiones])
 	if resuelta:
 		detalles.append("Resuelta")
+	if cerrada:
+		detalles.append("Bloqueada. " + motivo)
 	tarjeta.accessibility_description = " · ".join(detalles)
 	margen.minimum_size_changed.connect(func():
 		tarjeta.custom_minimum_size.y = margen.get_combined_minimum_size().y)

@@ -29,7 +29,8 @@ static func listar(ruta := "escenarios") -> Dictionary:
 		resultado.ordenes.append({"archivo": archivo, "id": datos.id, "titulo": titulo.texto,
 			"marca": titulo.etiqueta, "misiones": datos.get("indicios", []).size(),
 			"zona": datos.zona, "grupo_funcion": datos.grupo_funcion, "dificultad": datos.dificultad,
-			"competencia": Banco.COMPETENCIAS[accion.competencia]})
+			"competencia": Banco.COMPETENCIAS[accion.competencia],
+			"competencia_id": accion.competencia})
 	return resultado
 
 
