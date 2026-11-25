@@ -35,7 +35,8 @@ var fuentes_ia := []
 func preparar(banco: Dictionary, ahora: int) -> bool:
 	estado = Recorrido.estado(base, perfil.id, ahora)
 	sesion = "%s-%s-%d" % [paso, perfil.get("alias", ""), ahora]
-	if paso not in estado.get("habilitados", []):
+	var diagnosticado: bool = Recorrido.PASOS.find(estado.get("siguiente", "")) > 0
+	if paso not in estado.get("habilitados", []) and not (paso == "ruta" and diagnosticado):
 		avisos.append(estado.get("aviso", "Este paso todavía no está disponible."))
 		return false
 	if banco.is_empty():
@@ -154,6 +155,9 @@ func responder(respuesta: Variant, tiempo_ms: int, fuente: String, ahora: int) -
 func guardar(ahora: int) -> Dictionary:
 	# La ruta se muestra como mapa, sin preguntas: el paso se cierra al continuar.
 	if paso == "ruta":
+		# Con la ruta ya cerrada, abrirla de nuevo solo la consulta.
+		if Recorrido.estado(base, perfil.id, ahora).get("siguiente") != "ruta":
+			return {"guardado": true, "respaldo": true}
 		return Recorrido.cerrar_paso(base, base + ".respaldo.sqlite", perfil.id, paso, ruta,
 			estado.microlecciones_hechas, ahora)
 	if items.is_empty() or intentos.size() != items.size():

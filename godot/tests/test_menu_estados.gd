@@ -28,7 +28,7 @@ static func comprobar(base: String) -> bool:
 		correcto = correcto and Recorrido.cerrar_paso(base, base + ".respaldo.sqlite", id, paso, [], 0, ahora).guardado
 	menu.actualizar()
 	correcto = correcto and estado_de(menu, "diagnostico") == "Completado" and estado_de(menu, "ruta") == "Completado" \
-		and menu.botones.ruta.tooltip_text == "Ya completaste este paso." \
+		and menu.botones.ruta.tooltip_text == "Ya la completaste. Puedes repasarla." and not menu.botones.ruta.disabled \
 		and estado_de(menu, "escenario") == "Siguiente" and estado_de(menu, "post") == "Bloqueado" \
 		and estado_de(menu, "retest") == "Bloqueado" and estado_de(menu, "tablero") == "Disponible"
 	menu.free()
