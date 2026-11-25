@@ -2,6 +2,8 @@ extends PanelContainer
 
 signal practicar(accion: Dictionary)
 
+const MapaRuta = preload("res://escenas/mapa_ruta.gd")
+
 const ANCHO := 420
 
 var contenido := VBoxContainer.new()
@@ -20,7 +22,7 @@ func _ready() -> void:
 	var estilo := StyleBoxFlat.new()
 	estilo.bg_color = Color("#1A2327")
 	estilo.border_color = Color("#5B7480")
-	estilo.border_width_left = 2
+	estilo.border_width_left = 4
 	for lado in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
 		estilo.set_content_margin(lado, 22)
 	add_theme_stylebox_override("panel", estilo)
@@ -31,7 +33,7 @@ func _ready() -> void:
 	cerrar_boton.text = "Cerrar"
 	cerrar_boton.custom_minimum_size.y = 40
 	cerrar_boton.size_flags_horizontal = Control.SIZE_SHRINK_END
-	cerrar_boton.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	MapaRuta.estilizar_boton(cerrar_boton, MapaRuta.FONDO, MapaRuta.NEUTRO)
 	cerrar_boton.pressed.connect(cerrar)
 	caja.add_child(cerrar_boton)
 
@@ -44,7 +46,7 @@ func _ready() -> void:
 	scroll.add_child(contenido)
 	titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	titulo.theme_type_variation = &"Seccion"
-	titulo.add_theme_font_size_override("font_size", 24)
+	titulo.add_theme_font_size_override("font_size", 22)
 	contenido.add_child(titulo)
 
 
@@ -55,8 +57,10 @@ func ajustar_ancho() -> void:
 	offset_bottom = 0
 
 
-func abrir(datos: Dictionary, boton: Button) -> void:
+func abrir(datos: Dictionary, boton: Button, estado: String) -> void:
 	origen = boton
+	var estilo := get_theme_stylebox("panel") as StyleBoxFlat
+	estilo.border_color = MapaRuta.ESTADOS[estado]
 	for hijo in contenido.get_children():
 		if hijo != titulo:
 			contenido.remove_child(hijo)
@@ -80,8 +84,7 @@ func abrir(datos: Dictionary, boton: Button) -> void:
 		var practicar_boton := Button.new()
 		practicar_boton.text = accion.texto
 		practicar_boton.custom_minimum_size.y = 44
-		practicar_boton.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		practicar_boton.theme_type_variation = &"Primario"
+		MapaRuta.estilizar_boton(practicar_boton, MapaRuta.ACENTO, MapaRuta.OSCURO, MapaRuta.OSCURO)
 		practicar_boton.pressed.connect(func():
 			cerrar()
 			practicar.emit(accion))
@@ -96,6 +99,7 @@ func agregar_texto(caja: Container, texto: String, variante: StringName = &"") -
 	rotulo.text = texto
 	rotulo.theme_type_variation = variante
 	rotulo.add_theme_font_size_override("font_size", 16)
+	rotulo.add_theme_constant_override("line_spacing", 5)
 	rotulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	caja.add_child(rotulo)
 

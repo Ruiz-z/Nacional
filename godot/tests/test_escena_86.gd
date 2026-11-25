@@ -20,7 +20,8 @@ static func comprobar(base: String) -> bool:
 		var pantalla: Node = menu.pantalla
 		# La ruta es solo el mapa: sin preguntas ni opciones; «Continuar» cierra el paso.
 		correcto = pantalla.mapa_pendiente and pantalla.roadmap_caja.visible and pantalla.opciones.get_child_count() == 0 \
-			and pantalla.enviar.text == "Continuar" and not pantalla.progreso.visible \
+			and pantalla.enviar.text == "Continuar" and pantalla.enviar.is_visible_in_tree() \
+			and not pantalla.desplazamiento.is_ancestor_of(pantalla.enviar) and not pantalla.progreso.visible \
 			and pantalla.fuente.text.is_empty() and pantalla.item.is_empty()
 		pantalla.enviar.pressed.emit()
 		correcto = correcto and pantalla.guardado and pantalla.detalle.text.contains("Temas para repasar")

@@ -364,22 +364,36 @@ func capturar() -> void:
 	if mapa:
 		var control: Control = escena.roadmap_caja
 		var rectangulo := control.get_global_rect()
+		var area: ScrollContainer = escena.desplazamiento
+		var pie: Rect2 = escena.pie_ruta.get_global_rect()
+		var continuar: Rect2 = escena.enviar.get_global_rect()
+		var paso: Control = escena.enviar.get_parent().get_child(1)
 		if not control.visible or rectangulo.position.x < 0 or rectangulo.end.x > tam.x \
-				or not mapa_cabe(control, rectangulo):
-			fallar("El contenido del mapa queda recortado.")
+				or not mapa_cabe(control, rectangulo) or not mapa_sin_solapes(escena.roadmap_caja.conexiones):
+			fallar("El contenido del mapa queda recortado o se solapa.")
+			return
+		if not vp.get_visible_rect().encloses(pie) or pie.intersects(area.get_global_rect()) \
+				or not pie.encloses(continuar) or not pie.encloses(paso.get_global_rect()) \
+				or continuar.intersects(paso.get_global_rect()) or continuar.size.x > 360:
+			fallar("El pie de la ruta queda recortado o invade el mapa.")
+			return
+		if tam.y >= 1080 and (not area.get_global_rect().encloses(rectangulo) \
+				or area.get_v_scroll_bar().visible):
+			fallar("Las cuatro competencias deben caber sin desplazamiento.")
 			return
 		if args[0] == "mapa-ruta-final":
-			escena.scroll_vertical += maxi(0, ceili(rectangulo.end.y - tam.y + 24.0))
+			area.scroll_vertical = int(area.get_v_scroll_bar().max_value)
 			await process_frame
 			var borde_inferior := control.get_global_rect().end.y
-			if borde_inferior < 0 or borde_inferior > tam.y:
-				fallar("El final del mapa queda fuera del desplazamiento.")
+			if borde_inferior < 0 or borde_inferior > pie.position.y \
+					or escena.enviar.get_global_rect() != continuar:
+				fallar("El final del mapa o el botón Continuar queda fuera de su área.")
 				return
-		elif escena.scroll_vertical != 0:
+		elif area.scroll_vertical != 0:
 			fallar("La vista inicial debe mostrar el comienzo del mapa.")
 			return
 		if args[0] == "mapa-ruta-detalle":
-			var error: Button = control.filas.get_child(1).get_child(0).get_child(0).get_child(0)
+			var error: Button = control.conexiones[0].izquierda[0].get_child(0)
 			for presionado in [true, false]:
 				var clic := InputEventMouseButton.new()
 				clic.button_index = MOUSE_BUTTON_LEFT
@@ -389,9 +403,13 @@ func capturar() -> void:
 			await process_frame
 			await process_frame
 			var panel: Control = escena.panel_detalle_mapa
-			if not panel.visible or not vp.get_visible_rect().encloses(panel.get_global_rect()):
-				fallar("El panel de detalle no se abrió o queda recortado.")
+			if not panel.visible or not vp.get_visible_rect().encloses(panel.get_global_rect()) \
+					or panel.get_global_rect().intersects(continuar):
+				fallar("El panel de detalle no se abrió, queda recortado o tapa Continuar.")
 				return
+		if verificar:
+			print("Mapa ", control.get_global_rect(), ", área ", area.get_global_rect(),
+				", pie ", pie, ", Continuar ", continuar, ", desplazamiento ", area.scroll_vertical)
 	if not tipo_flashcard.is_empty() and (not escena.flashcard.visible \
 			or not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect())):
 		fallar("La tarjeta no se abrió o queda recortada.")
@@ -443,7 +461,7 @@ func capturar() -> void:
 	quit(0)
 
 
-func preparar_mapa(escena: ScrollContainer) -> void:
+func preparar_mapa(escena: VBoxContainer) -> void:
 	var actividad: RefCounted = escena.actividad
 	actividad.paso = "ruta"
 	actividad.historial = [
@@ -486,6 +504,18 @@ func mapa_cabe(nodo: Node, rectangulo: Rect2) -> bool:
 	for hijo in nodo.get_children():
 		if not mapa_cabe(hijo, rectangulo):
 			return false
+	return true
+
+
+func mapa_sin_solapes(conexiones: Array) -> bool:
+	var tarjetas: Array[Rect2] = []
+	for conexion in conexiones:
+		var controles: Array = [conexion.centro] + conexion.izquierda + conexion.derecha
+		for control in controles:
+			var rectangulo: Rect2 = control.get_global_rect()
+			if tarjetas.any(func(otra: Rect2) -> bool: return rectangulo.intersects(otra)):
+				return false
+			tarjetas.append(rectangulo)
 	return true
 
 

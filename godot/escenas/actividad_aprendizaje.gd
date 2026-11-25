@@ -1,4 +1,4 @@
-extends ScrollContainer
+extends VBoxContainer
 
 const TextoLimpio = preload("res://logica/texto_limpio.gd")
 
@@ -31,7 +31,9 @@ var intro: Label
 var resultados_caja: VBoxContainer
 var roadmap_caja: MapaRuta
 var panel_detalle_mapa: PanelDetalleMapa
-@onready var contenido := $Margen/Centro/Tarjeta/Contenido
+var pie_ruta: PanelContainer
+@onready var desplazamiento: ScrollContainer = $Desplazamiento
+@onready var contenido := $Desplazamiento/Margen/Centro/Tarjeta/Contenido
 @onready var opciones := contenido.get_node("Opciones")
 @onready var enviar := contenido.get_node("Enviar")
 @onready var detalle := contenido.get_node("Detalle")
@@ -109,7 +111,7 @@ func crear_bloques() -> void:
 	capa.add_child(panel_detalle_mapa)
 	roadmap_caja.nodo_activado.connect(func(nodo: Dictionary, tipo: String, boton: Button):
 		panel_detalle_mapa.abrir(DatosMapa.detalle(nodo, tipo, actividad.historial,
-			actividad.banco_cargado.get("items", [])), boton))
+			actividad.banco_cargado.get("items", [])), boton, nodo.estado))
 	panel_detalle_mapa.practicar.connect(practica_mapa_solicitada.emit)
 	resultados_caja = VBoxContainer.new()
 	resultados_caja.add_theme_constant_override("separation", 10)
@@ -122,12 +124,6 @@ func texto_intro() -> String:
 	match actividad.paso:
 		"diagnostico":
 			return "Este diagnóstico mide lo que ya sabes en cuatro temas. Son %d preguntas, unos %d minutos. No es una calificación: sirve para armar tu ruta de aprendizaje." % [total, maxi(5, total)]
-		"ruta":
-			var origen := "Ruta calculada sin IA."
-			if actividad.origen_ruta == "ia":
-				origen = "Ruta generada con IA."
-			return "Tu ruta parte del diagnóstico. Hoy tienes %d preguntas en %d lecciones cortas. %s" % [
-				total, actividad.plan.lecciones.size(), origen]
 	return ""
 
 
@@ -138,7 +134,30 @@ func mostrar_roadmap() -> void:
 		de_hoy[leccion.competencia] = true
 	var nodos := DatosMapa.armar(actividad.motivos_ruta(), instantanea, actividad.historial,
 		Ordenes.listar().ordenes, actividad.detalle_ia, de_hoy)
-	roadmap_caja.mostrar(nodos, actividad.fuentes_ia, actividad.detalle_ia)
+	roadmap_caja.mostrar(nodos, actividad.origen_ruta, actividad.fuentes_ia, actividad.detalle_ia)
+
+
+func preparar_pie_ruta() -> void:
+	if is_instance_valid(pie_ruta):
+		return
+	pie_ruta = PanelContainer.new()
+	var fondo := MapaRuta.plano(MapaRuta.OSCURO, MapaRuta.NEUTRO, 0)
+	fondo.border_width_top = 1
+	fondo.content_margin_top = 12
+	fondo.content_margin_bottom = 12
+	pie_ruta.add_theme_stylebox_override("panel", fondo)
+	add_child(pie_ruta)
+
+	var acciones := HBoxContainer.new()
+	acciones.alignment = BoxContainer.ALIGNMENT_CENTER
+	acciones.add_theme_constant_override("separation", 20)
+	pie_ruta.add_child(acciones)
+	enviar.reparent(acciones, false)
+	enviar.custom_minimum_size = Vector2(360, 48)
+	MapaRuta.estilizar_boton(enviar, MapaRuta.ACENTO, MapaRuta.OSCURO, MapaRuta.OSCURO)
+	var paso := roadmap_caja.etiqueta("Paso 2 de 6: tu ruta", 14, &"Secundario")
+	paso.autowrap_mode = TextServer.AUTOWRAP_OFF
+	acciones.add_child(paso)
 
 
 func mostrar_retro() -> void:
@@ -218,6 +237,12 @@ func mostrar_item() -> void:
 	intro.visible = indice == 0 and not intro.text.is_empty()
 	if mapa_pendiente:
 		item = {}
+		var tarjeta: PanelContainer = contenido.get_parent()
+		tarjeta.custom_minimum_size.x = 1120
+		tarjeta.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+		for control in [contenido.get_node("Titulo"), intro, detalle, pregunta_visible, opciones, fuente]:
+			control.hide()
+		preparar_pie_ruta()
 		mostrar_roadmap()
 		retro.hide()
 		progreso.hide()
@@ -317,11 +342,17 @@ func confirmar() -> void:
 		return
 	var cierre := actividad.guardar(ahora())
 	if not cierre.get("guardado", false):
-		aviso.text = "No se guardó tu avance. Pulsa Guardar y terminar otra vez."
+		aviso.text = "No se guardó tu avance. Pulsa %s otra vez." % enviar.text
 		aviso.show()
+		if mapa_pendiente:
+			desplazamiento.scroll_vertical = 0
 		return
 	guardado = true
 	enviar.hide()
+	if is_instance_valid(pie_ruta):
+		pie_ruta.hide()
+		for control in [contenido.get_node("Titulo"), detalle, pregunta_visible]:
+			control.show()
 	pregunta_visible.text = "Paso guardado."
 	var lineas := PackedStringArray()
 	retro.hide()

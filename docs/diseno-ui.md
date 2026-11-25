@@ -28,10 +28,12 @@ Estas asignaciones cubren los diez escenarios. Aislamiento requiere evaluar un r
 
 ## Mapa de la ruta de aprendizaje
 
-Un camino vertical sólido une las competencias en el orden de la ruta. Las líneas punteadas enlazan los errores con su conteo a la izquierda y las órdenes con el refuerzo a la derecha. El mapa cabe en el desplazamiento vertical de la actividad a 1280 × 720 y 1920 × 1080. Los títulos y las fuentes se ajustan en varias líneas.
+«Tu ruta» indica por qué competencia empezar, identifica el origen de la ruta y muestra una leyenda de cuatro estados. Los nodos numerados usan Poppins y muestran el estado, el porcentaje y una barra de dominio de 6 px. El relleno es ámbar para «Primero», turquesa para «Hoy», claro para «Después» y verde para «Hecho». El primer nodo lleva «Empieza aquí» y los nodos hechos llevan una marca de verificación.
 
-Los nodos usan Poppins y rectángulos con radio de 3 px y borde de 2 px. Cada competencia muestra su dominio y el estado «Primero», «Hoy», «Después» o «Hecho». El ámbar señala la falta crítica y el turquesa marca la práctica de hoy. Las ramas y los estados restantes usan tonos neutros. La nota de fuente va debajo del nodo central cuando hay una cita para la propuesta.
+El camino enlaza las competencias con una línea sólida y flechas descendentes. Los conectores en codo unen cada competencia con los errores a la izquierda y las prácticas a la derecha. Cada lado muestra hasta tres fichas de contenido. «+N más» abre el detalle de la competencia con la lista completa. Las faltas críticas tienen borde rojo. A la derecha aparecen primero los temas de la propuesta y luego las órdenes del taller. Las citas, las marcas didácticas y el refuerzo ampliado se consultan en el detalle.
 
-Cada tarjeta se activa con clic, Enter o Espacio. Al pasar el ratón se aclara la tarjeta y aparece el cursor de mano. Un borde claro marca el foco de teclado.
+«Continuar» y «Paso 2 de 6: tu ruta» quedan en el pie fijo. A 1920 × 1080 caben las cuatro competencias en la misma vista. A 1280 × 720, el mapa se desplaza sin mover el pie.
 
-El detalle se abre sobre el borde derecho, hasta 420 px de ancho, y se desplaza por separado del mapa. «Cerrar» queda arriba y recibe el foco al abrir. Escape y «Cerrar» devuelven el foco a la tarjeta. Al elegir otra tarjeta visible, el panel actualiza su contenido. Los errores muestran sus intentos con los datos disponibles. La acción de una competencia abre el catálogo filtrado, y la de una orden abre su práctica. «Volver» retoma la ruta.
+Cada tarjeta se activa con clic, Enter o Espacio. Al pasar el ratón se aclara el relleno y aparece el cursor de mano. Un borde blanco de 3 px marca el foco de teclado.
+
+El panel se abre a la derecha y se desplaza por separado. Tiene fondo oscuro, un borde izquierdo de 4 px del color del estado, título de 22 px y texto de 16 px. «Cerrar» recibe el foco al abrir. Escape y «Cerrar» devuelven el foco a la tarjeta. Al elegir otra tarjeta visible, el panel actualiza su contenido. Los errores muestran los intentos disponibles. La acción de una competencia abre el catálogo filtrado y la de una orden abre su práctica. «Volver» retoma la ruta.

@@ -5,6 +5,7 @@ const Pantallas = preload("res://tests/pantallas_aprendizaje.gd")
 const Ordenes = preload("res://logica/simulador/ordenes.gd")
 const Recorrido = preload("res://logica/flujo/recorrido.gd")
 const Mapa = preload("res://logica/aprendizaje/mapa_ruta.gd")
+const VistaMapa = preload("res://escenas/mapa_ruta.gd")
 
 
 static func ejecutar() -> bool:
@@ -31,7 +32,7 @@ static func ejecutar() -> bool:
 		"posterior": {"ordenes": ["inexistente"]}}
 	var mapa := Mapa.armar(motivos, instantanea, historial, catalogo, sugerencias,
 		{"pendiente": true, "critica": true, "hecha": true})
-	return probar_detalles() and Base.con_base(probar_panel) and mapa.map(func(nodo: Dictionary) -> String: return nodo.estado) == [
+	return probar_detalles() and probar_fichas(mapa.slice(0, 4)) and Base.con_base(probar_panel) and mapa.map(func(nodo: Dictionary) -> String: return nodo.estado) == [
 			"Primero", "Hecho", "Hoy", "Después", "Después"] \
 		and mapa[0].competencia == "critica" and mapa[0].dominio == 82 \
 		and mapa[0].errores[0].nombre == "Falta crítica" and mapa[0].errores[0].conteo == 1 \
@@ -41,6 +42,51 @@ static func ejecutar() -> bool:
 		and mapa[2].ordenes == [catalogo[1], catalogo[0], catalogo[2]] \
 		and mapa[2].refuerzo == "Practica la medición." and mapa[3].ordenes.is_empty() \
 		and mapa[4].ordenes == [catalogo[2]] and mapa[4].competencia == "reciente"
+
+
+static func probar_fichas(nodos: Array) -> bool:
+	var nodo: Dictionary = nodos[2].duplicate(true)
+	nodos[2] = nodo
+	nodo.errores.append({"nombre": "Falta crítica", "tipo_error": "falta-critica", "conteo": 3})
+	nodo.ordenes[0].marca = "Ejemplo didáctico"
+	nodo.temas = [{"titulo": "Medición", "fuente": "Manual.pdf"}, {"titulo": "Fusibles"}]
+
+	var vista := VistaMapa.new()
+	var arbol := Engine.get_main_loop() as SceneTree
+	arbol.root.add_child(vista)
+	vista.mostrar(nodos, "ia", ["ejemplo didáctico, sin fuente oficial"], {"pendiente": {}})
+	var fila: Dictionary = vista.conexiones[2]
+	var izquierda: Array = fila.izquierda.map(nombre_ficha)
+	var derecha: Array = fila.derecha.map(nombre_ficha)
+	var colores: Array[Color] = []
+	for conexion in vista.conexiones:
+		var boton: Button = conexion.centro.get_child(0)
+		var estilo := boton.get_theme_stylebox("normal") as StyleBoxFlat
+		colores.append(estilo.bg_color)
+	var critica: Button = fila.izquierda[0].get_child(0)
+	var estilo_critica := critica.get_theme_stylebox("normal") as StyleBoxFlat
+	var borde_critico := estilo_critica.border_color == Color("#D64545")
+	var selecciones: Array = []
+	vista.nodo_activado.connect(func(datos: Dictionary, tipo: String, boton: Button):
+		selecciones.append([datos.competencia, tipo, boton.accessibility_name]))
+	for lado in [fila.izquierda, fila.derecha]:
+		var mas: Button = lado.back().get_child(0)
+		mas.pressed.emit()
+	var textos: Array[Node] = vista.find_children("*", "Label", true, false)
+	var limpio := textos.all(func(rotulo: Label) -> bool:
+		var texto := rotulo.text.to_lower()
+		return not texto.contains("ejemplo didáctico") and not texto.contains("fuente:") \
+			and not texto.contains("practica la medición."))
+	vista.free()
+	return limpio and borde_critico and izquierda == ["Falta crítica · 3", "Omitir un paso · 2", "Alterar el orden de los pasos · 1", "+1 más"] \
+		and derecha == ["Medición", "Fusibles", "Segunda orden", "+2 más"] \
+		and selecciones == [["pendiente", "competencia", "+1 más"], ["pendiente", "competencia", "+2 más"]] \
+		and colores == [Color("#F2B705"), Color("#3FAE6A"), Color("#1AA7A6"), Color("#ECFAFA")]
+
+
+static func nombre_ficha(ficha: Control) -> String:
+	var boton := ficha.get_child(0) as Button
+	return boton.accessibility_name
 
 
 static func probar_detalles() -> bool:
@@ -92,20 +138,22 @@ static func probar_panel(base: String) -> bool:
 		menu.free()
 		return false
 	var catalogo_real: Array = Ordenes.listar().ordenes
-	var fila: HBoxContainer
-	for candidata in ruta.roadmap_caja.filas.get_children().slice(1):
-		var boton: Button = candidata.get_child(1).get_child(0).get_child(0)
+	var fila := {}
+	for candidata in ruta.roadmap_caja.conexiones:
+		var boton: Button = candidata.centro.get_child(0)
 		if catalogo_real.any(func(orden: Dictionary) -> bool: return orden.competencia == boton.accessibility_name):
 			fila = candidata
 			break
-	if fila == null:
+	if fila.is_empty():
 		menu.free()
 		return false
-	var error: Button = fila.get_child(0).get_child(0).get_child(0)
-	var competencia: Button = fila.get_child(1).get_child(0).get_child(0)
+	var error: Button = fila.izquierda[0].get_child(0)
+	var competencia: Button = fila.centro.get_child(0)
 	var panel: PanelContainer = ruta.panel_detalle_mapa
 	error.pressed.emit()
-	var correcto: bool = panel.visible and panel.titulo.text == "Sin errores" and panel.cerrar_boton.has_focus()
+	var estilo := panel.get_theme_stylebox("panel") as StyleBoxFlat
+	var correcto: bool = panel.visible and panel.titulo.text == "Sin errores" and panel.cerrar_boton.has_focus() \
+		and estilo.border_width_left == 4 and estilo.border_color == VistaMapa.ESTADOS[fila.centro.get_child(0).accessibility_description.get_slice(" · ", 0)]
 	competencia.pressed.emit()
 	correcto = correcto and panel.visible and panel.titulo.text != "Sin errores"
 	pulsar(menu.get_viewport(), KEY_ESCAPE)
@@ -128,7 +176,7 @@ static func probar_panel(base: String) -> bool:
 		menu.volver()
 		correcto = correcto and menu.pantalla == ruta and competencia.has_focus()
 	if correcto:
-		var orden: Button = fila.get_child(2).get_child(0).get_child(0)
+		var orden: Button = fila.derecha[0].get_child(0)
 		orden.pressed.emit()
 		var esperada: String = panel.titulo.text
 		var iniciar: Button = panel.contenido.get_child(-1)
