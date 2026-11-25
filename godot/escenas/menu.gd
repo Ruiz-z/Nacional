@@ -18,6 +18,7 @@ const Ordenes = preload("res://escenas/ordenes.tscn")
 const Bus = preload("res://escenas/bus.tscn")
 const Diagnostico = preload("res://escenas/diagnostico.tscn")
 const Ruta = preload("res://escenas/ruta.tscn")
+const Sonido = preload("res://logica/sonido.gd")
 const Evaluacion = preload("res://escenas/evaluacion.tscn")
 const NOMBRES := {"alias": "Iniciar sesión", "administracion": "Administración", "materiales": "Materiales de estudio", "diagnostico": "Diagnóstico", "ruta": "Ruta de aprendizaje",
 	"escenario": "Práctica", "post": "Evaluación", "retest": "Repetir la evaluación", "tablero": "Tablero"}
@@ -53,6 +54,8 @@ var lanzar_materiales: Callable = abrir_pagina_materiales
 
 
 func _ready() -> void:
+	Sonido.cargar_preferencia()
+	Sonido.clics_globales(get_tree())
 	if "--verificar-contenido" in OS.get_cmdline_user_args():
 		verificar_contenido()
 		return
@@ -611,3 +614,10 @@ func ajustar_marco(actividad: bool) -> void:
 	$Marco.offset_right = -24 if actividad else 0
 	$Marco.offset_top = 16 if actividad else 0
 	$Marco.offset_bottom = -16 if actividad else 0
+
+
+func _unhandled_key_input(evento: InputEvent) -> void:
+	if evento is InputEventKey and evento.pressed and not evento.echo and evento.keycode == KEY_M \
+			and not (get_viewport().gui_get_focus_owner() is LineEdit):
+		Sonido.alternar()
+		get_viewport().set_input_as_handled()

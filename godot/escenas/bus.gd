@@ -57,6 +57,7 @@ const FuenteBanco = preload("res://logica/simulador/fuente_banco.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
 const Elevador = preload("res://escenas/elevador.gd")
 const Epp = preload("res://logica/simulador/epp.gd")
+const Sonido = preload("res://logica/sonido.gd")
 const EstacionEpp = preload("res://escenas/estacion_epp.gd")
 const ZonaBase = preload("res://escenas/zona_base.gd")
 const Interactuable = preload("res://escenas/interactuable.gd")
@@ -125,6 +126,7 @@ var pieza_menu: Interactuable
 
 
 func _ready() -> void:
+	Sonido.cargar_preferencia()
 	var carga_elevador: Array[Node3D] = [$Autobus, $Sector, $Faros, $Motor, $PuertaPasajeros, $Bajos]
 	$Elevador.configurar(carga_elevador, $Colisiones/Casco, $Bajos)
 	$Bajos.acceso = Elevador.CONSOLA
@@ -289,6 +291,7 @@ func cambiar_equipo_epp(id: String, puesto: bool) -> void:
 			return pieza_id.begins_with("guantes_"))
 		jugador.mostrar_guantes(guantes[-1] if not guantes.is_empty() else "")
 	jugador.animar_equipamiento()
+	Sonido.reproducir("epp" if puesto else "epp_quitar")
 	var careta := "careta" in equipo
 	var gafas := "gafas" in equipo
 	marco_epp.border_width_top = 16 if "casco" in equipo else (4 if gafas else 0)
@@ -455,6 +458,9 @@ func ejecutar(id: String, fuente: String, lectura_previa: Dictionary = {}) -> vo
 		if not regla.is_empty() and (id == "inspeccionar" \
 				or zona.es_pieza_interna(regla.get("componente", "bateria"))):
 			zona.cambiar_acceso(true)
+	if decision.get("aplicada", false) and decision.get("tipo_error", "").is_empty() \
+			and decision.get("criticidad") != "critica":
+		Sonido.reproducir("paso")
 	mostrar_resultado(decision)
 	actualizar_inventario()
 	actualizar_mision()
@@ -476,6 +482,8 @@ func finalizar_orden() -> void:
 
 
 func guardar_resultados() -> void:
+	if motor.fin() == "resuelto" and not resultados_guardados:
+		Sonido.reproducir("victoria")
 	if not tecnico.is_empty() and not resultados_guardados:
 		resultados_guardados = Practica.guardar(tecnico.base, tecnico.id, tecnico.alias, motor,
 			int(Time.get_unix_time_from_system()))
@@ -1674,6 +1682,10 @@ func _input(evento: InputEvent) -> void:
 			else:
 				avisar_temporal("Presiona Esc otra vez para salir")
 				salida_hasta = ahora + int(duracion_aviso.wait_time * 1000)
+			return
+		if evento.keycode == KEY_M:
+			Sonido.alternar()
+			avisar_temporal("Sonido apagado" if Sonido.silenciado else "Sonido activado")
 			return
 		if evento.keycode == KEY_V and motor.fin().is_empty():
 			guia_automatica = not guia_automatica
