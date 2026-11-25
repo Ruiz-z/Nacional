@@ -3,12 +3,14 @@ extends ScrollContainer
 const TextoLimpio = preload("res://logica/texto_limpio.gd")
 
 signal finalizada
+signal practica_mapa_solicitada(accion: Dictionary)
 
 const Actividad = preload("res://logica/flujo/actividad_aprendizaje.gd")
 const Foundry = preload("res://logica/aprendizaje/foundry.gd")
 const RutaIA = preload("res://logica/aprendizaje/ruta_ia.gd")
 const Ordenes = preload("res://logica/simulador/ordenes.gd")
 const DatosMapa = preload("res://logica/aprendizaje/mapa_ruta.gd")
+const PanelDetalleMapa = preload("res://escenas/panel_detalle_mapa.gd")
 const MapaRuta = preload("res://escenas/mapa_ruta.gd")
 const PanelVirtual = preload("res://escenas/panel_virtual.tscn")
 
@@ -27,6 +29,7 @@ var retro: Label
 var intro: Label
 var resultados_caja: VBoxContainer
 var roadmap_caja: MapaRuta
+var panel_detalle_mapa: PanelDetalleMapa
 @onready var contenido := $Margen/Centro/Tarjeta/Contenido
 @onready var opciones := contenido.get_node("Opciones")
 @onready var enviar := contenido.get_node("Enviar")
@@ -99,6 +102,14 @@ func crear_bloques() -> void:
 	roadmap_caja.hide()
 	contenido.add_child(roadmap_caja)
 	contenido.move_child(roadmap_caja, intro.get_index() + 1)
+	var capa := CanvasLayer.new()
+	add_child(capa)
+	panel_detalle_mapa = PanelDetalleMapa.new()
+	capa.add_child(panel_detalle_mapa)
+	roadmap_caja.nodo_activado.connect(func(nodo: Dictionary, tipo: String, boton: Button):
+		panel_detalle_mapa.abrir(DatosMapa.detalle(nodo, tipo, actividad.historial,
+			actividad.banco_cargado.get("items", [])), boton))
+	panel_detalle_mapa.practicar.connect(practica_mapa_solicitada.emit)
 	resultados_caja = VBoxContainer.new()
 	resultados_caja.add_theme_constant_override("separation", 10)
 	contenido.add_child(resultados_caja)
@@ -205,6 +216,7 @@ func mostrar_item() -> void:
 	if actividad.paso == "ruta" and indice == 0:
 		mostrar_roadmap()
 	else:
+		panel_detalle_mapa.hide()
 		roadmap_caja.hide()
 	mostrar_retro()
 	progreso.max_value = actividad.items.size()
@@ -221,13 +233,6 @@ func mostrar_item() -> void:
 		return
 
 	item = actividad.items[indice]
-	var leccion := actividad.leccion(indice)
-	if not leccion.is_empty():
-		detalle.text = "Lección corta %d de %d · %d min\n%s\n%s%s" % [
-			actividad.numero_leccion(indice), actividad.plan.lecciones.size(), leccion.minutos,
-			Actividad.Banco.COMPETENCIAS[leccion.competencia],
-			"Ejemplo didáctico\n" if leccion.muestra else "", TextoLimpio.limpiar(leccion.explicacion).texto]
-		detalle.text += "\n[color=#9aa7b4]Fuente de la lección: %s[/color]" % citar(leccion.fuente)
 	if actividad.reloj_simulado:
 		fuente.text += "Reloj simulado\n"
 	fuente.text += "Fuente: %s" % citar(item.fuente)
@@ -311,6 +316,7 @@ func confirmar() -> void:
 	var lineas := PackedStringArray()
 	retro.hide()
 	intro.hide()
+	panel_detalle_mapa.hide()
 	roadmap_caja.hide()
 	mostrar_barras()
 	if actividad.paso == "ruta":

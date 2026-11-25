@@ -2,6 +2,7 @@ extends ScrollContainer
 
 signal orden_elegida(archivo: String)
 
+const Banco = preload("res://logica/competencias/banco.gd")
 const Ordenes = preload("res://logica/simulador/ordenes.gd")
 const TextoLimpio = preload("res://logica/texto_limpio.gd")
 const ZONAS := {"gabinete": "Gabinete lateral", "faros": "Faros", "motor": "Motor",
@@ -18,6 +19,7 @@ const ANCHO_TARJETA := 268
 var tecnico: Dictionary = {}
 var resueltas: Dictionary = {}
 var catalogo: Array = []
+var competencia_filtro := ""
 
 @onready var columna: VBoxContainer = $Centro/Columna
 @onready var tarjetas: VBoxContainer = $Centro/Columna/Tarjetas
@@ -33,6 +35,12 @@ func _ready() -> void:
 
 func mostrar(listado: Dictionary) -> void:
 	catalogo = listado.ordenes.duplicate()
+	if not competencia_filtro.is_empty():
+		var nombre: String = Banco.COMPETENCIAS.get(competencia_filtro, competencia_filtro)
+		catalogo = catalogo.filter(func(orden: Dictionary) -> bool: return orden.competencia == nombre)
+		var titulo: Label = $Centro/Columna/Titulo
+		titulo.text = "Órdenes del taller · %s" % nombre
+		titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	catalogo.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var fg_a := numero_fg(a.get("grupo_funcion"))
 		var fg_b := numero_fg(b.get("grupo_funcion"))
@@ -54,7 +62,8 @@ func mostrar(listado: Dictionary) -> void:
 	var aviso: Label = $Centro/Columna/Aviso
 	aviso.text = ""
 	if catalogo.is_empty():
-		aviso.text = "No hay órdenes disponibles. Vuelve al menú y elige otra actividad."
+		aviso.text = ("No hay órdenes disponibles. Vuelve al menú y elige otra actividad."
+			if competencia_filtro.is_empty() else "No hay órdenes para esta competencia. Usa Volver para retomar la ruta.")
 	elif not listado.errores.is_empty():
 		aviso.text = "Algunas órdenes no abrieron. Elige una de la lista."
 	aviso.visible = not aviso.text.is_empty()

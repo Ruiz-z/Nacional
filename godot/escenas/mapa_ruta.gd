@@ -1,5 +1,7 @@
 extends Control
 
+signal nodo_activado(nodo: Dictionary, tipo: String, boton: Button)
+
 const NEUTRO := Color("#5B7480")
 const FONDO := Color("#1A2327")
 const ACENTO := Color("#1AA7A6")
@@ -55,44 +57,45 @@ func mostrar(nodos: Array, fuentes: Array, detalles: Dictionary) -> void:
 				fondo = Color("#163739")
 			"Hecho":
 				fondo = Color("#0E1A22")
-		var centro := tarjeta(medio, borde, fondo)
+		var centro := tarjeta(medio, nodo, "competencia", borde, fondo)
 		centro.add_child(etiqueta(nodo.nombre, 20, &"Seccion"))
 		centro.add_child(etiqueta("%s  ·  %d %%" % [nodo.estado, nodo.dominio], 16, &"Secundario"))
 		if detalles.has(nodo.competencia) and not fuentes.is_empty():
-			var nota := tarjeta(medio)
-			nota.add_child(etiqueta("Fuente: %s" % ", ".join(fuentes), 13, &"Secundario"))
+			var texto_fuente := "Fuente: %s" % ", ".join(fuentes)
+			var nota := tarjeta(medio, nodo.merged({"fuente_propuesta": texto_fuente}), "competencia")
+			nota.add_child(etiqueta(texto_fuente, 13, &"Secundario"))
 
 		var ramas_izquierda: Array[Control] = []
 		for error in nodo.errores:
-			var rama := tarjeta(izquierda)
+			var rama := tarjeta(izquierda, error, "error")
 			var texto: String = error.nombre
 			if error.conteo > 0:
 				texto += " · %d" % error.conteo
 			rama.add_child(etiqueta(texto, 16, &"Secundario" if error.conteo == 0 else &""))
-			ramas_izquierda.append(rama.get_parent())
+			ramas_izquierda.append(izquierda.get_child(-1))
 
 		var ramas_derecha: Array[Control] = []
 		for tema in nodo.temas:
-			var rama := tarjeta(derecha)
+			var rama := tarjeta(derecha, tema, "tema")
 			rama.add_child(etiqueta(tema.titulo, 16))
 			rama.add_child(etiqueta("Fuente: %s" % tema.fuente.trim_suffix(".pdf"), 13, &"Secundario"))
-			ramas_derecha.append(rama.get_parent())
+			ramas_derecha.append(derecha.get_child(-1))
 		for orden in nodo.ordenes:
-			var rama := tarjeta(derecha)
+			var rama := tarjeta(derecha, orden, "orden")
 			rama.add_child(etiqueta(orden.titulo, 16))
 			if not orden.get("marca", "").is_empty():
 				rama.add_child(etiqueta(orden.marca, 13, &"Secundario"))
-			ramas_derecha.append(rama.get_parent())
+			ramas_derecha.append(derecha.get_child(-1))
 		if not nodo.refuerzo.is_empty():
-			var rama := tarjeta(derecha)
+			var rama := tarjeta(derecha, nodo, "competencia")
 			rama.add_child(etiqueta(nodo.refuerzo, 15, &"Secundario"))
-			ramas_derecha.append(rama.get_parent())
+			ramas_derecha.append(derecha.get_child(-1))
 		elif ramas_derecha.is_empty():
-			var rama := tarjeta(derecha)
+			var rama := tarjeta(derecha, nodo, "competencia")
 			rama.add_child(etiqueta("Sin órdenes sugeridas", 16, &"Secundario"))
-			ramas_derecha.append(rama.get_parent())
+			ramas_derecha.append(derecha.get_child(-1))
 
-		conexiones.append({"centro": centro.get_parent(), "izquierda": ramas_izquierda,
+		conexiones.append({"centro": medio.get_child(0), "izquierda": ramas_izquierda,
 			"derecha": ramas_derecha})
 	show()
 	queue_redraw()
@@ -107,28 +110,54 @@ func columna(fila: HBoxContainer) -> VBoxContainer:
 	return caja
 
 
-func tarjeta(columna_nodo: VBoxContainer, borde: Color = NEUTRO, fondo: Color = FONDO) -> VBoxContainer:
+func tarjeta(columna_nodo: VBoxContainer, nodo: Dictionary, tipo: String, borde: Color = NEUTRO, fondo: Color = FONDO) -> VBoxContainer:
 	var panel := PanelContainer.new()
 	var estilo := StyleBoxFlat.new()
 	estilo.bg_color = fondo
 	estilo.border_color = borde
 	estilo.set_border_width_all(2)
 	estilo.set_corner_radius_all(3)
-	estilo.content_margin_left = 12
-	estilo.content_margin_right = 12
-	estilo.content_margin_top = 8
-	estilo.content_margin_bottom = 8
-	panel.add_theme_stylebox_override("panel", estilo)
+	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	panel.item_rect_changed.connect(queue_redraw)
 	columna_nodo.add_child(panel)
+
+	var boton := Button.new()
+	boton.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	boton.add_theme_stylebox_override("normal", estilo)
+	var resaltado := estilo.duplicate() as StyleBoxFlat
+	resaltado.bg_color = fondo.lightened(0.10)
+	resaltado.border_color = Color("#87D8D7")
+	boton.add_theme_stylebox_override("hover", resaltado)
+	boton.add_theme_stylebox_override("pressed", resaltado)
+	var foco := estilo.duplicate() as StyleBoxFlat
+	foco.draw_center = false
+	foco.border_color = Color("#F4F7F7")
+	foco.set_border_width_all(3)
+	boton.add_theme_stylebox_override("focus", foco)
+	boton.pressed.connect(func(): nodo_activado.emit(nodo, tipo, boton))
+	panel.add_child(boton)
+
+	var margen := MarginContainer.new()
+	margen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for lado in ["left", "right", "top", "bottom"]:
+		margen.add_theme_constant_override("margin_" + lado, 12 if lado in ["left", "right"] else 8)
+	panel.add_child(margen)
 	var texto := VBoxContainer.new()
+	texto.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	texto.add_theme_constant_override("separation", 2)
-	panel.add_child(texto)
+	margen.add_child(texto)
+	texto.child_entered_tree.connect(func(hijo: Node):
+		if hijo is Label:
+			if boton.accessibility_name.is_empty():
+				boton.accessibility_name = hijo.text
+			else:
+				boton.accessibility_description = hijo.text)
 	return texto
 
 
 func etiqueta(texto: String, puntos: int, variante: StringName = &"") -> Label:
 	var rotulo := Label.new()
+	rotulo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rotulo.text = texto
 	rotulo.theme_type_variation = variante
 	rotulo.add_theme_font_size_override("font_size", puntos)

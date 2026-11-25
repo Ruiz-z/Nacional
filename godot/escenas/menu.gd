@@ -25,6 +25,8 @@ var perfil := {}
 var banco_aprendizaje := {}
 var conexion := Conexion.new()
 var pantalla: Node
+var ruta_en_pausa: Control
+var inicio_practica_mapa := 0
 var botones := {}
 var destacados := {}
 @onready var entrada_inicio: ScrollContainer = $Marco/EntradaInicio
@@ -275,6 +277,7 @@ func abrir_paso(paso: String) -> void:
 			if paso in ["post", "retest"]:
 				actividad.titulo_preparado = NOMBRES[paso]
 			actividad.finalizada.connect($Marco/Volver.grab_focus)
+			actividad.practica_mapa_solicitada.connect(practicar_desde_ruta)
 			abrir(actividad)
 			if actividad.item.is_empty():
 				$Marco/Volver.grab_focus()
@@ -295,9 +298,23 @@ func abrir_tablero(tecnico: Dictionary) -> void:
 	abrir(tablero)
 
 
-func abrir_ordenes(tecnico: Dictionary) -> void:
+func practicar_desde_ruta(accion: Dictionary) -> void:
+	ruta_en_pausa = pantalla
+	inicio_practica_mapa = Time.get_ticks_msec()
+	ruta_en_pausa.hide()
+	pantalla = null
+	var tecnico := perfil.merged({"base": base})
+	var archivo: String = accion.get("archivo", "")
+	if archivo.is_empty():
+		abrir_ordenes(tecnico, accion.get("competencia", ""))
+	else:
+		abrir_bus(tecnico, archivo)
+
+
+func abrir_ordenes(tecnico: Dictionary, competencia: String = "") -> void:
 	var ordenes := Ordenes.instantiate()
 	ordenes.tecnico = tecnico
+	ordenes.competencia_filtro = competencia
 	ordenes.orden_elegida.connect(func(archivo: String): abrir_bus(tecnico, archivo))
 	abrir(ordenes)
 
@@ -341,6 +358,14 @@ func volver() -> void:
 		pantalla.queue_free()
 		pantalla = null
 	$Marco.show()
+	if is_instance_valid(ruta_en_pausa):
+		pantalla = ruta_en_pausa
+		ruta_en_pausa = null
+		pantalla.inicio_ms += Time.get_ticks_msec() - inicio_practica_mapa
+		pantalla.show()
+		pantalla.panel_detalle_mapa.cerrar()
+		$Marco/Volver.show()
+		return
 	$Marco/Volver.hide()
 	ajustar_marco(false)
 	entrada_inicio.show()

@@ -2,7 +2,7 @@ extends SceneTree
 
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
 # Mapa: godot --path godot -s ../tools/captura.gd -- mapa-ruta salida.png 1280 720
-# Tramo final: usa mapa-ruta-final como escena.
+# Tramo final: usa mapa-ruta-final como escena. Panel abierto: usa mapa-ruta-detalle.
 # Órdenes: godot --path godot -s ../tools/captura.gd -- ordenes salida.png 1280 720
 # Menú: godot --path godot -s ../tools/captura.gd -- escenas/menu.tscn salida.png 1280 720
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
@@ -111,11 +111,12 @@ func capturar() -> void:
 	if not verificar and DisplayServer.get_name() == "headless":
 		fallar("La captura requiere un servidor gráfico. Usa --verificar para comprobar el estado sin generar PNG.")
 		return
-	var mapa := args[0] in ["mapa-ruta", "mapa-ruta-final"]
+	var mapa := args[0] in ["mapa-ruta", "mapa-ruta-final", "mapa-ruta-detalle"]
 	if mapa:
 		OS.set_environment("NACIONAL_SIN_NUBE", "1")
 	var rutas_captura := {"ordenes": "escenas/ordenes.tscn",
-		"mapa-ruta": "escenas/ruta.tscn", "mapa-ruta-final": "escenas/ruta.tscn"}
+		"mapa-ruta": "escenas/ruta.tscn", "mapa-ruta-final": "escenas/ruta.tscn",
+		"mapa-ruta-detalle": "escenas/ruta.tscn"}
 	var ruta: String = rutas_captura.get(args[0], args[0])
 	var paquete := load("res://" + ruta) as PackedScene
 	if paquete == null:
@@ -377,6 +378,20 @@ func capturar() -> void:
 		elif escena.scroll_vertical != 0:
 			fallar("La vista inicial debe mostrar el comienzo del mapa.")
 			return
+		if args[0] == "mapa-ruta-detalle":
+			var error: Button = control.filas.get_child(1).get_child(0).get_child(0).get_child(0)
+			for presionado in [true, false]:
+				var clic := InputEventMouseButton.new()
+				clic.button_index = MOUSE_BUTTON_LEFT
+				clic.position = error.get_global_rect().get_center()
+				clic.pressed = presionado
+				vp.push_input(clic, true)
+			await process_frame
+			await process_frame
+			var panel: Control = escena.panel_detalle_mapa
+			if not panel.visible or not vp.get_visible_rect().encloses(panel.get_global_rect()):
+				fallar("El panel de detalle no se abrió o queda recortado.")
+				return
 	if not tipo_flashcard.is_empty() and (not escena.flashcard.visible \
 			or not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect())):
 		fallar("La tarjeta no se abrió o queda recortada.")

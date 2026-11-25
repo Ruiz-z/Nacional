@@ -31,3 +31,7 @@ Estas asignaciones cubren los diez escenarios. Aislamiento requiere evaluar un r
 Un camino vertical sólido une las competencias en el orden de la ruta. Las líneas punteadas enlazan los errores con su conteo a la izquierda y las órdenes con el refuerzo a la derecha. El mapa cabe en el desplazamiento vertical de la actividad a 1280 × 720 y 1920 × 1080. Los títulos y las fuentes se ajustan en varias líneas.
 
 Los nodos usan Poppins y rectángulos con radio de 3 px y borde de 2 px. Cada competencia muestra su dominio y el estado «Primero», «Hoy», «Después» o «Hecho». El ámbar señala la falta crítica y el turquesa marca la práctica de hoy. Las ramas y los estados restantes usan tonos neutros. La nota de fuente va debajo del nodo central cuando hay una cita para la propuesta.
+
+Cada tarjeta se activa con clic, Enter o Espacio. Al pasar el ratón se aclara la tarjeta y aparece el cursor de mano. Un borde claro marca el foco de teclado.
+
+El detalle se abre sobre el borde derecho, hasta 420 px de ancho, y se desplaza por separado del mapa. «Cerrar» queda arriba y recibe el foco al abrir. Escape y «Cerrar» devuelven el foco a la tarjeta. Al elegir otra tarjeta visible, el panel actualiza su contenido. Los errores muestran sus intentos con los datos disponibles. La acción de una competencia abre el catálogo filtrado, y la de una orden abre su práctica. «Volver» retoma la ruta.
