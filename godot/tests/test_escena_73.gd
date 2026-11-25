@@ -27,11 +27,6 @@ static func comprobar(base: String) -> bool:
 	menu._process(0.0)
 	correcto = correcto and menu.barra.get_node("Entrada").text.contains("Panel desconectado")
 	menu.cerrar_sesion()
-	menu.demo_boton.pressed.emit()
-	correcto = correcto and menu.pantalla != null and not menu.inicio.visible
-	menu.pantalla.get_node("Tablero").pressed.emit()
-	correcto = correcto and menu.pantalla.alias_actual.begins_with("[DEMO]")
-	menu.get_node("Marco/Volver").pressed.emit()
 	correcto = correcto and menu.inicio.visible and menu.perfil.is_empty()
 	menu.usuario.text = "tecnico73"
 	menu.clave.text = "clave-de-prueba"

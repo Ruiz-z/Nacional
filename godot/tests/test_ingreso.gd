@@ -54,13 +54,6 @@ static func recorrido(menu: Node, base: String) -> bool:
 	menu.barra.get_child(-1).pressed.emit()
 	if menu.etapa != "ingreso" or not menu.perfil.is_empty() or not menu.usuario.text.is_empty():
 		return false
-	menu.demo_boton.pressed.emit()
-	if menu.pantalla == null or not menu.perfil.is_empty():
-		return false
-	menu.pantalla.get_node("Tablero").pressed.emit()
-	if menu.pantalla.vista != "jefe" or menu.pantalla.base == base:
-		return false
-	menu.volver()
 	for intento in range(5):
 		enviar(menu, "admin01", "incorrecta")
 		if menu.aviso == null or not menu.aviso.visible or not menu.perfil.is_empty():

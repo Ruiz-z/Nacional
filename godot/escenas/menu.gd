@@ -16,7 +16,6 @@ const Conexion = preload("res://logica/entrada/conexion_panel.gd")
 const Tablero = preload("res://escenas/tablero.tscn")
 const Ordenes = preload("res://escenas/ordenes.tscn")
 const Bus = preload("res://escenas/bus.tscn")
-const Demo = preload("res://escenas/modo_demo.tscn")
 const Diagnostico = preload("res://escenas/diagnostico.tscn")
 const Ruta = preload("res://escenas/ruta.tscn")
 const Evaluacion = preload("res://escenas/evaluacion.tscn")
@@ -49,7 +48,6 @@ var lanzar_materiales: Callable = abrir_pagina_materiales
 @onready var clave: LineEdit = inicio.get_node("Clave")
 @onready var repeticion: LineEdit = inicio.get_node("Repetir")
 @onready var enviar: Button = inicio.get_node("Elegir")
-@onready var demo_boton: Button = inicio.get_node("DemoTarjeta")
 @onready var espera: Label = inicio.get_node("Aviso")
 @onready var recorrido := columna.get_node("Recorrido/Margen/Contenido")
 
@@ -83,10 +81,7 @@ func preparar_inicio(disponible: bool) -> void:
 	var acciones := texto_hero.get_node("Acciones")
 	acciones.get_node("IrAlias").disabled = not disponible
 	acciones.get_node("IrAlias").pressed.connect(entrar_desde_hero)
-	acciones.get_node("DemoHero").pressed.connect(abrir_demo)
-	inicio.get_node("DemoTarjeta").pressed.connect(abrir_demo)
 	entrada_inicio.resized.connect(ajustar_hero)
-	recorrido.get_node("Demo").pressed.connect(abrir_demo)
 	var fichas := columna.get_node("Destacados/Tarjetas")
 	for datos in [
 		["diagnostico", "Diagnóstico", "Contesta preguntas para saber qué necesitas practicar."],
@@ -382,7 +377,6 @@ func actualizar() -> void:
 	columna.get_node("Hero/Margen/Fila").alignment = BoxContainer.ALIGNMENT_CENTER if solo_ingreso else BoxContainer.ALIGNMENT_BEGIN
 	tarjeta.custom_minimum_size.x = 400.0 if solo_ingreso else 342.0
 	tarjeta.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if solo_ingreso else Control.SIZE_FILL
-	demo_boton.visible = solo_ingreso and etapa == "ingreso"
 	ajustar_hero()
 	var formulario := not con_sesion or etapa == "cambio"
 	for nombre in ["EtiquetaAlias", "Alias", "EtiquetaClave", "Clave", "EtiquetaRepetir", "Repetir", "Elegir", "Alta"]:
@@ -503,14 +497,6 @@ func abrir_pagina_materiales(rol: String, usuario: String) -> void:
 		if not token.is_empty() or rol not in Materiales.ROLES_AUTOR:
 			break
 	OS.shell_open(Materiales.url(rol, token, usuario))
-
-
-func abrir_demo() -> void:
-	var demo := Demo.instantiate()
-	demo.base_real = base
-	demo.tablero_solicitado.connect(abrir_tablero)
-	demo.escenario_solicitado.connect(abrir_ordenes)
-	abrir(demo)
 
 
 func abrir_tablero(tecnico: Dictionary) -> void:
