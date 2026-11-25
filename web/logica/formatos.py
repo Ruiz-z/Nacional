@@ -4,8 +4,13 @@ Cada validador recibe el `contenido` propuesto y devuelve (contenido_limpio, err
 Si hay errores, el material no se guarda (SPEC-materiales RF-5 y RF-9).
 """
 
+import re
+import unicodedata
+
 MAX_TITULO = 90
-FORMATOS = ("tarjetas", "presentacion", "infografia", "quiz", "pareo", "secuencia")
+FORMATOS = ("tarjetas", "presentacion", "infografia", "quiz", "pareo", "secuencia", "ahorcado")
+MAX_PALABRA = 24
+MARCA_ENE = "\x00"  # Protege la Ñ mientras se quitan los acentos.
 
 
 class Errores(list):
@@ -138,6 +143,32 @@ def _secuencia(c, e):
     }
 
 
+def letras_ahorcado(palabra):
+    """Mayúsculas sin acentos (la Ñ se conserva): así se compara cada letra en el juego."""
+    texto = palabra.upper().replace("Ñ", MARCA_ENE)
+    plano = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
+    return plano.replace(MARCA_ENE, "Ñ")
+
+
+def _ahorcado(c, e):
+    palabras = []
+    for i, p in enumerate(_lista(c.get("palabras"), "palabras", 4, 10, e)):
+        p = _objeto(p, f"palabras[{i}]", ("palabra", "pista", "explicacion"), e)
+        palabra = _texto(p.get("palabra"), f"palabras[{i}].palabra", MAX_PALABRA, e)
+        letras = letras_ahorcado(palabra)
+        if palabra and not re.fullmatch(r"[A-ZÑ]+(?:[ -][A-ZÑ]+){0,2}", letras):
+            e.agregar(f"palabras[{i}].palabra", "solo letras, de 1 a 3 palabras, sin números ni signos")
+        elif palabra and len(re.sub(r"[ -]", "", letras)) < 3:
+            e.agregar(f"palabras[{i}].palabra", "debe tener al menos 3 letras")
+        palabras.append({
+            "palabra": palabra,
+            "pista": _texto(p.get("pista"), f"palabras[{i}].pista", 160, e),
+            "explicacion": _texto(p.get("explicacion"), f"palabras[{i}].explicacion", 200, e),
+        })
+    _sin_repetir([letras_ahorcado(p["palabra"]) for p in palabras], "palabras", e)
+    return {"palabras": palabras}
+
+
 VALIDADORES = {
     "tarjetas": _tarjetas,
     "presentacion": _presentacion,
@@ -145,6 +176,7 @@ VALIDADORES = {
     "quiz": _quiz,
     "pareo": _pareo,
     "secuencia": _secuencia,
+    "ahorcado": _ahorcado,
 }
 
 
@@ -190,6 +222,7 @@ CONTENIDO = {
                                      explicacion=_s()), 3, 10)),
     "pareo": _obj(pares=_arr(_obj(termino=_s(), definicion=_s()), 4, 8)),
     "secuencia": _obj(procedimiento=_s(), pasos=_arr(_s(), 3, 8), explicacion=_s()),
+    "ahorcado": _obj(palabras=_arr(_obj(palabra=_s(), pista=_s(), explicacion=_s()), 4, 10)),
 }
 
 LIMITES = {
@@ -198,6 +231,7 @@ LIMITES = {
     "infografia": "idea_central hasta 200; en cada bloque, título hasta 60, dato hasta 60: una cifra con su unidad o de 2 a 5 palabras, nunca una oración, explicación hasta 200; aviso_seguridad hasta 200 o vacío.",
     "quiz": "pregunta hasta 200, opciones hasta 140, «correcta» es el índice (desde 0) de la opción correcta, explicación hasta 240. Las opciones incorrectas deben ser creíbles.",
     "pareo": "término hasta 60, definición hasta 160; sin términos ni definiciones repetidos.",
+    "ahorcado": "cada «palabra» es un término técnico del manual de 1 a 3 palabras y hasta 24 caracteres, solo letras (sin números, siglas con números ni signos); «pista» hasta 160 describe el término sin nombrarlo; «explicacion» hasta 200 dice para qué sirve o por qué importa.",
     "secuencia": "«pasos» va en el orden correcto (la app los revuelve), cada paso hasta 140; explicación hasta 240 dice por qué ese orden.",
 }
 

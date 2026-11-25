@@ -92,6 +92,7 @@
     {"id": "infografia", "nombre": "Infografía", "tipo": "estudio", "descripcion": "Una página con la idea central y los datos clave.", "sin_ia": false},
     {"id": "quiz", "nombre": "Quiz", "tipo": "juego", "descripcion": "Preguntas con puntaje y explicación de cada respuesta.", "sin_ia": true},
     {"id": "pareo", "nombre": "Pareo", "tipo": "juego", "descripcion": "Une cada término con su definición.", "sin_ia": false},
-    {"id": "secuencia", "nombre": "Ordena los pasos", "tipo": "juego", "descripcion": "Pon en orden los pasos de un procedimiento.", "sin_ia": true}
+    {"id": "secuencia", "nombre": "Ordena los pasos", "tipo": "juego", "descripcion": "Pon en orden los pasos de un procedimiento.", "sin_ia": true},
+    {"id": "ahorcado", "nombre": "Ahorcado", "tipo": "juego", "descripcion": "Adivina el término técnico letra por letra con una pista.", "sin_ia": false}
   ]
 }

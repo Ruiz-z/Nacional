@@ -259,5 +259,148 @@ const Formatos = {
   },
 };
 
+// --- Ahorcado ---
+
+const MAX_FALLOS = 6;
+const TECLADO = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("");
+
+// Mayúsculas sin acentos, conservando la Ñ (igual que letras_ahorcado en el servidor).
+function normalizarLetra(texto) {
+  return texto.toUpperCase().replace(/Ñ/g, "\u0000").normalize("NFD")
+    .replace(/[̀-ͯ]/g, "").replace(/\u0000/g, "Ñ");
+}
+
+function dibujoAhorcado(fallos) {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 120 140");
+  svg.setAttribute("class", "horca");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `${fallos} de ${MAX_FALLOS} errores`);
+  const trazo = (tipo, attrs, visible = true) => {
+    const nodo = document.createElementNS(ns, tipo);
+    for (const [k, v] of Object.entries(attrs)) nodo.setAttribute(k, v);
+    nodo.setAttribute("class", visible ? "trazo" : "trazo pendiente");
+    svg.append(nodo);
+  };
+  // Estructura fija.
+  trazo("line", { x1: 10, y1: 132, x2: 80, y2: 132 });
+  trazo("line", { x1: 30, y1: 132, x2: 30, y2: 10 });
+  trazo("line", { x1: 30, y1: 10, x2: 85, y2: 10 });
+  trazo("line", { x1: 85, y1: 10, x2: 85, y2: 24 });
+  // Partes que aparecen con cada error.
+  const partes = [
+    ["circle", { cx: 85, cy: 34, r: 10 }],
+    ["line", { x1: 85, y1: 44, x2: 85, y2: 80 }],
+    ["line", { x1: 85, y1: 54, x2: 70, y2: 68 }],
+    ["line", { x1: 85, y1: 54, x2: 100, y2: 68 }],
+    ["line", { x1: 85, y1: 80, x2: 72, y2: 102 }],
+    ["line", { x1: 85, y1: 80, x2: 98, y2: 102 }],
+  ];
+  partes.forEach(([tipo, attrs], i) => trazo(tipo, attrs, i < fallos));
+  return svg;
+}
+
+Formatos.ahorcado = function (contenido) {
+  const raiz = el("div", { clase: "ahorcado", tabindex: "0", "aria-label": "Ahorcado; puedes escribir las letras con el teclado" });
+  let orden, indice, ganadas, alTeclear = null;
+
+  function iniciar() { orden = barajar(contenido.palabras); indice = 0; ganadas = 0; jugar(); }
+
+  function jugar() {
+    if (indice >= orden.length) {
+      alTeclear = null;
+      raiz.replaceChildren(resultadoFinal(ganadas, orden.length, iniciar,
+        `Adivinaste ${ganadas} de ${orden.length} términos.`));
+      return;
+    }
+    const actual = orden[indice];
+    const objetivo = [...actual.palabra].map((c) => ({ visible: c, letra: normalizarLetra(c) }));
+    const usadas = new Set();
+    let fallos = 0;
+    let terminado = false;
+
+    const marcador = el("div", { clase: "marcador" });
+    const dibujo = el("div", { clase: "dibujo" });
+    const palabra = el("div", { clase: "palabra-oculta", "aria-live": "polite" });
+    const retro = el("div", { clase: "retro oculto", role: "status" });
+    const teclas = new Map();
+    const teclado = el("div", { clase: "teclado" }, TECLADO.map((letra) => {
+      const boton = el("button", { type: "button", clase: "tecla", onclick: () => probar(letra) }, letra);
+      teclas.set(letra, boton);
+      return boton;
+    }));
+
+    function pintar() {
+      marcador.replaceChildren(el("span", {}, `Término ${indice + 1} de ${orden.length}`),
+        el("span", {}, `Errores: ${fallos} de ${MAX_FALLOS}`));
+      dibujo.replaceChildren(dibujoAhorcado(fallos));
+      // Cada palabra va en un bloque que no se parte entre renglones.
+      const bloques = [[]];
+      for (const o of objetivo) {
+        if (o.visible === " ") bloques.push([]);
+        else bloques[bloques.length - 1].push(o);
+      }
+      palabra.replaceChildren(...bloques.map((bloque) => el("span", { clase: "bloque-palabra" }, bloque.map(({ visible, letra }) => {
+        if (!/[A-ZÑ]/.test(letra)) return el("span", { clase: "hueco espacio" }, visible);
+        const descubierta = usadas.has(letra) || terminado;
+        return el("span", { clase: `hueco${descubierta ? " visto" : ""}${terminado && !usadas.has(letra) ? " faltó" : ""}` },
+          descubierta ? visible.toUpperCase() : " ");
+      }))));
+    }
+
+    function probar(letra) {
+      if (terminado || usadas.has(letra)) return;
+      usadas.add(letra);
+      const acierto = objetivo.some((o) => o.letra === letra);
+      if (!acierto) fallos++;
+      const boton = teclas.get(letra);
+      boton.disabled = true;
+      boton.classList.add(acierto ? "bien" : "mal");
+      const completa = objetivo.every((o) => !/[A-ZÑ]/.test(o.letra) || usadas.has(o.letra));
+      if (completa || fallos >= MAX_FALLOS) terminar(completa);
+      pintar();
+    }
+
+    function terminar(gano) {
+      terminado = true;
+      if (gano) ganadas++;
+      teclas.forEach((b) => { b.disabled = true; });
+      retro.replaceChildren(
+        el("strong", {}, gano ? "¡Lo adivinaste! " : `Era «${actual.palabra}». `), actual.explicacion,
+        el("div", { style: "margin-top:10px" },
+          el("button", { type: "button", clase: "boton chico", onclick: () => { indice++; jugar(); } },
+            indice + 1 < orden.length ? "Siguiente término" : "Ver resultado")));
+      retro.classList.remove("oculto");
+      setTimeout(() => retro.querySelector("button")?.focus(), 0);
+    }
+
+    alTeclear = (e) => {
+      if (e.ctrlKey || e.altKey || e.metaKey || e.key.length !== 1) return;
+      const letra = normalizarLetra(e.key);
+      if (TECLADO.includes(letra)) { e.preventDefault(); probar(letra); }
+    };
+
+    pintar();
+    raiz.replaceChildren(marcador,
+      el("div", { clase: "tablero-ahorcado" }, dibujo,
+        el("div", { clase: "zona-palabra" },
+          el("p", { clase: "pista" }, el("strong", {}, "Pista: "), actual.pista),
+          palabra, teclado)),
+      retro);
+    raiz.focus();
+  }
+
+  // Teclado físico: escucha en la página mientras el juego está a la vista; se quita al cerrarlo.
+  const escuchar = (e) => {
+    if (!raiz.isConnected) { document.removeEventListener("keydown", escuchar); return; }
+    if (e.target.closest?.("input, textarea, select")) return;
+    alTeclear?.(e);
+  };
+  document.addEventListener("keydown", escuchar);
+  iniciar();
+  return raiz;
+};
+
 window.Formatos = Formatos;
 window.el = el;

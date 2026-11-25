@@ -230,3 +230,4 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [ ] T-194 H — Revisar los PNG de las cuatro vistas en una sesión gráfica.
 
 - [x] T-195 — Banco de competencias (RF-2 y RF-3). Retirar 14 preguntas repetitivas o poco útiles, incorporar 14 preguntas respaldadas por los PDF y agrupar las 52 preguntas por tema. Ajustar distractores y repartir la posición de las respuestas correctas. [Fuentes y cobertura por dificultad](docs/fuentes-volvo.md#fuentes-vigentes-del-banco-t-185).
+- [x] T-196 — Juego de ahorcado en materiales: formato validado (solo letras, sin distinguir acentos), teclado en pantalla y físico, dibujo por errores y explicación al terminar cada término; uno generado con Faro.

@@ -1,7 +1,7 @@
 # Spec 009 — materiales
 
 ## Contexto y objetivo
-Página web donde un autor genera, con el agente de Azure AI Foundry y su búsqueda en los manuales de Volvo (RAG), materiales de estudio en varios formatos: tarjetas, presentación, infografía y tres juegos (quiz, pareo y ordenar pasos). Cada material se cataloga por **modelo de autobús**, **nivel** y **competencia**, y el enfoque por defecto son los **básicos** (Novato y Básico). El técnico solo ve los materiales que una persona revisó.
+Página web donde un autor genera, con el agente de Azure AI Foundry y su búsqueda en los manuales de Volvo (RAG), materiales de estudio en varios formatos: tarjetas, presentación, infografía y cuatro juegos (quiz, pareo, ordenar pasos y ahorcado). Cada material se cataloga por **modelo de autobús**, **nivel** y **competencia**, y el enfoque por defecto son los **básicos** (Novato y Básico). El técnico solo ve los materiales que una persona revisó.
 
 Complementa a `competencias`: los materiales **no** son ítems del banco de evaluación y no cambian dominio ni ruta.
 
@@ -30,6 +30,7 @@ Complementa a `competencias`: los materiales **no** son ítems del banco de eval
 | `quiz` | Juego de 3 a 10 preguntas con 3 o 4 opciones, una correcta y explicación. |
 | `pareo` | Juego de 4 a 8 pares término–definición. |
 | `secuencia` | Juego de ordenar 3 a 8 pasos de un procedimiento, con explicación. |
+| `ahorcado` | Juego de adivinar 4 a 10 términos técnicos (1 a 3 palabras, solo letras, hasta 24 caracteres) con pista y explicación; 6 errores por término, sin distinguir acentos. |
 
 Campos comunes de un material: `id`, `formato`, `titulo`, `modelo`, `nivel`, `competencia`, `tema`, `contenido`, `fuentes` (nombres de PDF o referencias), `origen` (`ia` | `banco` | `manual`), `estado` (`borrador` | `revisado`), `revisado_por`, `version`, `creado`, `actualizado`, `historial` (versiones anteriores con su motivo).
 

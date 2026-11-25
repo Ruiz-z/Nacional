@@ -1,0 +1,66 @@
+{
+  "id": "ahorcado-terminos-basicos-del-sistema-electrico-y-b66749",
+  "formato": "ahorcado",
+  "titulo": "Términos básicos del sistema eléctrico y la batería",
+  "modelo": "bzl-electrico",
+  "nivel": "novato",
+  "competencia": "sistema-electrico-bateria",
+  "tema": "Términos básicos del sistema eléctrico y la batería",
+  "contenido": {
+    "palabras": [
+      {
+        "palabra": "Batería",
+        "pista": "Fuente principal para almacenar energía en el autobús eléctrico",
+        "explicacion": "Almacena energía en forma de iones de litio para alimentar motor y sistemas."
+      },
+      {
+        "palabra": "Voltaje",
+        "pista": "Presión eléctrica que impulsa la corriente en el sistema",
+        "explicacion": "El sistema opera a 600 voltios, suministrando energía estable."
+      },
+      {
+        "palabra": "Alto voltaje",
+        "pista": "Nivel de tensión que requiere cuidado especial para evitar accidentes",
+        "explicacion": "Solo técnicos certificados pueden manipular componentes de alto voltaje por riesgo."
+      },
+      {
+        "palabra": "Gestión batería",
+        "pista": "Controla temperatura, carga y descarga de la batería",
+        "explicacion": "Monitorea y protege las baterías para que funcionen dentro de parámetros seguros."
+      },
+      {
+        "palabra": "Ventana seguridad",
+        "pista": "Intervalo seguro de temperatura y voltaje para la batería",
+        "explicacion": "Mantiene la batería en rango seguro para evitar daños o riesgos."
+      },
+      {
+        "palabra": "Circuito HVIL",
+        "pista": "Interbloqueo que corta voltaje peligroso si hay daño o desconexión",
+        "explicacion": "Desconecta la energía cuando detecta fallas en cables de alto voltaje."
+      },
+      {
+        "palabra": "Puesta fuera servicio",
+        "pista": "Procedimiento para desconectar el sistema antes de repararlo",
+        "explicacion": "Evita accidentes eléctricos al aislar todo el sistema antes del mantenimiento."
+      },
+      {
+        "palabra": "Protección térmica",
+        "pista": "Medidas para evitar que la batería se sobrecaliente",
+        "explicacion": "Incluye refrigeración líquida y aislamiento para proteger la batería."
+      }
+    ]
+  },
+  "fuentes": [
+    "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf",
+    "Data sheet BZL Electric ES-MX 2021.pdf"
+  ],
+  "origen": "ia",
+  "muestra": false,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T01:23:52-06:00",
+  "actualizado": "2026-11-25T01:23:52-06:00",
+  "historial": []
+}

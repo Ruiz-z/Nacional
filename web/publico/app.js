@@ -42,6 +42,7 @@ const GLIFOS = {
   quiz: ["circle:12,12,9", "poly:8,12.5,11,15.5,16,9"],
   pareo: ["circle:6,7,2.5", "circle:18,17,2.5", "poly:8.5,7,13,7,13,17,15.5,17"],
   secuencia: ["line:10,6,20,6", "line:10,12,20,12", "line:10,18,20,18", "circle:5,6,1", "circle:5,12,1", "circle:5,18,1"],
+  ahorcado: ["line:4,21,13,21", "line:7,21,7,3", "line:7,3,16,3", "line:16,3,16,6", "circle:16,9,3", "line:16,12,16,17"],
 };
 const ESPACIO_SVG = "http://www.w3.org/2000/svg";
 
@@ -68,7 +69,8 @@ function contenidoDe(m) {
   const c = m.contenido || {};
   const por = { tarjetas: ["tarjetas", "tarjeta", "tarjetas"], presentacion: ["diapositivas", "diapositiva", "diapositivas"],
     infografia: ["bloques", "bloque", "bloques"], quiz: ["preguntas", "pregunta", "preguntas"],
-    pareo: ["pares", "par", "pares"], secuencia: ["pasos", "paso", "pasos"] }[m.formato];
+    pareo: ["pares", "par", "pares"], secuencia: ["pasos", "paso", "pasos"],
+    ahorcado: ["palabras", "término", "términos"] }[m.formato];
   if (!por || !Array.isArray(c[por[0]])) return "";
   const n = c[por[0]].length;
   return `${n} ${n === 1 ? por[1] : por[2]}`;
