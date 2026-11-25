@@ -199,3 +199,8 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [ ] T-165 S — Evidencia y errores/oportunidades junto al dominio en el tablero.
 - [ ] T-166 H — Prueba en mesa con el ESP32 real: sano, alimentación abierta, señal abierta y desconexión a mitad de un intento; comparar multímetro, monitor serial y Godot.
 - [x] T-167 S — Ruta de aprendizaje como roadmap: camino numerado por competencia según el diagnóstico, con "Hoy" o "Después", barra de dominio, motivo y práctica sugerida (aprendizaje RF-21).
+- [x] T-168 S — Foundry: contexto, esquema y validación de la ruta (`ruta_ia.gd`) y spec/privacidad (aprendizaje RF-23, RF-24).
+- [x] T-169 S — Cliente Foundry con `HTTPRequest`, configuración local y tiempo de espera de 8 s.
+- [x] T-170 S — Caché de la ruta generada en SQLite.
+- [x] T-171 S — Pantalla de ruta: "Armando tu ruta…", ruta con IA y respaldo "Ruta calculada sin IA".
+- [ ] T-172 H — Prueba con la clave real de Foundry: correr un diagnóstico y revisar que la ruta tenga sentido.

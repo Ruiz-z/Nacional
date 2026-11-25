@@ -36,7 +36,8 @@ static func comprobar(esquema: GDScript, consultar: Callable, base: String, resp
 	var tablas: Variant = consultar.call(base, "SELECT name FROM sqlite_schema WHERE type = 'table' ORDER BY name;")
 	var esperadas := [
 		{"name": "brecha"}, {"name": "evento"}, {"name": "intento"},
-		{"name": "leitner"}, {"name": "progreso"}, {"name": "reloj"}, {"name": "tecnico"},
+		{"name": "leitner"}, {"name": "progreso"}, {"name": "reloj"}, {"name": "ruta_generada"},
+		{"name": "tecnico"},
 	]
 	if tablas != esperadas or consultar.call(base, "SELECT alias FROM tecnico;") != []:
 		printerr("La base inicial debe tener las siete tablas y ningún técnico.")

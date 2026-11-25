@@ -66,6 +66,13 @@ CREATE TABLE IF NOT EXISTS progreso (
 	ruta TEXT NOT NULL DEFAULT '[]' CHECK (json_valid(ruta)),
 	microlecciones_hechas INTEGER NOT NULL DEFAULT 0 CHECK (microlecciones_hechas >= 0)
 ) STRICT;
+CREATE TABLE IF NOT EXISTS ruta_generada (
+	tecnico INTEGER NOT NULL REFERENCES tecnico(id) ON DELETE CASCADE,
+	clave TEXT NOT NULL,
+	contenido TEXT NOT NULL CHECK (json_valid(contenido)),
+	creado TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+	PRIMARY KEY (tecnico, clave)
+) STRICT;
 CREATE TABLE IF NOT EXISTS reloj (
 	tecnico INTEGER PRIMARY KEY REFERENCES tecnico(id) ON DELETE CASCADE,
 	desplazamiento_dias INTEGER NOT NULL DEFAULT 0 CHECK (desplazamiento_dias >= 0)

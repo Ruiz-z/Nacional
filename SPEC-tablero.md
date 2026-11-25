@@ -52,7 +52,7 @@ Muestra el avance, dominio, errores y retención de cada técnico, con trazabili
 - RF-18: DONDE exista un modelo LLM disponible, EL SISTEMA ofrece un asistente que explica errores, resume progreso, sugiere qué practicar y responde dudas de procedimiento.
 - RF-19: CUANDO el asistente responde, EL SISTEMA se basa solo en las fuentes permitidas y en el historial del técnico, y cita la fuente.
 - RF-20: SI el asistente no encuentra respaldo, ENTONCES EL SISTEMA responde "no tengo esa información".
-- RF-21: EL SISTEMA no permite que el asistente cree ítems, cambie dominio o ruta, ni dé valores técnicos fuera de las fuentes.
+- RF-21: EL SISTEMA no permite que el asistente cree ítems, cambie dominio, ni dé valores técnicos fuera de las fuentes; la ruta solo puede proponerla dentro del catálogo y validada (SPEC-aprendizaje RF-23).
 - RF-22: SI no hay conexión o modelo, ENTONCES EL SISTEMA desactiva el asistente con el aviso "Asistente no disponible" y el resto del tablero sigue funcionando.
 - RF-23: EL SISTEMA envía al asistente solo datos con alias, nunca nombres.
 

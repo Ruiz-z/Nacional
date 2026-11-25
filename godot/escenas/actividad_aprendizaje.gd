@@ -5,6 +5,9 @@ const TextoLimpio = preload("res://logica/texto_limpio.gd")
 signal finalizada
 
 const Actividad = preload("res://logica/flujo/actividad_aprendizaje.gd")
+const Foundry = preload("res://logica/aprendizaje/foundry.gd")
+const RutaIA = preload("res://logica/aprendizaje/ruta_ia.gd")
+const Ordenes = preload("res://logica/simulador/ordenes.gd")
 const PanelVirtual = preload("res://escenas/panel_virtual.tscn")
 
 var actividad := Actividad.new()
@@ -17,6 +20,7 @@ var guardado := false
 var ultima_retro := {}
 
 var titulo_preparado := ""
+var cliente_ia: Node
 var retro: Label
 var intro: Label
 var resultados_caja: VBoxContainer
@@ -46,10 +50,35 @@ func _ready() -> void:
 		detalle.text = "Vuelve al menú y entra con tu alias."
 		return
 	if actividad.preparar(banco, ahora()):
+		if actividad.paso == "ruta":
+			await pedir_ruta_ia()
 		mostrar_item()
 	else:
 		pregunta_visible.text = "Esta actividad aún no está disponible"
 		mostrar_avisos()
+
+
+# Pide a Foundry la ruta si hay configuración; si no hay, falla o no es válida, queda la ruta por reglas.
+func pedir_ruta_ia() -> void:
+	if cliente_ia == null:
+		cliente_ia = Foundry.new()
+	if not cliente_ia.disponible():
+		return
+	var ordenes: Array = Ordenes.listar().ordenes
+	var contexto := actividad.contexto_ruta(ordenes)
+	var llave := RutaIA.clave(contexto)
+	var validada := RutaIA.leer_cache(actividad.base, actividad.perfil.id, llave)
+	if validada.is_empty():
+		add_child(cliente_ia) if cliente_ia.get_parent() == null else null
+		pregunta_visible.text = "Armando tu ruta…"
+		var competencias: Array = contexto.orden_base
+		var respuesta: Dictionary = await cliente_ia.generar(RutaIA.INSTRUCCION, contexto, RutaIA.esquema(competencias))
+		var ids := ordenes.map(func(orden: Dictionary) -> String: return orden.id)
+		validada = RutaIA.validar(respuesta, competencias, actividad.historial, ids)
+		if not validada.is_empty():
+			RutaIA.guardar_cache(actividad.base, actividad.perfil.id, llave, validada)
+	if not validada.is_empty():
+		actividad.aplicar_ruta_ia(validada)
 
 
 func crear_bloques() -> void:
@@ -81,8 +110,9 @@ func texto_intro() -> String:
 		"diagnostico":
 			return "Este diagnóstico mide lo que ya sabes en cuatro temas. Son %d preguntas, unos %d minutos. No es una calificación: sirve para armar tu ruta de aprendizaje." % [total, maxi(5, total)]
 		"ruta":
-			return "Este es tu camino según tu diagnóstico. Hoy haces %d preguntas con %d lecciones cortas; el resto queda para después." % [
-				total, actividad.plan.lecciones.size()]
+			return "Este es tu camino según tu diagnóstico. Hoy haces %d preguntas con %d lecciones cortas; el resto queda para después. %s" % [
+				total, actividad.plan.lecciones.size(),
+				"Ruta generada con IA." if actividad.origen_ruta == "ia" else "Ruta calculada sin IA."]
 	return ""
 
 
