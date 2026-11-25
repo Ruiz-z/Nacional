@@ -19,6 +19,7 @@ const Bus = preload("res://escenas/bus.tscn")
 const Diagnostico = preload("res://escenas/diagnostico.tscn")
 const Ruta = preload("res://escenas/ruta.tscn")
 const Sonido = preload("res://logica/sonido.gd")
+const Niveles = preload("res://logica/flujo/niveles.gd")
 const Evaluacion = preload("res://escenas/evaluacion.tscn")
 const NOMBRES := {"alias": "Iniciar sesión", "administracion": "Administración", "materiales": "Materiales de estudio", "diagnostico": "Diagnóstico", "ruta": "Ruta de aprendizaje",
 	"escenario": "Práctica", "post": "Evaluación", "retest": "Repetir la evaluación", "tablero": "Tablero"}
@@ -501,7 +502,11 @@ func abrir_pagina_materiales(rol: String, usuario: String) -> void:
 		token = Materiales.leer_token(raiz)
 		if not token.is_empty() or rol not in Materiales.ROLES_AUTOR:
 			break
-	OS.shell_open(Materiales.url(rol, token, usuario))
+	var ruta := ""
+	if rol == "tecnico" and perfil.has("id"):
+		var progreso := Recorrido.estado(base, perfil.id, ahora())
+		ruta = Materiales.texto_ruta(progreso.get("ruta", []), Niveles.dominios(base, perfil.get("alias", "")))
+	OS.shell_open(Materiales.url(rol, token, usuario, ruta))
 
 
 func abrir_tablero(tecnico: Dictionary) -> void:

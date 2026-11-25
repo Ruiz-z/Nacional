@@ -121,6 +121,12 @@ class Almacen:
         material.update(estado="revisado", revisado_por=revisor, revisado_en=ahora())
         return self.guardar(material)
 
+    def retirar(self, id_material):
+        """Vuelve el material a borrador: el técnico deja de verlo y de recibirlo en su ruta."""
+        material = self.obtener(id_material)
+        material.update(estado="borrador", revisado_por="", revisado_en="")
+        return self.guardar(material)
+
     def eliminar(self, id_material):
         ruta = self._ruta(id_material)
         if not ruta.exists():

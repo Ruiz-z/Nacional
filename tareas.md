@@ -240,3 +240,4 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-205 — Casillero de EPP en el taller 3D, selección en primera persona y retroalimentación del equipo puesto (SPEC-simulador RF-39). Queda pendiente la validación con Volvo de los requisitos por tarea.
 - [x] T-206 — La práctica en el taller se bloquea hasta terminar el diagnóstico y las órdenes se abren por nivel según el dominio de cada competencia (Media desde 50, Difícil desde 75; `niveles.gd`).
 - [x] T-207 — Sonido sintetizado en código (clics, pasos, éxito, error, falta crítica, EPP, elevador, victoria). La tecla M lo silencia y la preferencia se guarda; sin archivos de audio externos.
+- [x] T-208 — Materiales: botón Publicar y Retirar en cada tarjeta y en el visor; el técnico recibe primero los publicados que le tocan según su ruta de aprendizaje y su nivel (`asignacion.py`, sección «Para ti»).

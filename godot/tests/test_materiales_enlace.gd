@@ -18,7 +18,9 @@ static func ejecutar() -> bool:
 		and Materiales.url("jefe", "") == base and Materiales.url("jefe", "  ") == base \
 		and Materiales.url("admin", "a b&c").contains("a%20b%26c") \
 		and Materiales.url("jefe", token, "jefa.taller") == base + "/acceso?token=" + token + "&usuario=jefa.taller" \
-		and Materiales.url("tecnico", token, "ana") == base
+		and Materiales.url("tecnico", token, "ana") == base + "/acceso?usuario=ana" \
+		and Materiales.url("tecnico", "", "ana", "a~30.b~60") == base + "/acceso?usuario=ana&ruta=a~30.b~60" \
+		and Materiales.texto_ruta(["a", "b", "x"], {"a": 30.4, "b": 60.0}) == "a~30.b~60"
 	DirAccess.remove_absolute(carpeta.path_join(Materiales.ARCHIVO_TOKEN))
 	DirAccess.remove_absolute(carpeta.path_join("web"))
 	DirAccess.remove_absolute(carpeta)

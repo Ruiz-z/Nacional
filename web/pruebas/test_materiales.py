@@ -13,7 +13,7 @@ from pathlib import Path
 os.environ["NACIONAL_SIN_NUBE"] = "1"  # Nunca llamar a Foundry en las pruebas.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from logica import formatos  # noqa: E402
+from logica import asignacion, formatos  # noqa: E402
 from logica.almacen import Almacen, NoEncontrado  # noqa: E402
 from logica.catalogo import Catalogo, ErrorSeleccion  # noqa: E402
 from logica.foundry import ClienteFoundry, ErrorFoundry, cargar_config, extraer  # noqa: E402
@@ -517,6 +517,50 @@ class PruebaPermisoDeAutor(Base):
         self.assertEqual(json.loads(self.pedir("GET", "/api/estado", cookie=malo)[1])["usuario"], "")
         # Sin permiso, el usuario de la cookie no cuenta.
         self.assertEqual(json.loads(self.pedir("GET", "/api/estado", cookie="usuario=jefa.taller")[1])["usuario"], "")
+
+    def test_publicar_retirar_y_asignar_segun_la_ruta(self):
+        cookie = f"autor={self.TOKEN}; usuario=jefa.taller"
+        ids = {}
+        for nivel in ("novato", "basico", "experto"):
+            creado = json.loads(self.pedir("POST", "/api/materiales", {"formato": "quiz", "modelo": "general",
+                                "nivel": nivel, "competencia": "diagnostico-fallas", "tema": "Fallas"}, cookie=cookie)[1])
+            ids[nivel] = creado["id"]
+        ruta = "diagnostico-fallas~30.seguridad-alto-voltaje~80.inventada~10"
+        tecnico = f"ruta={ruta}"
+        # Un borrador no se asigna.
+        self.assertEqual(json.loads(self.pedir("GET", "/api/asignados", cookie=tecnico)[1])["pasos"][0]["materiales"], [])
+        for nivel in ids:
+            self.assertEqual(self.pedir("POST", f"/api/materiales/{ids[nivel]}/revisar", {}, cookie=cookie)[0], 200)
+        pasos = json.loads(self.pedir("GET", "/api/asignados", cookie=tecnico)[1])["pasos"]
+        self.assertEqual([p["competencia"] for p in pasos], ["diagnostico-fallas", "seguridad-alto-voltaje"])
+        self.assertEqual((pasos[0]["paso"], pasos[0]["nivel"]), (1, "novato"))
+        # Dominio 30 (novato): recibe novato y básico, no experto.
+        self.assertEqual({m["id"] for m in pasos[0]["materiales"]}, {ids["novato"], ids["basico"]})
+        # Sin ruta no hay asignación; con retirar, el material deja de llegar.
+        self.assertEqual(json.loads(self.pedir("GET", "/api/asignados")[1])["pasos"], [])
+        self.assertEqual(self.pedir("POST", f"/api/materiales/{ids['novato']}/retirar", {}, cookie=cookie)[0], 200)
+        pasos = json.loads(self.pedir("GET", "/api/asignados", cookie=tecnico)[1])["pasos"]
+        self.assertEqual({m["id"] for m in pasos[0]["materiales"]}, {ids["basico"]})
+        # Solo el autor retira.
+        self.assertEqual(self.pedir("POST", f"/api/materiales/{ids['basico']}/retirar", {})[0], 403)
+
+    def test_el_tecnico_entra_con_su_ruta_en_una_cookie_sin_permiso(self):
+        class SinSeguir(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *args, **kwargs):
+                return None
+        try:
+            urllib.request.build_opener(SinSeguir).open(
+                f"{self.base}/acceso?usuario=ana.t&ruta=diagnostico-fallas~42.mala~5", timeout=10)
+            self.fail("debía redirigir")
+        except urllib.error.HTTPError as respuesta:
+            cookies = respuesta.headers.get_all("Set-Cookie")
+            self.assertTrue(any(c.startswith("ruta=diagnostico-fallas~42") and "mala" not in c for c in cookies))
+            self.assertFalse(any(c.startswith("autor=") for c in cookies))
+
+    def test_asignacion_pura(self):
+        self.assertEqual([asignacion.nivel_de(d) for d in (0, 39, 40, 69, 70, 89, 90)],
+                         ["novato", "novato", "basico", "basico", "competente", "competente", "experto"])
+        self.assertEqual(asignacion.leer_ruta("a~10.a~20.b~x.c~150.b~55", {"a": 1, "b": 1, "c": 1}), [("a", 10.0), ("b", 55.0)])
 
     def test_el_token_se_crea_una_vez_y_con_permisos_cerrados(self):
         with tempfile.TemporaryDirectory() as carpeta:

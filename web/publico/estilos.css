@@ -244,3 +244,12 @@ main { max-width: 1160px; margin: 0 auto; padding: 24px 28px 64px; }
   .juego-clasificar { grid-template-columns: minmax(0, 1fr); }
   .juego-clasificar > section:last-child { position: static; }
 }
+
+.material-con-accion { display: flex; flex-direction: column; gap: 6px; }
+.material-con-accion .material { flex: 1; }
+.accion-tarjeta { width: 100%; }
+.asignados { margin-bottom: 28px; padding: 16px 16px 8px; background: var(--superficie); border: 1px solid var(--turquesa-texto); border-radius: var(--radio); }
+.paso-ruta { margin-bottom: 14px; }
+.paso-ruta h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; font-size: 1rem; margin-bottom: 8px; }
+.paso-ruta h3 small { font-weight: 400; color: var(--texto-2); }
+.numero-paso { background: var(--turquesa-texto); color: #fff; border-radius: 10px; padding: 1px 8px; font-size: .75rem; font-weight: 600; }

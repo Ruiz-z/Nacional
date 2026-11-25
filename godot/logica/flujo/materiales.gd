@@ -12,12 +12,25 @@ static func base_url() -> String:
 
 
 # Dirección que abre el navegador. Con permiso pasa por /acceso, que guarda una cookie y quita el token de la barra.
-static func url(rol: String, token: String, usuario: String = "") -> String:
+static func url(rol: String, token: String, usuario: String = "", ruta: String = "") -> String:
 	if rol in ROLES_AUTOR and not token.strip_edges().is_empty():
 		var direccion := "%s/acceso?token=%s" % [base_url(), token.strip_edges().uri_encode()]
 		# Quien revisa un material queda registrado con su cuenta, no con un texto libre.
 		return direccion + ("&usuario=" + usuario.uri_encode() if not usuario.is_empty() else "")
+	# El técnico entra sin permiso de autor, pero con su ruta para recibir primero lo que le toca.
+	if rol == "tecnico" and not usuario.is_empty():
+		var direccion := "%s/acceso?usuario=%s" % [base_url(), usuario.uri_encode()]
+		return direccion + ("&ruta=" + ruta.uri_encode() if not ruta.is_empty() else "")
 	return base_url()
+
+
+# «competencia~dominio.competencia~dominio», de la más urgente a la menos urgente.
+static func texto_ruta(ruta: Array, dominios: Dictionary) -> String:
+	var partes := PackedStringArray()
+	for competencia in ruta:
+		if competencia is String and dominios.has(competencia):
+			partes.append("%s~%d" % [competencia, roundi(dominios[competencia])])
+	return ".".join(partes)
 
 
 static func leer_token(raiz: String) -> String:
