@@ -57,3 +57,16 @@ Para verificar el protocolo sin el Uno, el emisor de prueba genera un latido, lo
 ```sh
 godot --headless --no-header -s tools/emisor_eventos.gd -- --banco
 ```
+
+## Banco con ESP32 (Wi-Fi, 3.3 V)
+
+La placa crea su red Wi-Fi, espera `INICIO` en UDP 4210 y reporta `{"tp1":0,"tp2":1}` cada 250 ms. Conecta la laptop a esa red y ejecuta el adaptador, que traduce los bits al protocolo del simulador y envía un latido mientras la placa responde:
+
+```sh
+python3 tools/puente_esp32.py 192.168.4.1
+godot --path godot -- --banco-fisico --nominal-alto=3.3
+```
+
+Con `--nominal-alto=3.3` las opciones de la hoja y los textos dicen **≈3.3 V** en lugar de ≈5 V. Los GPIO del ESP32 solo aceptan 3.3 V: no apliques 5 V directos. Si la placa deja de responder, el latido se corta y el simulador avisa **Banco desconectado · falla virtual**.
+
+Prueba de lógica del adaptador: `python3 firmware/pruebas/prueba_puente_esp32.py`.

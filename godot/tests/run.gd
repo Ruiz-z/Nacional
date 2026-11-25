@@ -2,6 +2,7 @@ extends SceneTree
 
 
 func _initialize() -> void:
+	OS.set_environment("NACIONAL_SIN_NUBE", "1")
 	ejecutar.call_deferred()
 
 

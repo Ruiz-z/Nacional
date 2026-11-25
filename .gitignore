@@ -3,3 +3,6 @@ build/
 tools/e2e/node_modules/
 tools/e2e/capturas/
 godot/contenido/
+
+# Configuración local de Foundry (nunca en git)
+.env

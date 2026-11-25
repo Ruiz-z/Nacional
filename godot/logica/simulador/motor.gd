@@ -31,12 +31,17 @@ var _reflexion_omitida := false
 var _diagnostico_final := {}
 var _causa_banco := ""
 var _lecturas_correctas := false
+var _sesion := ""
+var _variante := ""
 
 
 func _init(escenario: Dictionary, lector_banco: Callable = Mediciones.leer_variante,
 		fuente_banco := "virtual") -> void:
 	_escenario = escenario.duplicate(true)
 	_estado = _escenario.estado.duplicate()
+	_sesion = "%s-%d" % [_escenario.id, Time.get_ticks_usec()]
+	_variante = "alimentacion" if _estado.get("s1_abierto", false) == true \
+		else "senal" if _estado.get("s2_abierto", false) == true else ""
 	if _escenario.get("zona") == "banco":
 		mediciones = Mediciones.new(lector_banco, fuente_banco)
 	var inicio := activar_eventos({}, _estado)
@@ -485,4 +490,5 @@ func intento_de(competencia: String, respuesta: String, reloj_sim: String) -> Di
 	return {"competencia": competencia, "item": _escenario.id, "formato": "escenario",
 		"dificultad": _escenario.dificultad, "respuesta": respuesta, "valor": 100,
 		"resultado": "correcto", "tipo_error": null, "tiempo_ms": 0, "fuente_entrada": "",
-		"momento": "practica", "reloj_sim": reloj_sim, "version_contenido": _escenario.version}
+		"momento": "practica", "reloj_sim": reloj_sim, "version_contenido": _escenario.version,
+		"sesion_id": _sesion, "caso": _escenario.id, "variante": _variante}

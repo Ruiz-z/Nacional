@@ -25,3 +25,15 @@ El catálogo presenta Fácil, Media y Difícil en ese orden. Cada sección indic
 - **Difícil (4).** Motor combina medición de temperatura con bloqueo de seguridad. Módulo auxiliar exige medir, reportar e interpretar varios puntos. Fuga neumática y amortiguador combinan trabajo en los bajos con comprobaciones o apriete de componentes de la suspensión.
 
 Estas asignaciones cubren los diez escenarios. Aislamiento requiere evaluar un riesgo crítico, aunque tenga pocas misiones.
+
+## Mapa de la ruta de aprendizaje
+
+«Tu ruta» indica por qué competencia empezar, identifica el origen de la ruta y muestra una leyenda de cuatro estados. Los nodos numerados usan Poppins y muestran el estado, el porcentaje y una barra de dominio de 6 px. El relleno es ámbar para «Primero», turquesa para «Hoy», claro para «Después» y verde para «Hecho». El primer nodo lleva «Empieza aquí» y los nodos hechos llevan una marca de verificación.
+
+El camino enlaza las competencias con una línea sólida y flechas descendentes. Los conectores en codo unen cada competencia con los errores a la izquierda y las prácticas a la derecha. Cada lado muestra hasta tres fichas de contenido. «+N más» abre el detalle de la competencia con la lista completa. Las faltas críticas tienen borde rojo. A la derecha aparecen primero los temas de la propuesta y luego las órdenes del taller. Las citas, las marcas didácticas y el refuerzo ampliado se consultan en el detalle.
+
+«Continuar» y «Paso 2 de 6: tu ruta» quedan en el pie fijo. A 1920 × 1080 caben las cuatro competencias en la misma vista. A 1280 × 720, el mapa se desplaza sin mover el pie.
+
+Cada tarjeta se activa con clic, Enter o Espacio. Al pasar el ratón se aclara el relleno y aparece el cursor de mano. Un borde blanco de 3 px marca el foco de teclado.
+
+El panel se abre a la derecha y se desplaza por separado. Tiene fondo oscuro, un borde izquierdo de 4 px del color del estado, título de 22 px y texto de 16 px. «Cerrar» recibe el foco al abrir. Escape y «Cerrar» devuelven el foco a la tarjeta. Al elegir otra tarjeta visible, el panel actualiza su contenido. Los errores muestran los intentos disponibles. La acción de una competencia abre el catálogo filtrado y la de una orden abre su práctica. «Volver» retoma la ruta.

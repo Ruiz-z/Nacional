@@ -30,7 +30,7 @@ static func comprobar(base: String) -> bool:
 			return false
 	if Base.consultar(base, """
 		UPDATE progreso SET paso_actual = 'retest';
-		INSERT INTO intento VALUES
+		INSERT INTO intento (id, tecnico, competencia, item, formato, dificultad, respuesta, valor, peso, resultado, tipo_error, tiempo_ms, fuente_entrada, momento, reloj_sim, version_contenido) VALUES
 			(1,1,'diagnostico-fallas','a','opcion-multiple','facil','x',50,1,'incorrecto',NULL,20,'teclado','post','1970-01-02T00:00:00Z','1');
 	""") == null:
 		return false

@@ -48,6 +48,7 @@ const PROBLEMAS := {
 	"indicio_descartado": "Lectura descartada",
 }
 const Inventario = preload("res://logica/simulador/inventario.gd")
+const Banco = preload("res://logica/simulador/banco_arnes.gd")
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Practica = preload("res://logica/simulador/practica.gd")
 const MenuPieza = preload("res://logica/simulador/menu_pieza.gd")
@@ -139,6 +140,14 @@ func _ready() -> void:
 		panel.conexion.protocolo.reiniciar_fuente("virtual")
 	var carga := Escenario.cargar(archivo)
 	datos = carga.get("escenario", {})
+	# Banco de 3.3 V (ESP32) o de 5 V (Arduino Uno): lo fija la orden o --nominal-alto=3.3.
+	var nominal: float = float(datos.get("nominal_alto", Banco.NOMINAL_5V))
+	for argumento in OS.get_cmdline_user_args():
+		if argumento.begins_with("--nominal-alto=") and argumento.get_slice("=", 1).is_valid_float():
+			nominal = clampf(argumento.get_slice("=", 1).to_float(), 0.1, 5.0)
+	Banco.nominal_alto = nominal
+	if not datos.is_empty():
+		Escenario.aplicar_nominal(datos, Banco.etiqueta_alto())
 	if datos.is_empty():
 		push_warning(str(carga.errores))
 		$Interfaz/Lateral/Estado.text = "No se abrió la orden. Vuelve al menú y elige otra."

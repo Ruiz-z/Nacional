@@ -1,10 +1,18 @@
-extends ScrollContainer
+extends VBoxContainer
 
 const TextoLimpio = preload("res://logica/texto_limpio.gd")
 
 signal finalizada
+signal ruta_cerrada
+signal practica_mapa_solicitada(accion: Dictionary)
 
 const Actividad = preload("res://logica/flujo/actividad_aprendizaje.gd")
+const Foundry = preload("res://logica/aprendizaje/foundry.gd")
+const RutaIA = preload("res://logica/aprendizaje/ruta_ia.gd")
+const Ordenes = preload("res://logica/simulador/ordenes.gd")
+const DatosMapa = preload("res://logica/aprendizaje/mapa_ruta.gd")
+const PanelDetalleMapa = preload("res://escenas/panel_detalle_mapa.gd")
+const MapaRuta = preload("res://escenas/mapa_ruta.gd")
 const PanelVirtual = preload("res://escenas/panel_virtual.tscn")
 
 var actividad := Actividad.new()
@@ -14,13 +22,19 @@ var seleccion := []
 var fuente_entrada := "interfaz"
 var inicio_ms := 0
 var guardado := false
+var mapa_pendiente := false
 var ultima_retro := {}
 
 var titulo_preparado := ""
+var cliente_ia: Node
 var retro: Label
 var intro: Label
 var resultados_caja: VBoxContainer
-@onready var contenido := $Margen/Centro/Tarjeta/Contenido
+var roadmap_caja: MapaRuta
+var panel_detalle_mapa: PanelDetalleMapa
+var pie_ruta: PanelContainer
+@onready var desplazamiento: ScrollContainer = $Desplazamiento
+@onready var contenido := $Desplazamiento/Margen/Centro/Tarjeta/Contenido
 @onready var opciones := contenido.get_node("Opciones")
 @onready var enviar := contenido.get_node("Enviar")
 @onready var detalle := contenido.get_node("Detalle")
@@ -45,10 +59,35 @@ func _ready() -> void:
 		detalle.text = "Vuelve al menú y entra con tu alias."
 		return
 	if actividad.preparar(banco, ahora()):
+		if actividad.paso == "ruta":
+			await pedir_ruta_ia()
 		mostrar_item()
 	else:
 		pregunta_visible.text = "Esta actividad aún no está disponible"
 		mostrar_avisos()
+
+
+# Pide a Foundry la ruta si hay configuración; si no hay, falla o no es válida, queda la ruta por reglas.
+func pedir_ruta_ia() -> void:
+	if cliente_ia == null:
+		cliente_ia = Foundry.new()
+	if not cliente_ia.disponible():
+		return
+	var ordenes: Array = Ordenes.listar().ordenes
+	var contexto := actividad.contexto_ruta(ordenes)
+	var llave := RutaIA.clave(contexto)
+	var validada := RutaIA.leer_cache(actividad.base, actividad.perfil.id, llave)
+	if validada.is_empty():
+		add_child(cliente_ia) if cliente_ia.get_parent() == null else null
+		pregunta_visible.text = "Armando tu ruta…"
+		var competencias: Array = contexto.orden_base
+		var respuesta: Dictionary = await cliente_ia.generar(RutaIA.INSTRUCCION, contexto, RutaIA.esquema(competencias))
+		var ids := ordenes.map(func(orden: Dictionary) -> String: return orden.id)
+		validada = RutaIA.validar(respuesta, competencias, actividad.historial, ids)
+		if not validada.is_empty():
+			RutaIA.guardar_cache(actividad.base, actividad.perfil.id, llave, validada)
+	if not validada.is_empty():
+		actividad.aplicar_ruta_ia(validada)
 
 
 func crear_bloques() -> void:
@@ -63,6 +102,18 @@ func crear_bloques() -> void:
 	retro.hide()
 	contenido.add_child(retro)
 	contenido.move_child(retro, intro.get_index() + 1)
+	roadmap_caja = MapaRuta.new()
+	roadmap_caja.hide()
+	contenido.add_child(roadmap_caja)
+	contenido.move_child(roadmap_caja, intro.get_index() + 1)
+	var capa := CanvasLayer.new()
+	add_child(capa)
+	panel_detalle_mapa = PanelDetalleMapa.new()
+	capa.add_child(panel_detalle_mapa)
+	roadmap_caja.nodo_activado.connect(func(nodo: Dictionary, tipo: String, boton: Button):
+		panel_detalle_mapa.abrir(DatosMapa.detalle(nodo, tipo, actividad.historial,
+			actividad.banco_cargado.get("items", [])), boton, nodo.estado))
+	panel_detalle_mapa.practicar.connect(practica_mapa_solicitada.emit)
 	resultados_caja = VBoxContainer.new()
 	resultados_caja.add_theme_constant_override("separation", 10)
 	contenido.add_child(resultados_caja)
@@ -74,12 +125,40 @@ func texto_intro() -> String:
 	match actividad.paso:
 		"diagnostico":
 			return "Este diagnóstico mide lo que ya sabes en cuatro temas. Son %d preguntas, unos %d minutos. No es una calificación: sirve para armar tu ruta de aprendizaje." % [total, maxi(5, total)]
-		"ruta":
-			var temas := PackedStringArray()
-			for competencia in actividad.ruta.slice(0, 3):
-				temas.append(Actividad.Banco.COMPETENCIAS[competencia])
-			return "Tu ruta tiene %d preguntas con lecciones cortas. Empiezas por lo que más necesitas repasar: %s." % [total, ", ".join(temas)]
 	return ""
+
+
+func mostrar_roadmap() -> void:
+	var instantanea := Actividad.Diagnostico.resultado(actividad.historial, true)
+	var de_hoy := {}
+	for leccion in actividad.plan.lecciones:
+		de_hoy[leccion.competencia] = true
+	var nodos := DatosMapa.armar(actividad.motivos_ruta(), instantanea, actividad.historial,
+		Ordenes.listar().ordenes, actividad.detalle_ia, de_hoy)
+	roadmap_caja.mostrar(nodos, actividad.origen_ruta, actividad.fuentes_ia, actividad.detalle_ia)
+
+
+func preparar_pie_ruta() -> void:
+	if is_instance_valid(pie_ruta):
+		return
+	pie_ruta = PanelContainer.new()
+	var fondo := MapaRuta.plano(MapaRuta.OSCURO, MapaRuta.NEUTRO, 0)
+	fondo.border_width_top = 1
+	fondo.content_margin_top = 12
+	fondo.content_margin_bottom = 12
+	pie_ruta.add_theme_stylebox_override("panel", fondo)
+	add_child(pie_ruta)
+
+	var acciones := HBoxContainer.new()
+	acciones.alignment = BoxContainer.ALIGNMENT_CENTER
+	acciones.add_theme_constant_override("separation", 20)
+	pie_ruta.add_child(acciones)
+	enviar.reparent(acciones, false)
+	enviar.custom_minimum_size = Vector2(360, 48)
+	MapaRuta.estilizar_boton(enviar, MapaRuta.ACENTO, MapaRuta.OSCURO, MapaRuta.OSCURO)
+	var paso := roadmap_caja.etiqueta("Paso 2 de 6: tu ruta", 14, &"Secundario")
+	paso.autowrap_mode = TextServer.AUTOWRAP_OFF
+	acciones.add_child(paso)
 
 
 func mostrar_retro() -> void:
@@ -154,7 +233,29 @@ func mostrar_item() -> void:
 	mostrar_avisos()
 	var indice := actividad.intentos.size()
 	intro.text = texto_intro()
+	# La ruta es solo el mapa, sin preguntas: «Continuar» cierra el paso.
+	mapa_pendiente = actividad.paso == "ruta"
 	intro.visible = indice == 0 and not intro.text.is_empty()
+	if mapa_pendiente:
+		item = {}
+		var tarjeta: PanelContainer = contenido.get_parent()
+		tarjeta.custom_minimum_size.x = 1120
+		tarjeta.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+		for control in [contenido.get_node("Titulo"), intro, detalle, pregunta_visible, opciones, fuente]:
+			control.hide()
+		preparar_pie_ruta()
+		mostrar_roadmap()
+		retro.hide()
+		progreso.hide()
+		reiniciar.hide()
+		contenido.get_node("Numero").hide()
+		pregunta_visible.text = ""
+		enviar.text = "Continuar"
+		enviar.show()
+		enviar.grab_focus()
+		return
+	panel_detalle_mapa.hide()
+	roadmap_caja.hide()
 	mostrar_retro()
 	progreso.max_value = actividad.items.size()
 	progreso.value = mini(indice + 1, actividad.items.size())
@@ -170,13 +271,6 @@ func mostrar_item() -> void:
 		return
 
 	item = actividad.items[indice]
-	var leccion := actividad.leccion(indice)
-	if not leccion.is_empty():
-		detalle.text = "Lección corta %d de %d · %d min\n%s\n%s%s" % [
-			actividad.numero_leccion(indice), actividad.plan.lecciones.size(), leccion.minutos,
-			Actividad.Banco.COMPETENCIAS[leccion.competencia],
-			"Ejemplo didáctico\n" if leccion.muestra else "", TextoLimpio.limpiar(leccion.explicacion).texto]
-		detalle.text += "\n[color=#9aa7b4]Fuente de la lección: %s[/color]" % citar(leccion.fuente)
 	if actividad.reloj_simulado:
 		fuente.text += "Reloj simulado\n"
 	fuente.text += "Fuente: %s" % citar(item.fuente)
@@ -205,8 +299,6 @@ func mostrar_item() -> void:
 	var pregunta_limpia := TextoLimpio.limpiar(pregunta)
 	pregunta_visible.text = pregunta_limpia.texto
 	var marca: String = pregunta_limpia.etiqueta
-	if marca.is_empty() and item.get("muestra", false):
-		marca = "Ejemplo didáctico"
 	var etiqueta: Label = contenido.get_node("Marca")
 	etiqueta.text = marca
 	etiqueta.visible = not marca.is_empty()
@@ -251,15 +343,29 @@ func confirmar() -> void:
 		return
 	var cierre := actividad.guardar(ahora())
 	if not cierre.get("guardado", false):
-		aviso.text = "No se guardó tu avance. Pulsa Guardar y terminar otra vez."
+		aviso.text = "No se guardó tu avance. Pulsa %s otra vez." % enviar.text
 		aviso.show()
+		if mapa_pendiente:
+			desplazamiento.scroll_vertical = 0
 		return
 	guardado = true
 	enviar.hide()
+	# La ruta es solo el mapa: al continuar se vuelve al menú, que ya muestra el siguiente paso.
+	if actividad.paso == "ruta":
+		if not cierre.respaldo:
+			actividad.avisos.append("Tu avance quedó guardado. Falló la copia de respaldo.")
+		ruta_cerrada.emit()
+		return
+	if is_instance_valid(pie_ruta):
+		pie_ruta.hide()
+		for control in [contenido.get_node("Titulo"), detalle, pregunta_visible]:
+			control.show()
 	pregunta_visible.text = "Paso guardado."
 	var lineas := PackedStringArray()
 	retro.hide()
 	intro.hide()
+	panel_detalle_mapa.hide()
+	roadmap_caja.hide()
 	mostrar_barras()
 	if actividad.paso == "ruta":
 		lineas.append("Temas para repasar")

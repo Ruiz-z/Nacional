@@ -38,6 +38,7 @@ static func banco() -> Dictionary:
 
 
 static func responder(pantalla: Node, cantidad: int, fallar_primera := false) -> bool:
+	empezar(pantalla)
 	for indice in range(cantidad):
 		if pantalla.item.is_empty():
 			return false
@@ -52,3 +53,10 @@ static func responder(pantalla: Node, cantidad: int, fallar_primera := false) ->
 				pantalla.enviar.pressed.emit()
 	pantalla.enviar.pressed.emit()
 	return pantalla.guardado
+
+
+# En la ruta el mapa se ve primero; «Empezar» abre las preguntas.
+static func empezar(pantalla: Node) -> Variant:
+	if pantalla.get("mapa_pendiente") == true:
+		pantalla.enviar.pressed.emit()
+	return null

@@ -2,7 +2,7 @@
 
 ## Datos
 - Los técnicos se identifican con un **alias** (por ejemplo `T-0001`); la aplicación no pide nombres reales ni datos personales.
-- Los datos viven **solo en el equipo** (SQLite local). No se envían a ningún servicio.
+- Los datos viven **en el equipo** (SQLite local). Solo la generación opcional de la ruta con Foundry envía a la nube un identificador seudónimo, el dominio por competencia, los tipos de error y el catálogo de órdenes; nunca alias, nombres ni texto libre. Sin configuración o sin conexión no se envía nada.
 - El asistente opcional usa un modelo local y solo recibe datos con alias.
 - Se puede exportar y borrar a un técnico desde el tablero.
 
@@ -11,7 +11,8 @@
 - El contenido que no proviene de material oficial lleva la marca **`[MUESTRA]`**.
 - Los datos de demostración llevan la marca **`[DEMO]`** y viven en una base separada.
 - Todo es simulado: no se manipula un bus real ni alto voltaje; el panel físico es una maqueta de bajo voltaje por USB.
-- Las reglas de seguridad están escritas a mano; ningún modelo de lenguaje las genera ni cambia el dominio o la ruta.
+- Las reglas de seguridad están escritas a mano; ningún modelo de lenguaje las genera ni cambia el dominio. La ruta que propone la IA se valida contra el catálogo y las reglas de seguridad, y se registra como "Ruta generada con IA".
+- La clave y el endpoint de Foundry viven en un archivo local fuera de git (`user://foundry.cfg`) o en variables de entorno.
 
 ## Modelos 3D
 Si se usa un modelo de terceros, se declara aquí su autor y licencia. Un modelo con marca Volvo hecho por un aficionado es solo una referencia visual y no representa el vehículo del escenario.

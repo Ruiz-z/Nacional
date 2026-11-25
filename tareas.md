@@ -191,3 +191,23 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-157 S — Cajones de la caja roja de uno en uno: cada cajón es una pieza, se abre con animación, solo uno abierto a la vez y solo sus herramientas se pueden tomar (taller RF-30) — Hecho cuando: prueba de abrir, cambiar de cajón, cerrar y tomar por la UI real, y captura con un solo cajón abierto.
 - [x] T-158 S — Diagnóstico y ruta: introducción, retroalimentación de la respuesta anterior y resultados con barras (aprendizaje RF-21) — Hecho cuando: capturas revisadas y suite en verde.
 - [ ] T-159 S — Ruta: motivo de cada tema, botón "Practicar en el taller" y estado en las tarjetas del menú.
+- [ ] T-160 S — Alinear con Volvo: el tablero muestra "recomendación para el jefe directo" y no una decisión de avance; el resumen de cada orden evalúa el procedimiento (orden, pasos omitidos e innecesarios) además del resultado (docs/respuestas-volvo.md) — Hecho cuando: textos revisados y prueba.
+- [x] T-161 S — Adaptador del ESP32 (UDP 4210 → eventos del simulador con latido) y prueba (arnés RF nuevo) — Hecho cuando: prueba de lógica y recorrido de punta a punta con una placa simulada.
+- [x] T-162 S — Nivel alto configurable (3.3 V o 5 V) en banco, opciones, textos y calificación — Hecho cuando: prueba con 3.3 V y suite en verde.
+- [x] T-163 S — Identidad de sesión en los intentos (`sesion_id`, caso, variante, número de intento, ayudas) y agrupación por sesión en el tablero.
+- [x] T-164 S — Error concreto → práctica de refuerzo con motivo visible en la ruta.
+- [ ] T-165 S — Evidencia y errores/oportunidades junto al dominio en el tablero.
+- [ ] T-166 H — Prueba en mesa con el ESP32 real: sano, alimentación abierta, señal abierta y desconexión a mitad de un intento; comparar multímetro, monitor serial y Godot.
+- [x] T-167 S — Ruta de aprendizaje como roadmap: camino numerado por competencia según el diagnóstico, con "Hoy" o "Después", barra de dominio, motivo y práctica sugerida (aprendizaje RF-21).
+- [x] T-168 S — Foundry: contexto, esquema y validación de la ruta (`ruta_ia.gd`) y spec/privacidad (aprendizaje RF-23, RF-24).
+- [x] T-169 S — Cliente Foundry con `HTTPRequest`, configuración local y tiempo de espera de 8 s.
+- [x] T-170 S — Caché de la ruta generada en SQLite.
+- [x] T-171 S — Pantalla de ruta: "Armando tu ruta…", ruta con IA y respaldo "Ruta calculada sin IA".
+- [ ] T-172 H — Revisión humana: correr un diagnóstico en la app con `az login` y revisar que la ruta tenga sentido (corrida real hecha: válida, con fuentes).
+- [x] T-173 — Cliente del agente Faro (API Responses con token de `az`, `.env` fuera de git), extracción de JSON y de fuentes citadas, y "Basada en: …" en la ruta. Pruebas sin nube.
+- [ ] T-174 S — Mostrar el mapa del diagnóstico con camino central y ramas de error y práctica (aprendizaje RF-25). Modelo, texto y desplazamiento verificados a 1280 × 720 y 1920 × 1080. Queda pendiente la revisión de las capturas en un entorno gráfico.
+- [x] T-175 — Faro genera los temas de cada paso del mapa (con fuente de los manuales), la app los valida contra las fuentes devueltas y tolera ids de órdenes inválidos; caché con versión.
+- [x] T-176 — Ampliar el banco a 57 ítems con 20 preguntas de opción múltiple (competencias RF-2 y RF-3). Nuevas por competencia: 4 de seguridad de alto voltaje, 6 de sistema eléctrico y batería, 4 de diagnóstico de fallas y 6 de electrónica y conectividad. PDF usados: `Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf`, `Data sheet BZL Electric ES-MX 2021.pdf`, `volvo_9700_manual_en_3.pdf`, `h3_operator_manual_en_0.pdf` y `PA1583-2 Literature.pdf`. [Páginas y reparto por dificultad](docs/fuentes-volvo.md#preguntas-nuevas-del-banco-t-176). Revisión por Volvo pendiente.
+- [x] T-177 — Abrir el detalle de cada nodo del mapa de aprendizaje, enlazar al taller y verificar el panel con pruebas y una vista de captura (aprendizaje RF-26).
+- [x] T-178 — La ruta se muestra solo como mapa, sin preguntas; «Continuar» cierra el paso (RF-27). Se quita la práctica de seis preguntas de la ruta.
+- [x] T-179 — Rediseñar el mapa de aprendizaje y su panel de detalle (RF-25 y RF-26). Camino numerado, cuatro estados con color, fichas compactas con acceso al detalle y pie fijo. Suite y geometría verificadas a 1280 × 720 y 1920 × 1080. Revisión de PNG pendiente por falta de acceso a una sesión gráfica.

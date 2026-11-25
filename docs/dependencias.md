@@ -8,4 +8,6 @@
 | Plugin serial de Godot o puente Python con pyserial | por decidir con la prueba de 30 min | Comunicación con el panel | No |
 | Ollama y un modelo local | por definir | Asistente LLM | No |
 
-No se usan servicios en la nube. Todo funciona sin conexión.
+| Azure AI Foundry (chat completions) | por definir | Ruta de aprendizaje generada con IA | No (hay ruta por reglas) |
+
+El único servicio en la nube es Foundry y es opcional: sin configuración o sin conexión todo funciona con la ruta por reglas.

@@ -1004,6 +1004,466 @@
           "valor": 1
         }
       ]
+    },
+    {
+      "id": "seguridad-09",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx",
+        "pagina": "4",
+        "referencia": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué puede dañar un impacto fuerte en un autobús eléctrico Volvo?",
+      "opciones": [
+        "Los cables de alto voltaje y las baterías del piso.",
+        "Solo los cables de baja tensión y sus conectores.",
+        "Solo los soportes externos de las baterías del piso."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "seguridad-10",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx",
+        "pagina": "8",
+        "referencia": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En un eléctrico Volvo, ¿qué ocurre si se interrumpe el interbloqueo de alto voltaje (HVIL)?",
+      "opciones": [
+        "El sistema cambia la fuente de alimentación del equipo de carga.",
+        "La batería se desconecta desde la fuente.",
+        "El sistema activa la refrigeración del paquete de baterías."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "seguridad-11",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "critica",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx",
+        "pagina": "4",
+        "referencia": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué riesgo describe Volvo si un vuelco daña gravemente las baterías del techo?",
+      "opciones": [
+        "Una fuga del sistema de enfriamiento sin daño eléctrico interno.",
+        "Un corte de alimentación que elimina el riesgo de incendio.",
+        "Una fuga en las baterías o un incendio por cortocircuitos internos."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "seguridad-12",
+      "competencia": "seguridad-alto-voltaje",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "critica",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx",
+        "pagina": "8",
+        "referencia": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En un eléctrico Volvo, la resistencia de aislamiento cae demasiado. ¿Cómo responde la protección?",
+      "opciones": [
+        "Corta la energía del sistema.",
+        "Reduce la corriente de carga y mantiene la tracción.",
+        "Ajusta la temperatura y mantiene la alimentación."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "bateria-09",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Data sheet BZL Electric ES-MX 2021",
+        "pagina": "3",
+        "referencia": "Data sheet BZL Electric ES-MX 2021.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué tipo de batería usa el Volvo BZL Eléctrico para la tracción?",
+      "opciones": [
+        "De plomo-ácido.",
+        "De iones de litio.",
+        "De níquel-hidruro metálico."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "bateria-10",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Data sheet BZL Electric ES-MX 2021",
+        "pagina": "3",
+        "referencia": "Data sheet BZL Electric ES-MX 2021.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿De dónde sale la energía para recargar las baterías de 24 V del Volvo BZL Eléctrico?",
+      "opciones": [
+        "De un alternador movido por el motor de tracción.",
+        "De la toma de corriente de la cabina.",
+        "De la batería de 600 V."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "bateria-11",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx",
+        "pagina": "5",
+        "referencia": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Una celda de un eléctrico Volvo está a temperatura adecuada, pero su voltaje queda fuera del intervalo seguro. ¿Qué le ocurre?",
+      "opciones": [
+        "La celda se degrada de forma progresiva.",
+        "La celda conserva su vida útil mientras la temperatura sea adecuada.",
+        "La celda recupera capacidad al volver al voltaje permitido."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "bateria-12",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx",
+        "pagina": "8",
+        "referencia": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En un eléctrico Volvo, ¿de qué depende el control térmico de la batería si se apaga el climatizador de cabina?",
+      "opciones": [
+        "Del mismo circuito de climatización que enfría la cabina.",
+        "De un sistema independiente que enfría y calienta con líquido.",
+        "De un sistema independiente que enfría y calienta con aire."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "bateria-13",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "volvo_9700_manual_en_3",
+        "pagina": "34",
+        "referencia": "volvo_9700_manual_en_3.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En el Volvo 9700, apagas el interruptor principal. ¿Qué equipos siguen recibiendo alimentación?",
+      "opciones": [
+        "La cocina y el alumbrado exterior.",
+        "La calefacción eléctrica y la cocina.",
+        "Los relojes y el calefactor auxiliar."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "bateria-14",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Data sheet BZL Electric ES-MX 2021",
+        "pagina": "3",
+        "referencia": "Data sheet BZL Electric ES-MX 2021.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "La ficha del Volvo BZL Eléctrico indica 94 kWh por batería. ¿Qué capacidad disponible corresponde a cuatro baterías?",
+      "opciones": [
+        "376 kWh.",
+        "282 kWh.",
+        "470 kWh."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "diagnostico-09",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "h3_operator_manual_en_0",
+        "pagina": "132",
+        "referencia": "h3_operator_manual_en_0.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En el Prevost H3, ¿qué consulta muestra las fallas que siguen presentes en un módulo?",
+      "opciones": [
+        "La consulta de fallas inactivas.",
+        "La consulta de fallas activas.",
+        "La consulta de números de parte."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "diagnostico-10",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "PA1583-2 Literature",
+        "pagina": "11",
+        "referencia": "PA1583-2 Literature.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En el selector Allison de cuarta generación aparece «d1» antes del código. ¿Qué indica?",
+      "opciones": [
+        "El estado activo o inactivo de la falla.",
+        "La prioridad de la falla en el tablero.",
+        "La primera posición del código en la lista."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "diagnostico-11",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "h3_operator_manual_en_0",
+        "pagina": "132",
+        "referencia": "h3_operator_manual_en_0.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Durante la autoprueba del tablero del Prevost H3, las agujas recorren la escala. ¿Qué compruebas?",
+      "opciones": [
+        "Que las agujas se mueven y sus mecanismos funcionan.",
+        "Que los sensores reportan los valores reales del momento.",
+        "Que los indicadores están calibrados en toda la escala."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "diagnostico-12",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "PA1583-2 Literature",
+        "pagina": "11",
+        "referencia": "PA1583-2 Literature.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En Allison de cuarta generación, falta un código inactivo antiguo tras registrarse otros. ¿Cómo puede explicarse?",
+      "opciones": [
+        "El módulo convierte el código más antiguo en activo al recibir otro.",
+        "El módulo puede retirar el código inactivo más antiguo al agregar códigos.",
+        "El módulo conserva los códigos inactivos y elimina primero los activos."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "conectividad-09",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "h3_operator_manual_en_0",
+        "pagina": "64",
+        "referencia": "h3_operator_manual_en_0.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué conectas al puerto DDR del Prevost H3?",
+      "opciones": [
+        "Un receptor de los sensores de las llantas.",
+        "Un monitor para la cámara de reversa.",
+        "Un lector de datos de diagnóstico."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "conectividad-10",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "h3_operator_manual_en_0",
+        "pagina": "132",
+        "referencia": "h3_operator_manual_en_0.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En el Prevost H3, ¿qué prueba revisa las entradas de los interruptores del tablero?",
+      "opciones": [
+        "La prueba de entradas del sistema multiplexado.",
+        "La prueba de las agujas del tablero.",
+        "La prueba de motores eléctricos del vehículo."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "conectividad-11",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "h3_operator_manual_en_0",
+        "pagina": "17",
+        "referencia": "h3_operator_manual_en_0.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En el Prevost H3, una salida multiplexada sufrió un corto. ¿Cómo responde su protección electrónica?",
+      "opciones": [
+        "Desactiva la salida y la reactiva cuando deja de detectar el corto.",
+        "Desactiva la salida y la mantiene apagada hasta restablecer la protección.",
+        "Mantiene activa la salida y registra el corto en la pantalla."
+      ],
+      "correcta": 1
+    },
+    {
+      "id": "conectividad-12",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "h3_operator_manual_en_0",
+        "pagina": "71",
+        "referencia": "h3_operator_manual_en_0.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "El monitor de llantas del Prevost H3 recibió datos de una rueda, pero muestra dos guiones. ¿Por qué?",
+      "opciones": [
+        "La presión recibida coincide con la presión objetivo.",
+        "La temperatura recibida supera el umbral de alarma.",
+        "El dato recibido cae en un rango definido como no disponible."
+      ],
+      "correcta": 2
+    },
+    {
+      "id": "conectividad-13",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "h3_operator_manual_en_0",
+        "pagina": "71",
+        "referencia": "h3_operator_manual_en_0.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En el Prevost H3, ¿qué hace la pantalla del monitor de llantas con las lecturas del receptor?",
+      "opciones": [
+        "Las combina con señales del vehículo para calcular lo que muestra.",
+        "Las reenvía a los sensores para que calculen lo que muestra.",
+        "Las pasa al receptor para que este calcule lo que muestra."
+      ],
+      "correcta": 0
+    },
+    {
+      "id": "conectividad-14",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "h3_operator_manual_en_0",
+        "pagina": "72",
+        "referencia": "h3_operator_manual_en_0.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "En el Prevost H3, las presiones aparecen poco a poco al encender el tablero. ¿Qué explica ese retraso?",
+      "opciones": [
+        "El receptor espera todas las lecturas antes de enviarlas juntas.",
+        "Los sensores transmiten por intervalos y la pantalla se actualiza al recibir los datos.",
+        "La pantalla espera a que termine la revisión previa antes de mostrar los datos."
+      ],
+      "correcta": 1
     }
   ]
 }

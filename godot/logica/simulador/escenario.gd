@@ -63,6 +63,8 @@ static func campo_invalido(datos: Dictionary) -> String:
 			return "estado.%s" % variable
 	if datos.has("briefing") and not briefing_valido(datos.briefing):
 		return "briefing"
+	if datos.has("nominal_alto") and not (nominal_valido(datos.nominal_alto)):
+		return "nominal_alto"
 	if datos.has("ubicacion_inicial") and not ubicacion_valida(datos.ubicacion_inicial, datos.zona):
 		return "ubicacion_inicial"
 	if datos.has("indicios") and not indicios_validos(datos):
@@ -133,6 +135,20 @@ static func briefing_valido(briefing: Variant) -> bool:
 		return false
 	var como: Variant = briefing.get("como")
 	return como is Array and como.size() in [1, 2, 3] and como.all(Banco.texto_presente)
+
+
+static func nominal_valido(valor: Variant) -> bool:
+	return (valor is int or valor is float) and valor > 0.0 and valor <= 5.0
+
+
+# Sustituye el nivel alto de ejemplo (≈5 V) por el del banco configurado.
+static func aplicar_nominal(datos: Dictionary, etiqueta: String) -> void:
+	if etiqueta == "≈5 V":
+		return
+	for accion in datos.acciones.values():
+		for campo in ["titulo", "descripcion"]:
+			if accion.get(campo) is String:
+				accion[campo] = accion[campo].replace("≈5 V", etiqueta)
 
 
 static func ubicacion_valida(ubicacion: Variant, zona: String) -> bool:

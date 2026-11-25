@@ -21,10 +21,17 @@ static func aliases(base: String) -> Array:
 
 
 static func sesiones(intentos: Array) -> Array[Dictionary]:
-	# No hay un identificador de sesión en los intentos. Se usa la fecha registrada y el momento.
+	# Con `sesion` se agrupa por sesión; los intentos anteriores usan la fecha y el momento.
 	var grupos := {}
+	var grupos_fecha := {}
 	for intento in intentos:
-		var clave := [intento.reloj_sim, intento.momento, intento.competencia]
+		var sesion: String = intento.get("sesion_id", "")
+		# Una sesión forma un punto por competencia, aunque sus respuestas tengan relojes distintos.
+		var clave := [intento.reloj_sim, intento.momento, intento.competencia] if sesion.is_empty() \
+			else [intento.reloj_sim, intento.momento, intento.competencia, sesion]
+		if not sesion.is_empty():
+			clave = [grupos_fecha.get_or_add([sesion, intento.competencia], intento.reloj_sim),
+				intento.momento, intento.competencia, sesion]
 		grupos.get_or_add(clave, []).append(intento)
 	var salida: Array[Dictionary] = []
 	for clave in grupos:

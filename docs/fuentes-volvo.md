@@ -57,3 +57,23 @@ Es la estructura con la que Volvo organiza la capacitación técnica y el catál
 - Cada escenario declara su `grupo_funcion` (FG 3 para aislamiento, faros y banco de arnés; FG 7 y FG 6 para suspensión y ruedas; FG 5 para frenos; FG 8 para puertas y aire; FG 2 para el motor de tracción) y el catálogo se agrupa por FG.
 - La línea de aprobación del tablero toma la de los cursos de Volvo: **91**.
 - El banco de arnés cubre "interpretación de diagramas eléctricos" (BEA) y una herramienta de diagnóstico tipo Tech Tool se suma al taller como objeto del inventario, con códigos de falla genéricos.
+
+## Preguntas nuevas del banco (T-176)
+
+Las 20 preguntas de opción múltiple están marcadas como ejemplos didácticos y quedan pendientes de revisión por Volvo. Las referencias cuentan las páginas del PDF desde 1, incluidas las portadas y páginas en blanco.
+
+| PDF usado | Páginas citadas | Preguntas |
+| --- | --- | ---: |
+| `Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf` | 4, 5, 8 | 6 |
+| `Data sheet BZL Electric ES-MX 2021.pdf` | 3 | 3 |
+| `volvo_9700_manual_en_3.pdf` | 34 | 1 |
+| `h3_operator_manual_en_0.pdf` | 17, 64, 71, 72, 132 | 8 |
+| `PA1583-2 Literature.pdf` | 11 | 2 |
+
+| Competencia | Fácil | Media | Difícil | Total |
+| --- | ---: | ---: | ---: | ---: |
+| Seguridad de alto voltaje | 1 | 2 | 1 | 4 |
+| Sistema eléctrico y batería | 1 | 1 | 4 | 6 |
+| Diagnóstico de fallas | 1 | 2 | 1 | 4 |
+| Electrónica y conectividad | 1 | 1 | 4 | 6 |
+| **Total** | **4** | **6** | **10** | **20** |
