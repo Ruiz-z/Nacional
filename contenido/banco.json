@@ -35,11 +35,12 @@
       "version": "1",
       "pregunta": "¿Para qué sirve el bloqueo en el procedimiento LOTO?",
       "opciones": [
-        "Para evitar que alguien vuelva a conectar el circuito sin permiso.",
-        "Para medir cuánta energía queda almacenada.",
-        "Para saber qué equipo de protección personal (EPP) necesitas."
+        "Identificar quién está trabajando en el circuito.",
+        "Confirmar que se agotó la energía almacenada.",
+        "Impedir que se vuelva a conectar el circuito."
       ],
-      "correcta": 0
+      "correcta": 2,
+      "grupo": "loto-bloqueo"
     },
     {
       "id": "seguridad-02",
@@ -58,11 +59,12 @@
       "version": "1",
       "pregunta": "¿Qué indica la etiqueta en el procedimiento LOTO?",
       "opciones": [
-        "Mantiene fijo el dispositivo de aislamiento.",
-        "Avisa que hay trabajo en curso y que nadie debe operar el dispositivo.",
-        "Confirma que se abrieron todos los contactos del dispositivo de aislamiento."
+        "Que hay trabajo en curso y no debes operar el dispositivo.",
+        "Que los contactos del dispositivo ya se comprobaron abiertos.",
+        "Que el dispositivo puede operarse si hay una falla."
       ],
-      "correcta": 1
+      "correcta": 0,
+      "grupo": "loto-etiquetado"
     },
     {
       "id": "seguridad-03",
@@ -81,11 +83,12 @@
       "version": "1",
       "pregunta": "¿Cómo eliges el EPP para un trabajo eléctrico?",
       "opciones": [
-        "Según la carga que marca el tablero.",
-        "Según el equipo que usaste en el trabajo anterior.",
-        "Según los peligros que identificaste y el procedimiento de la tarea."
+        "Según el riesgo y el procedimiento de la tarea.",
+        "Según el EPP disponible para el turno.",
+        "Según el voltaje nominal que indica la placa."
       ],
-      "correcta": 2
+      "correcta": 0,
+      "grupo": "seleccion-epp"
     },
     {
       "id": "seguridad-04",
@@ -104,11 +107,12 @@
       "version": "1",
       "pregunta": "El tablero está apagado. ¿Cómo compruebas que no hay tensión?",
       "opciones": [
-        "Mide en los puntos indicados con el instrumento que pide el procedimiento.",
-        "Vuelve a mirar el indicador apagado.",
-        "Anota en la orden que el tablero se apagó."
+        "Confirma que el indicador de tensión siga apagado en el tablero.",
+        "Mide en un solo punto y extrapola al resto del circuito.",
+        "Mide en los puntos indicados con un instrumento verificado."
       ],
-      "correcta": 0
+      "correcta": 2,
+      "grupo": "verificar-ausencia-tension"
     },
     {
       "id": "seguridad-05",
@@ -127,11 +131,12 @@
       "version": "1",
       "pregunta": "Ya aislaste el circuito de su alimentación principal. ¿Qué falta revisar para saber si es seguro?",
       "opciones": [
-        "Cuánto tiempo lleva en uso el equipo desde el último servicio.",
-        "Si hay otras fuentes de alimentación o queda energía almacenada.",
-        "Cuánta energía consumía el circuito antes de apagarlo."
+        "Si hay otras fuentes o queda energía almacenada.",
+        "Si el consumo bajó a cero antes de apagar el equipo.",
+        "Si la orden de apagado llegó a todas las unidades."
       ],
-      "correcta": 1
+      "correcta": 0,
+      "grupo": "energia-residual"
     },
     {
       "id": "seguridad-06",
@@ -150,11 +155,12 @@
       "version": "1",
       "pregunta": "Ya tienes el EPP indicado. ¿Qué haces si debes dejar el circuito sin energía?",
       "opciones": [
-        "Haz una revisión visual sin cambiar el alcance de la tarea.",
-        "Anota el EPP como prueba de que aislaste el circuito.",
-        "Sigue el procedimiento y comprueba que puedes trabajar sin riesgo eléctrico."
+        "Abre el interruptor principal y confirma su posición.",
+        "Apaga el sistema y espera a que se apaguen los indicadores.",
+        "Aplica el procedimiento y confirma la condición segura."
       ],
-      "correcta": 2
+      "correcta": 2,
+      "grupo": "puesta-fuera-de-servicio"
     },
     {
       "id": "seguridad-07",
@@ -173,11 +179,12 @@
       "version": "1",
       "pregunta": "El instrumento no marcó tensión. Al comprobarlo después, falló. ¿Qué haces con esa lectura?",
       "opciones": [
-        "Da por pendiente la comprobación y mantén detenida la tarea.",
-        "Acepta la lectura porque el instrumento alcanzó a mostrarla.",
-        "Da por válida la lectura porque ya aplicaste el bloqueo."
+        "Invalida la lectura y mantén detenida la tarea.",
+        "Acepta la lectura si el instrumento encendió al principio.",
+        "Acepta la lectura si el bloqueo sigue puesto en el circuito."
       ],
-      "correcta": 0
+      "correcta": 0,
+      "grupo": "verificar-ausencia-tension"
     },
     {
       "id": "seguridad-08",
@@ -196,11 +203,12 @@
       "version": "1",
       "pregunta": "Bloqueaste la alimentación principal. El esquema muestra otra fuente que alimenta los puntos de trabajo. ¿Qué haces?",
       "opciones": [
-        "Da por terminado el aislamiento si la fuente auxiliar no aparece en el tablero.",
-        "Mantén detenida la tarea. Controla la fuente auxiliar y comprueba que sea seguro seguir.",
-        "Acepta el bloqueo principal porque la fuente auxiliar pertenece a otro sistema."
+        "Conserva el bloqueo principal si el tablero no muestra la fuente auxiliar.",
+        "Controla la fuente auxiliar y vuelve a comprobar que no haya tensión.",
+        "Acepta el aislamiento si la fuente auxiliar pertenece a otro sistema."
       ],
-      "correcta": 1
+      "correcta": 1,
+      "grupo": "alimentacion-auxiliar"
     },
     {
       "id": "bateria-muestra-01",
@@ -219,11 +227,12 @@
       "version": "1",
       "pregunta": "¿Para qué sirve la batería de tracción de un autobús eléctrico?",
       "opciones": [
-        "Para comprobar el aislamiento entre los conductores y el chasis.",
-        "Para guardar energía y alimentar el sistema de propulsión.",
-        "Para repartir mensajes entre las unidades de control."
+        "Almacena energía para alimentar la propulsión.",
+        "Mantiene alimentados los accesorios de 24 V.",
+        "Estabiliza el voltaje de las entradas de control."
       ],
-      "correcta": 1
+      "correcta": 0,
+      "grupo": "bateria-traccion"
     },
     {
       "id": "bateria-02",
@@ -240,13 +249,14 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué dato te ayuda a saber si la batería se calienta?",
+      "pregunta": "¿Qué lectura usas para saber si aumenta la temperatura de la batería?",
       "opciones": [
-        "La carga estimada de la batería.",
-        "El tiempo que pasó desde la última carga.",
-        "La temperatura que marca la batería."
+        "La temperatura del aire cerca de la batería.",
+        "La temperatura medida en la batería.",
+        "La temperatura del refrigerante a la salida del motor."
       ],
-      "correcta": 2
+      "correcta": 1,
+      "grupo": "temperatura-bateria"
     },
     {
       "id": "bateria-03",
@@ -265,11 +275,12 @@
       "version": "1",
       "pregunta": "¿Qué comprueba el monitor de aislamiento del sistema de tracción?",
       "opciones": [
-        "Si el circuito de tracción está aislado del chasis.",
-        "Cuánta energía queda para el próximo recorrido.",
-        "Si la temperatura se mantiene durante la carga."
+        "El aislamiento entre los módulos de la batería de tracción.",
+        "El estado de la conexión entre el chasis y la batería de 24 V.",
+        "El aislamiento del circuito de tracción respecto al chasis."
       ],
-      "correcta": 0
+      "correcta": 2,
+      "grupo": "monitor-aislamiento-hv"
     },
     {
       "id": "bateria-04",
@@ -288,11 +299,12 @@
       "version": "1",
       "pregunta": "El autobús todavía tiene carga y aparece una alerta de temperatura de la batería. ¿Qué te dicen ambos datos?",
       "opciones": [
-        "La alerta de temperatura indica que se acabó la carga.",
-        "La carga y la temperatura describen cosas distintas de la batería.",
-        "Si aún tiene carga, la alerta es un error de lectura."
+        "La temperatura confirma que la carga indicada está sobreestimada.",
+        "La batería conserva carga y tiene una condición térmica que revisar.",
+        "La carga restante indica que la temperatura sigue dentro del límite."
       ],
-      "correcta": 1
+      "correcta": 1,
+      "grupo": "carga-temperatura"
     },
     {
       "id": "bateria-05",
@@ -309,13 +321,14 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué te indica un aviso de aislamiento degradado?",
+      "pregunta": "El tablero avisa que se degradó el aislamiento sin señalar un componente. ¿Qué puedes concluir?",
       "opciones": [
-        "En qué lugar exacto falló un módulo de la batería.",
-        "Cuánta distancia puede recorrer ahora el autobús.",
-        "El aislamiento presenta una falla que debes revisar."
+        "Hay que investigar la pérdida de aislamiento.",
+        "El aviso identifica el módulo donde ocurrió la falla.",
+        "El aviso confirma un corto entre los polos de la batería."
       ],
-      "correcta": 2
+      "correcta": 0,
+      "grupo": "diagnostico-aislamiento"
     },
     {
       "id": "bateria-06",
@@ -334,11 +347,12 @@
       "version": "1",
       "pregunta": "Desconectas la batería del circuito de tracción. ¿Qué pasa con la energía de sus celdas?",
       "opciones": [
-        "Puede quedar energía en la batería.",
-        "La desconexión consume toda la energía guardada.",
-        "Toda la energía pasa al circuito que desconectaste."
+        "La energía se disipa al abrirse los contactos de la batería.",
+        "La energía queda solo en el circuito de tracción.",
+        "Puede quedar energía en las celdas."
       ],
-      "correcta": 0
+      "correcta": 2,
+      "grupo": "energia-residual"
     },
     {
       "id": "bateria-07",
@@ -357,11 +371,12 @@
       "version": "1",
       "pregunta": "La carga se mantiene y el tablero avisa que bajó el aislamiento. ¿Qué puedes concluir?",
       "opciones": [
-        "Si baja el aislamiento, la carga cae de inmediato.",
+        "La carga debe caer antes de que la alerta de aislamiento sea válida.",
         "La carga puede mantenerse aunque baje el aislamiento.",
-        "Si la carga se mantiene, la falla está solo en el chasis."
+        "La carga estable confirma que la falla está fuera de la batería."
       ],
-      "correcta": 1
+      "correcta": 1,
+      "grupo": "diagnostico-aislamiento"
     },
     {
       "id": "bateria-08",
@@ -380,11 +395,12 @@
       "version": "1",
       "pregunta": "Una lectura de temperatura difiere de las demás. ¿Qué puedes concluir mientras revisas la diferencia?",
       "opciones": [
-        "El promedio prueba que toda la batería estuvo a la misma temperatura.",
-        "Esa lectura basta para ubicar una zona dañada.",
-        "Puede ser una diferencia real de temperatura o un error de lectura. Comprueba ambas posibilidades."
+        "Usa el promedio para decidir si toda la batería está a la misma temperatura.",
+        "Comprueba si la diferencia es térmica o viene de la medición.",
+        "Da por localizada la falla térmica donde se obtuvo la lectura distinta."
       ],
-      "correcta": 2
+      "correcta": 1,
+      "grupo": "validacion-sensor"
     },
     {
       "id": "diagnostico-01",
@@ -403,34 +419,12 @@
       "version": "1",
       "pregunta": "¿Qué te dice un código de falla?",
       "opciones": [
-        "Qué reparación ya le hicieron a la pieza.",
-        "Qué piezas tienes que cambiar.",
-        "Qué condición detectó y guardó el sistema de diagnóstico."
+        "La pieza que debe cambiarse para corregir la falla.",
+        "La causa exacta confirmada por el sistema.",
+        "La condición que detectó el sistema."
       ],
-      "correcta": 2
-    },
-    {
-      "id": "diagnostico-02",
-      "competencia": "diagnostico-fallas",
-      "formato": "opcion-multiple",
-      "dificultad": "facil",
-      "criticidad": "normal",
-      "fuente": {
-        "origen": "Volvo Buses",
-        "titulo": "Workshop services",
-        "seccion": "Registro de códigos para preparar el servicio",
-        "referencia": "Volvo Buses, acceso remoto a códigos de diagnóstico"
-      },
-      "muestra": true,
-      "revisado": false,
-      "version": "1",
-      "pregunta": "¿Qué anotas al encontrar un código de falla?",
-      "opciones": [
-        "Anota el código, el módulo que lo mostró y el síntoma que viste.",
-        "Anota solo el modelo del autobús y su autonomía.",
-        "Anota solo la pieza de la que sospechabas."
-      ],
-      "correcta": 0
+      "correcta": 2,
+      "grupo": "codigos-falla"
     },
     {
       "id": "diagnostico-03",
@@ -449,11 +443,12 @@
       "version": "1",
       "pregunta": "¿Cómo guardas evidencia para comparar una falla intermitente en dos sesiones?",
       "opciones": [
-        "Guarda solo la lista de piezas que revisaste.",
-        "Guarda los códigos y anota en qué condiciones apareció el síntoma.",
-        "Guarda solo el resultado de la última sesión."
+        "Registra los códigos y las condiciones del síntoma.",
+        "Registra las piezas revisadas y el resultado de la última sesión.",
+        "Registra los códigos que queden después de reiniciar."
       ],
-      "correcta": 1
+      "correcta": 0,
+      "grupo": "registro-intermitencia"
     },
     {
       "id": "diagnostico-04",
@@ -472,11 +467,12 @@
       "version": "1",
       "pregunta": "El código quedó en el historial y el síntoma desapareció. ¿Qué puedes concluir?",
       "opciones": [
-        "La falla sigue activa durante toda la sesión.",
-        "Ya quedó reparada la pieza asociada al código.",
-        "El sistema detectó algo antes. Busca evidencia para relacionarlo con el síntoma."
+        "La falla se detectó antes. Relaciónala con el síntoma.",
+        "La falla se resolvió cuando el síntoma dejó de aparecer.",
+        "La falla continúa activa mientras el código siga guardado."
       ],
-      "correcta": 2
+      "correcta": 0,
+      "grupo": "estado-codigo-falla"
     },
     {
       "id": "diagnostico-05",
@@ -495,11 +491,12 @@
       "version": "1",
       "pregunta": "El tablero dejó de recibir datos de otro módulo. ¿Qué revisas primero?",
       "opciones": [
-        "Revisa si los módulos involucrados se comunican y qué anotaron en su historial.",
-        "Revisa la calibración de todos los sensores del tablero.",
-        "Revisa cómo cambiar el módulo que dio el aviso."
+        "Revisa el tablero como causa principal porque emitió el aviso.",
+        "Recalibra el sensor de origen y revisa si vuelve la lectura.",
+        "Comprueba el enlace y consulta los eventos de ambos módulos."
       ],
-      "correcta": 0
+      "correcta": 2,
+      "grupo": "perdida-comunicacion"
     },
     {
       "id": "diagnostico-06",
@@ -518,11 +515,12 @@
       "version": "1",
       "pregunta": "Varios códigos acompañan al mismo síntoma. ¿Cómo decides qué causas revisar primero?",
       "opciones": [
-        "Planea desde el inicio una reparación por cada código.",
-        "Compara cuándo salió cada código con el síntoma y el módulo que lo registró.",
-        "Empieza por el primer código en orden alfabético."
+        "Cruza los tiempos, los módulos y el síntoma.",
+        "Atiende primero el código del módulo que muestra la alerta.",
+        "Prioriza los códigos que se repiten en el historial."
       ],
-      "correcta": 1
+      "correcta": 0,
+      "grupo": "correlacion-eventos"
     },
     {
       "id": "diagnostico-07",
@@ -541,11 +539,12 @@
       "version": "1",
       "pregunta": "Varios módulos pierden comunicación a la vez. Uno guardó un evento antes que los demás. ¿Por dónde empiezas?",
       "opciones": [
-        "Atribuye todas las pérdidas al módulo que guardó el primer evento.",
-        "Trata cada pérdida como una falla separada porque llegó de otro módulo.",
-        "Ordena los eventos por hora. Revisa si una causa común explica las pérdidas simultáneas."
+        "Ordena los eventos y busca una causa compartida.",
+        "Atribuye las pérdidas al módulo con el primer evento.",
+        "Investiga cada módulo por separado según su orden de falla."
       ],
-      "correcta": 2
+      "correcta": 0,
+      "grupo": "falla-comun-red"
     },
     {
       "id": "diagnostico-08",
@@ -564,11 +563,12 @@
       "version": "1",
       "pregunta": "Después de la corrección desapareció el código, pero sigue el síntoma. ¿Qué haces?",
       "opciones": [
-        "Comprueba la corrección y sigue investigando el síntoma.",
-        "Da por hecho que el síntoma tiene una causa nueva.",
-        "Cierra el diagnóstico del síntoma porque se borró el código."
+        "Repite el borrado del código y espera a que reaparezca la alerta.",
+        "Da por resuelta la falla registrada y abre un caso para el síntoma.",
+        "Comprueba la corrección y sigue investigando el síntoma."
       ],
-      "correcta": 0
+      "correcta": 2,
+      "grupo": "verificacion-reparacion"
     },
     {
       "id": "conectividad-01",
@@ -587,34 +587,12 @@
       "version": "1",
       "pregunta": "¿Para qué sirve la red CAN del autobús?",
       "opciones": [
-        "Para que las unidades electrónicas intercambien mensajes.",
-        "Para llevar potencia eléctrica al motor de tracción.",
-        "Para guardar la energía que usan las unidades electrónicas."
+        "Para alimentar las entradas de los sensores.",
+        "Para crear referencias de tierra entre módulos.",
+        "Para intercambiar mensajes entre unidades."
       ],
-      "correcta": 0
-    },
-    {
-      "id": "conectividad-02",
-      "competencia": "electronica-conectividad",
-      "formato": "opcion-multiple",
-      "dificultad": "facil",
-      "criticidad": "normal",
-      "fuente": {
-        "origen": "Volvo Buses",
-        "titulo": "Electric safety",
-        "seccion": "Monitoreo de parámetros eléctricos",
-        "referencia": "Volvo Buses, información pública sobre seguridad eléctrica"
-      },
-      "muestra": true,
-      "revisado": false,
-      "version": "1",
-      "pregunta": "¿Para qué sirve un sensor de temperatura?",
-      "opciones": [
-        "Para repartir la alimentación entre las unidades de control.",
-        "Para enviar una señal que representa la temperatura donde mide.",
-        "Para decidir por sí mismo si el autobús puede avanzar."
-      ],
-      "correcta": 1
+      "correcta": 2,
+      "grupo": "funcion-red-can"
     },
     {
       "id": "conectividad-03",
@@ -633,11 +611,12 @@
       "version": "1",
       "pregunta": "¿Qué hace una unidad de control al publicar una lectura en la red?",
       "opciones": [
-        "Pasa al receptor la alimentación del sensor.",
-        "Cambia por sí misma lo que midió el sensor.",
-        "Comparte la lectura con las unidades que usan ese mensaje."
+        "Envía la lectura únicamente al módulo que alimenta el sensor.",
+        "Comparte la lectura con las unidades que usan ese mensaje.",
+        "Entrega la lectura al tablero para que este la publique."
       ],
-      "correcta": 2
+      "correcta": 1,
+      "grupo": "publicacion-datos"
     },
     {
       "id": "conectividad-04",
@@ -656,11 +635,12 @@
       "version": "1",
       "pregunta": "El tablero muestra «Sin datos» en una lectura. ¿Qué significa?",
       "opciones": [
-        "El tablero no tiene una lectura válida que mostrar.",
-        "La medición bajó automáticamente al valor mínimo.",
-        "El sensor se calibró con la última lectura."
+        "Recibió una lectura por debajo del mínimo.",
+        "No dispone de una lectura válida.",
+        "Conserva la última lectura como valor actual."
       ],
-      "correcta": 0
+      "correcta": 1,
+      "grupo": "dato-no-disponible"
     },
     {
       "id": "conectividad-05",
@@ -677,13 +657,14 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Para qué sirve una pasarela entre las redes del autobús?",
+      "pregunta": "Un dato existe en una red y lo necesita un módulo de otra red. ¿Qué función cumple la pasarela?",
       "opciones": [
-        "Para sustituir las lecturas de los sensores de cada red.",
-        "Para conectar redes y reenviar los datos que le indicaron.",
-        "Para dar energía de tracción a los módulos de ambas redes."
+        "Actualiza el valor del sensor antes de cada transmisión.",
+        "Reenvía los mensajes configurados entre ambas redes.",
+        "Retransmite todos los mensajes sin distinguir su destino."
       ],
-      "correcta": 1
+      "correcta": 1,
+      "grupo": "pasarela-redes"
     },
     {
       "id": "conectividad-06",
@@ -702,11 +683,12 @@
       "version": "1",
       "pregunta": "Un módulo tiene alimentación, pero sus mensajes ya no llegan al tablero. ¿Qué puedes concluir?",
       "opciones": [
-        "La alimentación confirma que el tablero recibe los mensajes.",
-        "Si no llegan mensajes, el sensor del módulo está dañado.",
-        "Tener alimentación no basta para confirmar que hay comunicación."
+        "La alimentación por sí sola no confirma la comunicación.",
+        "La alimentación confirma que el módulo publica su mensaje.",
+        "La alimentación descarta una falla en el módulo transmisor."
       ],
-      "correcta": 2
+      "correcta": 0,
+      "grupo": "perdida-comunicacion"
     },
     {
       "id": "conectividad-07",
@@ -725,11 +707,12 @@
       "version": "1",
       "pregunta": "Dos receptores dejan de actualizar el mismo dato. El módulo aún muestra la lectura local. ¿Qué revisas para distinguir las fallas?",
       "opciones": [
-        "Compara la lectura local con el mensaje y revisa si llega a los receptores.",
-        "Compara solo las últimas lecturas que quedaron en los dos receptores.",
-        "Compara la lectura local con un dato de otro sistema sin relación."
+        "Sigue la señal del sensor hasta la entrada del módulo de origen.",
+        "Compara los últimos valores guardados en los dos receptores.",
+        "Sigue la lectura desde el mensaje de origen hasta los receptores."
       ],
-      "correcta": 0
+      "correcta": 2,
+      "grupo": "ruta-del-dato"
     },
     {
       "id": "conectividad-08",
@@ -748,11 +731,12 @@
       "version": "1",
       "pregunta": "Los módulos de una rama desaparecen de la red. Los demás siguen comunicándose. ¿Qué compruebas primero en el esquema?",
       "opciones": [
-        "Si cada módulo de esa rama tiene por separado una mala calibración.",
-        "Si los módulos de esa rama comparten algo que explique la falla.",
-        "Si la falla afecta igual a todas las redes del autobús."
+        "Busca conexiones compartidas por los módulos que dejaron de responder.",
+        "Compara los ajustes de cada módulo de esa rama por separado.",
+        "Busca una conexión común a las redes que todavía funcionan."
       ],
-      "correcta": 1
+      "correcta": 0,
+      "grupo": "falla-comun-red"
     },
     {
       "id": "caso-comunicacion-01",
@@ -1022,11 +1006,12 @@
       "version": "1",
       "pregunta": "¿Qué puede dañar un impacto fuerte en un autobús eléctrico Volvo?",
       "opciones": [
-        "Los cables de alto voltaje y las baterías del piso.",
-        "Solo los cables de baja tensión y sus conectores.",
-        "Solo los soportes externos de las baterías del piso."
+        "Los soportes del piso y la carcasa de los equipos auxiliares.",
+        "El cableado de alto voltaje y las baterías del piso.",
+        "El cableado de baja tensión y los conectores del tablero."
       ],
-      "correcta": 0
+      "correcta": 1,
+      "grupo": "dano-por-impacto"
     },
     {
       "id": "seguridad-10",
@@ -1043,13 +1028,14 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "En un eléctrico Volvo, ¿qué ocurre si se interrumpe el interbloqueo de alto voltaje (HVIL)?",
+      "pregunta": "Durante una prueba se interrumpe el interbloqueo de alto voltaje (HVIL). ¿Cómo responde el sistema Volvo?",
       "opciones": [
-        "El sistema cambia la fuente de alimentación del equipo de carga.",
+        "La carga se suspende y la tracción sigue alimentada.",
         "La batería se desconecta desde la fuente.",
-        "El sistema activa la refrigeración del paquete de baterías."
+        "El sistema enfría la batería antes de cortar la alimentación."
       ],
-      "correcta": 1
+      "correcta": 1,
+      "grupo": "hvil-interbloqueo"
     },
     {
       "id": "seguridad-11",
@@ -1066,13 +1052,14 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué riesgo describe Volvo si un vuelco daña gravemente las baterías del techo?",
+      "pregunta": "Tras un vuelco, ves daños graves en las baterías del techo. ¿Qué riesgo debes considerar?",
       "opciones": [
-        "Una fuga del sistema de enfriamiento sin daño eléctrico interno.",
-        "Un corte de alimentación que elimina el riesgo de incendio.",
-        "Una fuga en las baterías o un incendio por cortocircuitos internos."
+        "Una fuga de refrigerante limitada al circuito térmico.",
+        "Una desconexión que elimina el riesgo eléctrico de las celdas.",
+        "Una fuga o un incendio por cortocircuitos internos."
       ],
-      "correcta": 2
+      "correcta": 2,
+      "grupo": "dano-por-vuelco"
     },
     {
       "id": "seguridad-12",
@@ -1091,11 +1078,12 @@
       "version": "1",
       "pregunta": "En un eléctrico Volvo, la resistencia de aislamiento cae demasiado. ¿Cómo responde la protección?",
       "opciones": [
-        "Corta la energía del sistema.",
-        "Reduce la corriente de carga y mantiene la tracción.",
-        "Ajusta la temperatura y mantiene la alimentación."
+        "Reduce el voltaje y mantiene activo el circuito.",
+        "Corta la alimentación del sistema.",
+        "Limita la corriente y mantiene la tracción."
       ],
-      "correcta": 0
+      "correcta": 1,
+      "grupo": "monitor-aislamiento-hv"
     },
     {
       "id": "bateria-09",
@@ -1114,11 +1102,12 @@
       "version": "1",
       "pregunta": "¿Qué tipo de batería usa el Volvo BZL Eléctrico para la tracción?",
       "opciones": [
-        "De plomo-ácido.",
         "De iones de litio.",
+        "De plomo-ácido.",
         "De níquel-hidruro metálico."
       ],
-      "correcta": 1
+      "correcta": 0,
+      "grupo": "quimica-bateria"
     },
     {
       "id": "bateria-10",
@@ -1135,13 +1124,14 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿De dónde sale la energía para recargar las baterías de 24 V del Volvo BZL Eléctrico?",
+      "pregunta": "Revisas cómo se recargan las baterías de 24 V en el BZL Eléctrico. ¿De dónde reciben energía?",
       "opciones": [
-        "De un alternador movido por el motor de tracción.",
-        "De la toma de corriente de la cabina.",
-        "De la batería de 600 V."
+        "De la batería de 600 V.",
+        "De una fuente auxiliar de la cabina.",
+        "De un alternador acoplado al motor."
       ],
-      "correcta": 2
+      "correcta": 0,
+      "grupo": "alimentacion-24v"
     },
     {
       "id": "bateria-11",
@@ -1160,11 +1150,12 @@
       "version": "1",
       "pregunta": "Una celda de un eléctrico Volvo está a temperatura adecuada, pero su voltaje queda fuera del intervalo seguro. ¿Qué le ocurre?",
       "opciones": [
-        "La celda se degrada de forma progresiva.",
-        "La celda conserva su vida útil mientras la temperatura sea adecuada.",
-        "La celda recupera capacidad al volver al voltaje permitido."
+        "La celda mantiene su vida útil gracias al control térmico.",
+        "La celda recupera capacidad al volver al intervalo permitido.",
+        "La celda se degrada de forma progresiva."
       ],
-      "correcta": 0
+      "correcta": 2,
+      "grupo": "limites-voltaje-celda"
     },
     {
       "id": "bateria-12",
@@ -1183,17 +1174,42 @@
       "version": "1",
       "pregunta": "En un eléctrico Volvo, ¿de qué depende el control térmico de la batería si se apaga el climatizador de cabina?",
       "opciones": [
-        "Del mismo circuito de climatización que enfría la cabina.",
-        "De un sistema independiente que enfría y calienta con líquido.",
-        "De un sistema independiente que enfría y calienta con aire."
+        "De un circuito independiente de líquido.",
+        "De un circuito independiente de aire forzado.",
+        "Del circuito de climatización de la cabina."
       ],
-      "correcta": 1
+      "correcta": 0,
+      "grupo": "control-termico-bateria"
     },
     {
-      "id": "bateria-13",
+      "id": "bateria-15",
       "competencia": "sistema-electrico-bateria",
       "formato": "opcion-multiple",
-      "dificultad": "dificil",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Interpretacion de planos electricos [Arquinube]",
+        "pagina": "51",
+        "referencia": "Interpretacion de planos electricos [Arquinube].pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "¿Qué falla puede interrumpir el fusible señalado en el plano de potencia?",
+      "opciones": [
+        "Una pérdida de aislamiento sin sobrecorriente.",
+        "Una caída de tensión por un falso contacto.",
+        "Un cortocircuito aguas abajo del fusible."
+      ],
+      "correcta": 2,
+      "grupo": "fusible-cortocircuito"
+    },
+    {
+      "id": "bateria-16",
+      "competencia": "sistema-electrico-bateria",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
       "criticidad": "normal",
       "fuente": {
         "origen": "Volvo Buses",
@@ -1204,19 +1220,68 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "En el Volvo 9700, apagas el interruptor principal. ¿Qué equipos siguen recibiendo alimentación?",
+      "pregunta": "Apagas el interruptor principal de un 9700 estacionado. ¿Qué debes prever al revisar la alimentación?",
       "opciones": [
-        "La cocina y el alumbrado exterior.",
-        "La calefacción eléctrica y la cocina.",
-        "Los relojes y el calefactor auxiliar."
+        "Todos los circuitos quedan sin alimentación.",
+        "Algunos circuitos conservan alimentación.",
+        "Solo se corta la alimentación de las baterías auxiliares."
       ],
-      "correcta": 2
+      "correcta": 1,
+      "grupo": "interruptor-principal"
     },
     {
-      "id": "bateria-14",
-      "competencia": "sistema-electrico-bateria",
+      "id": "diagnostico-13",
+      "competencia": "diagnostico-fallas",
       "formato": "opcion-multiple",
-      "dificultad": "dificil",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Interpretacion de planos electricos [Arquinube]",
+        "pagina": "7",
+        "referencia": "Interpretacion de planos electricos [Arquinube].pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Si el plano no indica una excepción, ¿en qué estado se dibujan los interruptores?",
+      "opciones": [
+        "En la posición de la última maniobra.",
+        "En reposo, sin accionar.",
+        "En servicio, con la carga alimentada."
+      ],
+      "correcta": 1,
+      "grupo": "estado-reposo-plano"
+    },
+    {
+      "id": "diagnostico-14",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "volvo_9700_manual_en_0_2",
+        "pagina": "100",
+        "referencia": "volvo_9700_manual_en_0_2.pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "La tabla da dos amperajes para la misma posición de fusible del 9700. ¿Qué dato permite elegir?",
+      "opciones": [
+        "La corriente medida sin accionar el equipo.",
+        "El amperaje del fusible de la posición vecina.",
+        "La función y versión del circuito."
+      ],
+      "correcta": 2,
+      "grupo": "referencia-fusible-version"
+    },
+    {
+      "id": "diagnostico-15",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
       "criticidad": "normal",
       "fuente": {
         "origen": "Volvo Buses",
@@ -1227,243 +1292,230 @@
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "La ficha del Volvo BZL Eléctrico indica 94 kWh por batería. ¿Qué capacidad disponible corresponde a cuatro baterías?",
+      "pregunta": "En un BZL Eléctrico se abre el interruptor principal cuando cae el voltaje. ¿Qué función debes considerar en el diagnóstico?",
       "opciones": [
-        "376 kWh.",
-        "282 kWh.",
-        "470 kWh."
+        "El corte por temperatura alta en las baterías.",
+        "El apagado automático por bajo voltaje.",
+        "La desconexión automática al terminar la carga."
       ],
-      "correcta": 0
+      "correcta": 1,
+      "grupo": "interruptor-principal"
     },
     {
-      "id": "diagnostico-09",
-      "competencia": "diagnostico-fallas",
-      "formato": "opcion-multiple",
-      "dificultad": "facil",
-      "criticidad": "normal",
-      "fuente": {
-        "origen": "Volvo Buses",
-        "titulo": "h3_operator_manual_en_0",
-        "pagina": "132",
-        "referencia": "h3_operator_manual_en_0.pdf"
-      },
-      "muestra": true,
-      "revisado": false,
-      "version": "1",
-      "pregunta": "En el Prevost H3, ¿qué consulta muestra las fallas que siguen presentes en un módulo?",
-      "opciones": [
-        "La consulta de fallas inactivas.",
-        "La consulta de fallas activas.",
-        "La consulta de números de parte."
-      ],
-      "correcta": 1
-    },
-    {
-      "id": "diagnostico-10",
+      "id": "diagnostico-16",
       "competencia": "diagnostico-fallas",
       "formato": "opcion-multiple",
       "dificultad": "media",
       "criticidad": "normal",
       "fuente": {
         "origen": "Volvo Buses",
-        "titulo": "PA1583-2 Literature",
-        "pagina": "11",
-        "referencia": "PA1583-2 Literature.pdf"
+        "titulo": "Interpretacion de planos electricos [Arquinube]",
+        "pagina": "59",
+        "referencia": "Interpretacion de planos electricos [Arquinube].pdf"
       },
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "En el selector Allison de cuarta generación aparece «d1» antes del código. ¿Qué indica?",
+      "pregunta": "En el plano, la bobina tiene una fuente separada. Hay tensión en potencia, pero el contactor no entra. ¿Qué revisas?",
       "opciones": [
-        "El estado activo o inactivo de la falla.",
-        "La prioridad de la falla en el tablero.",
-        "La primera posición del código en la lista."
+        "La alimentación del circuito de mando.",
+        "La alimentación del motor después del contactor.",
+        "La corriente nominal del fusible de potencia."
       ],
-      "correcta": 2
+      "correcta": 0,
+      "grupo": "circuito-mando-potencia"
     },
     {
-      "id": "diagnostico-11",
-      "competencia": "diagnostico-fallas",
-      "formato": "opcion-multiple",
-      "dificultad": "media",
-      "criticidad": "normal",
-      "fuente": {
-        "origen": "Volvo Buses",
-        "titulo": "h3_operator_manual_en_0",
-        "pagina": "132",
-        "referencia": "h3_operator_manual_en_0.pdf"
-      },
-      "muestra": true,
-      "revisado": false,
-      "version": "1",
-      "pregunta": "Durante la autoprueba del tablero del Prevost H3, las agujas recorren la escala. ¿Qué compruebas?",
-      "opciones": [
-        "Que las agujas se mueven y sus mecanismos funcionan.",
-        "Que los sensores reportan los valores reales del momento.",
-        "Que los indicadores están calibrados en toda la escala."
-      ],
-      "correcta": 0
-    },
-    {
-      "id": "diagnostico-12",
+      "id": "diagnostico-17",
       "competencia": "diagnostico-fallas",
       "formato": "opcion-multiple",
       "dificultad": "dificil",
       "criticidad": "normal",
       "fuente": {
         "origen": "Volvo Buses",
-        "titulo": "PA1583-2 Literature",
-        "pagina": "11",
-        "referencia": "PA1583-2 Literature.pdf"
+        "titulo": "Interpretacion de planos electricos [Arquinube]",
+        "pagina": "89",
+        "referencia": "Interpretacion de planos electricos [Arquinube].pdf"
       },
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "En Allison de cuarta generación, falta un código inactivo antiguo tras registrarse otros. ¿Cómo puede explicarse?",
+      "pregunta": "C4 no entra. El contacto de C5 que lo habilita sigue abierto y C5 no está activado. ¿Qué ruta sigues?",
       "opciones": [
-        "El módulo convierte el código más antiguo en activo al recibir otro.",
-        "El módulo puede retirar el código inactivo más antiguo al agregar códigos.",
-        "El módulo conserva los códigos inactivos y elimina primero los activos."
+        "Sigue la salida de potencia hacia la carga de C4.",
+        "Sigue el circuito que alimenta la bobina de C5.",
+        "Sigue el contacto de salida de C4 hacia el siguiente equipo."
       ],
-      "correcta": 1
+      "correcta": 1,
+      "grupo": "cadena-habilitacion"
     },
     {
-      "id": "conectividad-09",
+      "id": "diagnostico-18",
+      "competencia": "diagnostico-fallas",
+      "formato": "opcion-multiple",
+      "dificultad": "dificil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Interpretacion de planos electricos [Arquinube]",
+        "pagina": "60",
+        "referencia": "Interpretacion de planos electricos [Arquinube].pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Un ventilador funciona mientras presionas Arranque y se apaga al soltarlo. El plano muestra retención. ¿Qué rama revisas?",
+      "opciones": [
+        "La rama de potencia que ya alimenta el ventilador.",
+        "La rama del contacto auxiliar de retención.",
+        "La rama del pulsador que ya activa la bobina."
+      ],
+      "correcta": 1,
+      "grupo": "contacto-retencion"
+    },
+    {
+      "id": "conectividad-15",
       "competencia": "electronica-conectividad",
       "formato": "opcion-multiple",
       "dificultad": "facil",
       "criticidad": "normal",
       "fuente": {
         "origen": "Volvo Buses",
-        "titulo": "h3_operator_manual_en_0",
-        "pagina": "64",
-        "referencia": "h3_operator_manual_en_0.pdf"
+        "titulo": "Interpretacion de planos electricos [Arquinube]",
+        "pagina": "92",
+        "referencia": "Interpretacion de planos electricos [Arquinube].pdf"
       },
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "¿Qué conectas al puerto DDR del Prevost H3?",
+      "pregunta": "¿Qué plano te ayuda a ubicar la terminal de un sensor en un módulo?",
       "opciones": [
-        "Un receptor de los sensores de las llantas.",
-        "Un monitor para la cámara de reversa.",
-        "Un lector de datos de diagnóstico."
+        "El esquema de entradas y salidas.",
+        "El plano general de montaje.",
+        "El esquema unifilar de potencia."
       ],
-      "correcta": 2
+      "correcta": 0,
+      "grupo": "terminales-modulo"
     },
     {
-      "id": "conectividad-10",
+      "id": "conectividad-16",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "facil",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Interpretacion de planos electricos [Arquinube]",
+        "pagina": "37",
+        "referencia": "Interpretacion de planos electricos [Arquinube].pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Un contacto principal de un plano DIN tiene el borne 3. ¿Con qué borne forma pareja?",
+      "opciones": [
+        "El borne 5.",
+        "El borne 2.",
+        "El borne 4."
+      ],
+      "correcta": 2,
+      "grupo": "bornes-contacto"
+    },
+    {
+      "id": "conectividad-17",
       "competencia": "electronica-conectividad",
       "formato": "opcion-multiple",
       "dificultad": "media",
       "criticidad": "normal",
       "fuente": {
         "origen": "Volvo Buses",
-        "titulo": "h3_operator_manual_en_0",
-        "pagina": "132",
-        "referencia": "h3_operator_manual_en_0.pdf"
+        "titulo": "Interpretacion de planos electricos [Arquinube]",
+        "pagina": "87",
+        "referencia": "Interpretacion de planos electricos [Arquinube].pdf"
       },
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "En el Prevost H3, ¿qué prueba revisa las entradas de los interruptores del tablero?",
+      "pregunta": "Un cable de señal sale del margen con una letra y un número de hoja. ¿Cómo encuentras su continuación?",
       "opciones": [
-        "La prueba de entradas del sistema multiplexado.",
-        "La prueba de las agujas del tablero.",
-        "La prueba de motores eléctricos del vehículo."
+        "Busca una terminal con ese número en la hoja actual.",
+        "Busca un cable del mismo color en esa hoja.",
+        "Busca la misma letra en la hoja indicada."
       ],
-      "correcta": 0
+      "correcta": 2,
+      "grupo": "continuacion-entre-hojas"
     },
     {
-      "id": "conectividad-11",
+      "id": "conectividad-18",
+      "competencia": "electronica-conectividad",
+      "formato": "opcion-multiple",
+      "dificultad": "media",
+      "criticidad": "normal",
+      "fuente": {
+        "origen": "Volvo Buses",
+        "titulo": "Interpretacion de planos electricos [Arquinube]",
+        "pagina": "62",
+        "referencia": "Interpretacion de planos electricos [Arquinube].pdf"
+      },
+      "muestra": true,
+      "revisado": false,
+      "version": "1",
+      "pregunta": "Dos pulsadores de arranque están en paralelo. Uno falla abierto. ¿Qué esperas al presionar el otro?",
+      "opciones": [
+        "Necesita que el primer pulsador cierre también.",
+        "Puede cerrar su propia rama de mando.",
+        "Activa el mando solo si abres su rama de arranque."
+      ],
+      "correcta": 1,
+      "grupo": "contactos-na-paralelo"
+    },
+    {
+      "id": "conectividad-19",
       "competencia": "electronica-conectividad",
       "formato": "opcion-multiple",
       "dificultad": "dificil",
       "criticidad": "normal",
       "fuente": {
         "origen": "Volvo Buses",
-        "titulo": "h3_operator_manual_en_0",
-        "pagina": "17",
-        "referencia": "h3_operator_manual_en_0.pdf"
+        "titulo": "Interpretacion de planos electricos [Arquinube]",
+        "pagina": "65",
+        "referencia": "Interpretacion de planos electricos [Arquinube].pdf"
       },
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "En el Prevost H3, una salida multiplexada sufrió un corto. ¿Cómo responde su protección electrónica?",
+      "pregunta": "Dos bobinas no deben activarse juntas. La primera ya está energizada. ¿Qué explica que la segunda no responda?",
       "opciones": [
-        "Desactiva la salida y la reactiva cuando deja de detectar el corto.",
-        "Desactiva la salida y la mantiene apagada hasta restablecer la protección.",
-        "Mantiene activa la salida y registra el corto en la pantalla."
+        "El contacto de enclavamiento abre su mando.",
+        "El contacto de retención abre su alimentación.",
+        "El contacto de arranque desvía la corriente a la primera."
       ],
-      "correcta": 1
+      "correcta": 0,
+      "grupo": "enclavamiento-mando"
     },
     {
-      "id": "conectividad-12",
+      "id": "conectividad-20",
       "competencia": "electronica-conectividad",
       "formato": "opcion-multiple",
       "dificultad": "dificil",
       "criticidad": "normal",
       "fuente": {
         "origen": "Volvo Buses",
-        "titulo": "h3_operator_manual_en_0",
-        "pagina": "71",
-        "referencia": "h3_operator_manual_en_0.pdf"
+        "titulo": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx",
+        "pagina": "8",
+        "referencia": "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"
       },
       "muestra": true,
       "revisado": false,
       "version": "1",
-      "pregunta": "El monitor de llantas del Prevost H3 recibió datos de una rueda, pero muestra dos guiones. ¿Por qué?",
+      "pregunta": "El cargador enciende y el autobús se conecta, pero la sesión no empieza. ¿Qué enlace de datos revisarías primero?",
       "opciones": [
-        "La presión recibida coincide con la presión objetivo.",
-        "La temperatura recibida supera el umbral de alarma.",
-        "El dato recibido cae en un rango definido como no disponible."
+        "La comunicación entre el autobús y el cargador.",
+        "La comunicación entre los módulos de la red de cabina.",
+        "La comunicación entre el tablero y el climatizador."
       ],
-      "correcta": 2
-    },
-    {
-      "id": "conectividad-13",
-      "competencia": "electronica-conectividad",
-      "formato": "opcion-multiple",
-      "dificultad": "dificil",
-      "criticidad": "normal",
-      "fuente": {
-        "origen": "Volvo Buses",
-        "titulo": "h3_operator_manual_en_0",
-        "pagina": "71",
-        "referencia": "h3_operator_manual_en_0.pdf"
-      },
-      "muestra": true,
-      "revisado": false,
-      "version": "1",
-      "pregunta": "En el Prevost H3, ¿qué hace la pantalla del monitor de llantas con las lecturas del receptor?",
-      "opciones": [
-        "Las combina con señales del vehículo para calcular lo que muestra.",
-        "Las reenvía a los sensores para que calculen lo que muestra.",
-        "Las pasa al receptor para que este calcule lo que muestra."
-      ],
-      "correcta": 0
-    },
-    {
-      "id": "conectividad-14",
-      "competencia": "electronica-conectividad",
-      "formato": "opcion-multiple",
-      "dificultad": "dificil",
-      "criticidad": "normal",
-      "fuente": {
-        "origen": "Volvo Buses",
-        "titulo": "h3_operator_manual_en_0",
-        "pagina": "72",
-        "referencia": "h3_operator_manual_en_0.pdf"
-      },
-      "muestra": true,
-      "revisado": false,
-      "version": "1",
-      "pregunta": "En el Prevost H3, las presiones aparecen poco a poco al encender el tablero. ¿Qué explica ese retraso?",
-      "opciones": [
-        "El receptor espera todas las lecturas antes de enviarlas juntas.",
-        "Los sensores transmiten por intervalos y la pantalla se actualiza al recibir los datos.",
-        "La pantalla espera a que termine la revisión previa antes de mostrar los datos."
-      ],
-      "correcta": 1
+      "correcta": 0,
+      "grupo": "comunicacion-con-cargador"
     }
   ]
 }

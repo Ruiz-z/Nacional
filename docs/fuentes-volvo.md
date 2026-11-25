@@ -60,20 +60,28 @@ Es la estructura con la que Volvo organiza la capacitación técnica y el catál
 
 ## Preguntas nuevas del banco (T-176)
 
-Las 20 preguntas de opción múltiple están marcadas como ejemplos didácticos y quedan pendientes de revisión por Volvo. Las referencias cuentan las páginas del PDF desde 1, incluidas las portadas y páginas en blanco.
+La ampliación inicial incorporó 20 preguntas de opción múltiple. La limpieza de T-185 retiró 14 ítems y agregó 14. Las preguntas incorporadas desde los PDF son ejemplos didácticos pendientes de revisión por Volvo.
 
-| PDF usado | Páginas citadas | Preguntas |
+## Fuentes vigentes del banco (T-185)
+
+Las referencias cuentan las páginas del PDF desde 1, incluidas las portadas y páginas en blanco. El material de Arquinube respalda los conceptos generales de lectura de planos. Los ejemplos del 9700 se identifican por modelo y se limitan al sistema eléctrico auxiliar. La columna de preguntas cuenta los ítems vigentes que citan cada PDF.
+
+| PDF | Páginas citadas | Preguntas |
 | --- | --- | ---: |
-| `Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf` | 4, 5, 8 | 6 |
+| `Interpretacion de planos electricos [Arquinube].pdf` | 7, 37, 51, 59, 60, 62, 65, 87, 89, 92 | 10 |
+| `Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf` | 4, 5, 8 | 7 |
 | `Data sheet BZL Electric ES-MX 2021.pdf` | 3 | 3 |
 | `volvo_9700_manual_en_3.pdf` | 34 | 1 |
-| `h3_operator_manual_en_0.pdf` | 17, 64, 71, 72, 132 | 8 |
-| `PA1583-2 Literature.pdf` | 11 | 2 |
+| `volvo_9700_manual_en_0_2.pdf` | 100 | 1 |
+
+### Preguntas de opción múltiple por competencia
 
 | Competencia | Fácil | Media | Difícil | Total |
 | --- | ---: | ---: | ---: | ---: |
-| Seguridad de alto voltaje | 1 | 2 | 1 | 4 |
-| Sistema eléctrico y batería | 1 | 1 | 4 | 6 |
-| Diagnóstico de fallas | 1 | 2 | 1 | 4 |
-| Electrónica y conectividad | 1 | 1 | 4 | 6 |
-| **Total** | **4** | **6** | **10** | **20** |
+| Seguridad de alto voltaje | 4 | 5 | 3 | 12 |
+| Sistema eléctrico y batería | 5 | 5 | 4 | 14 |
+| Diagnóstico de fallas | 4 | 5 | 4 | 13 |
+| Electrónica y conectividad | 4 | 5 | 4 | 13 |
+| **Total** | **17** | **20** | **15** | **52** |
+
+El banco suma 57 ítems. Además de las 52 preguntas, incluye cinco actividades de panel y casos de diagnóstico.

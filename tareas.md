@@ -228,3 +228,5 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-188 S — Integrar las gráficas de técnico, equipo, ficha y administración con acceso por rol, foco, tooltips y tablas equivalentes (tablero RF-27 a RF-30).
 - [x] T-189 S — Añadir las cuatro vistas de captura con datos temporales y verificar geometría a 1280 × 720 y 1920 × 1080.
 - [ ] T-190 H — Revisar los PNG de las cuatro vistas en una sesión gráfica.
+
+- [x] T-185 — Banco de competencias (RF-2 y RF-3). Retirar 14 preguntas repetitivas o poco útiles, incorporar 14 preguntas respaldadas por los PDF y agrupar las 52 preguntas por tema. Ajustar distractores y repartir la posición de las respuestas correctas. [Fuentes y cobertura por dificultad](docs/fuentes-volvo.md#fuentes-vigentes-del-banco-t-185).
