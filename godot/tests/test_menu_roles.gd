@@ -18,7 +18,9 @@ static func comprobar(base: String) -> bool:
 	var correcto := true
 	for rol in esperado:
 		correcto = Pantallas.entrar(menu, rol + "01", "clave-de-prueba", rol) and correcto
-		correcto = correcto and menu.botones.keys() == esperado[rol]
+		var visibles: Array = menu.botones.keys().filter(func(paso: String) -> bool: return menu.botones[paso].visible)
+		correcto = correcto and visibles == esperado[rol] \
+			and menu.columna.get_node("Destacados").visible == (rol == "tecnico")
 		menu.botones.tablero.pressed.emit()
 		correcto = correcto and menu.pantalla != null and menu.pantalla.perfil.rol == rol
 		if rol == "jefe" and menu.pantalla != null:

@@ -16,10 +16,11 @@ static func comprobar(base: String) -> bool:
 	var control := InputEventJoypadButton.new()
 	control.button_index = JOY_BUTTON_A
 	var correcto: bool = InputMap.event_is_action(control, "ui_accept")
-	correcto = correcto and menu.botones.is_empty() and menu.etapa == "primer-admin"
+	correcto = correcto and menu.botones.values().all(func(boton: Button) -> bool: return boton.disabled) \
+		and menu.etapa == "primer-admin"
 	correcto = Pantallas.entrar(menu, "tecnico73") and correcto
 	correcto = correcto and not menu.botones.diagnostico.disabled and menu.botones.ruta.disabled
-	correcto = correcto and menu.inicio.get_child(3).text.contains("Diagnóstico")
+	correcto = correcto and menu.inicio.get_node("Siguiente").text.contains("Diagnóstico")
 	menu._process(0.0)
 	correcto = correcto and menu.barra.get_node("Entrada").text == "Panel virtual"
 	menu.conexion.iniciar_panel(Time.get_ticks_msec() - 3000)

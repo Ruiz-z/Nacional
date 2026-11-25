@@ -68,7 +68,7 @@ static func recorrido(menu: Node, base: String) -> bool:
 		if intento < 4 and menu.enviar.disabled:
 			return false
 		cerrar_aviso(menu)
-	if not menu.enviar.disabled or not menu.espera.text.contains("30"):
+	if not menu.enviar.disabled or not menu.enviar.text.contains("30"):
 		return false
 	enviar(menu, "admin01", CLAVE)
 	if not menu.perfil.is_empty():
@@ -83,7 +83,8 @@ static func recorrido(menu: Node, base: String) -> bool:
 	if not Cuentas.crear(base, "tecnico01", "tecnico", CLAVE, true).ok:
 		return false
 	enviar(menu, "tecnico01", CLAVE)
-	if menu.etapa != "cambio" or not menu.perfil.is_empty() or not menu.botones.is_empty():
+	if menu.etapa != "cambio" or not menu.perfil.is_empty() \
+			or not menu.botones.values().all(func(boton: Button) -> bool: return boton.disabled):
 		return false
 	menu.clave.text = "clave-nueva"
 	menu.repeticion.text = "clave-nueva"

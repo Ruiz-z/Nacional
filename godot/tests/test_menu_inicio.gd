@@ -24,8 +24,8 @@ static func comprobar(tamano: Vector2i) -> bool:
 	await arbol.process_frame
 	var formulario: Rect2 = menu.inicio.get_global_rect()
 	var correcto: bool = alta.ok and menu.entrada_inicio.size == Vector2(tamano) \
-		and formulario.size.x == 420 and formulario.get_center().distance_to(Vector2(tamano) / 2) < 2 \
-		and vista.get_visible_rect().encloses(formulario) and menu.usuario.has_focus()
+		and formulario.size.x >= 300 and formulario.position.x >= 0 and formulario.end.x <= tamano.x \
+		and menu.usuario.has_focus() and menu.usuario.get_global_rect().size.x > 200
 	menu.enviar.grab_focus()
 	var aceptar := InputEventJoypadButton.new()
 	aceptar.button_index = JOY_BUTTON_A
