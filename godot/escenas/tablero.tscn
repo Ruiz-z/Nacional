@@ -67,7 +67,7 @@ follow_focus = true
 
 [node name="Datos" type="VBoxContainer" parent="Contenido"]
 size_flags_horizontal = 3
-theme_override_constants/separation = 10
+theme_override_constants/separation = 14
 
 
 [node name="GuardarResultados" type="FileDialog" parent="."]

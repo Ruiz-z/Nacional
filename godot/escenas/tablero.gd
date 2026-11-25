@@ -2,6 +2,9 @@ extends VBoxContainer
 
 signal administracion_solicitada
 
+const Dashboard = preload("res://escenas/graficas/dashboard.gd")
+const DatosGraficas = preload("res://logica/tablero/datos_graficas.gd")
+
 const UI = preload("res://escenas/cuenta_ui.gd")
 const Permisos = preload("res://logica/tablero/permisos.gd")
 const VistaAdmin = preload("res://logica/tablero/vista_admin.gd")
@@ -69,8 +72,6 @@ func cambiar_a(destino: String) -> void:
 	mostrar()
 	if vista == "admin":
 		$Vistas/Administracion.grab_focus()
-	elif vista == "jefe" and not botones_tecnicos.is_empty():
-		botones_tecnicos.values()[0].grab_focus()
 	else:
 		$Vistas/Ayuda.grab_focus()
 
@@ -114,9 +115,10 @@ func mostrar() -> void:
 		objetivo = usuario_personal
 	var ficha_personal := Consultas.tecnico(base, objetivo) if not base.is_empty() and \
 		Permisos.puede_ver(rol, perfil.get("alias", alias_actual), objetivo) and not objetivo.is_empty() else {}
+	if not ficha_personal.is_empty():
+		linea(alias_visible(ficha_personal), &"Chip")
+	agregar_dashboard(DatosGraficas.tecnico(ficha_personal))
 	if ficha_personal.is_empty() or ficha_personal.estado == "sin_sesiones":
-		if not ficha_personal.is_empty():
-			linea(ficha_personal.alias, &"Chip")
 		var indicadores := fila_indicadores()
 		indicador(indicadores, "Ganancia indicativa", "Pendiente", "Completa el diagnóstico y la evaluación")
 		indicador(indicadores, "Retención simulada", "Pendiente", "Completa la evaluación y repítela")
@@ -128,7 +130,6 @@ func mostrar() -> void:
 			detalle = "Elige un técnico para consultar su progreso."
 		linea(detalle, &"Secundario", mensaje)
 		return
-	linea(ficha_personal.alias, &"Chip")
 	var indicadores := fila_indicadores()
 	indicador(indicadores, "Ruta de aprendizaje", str(ficha_personal.avance_ruta.completadas),
 		"%d microlecciones pendientes" % ficha_personal.avance_ruta.pendientes)
@@ -206,6 +207,7 @@ func mostrar_operacion() -> void:
 	var servicio := Foundry.new()
 	var resumen := VistaAdmin.resumen(base, Banco.cargar().items, servicio.disponible(), base + ".respaldo.sqlite")
 	servicio.free()
+	agregar_dashboard(DatosGraficas.admin(resumen))
 	linea("Cuentas", &"Seccion")
 	linea("%s · %s · %s" % [
 		cantidad(resumen.cuentas.tecnico, "técnico", "técnicos"),
@@ -234,6 +236,13 @@ func mostrar_operacion() -> void:
 	for tecnico in resumen.tecnicos:
 		linea(tecnico.alias, &"", tabla)
 		linea(fecha_visible(tecnico.ultima), &"Secundario", tabla)
+
+
+func agregar_dashboard(modelo: Dictionary) -> void:
+	var dashboard := Dashboard.new()
+	dashboard.name = "Dashboard"
+	datos.add_child(dashboard)
+	dashboard.cargar(modelo)
 
 
 func selector_personal() -> void:
@@ -401,7 +410,6 @@ func perfil_jefe(nombre: String) -> Dictionary:
 
 
 func mostrar_lista() -> void:
-	linea("Técnicos", &"Titulo")
 	var perfiles: Array[Dictionary] = []
 	if not base.is_empty():
 		var personal := {}
@@ -413,6 +421,8 @@ func mostrar_lista() -> void:
 			var perfil := perfil_jefe(nombre)
 			if not perfil.is_empty():
 				perfiles.append(perfil)
+	agregar_dashboard(DatosGraficas.equipo(perfiles))
+	linea("Técnicos", &"Titulo")
 	if perfiles.is_empty():
 		var mensaje := "Aún no hay técnicos registrados."
 		if rol == "jefe" and perfil.get("base", "") == base and not alias_actual.begins_with("[DEMO]"):
@@ -489,6 +499,7 @@ func mostrar_ficha() -> void:
 	estado.size_flags_horizontal = Control.SIZE_SHRINK_END
 	separador(datos)
 
+	agregar_dashboard(DatosGraficas.tecnico(perfil))
 	linea("Recomendación", &"Metadato")
 	linea(recomendacion.mensaje, &"Titulo")
 	for respaldo in recomendacion.evidencias:

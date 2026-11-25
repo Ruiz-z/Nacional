@@ -219,3 +219,8 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-184 S — Aplicar roles al menú y a las vistas personal, de equipo y operativa (flujo RF-12 y tablero RF-3).
 - [x] T-185 S — Gestionar cuentas, mostrar la contraseña temporal una vez y confirmar el borrado con protecciones (flujo RF-13 y tablero RF-14).
 - [x] T-186 S — Probar las pantallas de cuenta e incorporar las seis vistas a la herramienta de captura.
+
+- [x] T-187 S — Preparar datos de gráficas a partir de las consultas existentes y probar estados vacíos, límites, orden y máximo de series (tablero RF-27 a RF-29).
+- [x] T-188 S — Integrar las gráficas de técnico, equipo, ficha y administración con acceso por rol, foco, tooltips y tablas equivalentes (tablero RF-27 a RF-30).
+- [x] T-189 S — Añadir las cuatro vistas de captura con datos temporales y verificar geometría a 1280 × 720 y 1920 × 1080.
+- [ ] T-190 H — Revisar los PNG de las cuatro vistas en una sesión gráfica.
