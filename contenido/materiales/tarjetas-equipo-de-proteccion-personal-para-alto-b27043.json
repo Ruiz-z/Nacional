@@ -1,0 +1,58 @@
+{
+  "id": "tarjetas-equipo-de-proteccion-personal-para-alto-b27043",
+  "formato": "tarjetas",
+  "titulo": "Equipo de Protección Personal para Alto Voltaje en Volvo BZL Eléctrico",
+  "modelo": "bzl-electrico",
+  "nivel": "basico",
+  "competencia": "sistema-electrico-bateria",
+  "tema": "Equipo de protección personal para alto voltaje",
+  "contenido": {
+    "tarjetas": [
+      {
+        "frente": "¿Por qué es crucial el equipo de protección para alto voltaje?",
+        "reverso": "Protege contra descargas eléctricas graves. Solo técnicos certificados deben trabajar con alto voltaje."
+      },
+      {
+        "frente": "¿Qué componentes eléctricos requieren precaución especial?",
+        "reverso": "Baterías de iones de litio y sistema de tracción de alto voltaje que puede alcanzar hasta 600V."
+      },
+      {
+        "frente": "Regla básica de seguridad para alto voltaje en Volvo BZL",
+        "reverso": "Realizar la puesta fuera y en servicio solo por personas autorizadas. Seguir procedimientos estrictos para evitar riesgos."
+      },
+      {
+        "frente": "¿Cómo se protege el técnico en el taller?",
+        "reverso": "Uso de equipo de protección personal especializado y seguir normas de seguridad propias del sistema de alto voltaje."
+      },
+      {
+        "frente": "¿Qué monitorea el sistema HVIL en el autobús eléctrico?",
+        "reverso": "Circuito de interbloqueo que desconecta batería si el cableado se interrumpe, previniendo accidentes eléctricos."
+      },
+      {
+        "frente": "Funciones del sistema de gestión de baterías (BMS)",
+        "reverso": "Monitorea temperatura, voltaje y corriente. Desconecta batería si detecta condiciones peligrosas."
+      },
+      {
+        "frente": "¿Qué hacer en caso de trabajar con componentes de alto voltaje?",
+        "reverso": "Seguir el procedimiento oficial de puesta fuera de servicio. Nunca trabajar sin autorización y capacitación."
+      },
+      {
+        "frente": "¿Por qué es importante usar barreras térmicas y eléctricas?",
+        "reverso": "Previenen daños catastróficos y mantienen seguro el sistema eléctrico frente a sobrecargas o fugas térmicas."
+      }
+    ]
+  },
+  "fuentes": [
+    "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf",
+    "Data sheet BZL Electric ES-MX 2021.pdf"
+  ],
+  "origen": "ia",
+  "muestra": false,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T01:12:34-06:00",
+  "actualizado": "2026-11-25T01:12:34-06:00",
+  "historial": []
+}

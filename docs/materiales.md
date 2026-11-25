@@ -1,6 +1,6 @@
 # Materiales de estudio con IA (página web)
 
-Página local donde se generan, con el agente de Azure AI Foundry y su búsqueda en los manuales de Volvo (RAG), materiales para aprender: **tarjetas**, **presentaciones**, **infografías** y tres **juegos** (quiz, pareo y ordenar pasos). Cada material se cataloga por **modelo de autobús**, **nivel** y **competencia**, y el catálogo abre en los **básicos** (Novato y Básico). Spec: [SPEC-materiales.md](../SPEC-materiales.md).
+Página local donde se generan, con el agente de Azure AI Foundry y su búsqueda en los manuales de Volvo (RAG), materiales para aprender: **tarjetas**, **presentaciones**, **infografías** y cuatro **juegos** (quiz, pareo, ordenar pasos y ahorcado). Cada material se cataloga por **modelo de autobús**, **nivel** y **competencia**, y el catálogo abre en los **básicos** (Novato y Básico). Spec: [SPEC-materiales.md](../SPEC-materiales.md).
 
 ## Cómo abrirla
 Desde la raíz del repositorio, con Python 3.10 o posterior (sin instalar nada más):
@@ -23,7 +23,7 @@ La vista **Autor** (generar, actualizar con IA, editar, marcar como revisado, el
 ## Con IA y sin IA
 - **Con IA:** usa la misma configuración que la ruta del juego ([foundry.md](foundry.md)): `.env` con `NACIONAL_FOUNDRY_ENDPOINT` y `az login`. La cabecera dice "IA conectada (Foundry)".
 - **Agente:** se recomienda crear el agente `materiales` ([foundry/agente-materiales.yaml](../foundry/agente-materiales.yaml)) con la **misma base de conocimiento que Faro** y poner `NACIONAL_FOUNDRY_AGENTE_MATERIALES=materiales` en el `.env`. Si no existe, se usa `NACIONAL_FOUNDRY_AGENTE` (Faro); funciona porque la instrucción y el esquema viajan en el mensaje, pero las instrucciones fijas de Faro hablan de la ruta.
-- **Sin IA** (sin `.env`, sin red o con `NACIONAL_SIN_NUBE=1`): tarjetas, quiz y ordenar pasos se arman con el banco (`contenido/banco.json`), con la fuente de cada ítem; prioriza el nivel, las palabras del tema y los PDF del modelo. Presentación, infografía y pareo necesitan la IA.
+- **Sin IA** (sin `.env`, sin red o con `NACIONAL_SIN_NUBE=1`): tarjetas, quiz y ordenar pasos se arman con el banco (`contenido/banco.json`), con la fuente de cada ítem; prioriza el nivel, las palabras del tema y los PDF del modelo. Presentación, infografía, pareo y ahorcado necesitan la IA.
 - Tiempo de espera de Foundry: 90 s (`NACIONAL_FOUNDRY_ESPERA_S`).
 - Si tu cuenta pertenece a varios tenants, pon `NACIONAL_FOUNDRY_TENANT=<id>` (el del recurso de Foundry) y entra con `az login --tenant <id>`.
 

@@ -46,7 +46,7 @@ SPEC-*.md    especificaciones por módulo; plan.md y tareas.md
 - Escalabilidad e integración: `docs/escalabilidad.md`
 - Privacidad y contenido: `docs/privacidad.md`
 - Guion de la demo: `docs/demo.md`
-- Materiales de estudio con IA (tarjetas, presentaciones, infografías y juegos por modelo y nivel): `docs/materiales.md`
+- Materiales de estudio con IA (tarjetas, presentaciones, infografías y juegos como quiz, pareo, ordenar pasos y ahorcado, por modelo y nivel): `docs/materiales.md`
 - Dependencias y versiones: `docs/dependencias.md`
 
 El contenido no oficial está marcado `[MUESTRA]` y los datos de demostración `[DEMO]`.

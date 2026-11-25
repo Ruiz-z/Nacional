@@ -31,6 +31,8 @@ EJEMPLOS = {
                            for i in range(3)]},
     "pareo": {"pares": [{"termino": f"T{i}", "definicion": f"Definición {i}"} for i in range(4)]},
     "secuencia": {"procedimiento": "LOTO", "pasos": ["Apagar", "Bloquear", "Verificar"], "explicacion": "Así"},
+    "ahorcado": {"palabras": [{"palabra": p, "pista": f"Pista {i}", "explicacion": "Sirve para algo"}
+                              for i, p in enumerate(["Batería", "Interbloqueo", "Multímetro", "Peña alta"])]},
 }
 
 
@@ -91,6 +93,17 @@ class PruebaFormatos(unittest.TestCase):
         self.assertTrue(any("repetido" in e for e in formatos.validar("pareo", pares)[1]))
         self.assertTrue(any("procedimiento" in e for e in formatos.validar("secuencia", {"pasos": ["a", "b", "c"]})[1]))
         self.assertTrue(any("faltan" in e for e in formatos.validar("pareo", {"pares": [{"termino": "a"}] * 4})[1]))
+
+    def test_ahorcado_solo_letras(self):
+        from logica.formatos import letras_ahorcado
+        self.assertEqual(letras_ahorcado("Batería ñandú"), "BATERIA ÑANDU")
+        base = EJEMPLOS["ahorcado"]["palabras"]
+        for mala in ("ESS 600", "HV!", "ab", "una dos tres cuatro", "x" * 25):
+            palabras = [{**base[0], "palabra": mala}] + base[1:]
+            self.assertTrue(formatos.validar("ahorcado", {"palabras": palabras})[1], mala)
+        repetida = base[:1] + [{**base[1], "palabra": "BATERIA"}] + base[2:]
+        self.assertTrue(any("repetido" in e for e in formatos.validar("ahorcado", {"palabras": repetida})[1]))
+        self.assertEqual(formatos.validar("ahorcado", {"palabras": [{**base[0], "palabra": "Freno de mano"}] + base[1:]})[1], [])
 
     def test_formato_inexistente_y_espacios(self):
         self.assertTrue(formatos.validar("video", {})[1])
