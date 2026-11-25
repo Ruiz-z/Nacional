@@ -1,0 +1,62 @@
+{
+  "id": "tarjetas-baterias-del-bzl-electrico-abce20",
+  "formato": "tarjetas",
+  "titulo": "Tarjetas: Baterías del BZL Eléctrico",
+  "modelo": "bzl-electrico",
+  "nivel": "novato",
+  "competencia": "sistema-electrico-bateria",
+  "tema": "Baterías del BZL Eléctrico",
+  "contenido": {
+    "tarjetas": [
+      {
+        "frente": "¿Para qué sirve la batería de tracción de un autobús eléctrico?",
+        "reverso": "Para guardar energía y alimentar el sistema de propulsión."
+      },
+      {
+        "frente": "¿Qué tipo de batería usa el Volvo BZL Eléctrico para la tracción?",
+        "reverso": "De iones de litio."
+      },
+      {
+        "frente": "¿Qué dato te ayuda a saber si la batería se calienta?",
+        "reverso": "La temperatura que marca la batería."
+      },
+      {
+        "frente": "¿Qué comprueba el monitor de aislamiento del sistema de tracción?",
+        "reverso": "Si el circuito de tracción está aislado del chasis."
+      },
+      {
+        "frente": "¿De dónde sale la energía para recargar las baterías de 24 V del Volvo BZL Eléctrico?",
+        "reverso": "De la batería de 600 V."
+      },
+      {
+        "frente": "La ficha del Volvo BZL Eléctrico indica 94 kWh por batería. ¿Qué capacidad disponible corresponde a cuatro baterías?",
+        "reverso": "376 kWh."
+      },
+      {
+        "frente": "En un eléctrico Volvo, ¿de qué depende el control térmico de la batería si se apaga el climatizador de cabina?",
+        "reverso": "De un sistema independiente que enfría y calienta con líquido."
+      },
+      {
+        "frente": "El autobús todavía tiene carga y aparece una alerta de temperatura de la batería. ¿Qué te dicen ambos datos?",
+        "reverso": "La carga y la temperatura describen cosas distintas de la batería."
+      }
+    ]
+  },
+  "fuentes": [
+    "Volvo Buses: Electric safety, Baterías de tracción",
+    "Volvo Buses: Data sheet BZL Electric ES-MX 2021, p. 3",
+    "Volvo Buses: Electric safety, Supervisión de parámetros de batería",
+    "ISO 6469: Electrically propelled road vehicles — Safety specifications — Part 3: Electrical safety, Aislamiento eléctrico respecto del chasis",
+    "Volvo Buses: Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx, p. 8",
+    "Volvo Buses: Electric safety, Supervisión de la batería durante el funcionamiento"
+  ],
+  "origen": "banco",
+  "muestra": true,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-24T23:18:29-06:00",
+  "actualizado": "2026-11-24T23:18:29-06:00",
+  "historial": []
+}

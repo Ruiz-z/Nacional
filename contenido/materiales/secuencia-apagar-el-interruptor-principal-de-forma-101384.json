@@ -1,0 +1,34 @@
+{
+  "id": "secuencia-apagar-el-interruptor-principal-de-forma-101384",
+  "formato": "secuencia",
+  "titulo": "Apagar el interruptor principal de forma segura en el Volvo 9700",
+  "modelo": "volvo-9700",
+  "nivel": "basico",
+  "competencia": "diagnostico-fallas",
+  "tema": "Apagar el interruptor principal de forma segura en el Volvo 9700",
+  "contenido": {
+    "procedimiento": "Sigue estos pasos para apagar el interruptor principal sin dañar el sistema eléctrico.",
+    "pasos": [
+      "Coloca la palanca de cambios en posición neutral.",
+      "Activa el freno de estacionamiento.",
+      "Enciende el interruptor que habilita el botón para abrir la puerta en el manillar.",
+      "Abre la puerta del autobús.",
+      "Apaga el suministro eléctrico con el interruptor principal.",
+      "Sal del autobús y cierra la puerta usando el botón en el manillar.",
+      "Cierra y bloquea la puerta con la llave."
+    ],
+    "explicacion": "Este orden asegura que el bus esté detenido y seguro, las puertas funcionan para salir y se evita descarga de la batería. Nunca apagues el interruptor principal con el motor en marcha para no causar daños al sistema."
+  },
+  "fuentes": [
+    "volvo_9700_manual_en_3.pdf"
+  ],
+  "origen": "ia",
+  "muestra": false,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T00:42:28-06:00",
+  "actualizado": "2026-11-25T00:42:28-06:00",
+  "historial": []
+}

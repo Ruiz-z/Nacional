@@ -8,7 +8,12 @@ CREATE TABLE IF NOT EXISTS tecnico (
 	id INTEGER PRIMARY KEY,
 	alias TEXT NOT NULL UNIQUE CHECK (length(trim(alias)) > 0),
 	demo INTEGER NOT NULL DEFAULT 0 CHECK (demo IN (0, 1)),
-	creado TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+	creado TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+	rol TEXT NOT NULL DEFAULT 'tecnico' CHECK (rol IN ('tecnico', 'jefe', 'admin')),
+	clave_hash TEXT NOT NULL DEFAULT '',
+	cambiar_clave INTEGER NOT NULL DEFAULT 0 CHECK (cambiar_clave IN (0, 1)),
+	fallos INTEGER NOT NULL DEFAULT 0 CHECK (fallos >= 0),
+	bloqueado_hasta INTEGER NOT NULL DEFAULT 0
 ) STRICT;
 CREATE TABLE IF NOT EXISTS intento (
 	id INTEGER PRIMARY KEY,
@@ -87,6 +92,15 @@ const COLUMNAS_SESION := {"sesion_id": "TEXT NOT NULL DEFAULT ''", "caso": "TEXT
 	"ayudas": "INTEGER NOT NULL DEFAULT 0"}
 
 
+# Columnas de tecnico añadidas con las cuentas. Las filas anteriores quedan sin contraseña y no pueden entrar.
+const COLUMNAS_CUENTA := {
+	"rol": "TEXT NOT NULL DEFAULT 'tecnico' CHECK (rol IN ('tecnico', 'jefe', 'admin'))",
+	"clave_hash": "TEXT NOT NULL DEFAULT ''",
+	"cambiar_clave": "INTEGER NOT NULL DEFAULT 0 CHECK (cambiar_clave IN (0, 1))",
+	"fallos": "INTEGER NOT NULL DEFAULT 0 CHECK (fallos >= 0)",
+	"bloqueado_hasta": "INTEGER NOT NULL DEFAULT 0"}
+
+
 static func crear(ruta: String, consultar: Callable = AccesoSQLite.consultar) -> bool:
 	var base := ProjectSettings.globalize_path(ruta)
 	if consultar.call(base, CREAR_SQL) == null:
@@ -96,13 +110,18 @@ static func crear(ruta: String, consultar: Callable = AccesoSQLite.consultar) ->
 
 # Añade a una base anterior las columnas de sesión sin perder sus intentos.
 static func migrar(base: String, consultar: Callable) -> bool:
-	var existentes: Variant = consultar.call(base, "SELECT name FROM pragma_table_info('intento');")
+	return completar_columnas(base, "intento", COLUMNAS_SESION, consultar) \
+		and completar_columnas(base, "tecnico", COLUMNAS_CUENTA, consultar)
+
+
+static func completar_columnas(base: String, tabla: String, columnas: Dictionary, consultar: Callable) -> bool:
+	var existentes: Variant = consultar.call(base, "SELECT name FROM pragma_table_info('%s');" % tabla)
 	if existentes == null:
 		return false
 	var nombres: Array = existentes.map(func(fila: Dictionary) -> String: return fila.name)
-	for columna in COLUMNAS_SESION:
+	for columna in columnas:
 		if columna not in nombres \
-				and consultar.call(base, "ALTER TABLE intento ADD COLUMN %s %s;" % [columna, COLUMNAS_SESION[columna]]) == null:
+				and consultar.call(base, "ALTER TABLE %s ADD COLUMN %s %s;" % [tabla, columna, columnas[columna]]) == null:
 			return false
 	return true
 

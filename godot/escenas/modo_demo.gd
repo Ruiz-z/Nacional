@@ -18,7 +18,8 @@ func _ready() -> void:
 	FondoTarjeta.aplicar(self, 16)
 	$Adelantar.pressed.connect(func(): actualizar(Demo.adelantar(base_real, 7)))
 	$Restablecer.pressed.connect(func(): actualizar(Demo.restablecer(base_real)))
-	$Tablero.pressed.connect(func(): tablero_solicitado.emit(perfil))
+	# El modo demo no pide credenciales: abre el tablero con la vista del jefe directo.
+	$Tablero.pressed.connect(func(): tablero_solicitado.emit(perfil.merged({"rol": "jefe"})))
 	$Escenario.pressed.connect(func(): escenario_solicitado.emit(perfil))
 	actualizar(true)
 	if not perfil.is_empty():

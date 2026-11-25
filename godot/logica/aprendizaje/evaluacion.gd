@@ -2,11 +2,19 @@ extends RefCounted
 
 const Banco = preload("res://logica/competencias/banco.gd")
 const Leitner = preload("res://logica/aprendizaje/leitner.gd")
+const Seleccion = preload("res://logica/aprendizaje/seleccion.gd")
 
-static func post(banco: Dictionary, ids_pre: Array) -> Dictionary:
+# `semilla` (el id del técnico) varía las preguntas por persona; con 0 se usa el orden del banco.
+static func post(banco: Dictionary, ids_pre: Array, semilla: int = 0) -> Dictionary:
 	var plan := {"items": [], "avisos": [], "equivalente": true}
+	var candidatas := Seleccion.barajar(banco.items, semilla)
+	# El post evita los temas del diagnóstico si hay alternativa, para no repetir la misma idea.
+	var grupos := []
+	for item in banco.items:
+		if item.id in ids_pre:
+			Seleccion.recordar(grupos, item)
 	for cupo in cupos():
-		agregar_post(plan, banco.items, cupo[0], cupo[1], cupo[2], ids_pre)
+		agregar_post(plan, candidatas, cupo[0], cupo[1], cupo[2], ids_pre, grupos)
 	return plan
 
 
@@ -38,9 +46,11 @@ static func reconstruir_post(filas: Array, ids_pre: Array) -> Dictionary:
 
 
 static func agregar_post(plan: Dictionary, items: Array, competencia: String, formato: String,
-		dificultad: String, ids_pre: Array) -> void:
+		dificultad: String, ids_pre: Array, grupos: Array = []) -> void:
 	var usados: Array = plan.items.map(func(item: Dictionary) -> String: return item.id)
-	var item := buscar(items, competencia, formato, dificultad, usados + ids_pre)
+	var item := buscar(items, competencia, formato, dificultad, usados + ids_pre, grupos)
+	if item.is_empty() and not grupos.is_empty():
+		item = buscar(items, competencia, formato, dificultad, usados + ids_pre)
 	if item.is_empty():
 		item = buscar(items, competencia, formato, "", usados + ids_pre)
 		if item.is_empty():
@@ -50,6 +60,7 @@ static func agregar_post(plan: Dictionary, items: Array, competencia: String, fo
 		avisar(plan, "Faltan preguntas del mismo nivel para %s." % Banco.COMPETENCIAS.get(competencia, competencia))
 	if not item.is_empty():
 		plan.items.append(item.duplicate(true))
+		Seleccion.recordar(grupos, item)
 
 
 static func retest(banco: Dictionary, plan_post: Dictionary, fecha_post: int, ahora: int) -> Dictionary:
@@ -78,10 +89,12 @@ static func retest(banco: Dictionary, plan_post: Dictionary, fecha_post: int, ah
 
 
 static func buscar(items: Array, competencia: String, formato: String, dificultad: String,
-		excluidos: Array) -> Dictionary:
+		excluidos: Array, grupos_excluidos: Array = []) -> Dictionary:
 	for item in items:
 		if item.competencia == competencia and item.formato == formato and item.id not in excluidos \
-				and (dificultad.is_empty() or item.dificultad == dificultad):
+				and (dificultad.is_empty() or item.dificultad == dificultad) \
+				and (grupos_excluidos.is_empty() or Seleccion.grupo_de(item).is_empty()
+					or Seleccion.grupo_de(item) not in grupos_excluidos):
 			return item
 	return {}
 

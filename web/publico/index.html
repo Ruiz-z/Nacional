@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Materiales de estudio · Técnicos del Mañana</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <header class="cabecera">
+    <h1>Técnicos del Mañana <span>Materiales de estudio</span></h1>
+    <div class="espacio"></div>
+    <span id="estado-ia" class="estado-ia" role="status"><i aria-hidden="true"></i><span>Comprobando IA…</span></span>
+    <div class="vista" role="group" aria-label="Vista de la página">
+      <button type="button" data-vista="tecnico" aria-pressed="true">Técnico</button>
+      <button type="button" data-vista="autor" aria-pressed="false">Autor</button>
+    </div>
+  </header>
+
+  <main>
+    <p class="intro" id="intro">Elige tu modelo de autobús y tu nivel. Empieza por los básicos, con la fuente de cada material.</p>
+
+    <section id="panel-autor" class="panel-autor oculto" aria-labelledby="titulo-crear">
+      <h2 id="titulo-crear">Crear material</h2>
+      <div id="formatos" class="formatos" role="radiogroup" aria-label="Formato del material"></div>
+      <p id="descripcion-formato" class="descripcion-formato"></p>
+      <div class="fila">
+        <label class="campo">Modelo de autobús<select id="crear-modelo"></select></label>
+        <label class="campo">Nivel<select id="crear-nivel"></select></label>
+        <label class="campo">Competencia<select id="crear-competencia"></select></label>
+      </div>
+      <div class="fila fila-tema">
+        <label class="campo ancho">Tema
+          <input id="crear-tema" maxlength="120" list="temas-sugeridos" placeholder="Ej.: Bloqueo y etiquetado antes de tocar cables naranja">
+        </label>
+        <datalist id="temas-sugeridos">
+          <option value="Bloqueo y etiquetado (LOTO) antes de trabajar en alto voltaje">
+          <option value="Equipo de protección personal para alto voltaje">
+          <option value="Partes del sistema de baterías y para qué sirve cada una">
+          <option value="Cómo leer un código de falla en el tablero">
+          <option value="Revisión diaria antes de sacar el autobús">
+          <option value="Uso básico del multímetro: tensión y continuidad">
+          <option value="Red de datos del vehículo: qué módulos se comunican">
+        </datalist>
+        <button type="button" class="boton" id="generar">Generar</button>
+      </div>
+      <p class="aviso-generar" id="aviso-generar"></p>
+      <div id="mensaje-crear" class="mensaje oculto" role="status"></div>
+    </section>
+
+    <section class="filtros" aria-label="Filtros del catálogo">
+      <div class="campo">Nivel
+        <div class="segmentos" id="filtro-nivel" role="group" aria-label="Nivel"></div>
+      </div>
+      <label class="campo">Modelo de autobús<select id="filtro-modelo"></select></label>
+      <label class="campo">Competencia<select id="filtro-competencia"></select></label>
+      <label class="campo">Formato<select id="filtro-formato"></select></label>
+      <label class="campo oculto" id="campo-estado">Estado
+        <select id="filtro-estado">
+          <option value="">Todos</option>
+          <option value="borrador">Borrador</option>
+          <option value="revisado">Revisado</option>
+        </select>
+      </label>
+      <p class="cuenta" id="cuenta" aria-live="polite"></p>
+    </section>
+
+    <div id="catalogo" aria-live="polite"></div>
+  </main>
+
+  <div id="visor-fondo" class="visor-fondo oculto">
+    <article id="visor" class="visor" role="dialog" aria-modal="true" aria-labelledby="visor-titulo"></article>
+  </div>
+
+  <script src="/formatos.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

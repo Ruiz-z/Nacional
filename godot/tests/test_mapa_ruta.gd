@@ -152,8 +152,10 @@ static func probar_panel(base: String) -> bool:
 	var panel: PanelContainer = ruta.panel_detalle_mapa
 	error.pressed.emit()
 	var estilo := panel.get_theme_stylebox("panel") as StyleBoxFlat
+	var estado: String = fila.centro.get_child(0).accessibility_description.get_slice(" · ", 0)
 	var correcto: bool = panel.visible and panel.titulo.text == "Sin errores" and panel.cerrar_boton.has_focus() \
-		and estilo.border_width_left == 4 and estilo.border_color == VistaMapa.ESTADOS[fila.centro.get_child(0).accessibility_description.get_slice(" · ", 0)]
+		and estilo.border_width_left == 1 and panel.estado_visible.text == estado \
+		and panel.estado_visible.get_theme_color("font_color") == VistaMapa.ESTADOS[estado]
 	competencia.pressed.emit()
 	correcto = correcto and panel.visible and panel.titulo.text != "Sin errores"
 	pulsar(menu.get_viewport(), KEY_ESCAPE)

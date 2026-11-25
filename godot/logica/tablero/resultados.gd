@@ -1,17 +1,24 @@
 extends RefCounted
 
 const Acceso = preload("res://logica/datos/acceso_sqlite.gd")
+const Permisos = preload("res://logica/tablero/permisos.gd")
 const RegistroSimulador = preload("res://logica/tablero/registro_simulador.gd")
 const TABLAS := {"tecnicos": "tecnico", "intentos": "intento", "eventos": "evento", "brechas": "brecha"}
 
-static func exportar(base: String, destino: String, formato: String, alias: String = "",
+# Sin contraseñas ni datos de acceso: el hash y los fallos nunca salen en una exportación.
+const COLUMNAS_TECNICO := "tecnico.id, tecnico.alias, tecnico.demo, tecnico.creado, tecnico.rol"
+
+
+static func exportar(base: String, destino: String, formato: String, alias: String, rol: String,
 		consultar: Callable = Acceso.consultar) -> bool:
+	if not Permisos.puede_exportar(rol):
+		return false
 	if formato not in ["csv", "json"] or not destino.ends_with("." + formato):
 		return false
 	var datos := {"fecha": Time.get_datetime_string_from_system(true) + "Z", "versiones_contenido": []}
 	for grupo in TABLAS:
 		var tabla: String = TABLAS[grupo]
-		var sql := "SELECT tecnico.* FROM tecnico" if tabla == "tecnico" else \
+		var sql := "SELECT %s FROM tecnico" % COLUMNAS_TECNICO if tabla == "tecnico" else \
 			"SELECT %s.*, tecnico.alias FROM %s JOIN tecnico ON tecnico.id = %s.tecnico" % [tabla, tabla, tabla]
 		var parametros: Array = []
 		if not alias.is_empty():
@@ -60,9 +67,9 @@ static func escribir_csv(archivo: FileAccess, datos: Dictionary) -> bool:
 	return true
 
 
-static func borrar(base: String, alias: String, confirmado: bool,
+static func borrar(base: String, alias: String, confirmado: bool, rol: String,
 		consultar: Callable = Acceso.consultar) -> bool:
-	if not confirmado:
+	if not confirmado or not Permisos.puede_borrar(rol):
 		return false
 	var filas: Variant = consultar.call(base, "DELETE FROM tecnico WHERE alias = ? RETURNING id;", [alias])
 	return filas != null and not filas.is_empty()

@@ -3,7 +3,10 @@ extends SceneTree
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
 # Mapa: godot --path godot -s ../tools/captura.gd -- mapa-ruta salida.png 1280 720
 # Tramo final: usa mapa-ruta-final como escena. Panel abierto: usa mapa-ruta-detalle.
+# Tablero: godot --path godot -s ../tools/captura.gd -- tablero-jefe-lista|tablero-jefe-ficha salida.png 1280 720
+# Dashboard: dashboard-tecnico|dashboard-jefe|dashboard-admin|dashboard-sin-datos salida.png [ancho alto]
 # Órdenes: godot --path godot -s ../tools/captura.gd -- ordenes salida.png 1280 720
+# Cuentas: ingreso|ingreso-error|primer-admin|administracion|tablero-admin|menu-jefe salida.png [ancho alto]
 # Menú: godot --path godot -s ../tools/captura.gd -- escenas/menu.tscn salida.png 1280 720
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
@@ -18,6 +21,15 @@ extends SceneTree
 # Banco: [ancho alto] banco-mesa|banco-puntas|hoja|orden [--verificar]
 # Alias del banco: [ancho alto] banco [cerrado|midiendo] [menu] [--verificar]
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
+const EsquemaTablero = preload("res://logica/datos/esquema.gd")
+const DemoTablero = preload("res://logica/tablero/demo.gd")
+const DashboardBanco = preload("res://logica/competencias/banco.gd")
+const DASHBOARDS := {"dashboard-tecnico": "tecnico", "dashboard-jefe": "jefe",
+	"dashboard-admin": "admin", "dashboard-sin-datos": "tecnico"}
+
+const Cuentas = preload("res://logica/flujo/cuentas.gd")
+const Contrasena = preload("res://logica/flujo/contrasena.gd")
+const Acceso = preload("res://logica/datos/acceso_sqlite.gd")
 const Acciones = preload("res://tests/acciones_taller.gd")
 
 
@@ -111,19 +123,29 @@ func capturar() -> void:
 	if not verificar and DisplayServer.get_name() == "headless":
 		fallar("La captura requiere un servidor gráfico. Usa --verificar para comprobar el estado sin generar PNG.")
 		return
+	var cuenta := args[0] in ["ingreso", "ingreso-error", "primer-admin", "administracion", "tablero-admin", "menu-jefe"]
+	if cuenta:
+		OS.set_environment("NACIONAL_SIN_NUBE", "1")
 	var mapa := args[0] in ["mapa-ruta", "mapa-ruta-final", "mapa-ruta-detalle"]
 	if mapa:
 		OS.set_environment("NACIONAL_SIN_NUBE", "1")
-	var rutas_captura := {"ordenes": "escenas/ordenes.tscn",
+	var dashboard := DASHBOARDS.has(args[0])
+	var tablero := args[0] in ["tablero-jefe-lista", "tablero-jefe-ficha"]
+	var ficha := args[0] == "tablero-jefe-ficha"
+	var rutas_captura := {"tablero-jefe-lista": "escenas/tablero.tscn",
+		"tablero-jefe-ficha": "escenas/tablero.tscn", "ordenes": "escenas/ordenes.tscn",
 		"mapa-ruta": "escenas/ruta.tscn", "mapa-ruta-final": "escenas/ruta.tscn",
 		"mapa-ruta-detalle": "escenas/ruta.tscn"}
-	var ruta: String = rutas_captura.get(args[0], args[0])
+	var ruta: String = "escenas/menu.tscn" if cuenta else rutas_captura.get(args[0], args[0])
+	if dashboard:
+		ruta = "escenas/tablero.tscn"
 	var paquete := load("res://" + ruta) as PackedScene
 	if paquete == null:
 		fallar("No se pudo cargar la escena.")
 		return
 	var vp := SubViewport.new()
 	vp.size = tam
+	vp.gui_embed_subwindows = true
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(vp)
 	var escena := paquete.instantiate()
@@ -149,7 +171,39 @@ func capturar() -> void:
 		if zona != "interior":
 			escena.archivo = "escenarios/%s.json" % {"cabina": "comunicacion", "banco": "modulo_auxiliar"}.get(zona, zona)
 		escena.get_node("Jugador").set_physics_process(false)
+	if cuenta:
+		escena.base = OS.get_temp_dir().path_join("nacional-captura-cuentas-%s.sqlite" %
+			Crypto.new().generate_random_bytes(8).hex_encode())
+	if tablero:
+		escena.rol = "jefe"
+		escena.base = OS.get_temp_dir().path_join("nacional-captura-tablero-%s.sqlite" %
+			Crypto.new().generate_random_bytes(8).hex_encode())
+		if not EsquemaTablero.crear(escena.base) or not DemoTablero.precargar(escena.base):
+			DirAccess.remove_absolute(escena.base)
+			escena.free()
+			fallar("No se pudo preparar el historial de demostración.")
+			return
+	if dashboard and not preparar_dashboard(escena, args[0]):
+		DirAccess.remove_absolute(escena.base)
+		escena.free()
+		fallar("No se pudo preparar el dashboard de demostración.")
+		return
 	vp.add_child(escena)
+	if dashboard:
+		DirAccess.remove_absolute(escena.base)
+	if cuenta:
+		var preparado := preparar_cuenta(escena, args[0])
+		for sufijo in ["", ".respaldo.sqlite"]:
+			DirAccess.remove_absolute(escena.base + sufijo)
+		if not preparado:
+			fallar("No se pudo preparar la vista de cuentas.")
+			return
+	if tablero:
+		if ficha:
+			escena.botones_tecnicos[DemoTablero.ALIAS].pressed.emit()
+		else:
+			escena.botones_tecnicos[DemoTablero.ALIAS].grab_focus()
+		DirAccess.remove_absolute(escena.base)
 	if mapa:
 		preparar_mapa(escena)
 	if vista != "orden" and escena.get_node_or_null("Flashcard") != null:
@@ -445,6 +499,38 @@ func capturar() -> void:
 		if not vp.get_visible_rect().encloses(escena.taller.hud.get_global_rect()):
 			fallar("El inventario debe caber en el encuadre.")
 			return
+	if cuenta and not comprobar_cuenta(escena, vp.get_visible_rect(), args[0]):
+		fallar("La pantalla de cuentas tiene controles recortados o solapados.")
+		return
+	if tablero:
+		var area_tablero: ScrollContainer = escena.get_node("Contenido")
+		if ficha:
+			for hijo in escena.datos.get_children():
+				if hijo is Label and hijo.text.begins_with("Es una recomendación"):
+					area_tablero.ensure_control_visible(hijo)
+					break
+		else:
+			area_tablero.ensure_control_visible(escena.botones_tecnicos[DemoTablero.ALIAS])
+		await process_frame
+		if not comprobar_tablero(escena, vp.get_visible_rect(), ficha):
+			fallar("El tablero tiene controles recortados o solapados.")
+			return
+		if ficha:
+			var recomendacion_visible := area_tablero.scroll_vertical
+			var desplazamiento := area_tablero.get_v_scroll_bar()
+			area_tablero.scroll_vertical = ceili(desplazamiento.max_value)
+			await process_frame
+			var historial: Control = escena.datos.find_child("AbrirHistorial", false, false)
+			if not area_tablero.get_global_rect().encloses(historial.get_global_rect()) \
+					or not escena.get_node("Vistas/Exportar").is_visible_in_tree():
+				fallar("El historial o la exportación quedan fuera del alcance.")
+				return
+			print("Ficha: historial accesible con desplazamiento ", area_tablero.scroll_vertical)
+			area_tablero.scroll_vertical = recomendacion_visible
+			await process_frame
+	if dashboard and not await comprobar_dashboard(escena, vp.get_visible_rect(), args[0] == "dashboard-sin-datos"):
+		fallar("El dashboard tiene controles recortados, solapados o sin datos de captura.")
+		return
 	if verificar:
 		quit(0)
 		return
@@ -459,6 +545,195 @@ func capturar() -> void:
 		return
 	print("Guardado ", args[1], " ", img.get_size())
 	quit(0)
+
+
+func preparar_dashboard(escena: Control, vista: String) -> bool:
+	OS.set_environment("NACIONAL_SIN_NUBE", "1")
+	escena.base = OS.get_temp_dir().path_join("nacional-dashboard-%s.sqlite" %
+		Crypto.new().generate_random_bytes(8).hex_encode())
+	escena.rol = DASHBOARDS[vista]
+	escena.alias_actual = DemoTablero.ALIAS
+	if not EsquemaTablero.crear(escena.base):
+		return false
+	if vista == "dashboard-sin-datos":
+		return Acceso.consultar(escena.base, "INSERT INTO tecnico (alias, demo) VALUES (?, 1);",
+			[DemoTablero.ALIAS]) != null
+	if not DemoTablero.precargar(escena.base):
+		return false
+	# Estas cuentas viven solo en la base temporal. VistaAdmin excluye las filas con demo = 1.
+	if Acceso.consultar(escena.base, """
+		INSERT INTO tecnico (alias, rol, clave_hash) VALUES
+		('[DEMO] Taller-02', 'tecnico', 'captura'), ('[DEMO] Taller-03', 'tecnico', 'captura'),
+		('[DEMO] Taller-04', 'tecnico', 'captura'), ('[DEMO] Jefatura', 'jefe', 'captura'),
+		('[DEMO] Administración', 'admin', 'captura');
+	""") == null:
+		return false
+	var ids: Array = DashboardBanco.COMPETENCIAS.keys()
+	for muestra in [
+			[DemoTablero.ALIAS, [[20, 50, 60], [0, 100, 100], [40, 85, 90], [55, 100, 95]]],
+			["[DEMO] Taller-02", [[0, 0, 0], [35, 50, 60], [50, 65, 70], [40, 60, 75]]],
+			["[DEMO] Taller-03", [[90, 100, 100], [80, 85, 90], [70, 75, 80], [85, 90, 95]]]]:
+		for j in ids.size():
+			for i in 3:
+				if muestra[0] == DemoTablero.ALIAS and j == 1:
+					continue
+				var valor: int = muestra[1][j][i]
+				var tipo: Variant = null
+				if valor == 0:
+					tipo = "falta-critica"
+				elif valor < 70:
+					tipo = ["paso-omitido", "lectura-equivocada", "causa-equivocada"][j % 3]
+				if Acceso.consultar(escena.base, """
+					INSERT INTO intento (tecnico, competencia, item, formato, dificultad,
+						respuesta, valor, peso, resultado, tipo_error, tiempo_ms, fuente_entrada, momento,
+						reloj_sim, version_contenido, sesion_id)
+					VALUES ((SELECT id FROM tecnico WHERE alias = ?), ?, 'muestra-dashboard',
+						'opcion-multiple', 'facil', 'Captura', ?, 1, ?, ?, 900, 'teclado', ?, ?, '1', '');
+				""", [muestra[0], ids[j], valor, "correcto" if valor >= 70 else "incorrecto", tipo,
+					["pre", "post", "retest"][i], "2026-01-%02dT10:00:00Z" % [1, 2, 9][i]]) == null:
+					return false
+	return true
+
+
+func comprobar_dashboard(escena: Control, ventana: Rect2, sin_datos: bool) -> bool:
+	var area: ScrollContainer = escena.get_node("Contenido")
+	var barra: HBoxContainer = escena.get_node("Vistas")
+	var dashboard: Control = escena.datos.get_node_or_null("Dashboard")
+	if dashboard == null or dashboard.bloques.size() != (4 if escena.vista == "tecnico" else 3) \
+			or not ventana.encloses(barra.get_global_rect()) \
+			or not ventana.encloses(area.get_global_rect()) or barra.get_global_rect().intersects(area.get_global_rect()) \
+			or not comprobar_celdas_tablero(dashboard):
+		return false
+	if dashboard.get_global_rect().end.x > area.get_global_rect().end.x:
+		return false
+	for bloque in dashboard.bloques:
+		if sin_datos != bloque.has("vacio"):
+			return false
+		if bloque.has("grafica") and (bloque.grafica.marcas.is_empty() or bloque.grafica.texto_fuera \
+				or not bloque.grafica.respeta_limites()):
+			printerr("Marcas o rótulos fuera de lugar en ", bloque.datos.titulo)
+			return false
+		if bloque.has("boton"):
+			bloque.boton.button_pressed = true
+	await process_frame
+	var tablas_caben := comprobar_celdas_tablero(dashboard) \
+		and dashboard.get_global_rect().end.x <= area.get_global_rect().end.x
+	for bloque in dashboard.bloques:
+		if bloque.has("boton"):
+			bloque.boton.button_pressed = false
+	await process_frame
+	print("Dashboard ", escena.vista, " · ", ventana.size, " · ", dashboard.bloques.size(), " gráficas o mensajes")
+	return tablas_caben
+
+
+func preparar_cuenta(menu: Node, vista: String) -> bool:
+	if vista == "primer-admin":
+		return menu.etapa == vista
+	var anterior := Contrasena.iteraciones_actuales
+	Contrasena.iteraciones_actuales = 200
+	var clave := "clave-de-captura"
+	var cuenta := Cuentas.crear(menu.base, "admin-taller", "admin", clave)
+	Cuentas.crear(menu.base, "turno-matutino", "jefe", clave)
+	Cuentas.crear(menu.base, "tecnico01", "tecnico", clave)
+	Cuentas.crear(menu.base, "tecnico02", "tecnico", clave, true)
+	Contrasena.iteraciones_actuales = anterior
+	Acceso.consultar(menu.base, "INSERT INTO tecnico (alias) VALUES ('T-0001');")
+	Acceso.consultar(menu.base, """
+		INSERT INTO intento (tecnico, competencia, item, formato, dificultad, respuesta,
+			valor, peso, resultado, tipo_error, tiempo_ms, fuente_entrada, momento, reloj_sim, version_contenido)
+		SELECT id, 'seguridad-alto-voltaje', 'ejemplo', 'opcion-multiple', 'facil', 'ejemplo',
+			100, 1, 'correcto', '', 1000, 'virtual', 'pre', '2026-11-24T15:00:00Z', '1'
+		FROM tecnico WHERE alias = 'tecnico01';
+	""")
+	EsquemaTablero.respaldar(menu.base, menu.base + ".respaldo.sqlite")
+	menu.mostrar_ingreso()
+	if not cuenta.ok or menu.etapa != "ingreso":
+		return false
+	if vista == "ingreso":
+		return true
+	menu.usuario.text = "turno-matutino" if vista == "menu-jefe" else "admin-taller"
+	menu.clave.text = "clave-incorrecta" if vista == "ingreso-error" else clave
+	menu.enviar.pressed.emit()
+	if vista == "ingreso-error":
+		return menu.aviso != null and menu.aviso.visible
+	if menu.perfil.is_empty():
+		return false
+	if vista == "administracion":
+		menu.botones.administracion.pressed.emit()
+	elif vista == "tablero-admin":
+		menu.botones.tablero.pressed.emit()
+	return true
+
+
+func comprobar_cuenta(menu: Control, ventana: Rect2, vista: String) -> bool:
+	var principal: Control = menu.pantalla if is_instance_valid(menu.pantalla) else menu.inicio
+	if not ventana.encloses(principal.get_global_rect()) or not comprobar_celdas_tablero(principal):
+		printerr(principal.name, " ", principal.get_global_rect(), " fuera de ", ventana, " o con celdas inválidas.")
+		return false
+	if vista == "ingreso-error":
+		var dialogo: Window = menu.aviso
+		var tarjeta := Rect2(Vector2(dialogo.position), Vector2(dialogo.size))
+		if not ventana.encloses(tarjeta) or not dialogo.visible or dialogo.size.y < 100:
+			printerr("Tarjeta de error ", tarjeta, " fuera de ", ventana, " o con altura insuficiente.")
+			return false
+		var bloque: Control = dialogo.get_child(0)
+		var aceptar := (dialogo as AcceptDialog).get_ok_button()
+		if not dialogo.get_visible_rect().encloses(bloque.get_global_rect()) \
+				or not dialogo.get_visible_rect().encloses(aceptar.get_global_rect()) \
+				or bloque.get_global_rect().intersects(aceptar.get_global_rect()) \
+				or not comprobar_celdas_tablero(bloque):
+			printerr("El contenido de la tarjeta de error no cabe.")
+			return false
+		print("Tarjeta ", tarjeta, " · botón ", aceptar.get_global_rect())
+	print(vista, " ", ventana.size, " · área ", principal.get_global_rect())
+	return true
+
+
+func comprobar_tablero(escena: Control, ventana: Rect2, ficha: bool) -> bool:
+	var barra: HBoxContainer = escena.get_node("Vistas")
+	var area: ScrollContainer = escena.get_node("Contenido")
+	if not ventana.encloses(barra.get_global_rect()) or not ventana.encloses(area.get_global_rect()) \
+			or barra.get_global_rect().intersects(area.get_global_rect()) \
+			or not comprobar_celdas_tablero(barra) or not comprobar_celdas_tablero(escena.datos):
+		return false
+	var principal: Button = escena.get_node("Vistas/VolverLista") if ficha else escena.botones_tecnicos[DemoTablero.ALIAS]
+	if not principal.has_focus() or not (ventana if ficha else area.get_global_rect()).encloses(principal.get_global_rect()):
+		return false
+	if ficha:
+		var exportar: Button = escena.get_node("Vistas/Exportar")
+		if not exportar.visible or not ventana.encloses(exportar.get_global_rect()):
+			return false
+		for hijo in escena.datos.get_children():
+			if hijo is Label and hijo.text.begins_with("Es una recomendación") \
+					and not area.get_global_rect().encloses(hijo.get_global_rect()):
+				return false
+	print("Tablero ", ventana.size, " · barra ", barra.get_global_rect(), " · contenido ", area.get_global_rect(),
+		" · acción enfocada ", principal.get_global_rect())
+	return true
+
+
+func comprobar_celdas_tablero(padre: Control) -> bool:
+	var limites := padre.get_global_rect()
+	var celdas: Array[Rect2] = []
+	for hijo in padre.get_children():
+		if not hijo is Control or not hijo.visible:
+			continue
+		var caja: Rect2 = hijo.get_global_rect()
+		var desplazable := padre is ScrollContainer and hijo == padre.get_child(0)
+		var cabe := caja.position.x >= limites.position.x and caja.end.x <= limites.end.x
+		if not (cabe if desplazable else limites.grow(0.01).encloses(caja)):
+			printerr(hijo.name, " ", caja, " fuera de ", padre.name, " ", limites)
+			return false
+		if padre is ScrollContainer and (hijo is HScrollBar or hijo is VScrollBar):
+			continue
+		for anterior in celdas:
+			if caja.intersects(anterior):
+				printerr(hijo.name, " ", caja, " se solapa con ", anterior)
+				return false
+		celdas.append(caja)
+		if hijo is Container and not comprobar_celdas_tablero(hijo):
+			return false
+	return true
 
 
 func preparar_mapa(escena: VBoxContainer) -> void:

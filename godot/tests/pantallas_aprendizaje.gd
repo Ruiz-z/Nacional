@@ -1,6 +1,8 @@
 extends RefCounted
 
 const Menu = preload("res://escenas/menu.tscn")
+const Cuentas = preload("res://logica/flujo/cuentas.gd")
+const Contrasena = preload("res://logica/flujo/contrasena.gd")
 const Banco = preload("res://logica/competencias/banco.gd")
 
 static func abrir(base: String) -> Node:
@@ -8,9 +10,27 @@ static func abrir(base: String) -> Node:
 	menu.base = base
 	menu.banco_aprendizaje = banco()
 	(Engine.get_main_loop() as SceneTree).root.add_child(menu)
-	menu.inicio.get_node("Alias").text = "T-85"
-	menu.inicio.get_node("Alta").pressed.emit()
+	entrar(menu)
 	return menu
+
+
+static func preparar_cuenta(menu: Node, usuario: String, clave: String, rol: String) -> Dictionary:
+	var anteriores := Contrasena.iteraciones_actuales
+	Contrasena.iteraciones_actuales = 200
+	var cuenta := Cuentas.crear(menu.base, usuario, rol, clave)
+	if not Cuentas.hay_admin(menu.base):
+		Cuentas.crear(menu.base, "admin-prueba", "admin", Contrasena.temporal())
+	Contrasena.iteraciones_actuales = anteriores
+	menu.mostrar_ingreso()
+	menu.usuario.text = usuario
+	menu.clave.text = clave
+	return cuenta
+
+
+static func entrar(menu: Node, usuario := "tecnico01", clave := "clave-de-prueba", rol := "tecnico") -> bool:
+	var cuenta := preparar_cuenta(menu, usuario, clave, rol)
+	menu.enviar.pressed.emit()
+	return cuenta.ok and menu.perfil.get("id") == cuenta.id
 
 
 static func banco() -> Dictionary:

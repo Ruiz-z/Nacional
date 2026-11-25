@@ -1,0 +1,70 @@
+{
+  "id": "presentacion-baterias-de-traccion-y-red-de-24-v-del-b-0109a1",
+  "formato": "presentacion",
+  "titulo": "Baterías de tracción y red de 24 V del Volvo BZL Eléctrico",
+  "modelo": "bzl-electrico",
+  "nivel": "basico",
+  "competencia": "sistema-electrico-bateria",
+  "tema": "Baterías de tracción y red de 24 V del BZL Eléctrico",
+  "contenido": {
+    "diapositivas": [
+      {
+        "titulo": "Características básicas de las baterías de tracción",
+        "puntos": [
+          "Las baterías son de ion de litio tipo NCA con alta densidad energética.",
+          "Están formadas por módulos con varias celdas para protección mecánica y térmica.",
+          "El paquete está protegido por una carcasa robusta de acero.",
+          "Cada módulo mezcla aislamiento térmico y amortiguación de vibraciones.",
+          "Control automático mantiene temperatura y voltaje en valores seguros."
+        ],
+        "nota": ""
+      },
+      {
+        "titulo": "Funciones de seguridad eléctrica y térmica",
+        "puntos": [
+          "El sistema monitorea constantemente voltaje, temperatura y aislamiento.",
+          "Si alguna celda falla, se desconecta automáticamente para evitar daño mayor.",
+          "Un circuito llamado HVIL detecta interrupciones de alto voltaje y corta energía.",
+          "Existen barreras térmicas y ventilaciones para evitar propagación de calor.",
+          "En caso de fuga térmica, el paquete completo se desconecta y alerta al conductor."
+        ],
+        "nota": "La seguridad eléctrica es crítica para prevenir riesgos de incendio o descarga."
+      },
+      {
+        "titulo": "Seguridad en el taller y procedimiento para técnicos",
+        "puntos": [
+          "Sólo técnicos autorizados y certificados pueden trabajar con componentes de alto voltaje.",
+          "Antes de hacer mantenimiento se debe poner fuera de servicio el sistema de tracción.",
+          "Se sigue un procedimiento estricto para la desconexión y reconexión segura.",
+          "El técnico responsable tiene la autoridad delegada para la puesta fuera y en servicio.",
+          "El incumplimiento puede causar lesiones graves o la muerte."
+        ],
+        "nota": "Nunca trabajes sin seguir los protocolos de seguridad indicados."
+      },
+      {
+        "titulo": "Red eléctrica de 24 V del Volvo BZL Eléctrico",
+        "puntos": [
+          "La red de 24 V se alimenta desde una batería interna conectada a la batería de tracción.",
+          "Se utilizan dos baterías de 12 V conectadas en serie para 24 V y capacidad de 105 Ah cada una.",
+          "El sistema incluye fusibles y relés para proteger circuitos eléctricos auxiliares.",
+          "El voltaje debe ser monitoreado para mantener entre 26.5 y 28.0 V en operación.",
+          "El sistema se apaga automáticamente si el nivel de voltaje es demasiado bajo."
+        ],
+        "nota": ""
+      }
+    ]
+  },
+  "fuentes": [
+    "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf",
+    "Data sheet BZL Electric ES-MX 2021.pdf"
+  ],
+  "origen": "ia",
+  "muestra": false,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T00:41:03-06:00",
+  "actualizado": "2026-11-25T00:41:03-06:00",
+  "historial": []
+}

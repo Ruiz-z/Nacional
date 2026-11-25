@@ -50,3 +50,6 @@ Requisitos transversales: operación offline, trazabilidad de resultados, conten
 
 ## Actualización — arnés
 - Módulo `arnes` (Spec 008): práctica de diagnóstico con medición. Depende de `simulador`, `panel`, `aprendizaje`, `tablero`. Banco físico opcional; el multímetro virtual es obligatorio.
+
+## Actualización — materiales
+- Módulo `materiales` (Spec 009, `SPEC-materiales.md`): página web que genera con el agente de Foundry y su RAG materiales de estudio (tarjetas, presentación, infografía, quiz, pareo y ordenar pasos), catalogados por modelo de autobús, nivel y competencia, con enfoque en los básicos. Depende de `competencias` (competencias y respaldo sin IA). No cambia dominio ni ruta. Revisión humana obligatoria antes de que lo vea un técnico.

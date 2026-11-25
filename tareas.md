@@ -78,7 +78,7 @@ Cada tarea dura menos de 30 min, sigue el orden del plan y empieza por su prueba
 - [x] T-61 S — Consultas de los 9 indicadores (RF-4) — Hecho cuando: pruebas con el técnico `[DEMO]`.
 - [x] T-62 S — Datos `[DEMO]` precargados (RF-15, 16) — Hecho cuando: historial con pre, post y retest.
 - [ ] T-63 S — Vista del técnico (RF-3, 6, 8) — Hecho cuando: demo manual. — falta verificación manual
-- [ ] T-64 S — Vista del instructor y detalle con línea de tiempo (RF-7, 9, 10, 12) — Hecho cuando: demo manual. — falta verificación manual
+- [ ] T-64 S — Vista «Jefe directo» y detalle con línea de tiempo (RF-7, 9, 10, 12) — Hecho cuando: demo manual. — falta verificación manual
 - [ ] T-65 S — Fórmulas en ayuda, color solo con texto (RF-5, 11) — Hecho cuando: checklist manual. — falta verificación manual
 - [x] T-66 S — Exportar CSV y JSON; borrar técnico con confirmación (RF-13, 14) — Hecho cuando: pruebas de contenido y de borrado.
 - [x] T-67 S — Estados vacíos y "pendiente" — Hecho cuando: técnico sin sesiones sin errores.
@@ -196,7 +196,7 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-162 S — Nivel alto configurable (3.3 V o 5 V) en banco, opciones, textos y calificación — Hecho cuando: prueba con 3.3 V y suite en verde.
 - [x] T-163 S — Identidad de sesión en los intentos (`sesion_id`, caso, variante, número de intento, ayudas) y agrupación por sesión en el tablero.
 - [x] T-164 S — Error concreto → práctica de refuerzo con motivo visible en la ruta.
-- [ ] T-165 S — Evidencia y errores/oportunidades junto al dominio en el tablero.
+- [x] T-165 S — Evidencia y errores/oportunidades junto al dominio en el tablero. Cubierto por T-180.
 - [ ] T-166 H — Prueba en mesa con el ESP32 real: sano, alimentación abierta, señal abierta y desconexión a mitad de un intento; comparar multímetro, monitor serial y Godot.
 - [x] T-167 S — Ruta de aprendizaje como roadmap: camino numerado por competencia según el diagnóstico, con "Hoy" o "Después", barra de dominio, motivo y práctica sugerida (aprendizaje RF-21).
 - [x] T-168 S — Foundry: contexto, esquema y validación de la ruta (`ruta_ia.gd`) y spec/privacidad (aprendizaje RF-23, RF-24).
@@ -211,3 +211,23 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-177 — Abrir el detalle de cada nodo del mapa de aprendizaje, enlazar al taller y verificar el panel con pruebas y una vista de captura (aprendizaje RF-26).
 - [x] T-178 — La ruta se muestra solo como mapa, sin preguntas; «Continuar» cierra el paso (RF-27). Se quita la práctica de seis preguntas de la ruta.
 - [x] T-179 — Rediseñar el mapa de aprendizaje y su panel de detalle (RF-25 y RF-26). Camino numerado, cuatro estados con color, fichas compactas con acceso al detalle y pie fijo. Suite y geometría verificadas a 1280 × 720 y 1920 × 1080. Revisión de PNG pendiente por falta de acceso a una sesión gráfica.
+
+- [x] T-180 S — Tablero para el jefe directo (tablero RF-3, RF-24 a RF-26). Lista por prioridad, ficha con evidencia y recomendación, y exportación por alias. Suite y geometría verificadas a 1280 × 720 y 1920 × 1080. Los PNG requieren una sesión gráfica.
+
+
+- [x] T-183 S — Sustituir el ingreso por alias con usuario y contraseña, creación del primer administrador, cambio obligatorio, bloqueo y cierre de sesión (flujo RF-1, RF-10 a RF-15).
+- [x] T-184 S — Aplicar roles al menú y a las vistas personal, de equipo y operativa (flujo RF-12 y tablero RF-3).
+- [x] T-185 S — Gestionar cuentas, mostrar la contraseña temporal una vez y confirmar el borrado con protecciones (flujo RF-13 y tablero RF-14).
+- [x] T-186 S — Probar las pantallas de cuenta e incorporar las seis vistas a la herramienta de captura.
+- [x] T-187 — Página de materiales (materiales RF-1 a RF-3, RF-11, RF-13): servidor con la biblioteca estándar, catálogo por modelo de autobús, nivel y competencia que abre en los básicos, vistas de técnico y autor y visores de tarjetas, presentación, infografía, quiz, pareo y ordenar pasos. Recorrido en navegador sin errores.
+- [x] T-188 — Generar y actualizar con el agente de Foundry (materiales RF-4 a RF-10, RF-14, RF-15): esquema por formato, guía por nivel, PDF sugeridos por modelo, validación de fuentes contra las devueltas, borrador, historial de versiones y edición manual validada. Pruebas con agente simulado.
+- [x] T-189 — Respaldo sin IA desde el banco (materiales RF-12) y materiales de inicio de nivel básico en borrador (7 del banco y a mano, 6 generados con Faro).
+- [ ] T-190 H — Crear el agente `materiales` en el portal con la base de conocimiento de Faro y revisar y publicar los materiales de inicio. Hecho: generación real de los seis formatos con Faro, fuentes verificadas (25/11/2026).
+
+- [x] T-191 S — Preparar datos de gráficas a partir de las consultas existentes y probar estados vacíos, límites, orden y máximo de series (tablero RF-27 a RF-29).
+- [x] T-192 S — Integrar las gráficas de técnico, equipo, ficha y administración con acceso por rol, foco, tooltips y tablas equivalentes (tablero RF-27 a RF-30).
+- [x] T-193 S — Añadir las cuatro vistas de captura con datos temporales y verificar geometría a 1280 × 720 y 1920 × 1080.
+- [ ] T-194 H — Revisar los PNG de las cuatro vistas en una sesión gráfica.
+
+- [x] T-195 — Banco de competencias (RF-2 y RF-3). Retirar 14 preguntas repetitivas o poco útiles, incorporar 14 preguntas respaldadas por los PDF y agrupar las 52 preguntas por tema. Ajustar distractores y repartir la posición de las respuestas correctas. [Fuentes y cobertura por dificultad](docs/fuentes-volvo.md#fuentes-vigentes-del-banco-t-185).
+- [x] T-196 — Juego de ahorcado en materiales: formato validado (solo letras, sin distinguir acentos), teclado en pantalla y físico, dibujo por errores y explicación al terminar cada término; uno generado con Faro.

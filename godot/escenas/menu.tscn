@@ -75,15 +75,22 @@ theme_override_font_sizes/font_size = 18
 
 [node name="Perfil" type="Label" parent="Marco/EntradaInicio/Columna/Barra/Margen/Fila"]
 theme_type_variation = &"Chip"
-text = "Técnico · Sin alias"
+text = "Sin sesión"
 size_flags_vertical = 4
 text_overrun_behavior = 3
-custom_minimum_size = Vector2(180, 0)
+custom_minimum_size = Vector2(300, 0)
 
 [node name="Entrada" type="Label" parent="Marco/EntradaInicio/Columna/Barra/Margen/Fila"]
 theme_type_variation = &"Chip"
 text = "Panel virtual"
 size_flags_vertical = 4
+
+[node name="Salir" type="Button" parent="Marco/EntradaInicio/Columna/Barra/Margen/Fila"]
+visible = false
+text = "Cerrar sesión"
+size_flags_vertical = 4
+custom_minimum_size = Vector2(0, 38)
+theme_type_variation = &"BotonPetroleo"
 
 [node name="Hero" type="PanelContainer" parent="Marco/EntradaInicio/Columna"]
 clip_contents = true
@@ -150,7 +157,7 @@ theme_override_constants/separation = 12
 
 [node name="IrAlias" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Texto/Acciones"]
 custom_minimum_size = Vector2(0, 50)
-text = "Entrar con alias"
+text = "Entrar"
 theme_type_variation = &"Primario"
 
 [node name="DemoHero" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Texto/Acciones"]
@@ -171,25 +178,55 @@ theme_type_variation = &"Cabecera"
 
 [node name="Titulo" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio/Cabecera"]
 theme_type_variation = &"Seccion"
-text = "Tu alias"
+text = "Tu cuenta"
 
 [node name="EtiquetaAlias" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
 theme_type_variation = &"DetalleClaro"
-text = "Alias de técnico"
+text = "Usuario"
 
 [node name="Alias" type="LineEdit" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
 custom_minimum_size = Vector2(0, 48)
 max_length = 64
-accessibility_name = "Alias de técnico"
+accessibility_name = "Usuario"
+placeholder_text = "Tu usuario"
+
+[node name="EtiquetaClave" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+theme_type_variation = &"DetalleClaro"
+text = "Contraseña"
+
+[node name="Clave" type="LineEdit" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+custom_minimum_size = Vector2(0, 48)
+max_length = 128
+secret = true
+accessibility_name = "Contraseña"
+
+[node name="EtiquetaRepetir" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+visible = false
+theme_type_variation = &"DetalleClaro"
+text = "Repite la contraseña"
+
+[node name="Repetir" type="LineEdit" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+visible = false
+custom_minimum_size = Vector2(0, 48)
+max_length = 128
+secret = true
+accessibility_name = "Repite la contraseña"
 
 [node name="Elegir" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
 custom_minimum_size = Vector2(0, 50)
-text = "Entrar con alias"
+text = "Entrar"
 theme_type_variation = &"Primario"
 
 [node name="Alta" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
 custom_minimum_size = Vector2(0, 50)
-text = "Registrar alias"
+text = "Mostrar contraseña"
+toggle_mode = true
+theme_type_variation = &"BotonClaro"
+
+[node name="DemoTarjeta" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
+visible = false
+custom_minimum_size = Vector2(0, 50)
+text = "Abrir modo demo"
 theme_type_variation = &"BotonClaro"
 
 [node name="Aviso" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]

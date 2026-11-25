@@ -8,7 +8,7 @@
 6. **Entrada con respaldo:** funciona con teclado y ratón, sticks y botones del Pro Controller y panel físico; sin giroscopio.
 7. **Contrato del panel:** una línea JSON por evento, versionada en `docs/protocolo-panel.md`; cambiarlo exige actualizar la spec primero.
 8. **Honestidad en la demo:** la retención a largo plazo se simula adelantando el reloj y se declara; no se inventan métricas.
-9. **Privacidad:** los técnicos se identifican con alias o ID, sin datos personales.
+9. **Privacidad:** cada cuenta usa un identificador sin datos personales. La contraseña se guarda solo como hash con sal en el equipo.
 10. **Verificable:** cada RF tiene una prueba (automática o checklist manual) antes de marcarse hecho.
 11. **Alcance:** primero el escenario eléctrico completo; el diésel solo si el eléctrico ya está validado.
 12. **Dependencias:** no se añaden librerías o plugins sin preguntar. Aprobadas: plugin SQLite para Godot, runtime LLM local opcional (Ollama o similar) y búsqueda por palabras clave en GDScript para el RAG (el godot-sqlite incluido no trae FTS5), sin embeddings. Plugin serial o puente Python: se decide con la prueba de 30 minutos.

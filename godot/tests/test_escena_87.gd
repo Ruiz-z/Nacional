@@ -65,12 +65,13 @@ static func recorrido(menu: Node, base: String) -> bool:
 	menu.volver()
 	if not Reloj.adelantar(base, tecnico, 7):
 		return false
+	menu.actualizar()
 	menu.botones.retest.pressed.emit()
 	if not Pantallas.responder(menu.pantalla, 10):
 		return false
 	menu.volver()
 	var por_momento := {"pre": [], "post": [], "retest": []}
-	for fila in Registro.leer(base, "T-85"):
+	for fila in Registro.leer(base, menu.perfil.alias):
 		if por_momento.has(fila.momento):
 			por_momento[fila.momento].append(fila.item)
 	return por_momento.post.size() == 10 and por_momento.post == por_momento.retest \

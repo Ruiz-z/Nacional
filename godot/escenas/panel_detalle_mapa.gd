@@ -9,6 +9,7 @@ const ANCHO := 420
 var contenido := VBoxContainer.new()
 var cerrar_boton := Button.new()
 var titulo := Label.new()
+var estado_visible := Label.new()
 var scroll := ScrollContainer.new()
 var origen: Button
 
@@ -22,7 +23,8 @@ func _ready() -> void:
 	var estilo := StyleBoxFlat.new()
 	estilo.bg_color = Color("#1A2327")
 	estilo.border_color = Color("#5B7480")
-	estilo.border_width_left = 4
+	estilo.set_border_width_all(1)
+	estilo.set_corner_radius_all(3)
 	for lado in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
 		estilo.set_content_margin(lado, 22)
 	add_theme_stylebox_override("panel", estilo)
@@ -48,6 +50,7 @@ func _ready() -> void:
 	titulo.theme_type_variation = &"Seccion"
 	titulo.add_theme_font_size_override("font_size", 22)
 	contenido.add_child(titulo)
+	contenido.add_child(estado_visible)
 
 
 func ajustar_ancho() -> void:
@@ -59,10 +62,10 @@ func ajustar_ancho() -> void:
 
 func abrir(datos: Dictionary, boton: Button, estado: String) -> void:
 	origen = boton
-	var estilo := get_theme_stylebox("panel") as StyleBoxFlat
-	estilo.border_color = MapaRuta.ESTADOS[estado]
+	estado_visible.text = estado
+	estado_visible.add_theme_color_override("font_color", MapaRuta.ESTADOS[estado])
 	for hijo in contenido.get_children():
-		if hijo != titulo:
+		if hijo != titulo and hijo != estado_visible:
 			contenido.remove_child(hijo)
 			hijo.queue_free()
 	titulo.text = datos.titulo

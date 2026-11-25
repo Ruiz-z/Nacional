@@ -2,16 +2,25 @@ extends RefCounted
 
 const Banco = preload("res://logica/competencias/banco.gd")
 
-static func preparar(banco: Dictionary) -> Dictionary:
+const Seleccion = preload("res://logica/aprendizaje/seleccion.gd")
+
+
+# `semilla` (el id del técnico) varía las preguntas por persona; con 0 se usa el orden del banco.
+static func preparar(banco: Dictionary, semilla: int = 0) -> Dictionary:
 	var plan := {"items": [], "faciles": {}, "avisos": []}
+	var grupos := []
 	for competencia in Banco.COMPETENCIAS:
 		for dificultad in ["media", "dificil"]:
-			agregar(plan, elegir(Banco.consultar(banco, competencia, dificultad),
-				"opcion-multiple"), "%s / %s" % [competencia, dificultad])
-		var facil := elegir(Banco.consultar(banco, competencia, "facil"), "opcion-multiple")
+			var item := Seleccion.elegir(Seleccion.barajar(Banco.consultar(banco, competencia, dificultad), semilla),
+				"opcion-multiple", grupos)
+			Seleccion.recordar(grupos, item)
+			agregar(plan, item, "%s / %s" % [competencia, dificultad])
+		var facil := Seleccion.elegir(Seleccion.barajar(Banco.consultar(banco, competencia, "facil"), semilla),
+			"opcion-multiple", grupos)
+		Seleccion.recordar(grupos, facil)
 		plan.faciles[competencia] = facil
-	agregar(plan, elegir(banco.items, "accion-panel"), "accion-panel")
-	agregar(plan, elegir(banco.items, "caso-diagnostico"), "caso-diagnostico")
+	agregar(plan, elegir(Seleccion.barajar(banco.items, semilla), "accion-panel"), "accion-panel")
+	agregar(plan, elegir(Seleccion.barajar(banco.items, semilla), "caso-diagnostico"), "caso-diagnostico")
 	return plan
 
 

@@ -1,0 +1,103 @@
+{
+  "id": "quiz-tablero-indicadores-y-presion-de-neumati-0fa5ef",
+  "formato": "quiz",
+  "titulo": "Tablero, indicadores y presión de neumáticos del Prevost H3",
+  "modelo": "prevost-h3",
+  "nivel": "basico",
+  "competencia": "electronica-conectividad",
+  "tema": "Tablero, indicadores y presión de neumáticos del Prevost H3",
+  "contenido": {
+    "preguntas": [
+      {
+        "pregunta": "¿Qué indica el tacómetro en el tablero del Prevost H3?",
+        "opciones": [
+          "La velocidad del vehículo en km/h",
+          "La presión de los neumáticos",
+          "La velocidad del motor en revoluciones por minuto",
+          "La temperatura del motor"
+        ],
+        "correcta": 2,
+        "explicacion": "El tacómetro indica la velocidad de operación del motor en cientos de revoluciones por minuto, ayudando a controlar la velocidad de motor y cambios de marcha."
+      },
+      {
+        "pregunta": "¿Qué debe hacer si la luz de advertencia de presión de aceite se enciende durante la marcha?",
+        "opciones": [
+          "Ignorarla y continuar manejando",
+          "Detener el motor y buscar la causa del problema",
+          "Aumentar la velocidad para aumentar la presión",
+          "Solicitar revisión cuando se detenga el vehículo"
+        ],
+        "correcta": 1,
+        "explicacion": "Si la luz de advertencia de presión de aceite se enciende, debes detener el motor inmediatamente y localizar la causa para evitar daños graves."
+      },
+      {
+        "pregunta": "¿Cómo se interpreta el indicador de presión de neumáticos con el sistema TPMS en Prevost H3?",
+        "opciones": [
+          "Muestra solo el nivel de temperatura de los neumáticos",
+          "Indica la presión individual de cada neumático y alerta cuando está baja o hay falla",
+          "Solo muestra presión promedio de todos los neumáticos",
+          "No muestra información sobre neumáticos de repuesto"
+        ],
+        "correcta": 1,
+        "explicacion": "El sistema TPMS muestra la presión de cada neumático, indica si están dentro de rango óptimo y da alertas si hay baja presión o fallas del sensor."
+      },
+      {
+        "pregunta": "¿Cuál es la precaución al manejar el motor con lectura en el rojo del tacómetro?",
+        "opciones": [
+          "Está permitido para acelerar el vehículo",
+          "Reducir el régimen para evitar daños al motor",
+          "No hay precaución especial, es normal",
+          "Solo afecta el consumo de combustible"
+        ],
+        "correcta": 1,
+        "explicacion": "Mantener el motor en régimen rojo puede causar daño severo, por ello se debe evitar y usar la zona verde para operación normal."
+      },
+      {
+        "pregunta": "¿Qué muestra el velocímetro en el tablero del Prevost H3?",
+        "opciones": [
+          "La velocidad en mph y km/h",
+          "La presión del aceite",
+          "La temperatura del motor",
+          "La presión del turbo"
+        ],
+        "correcta": 0,
+        "explicacion": "El velocímetro indica la velocidad del vehículo tanto en millas por hora (mph) como en kilómetros por hora (km/h)."
+      },
+      {
+        "pregunta": "¿Dónde se encuentra la información de presión recomendada para neumáticos en el Prevost H3?",
+        "opciones": [
+          "En el manual del motor solamente",
+          "En la placa de certificación DOT al lado del asiento del conductor",
+          "No es importante conocer la presión",
+          "Solo se revisa con herramienta externa"
+        ],
+        "correcta": 1,
+        "explicacion": "La presión recomendada está en la placa DOT situada en la consola izquierda junto al asiento del conductor y en la documentación técnica del vehículo."
+      },
+      {
+        "pregunta": "¿Qué indica la luz STOP en el tablero relacionada con el motor?",
+        "opciones": [
+          "Solo indica que el motor está listo para apagar",
+          "Se enciende con fallas críticas como baja presión de aceite o alta temperatura, indicando detenerse de inmediato",
+          "Indica que se puede seguir conduciendo normalmente",
+          "Alerta solo por baja presión de neumáticos"
+        ],
+        "correcta": 1,
+        "explicacion": "La luz STOP se activa con fallas graves de seguridad o funcionamiento, como presión baja de aceite o temperatura alta del motor, y obliga a detener el vehículo para evitar daños."
+      }
+    ]
+  },
+  "fuentes": [
+    "h3_operator_manual_en_0.pdf",
+    "PA1583-2 Literature.pdf"
+  ],
+  "origen": "ia",
+  "muestra": false,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T00:41:19-06:00",
+  "actualizado": "2026-11-25T00:41:19-06:00",
+  "historial": []
+}
