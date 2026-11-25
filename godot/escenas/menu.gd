@@ -107,6 +107,8 @@ func preparar_inicio(disponible: bool) -> void:
 	var materiales := crear_tarjeta("materiales", NOMBRES.materiales, "", false)
 	recorrido.get_node("Pasos").add_child(materiales)
 	materiales.get_node("Contenido/Insignia").text = "WEB"
+	# Los materiales van justo después de la práctica en el taller.
+	recorrido.get_node("Pasos").move_child(materiales, botones.escenario.get_index() + 1)
 	botones["materiales"] = materiales
 	var gestion := crear_tarjeta("administracion", NOMBRES.administracion, "", false)
 	recorrido.get_node("Pasos").add_child(gestion)
