@@ -54,14 +54,14 @@ func preparar(banco: Dictionary, ahora: int) -> bool:
 	ruta = estado.ruta
 	match paso:
 		"diagnostico":
-			plan = Diagnostico.preparar(banco)
+			plan = Diagnostico.preparar(banco, int(perfil.get("id", 0)))
 		"ruta":
 			ruta = ordenar(Diagnostico.resultado(historial, true), historial)
 			plan = Sesion.preparar(ruta, Sesion.catalogo(banco))
 			for leccion in plan.lecciones:
 				items.append_array(leccion.items)
 		"post":
-			plan = Evaluacion.post(banco, ids_pre())
+			plan = Evaluacion.post(banco, ids_pre(), int(perfil.get("id", 0)))
 		"retest":
 			var post := historial.filter(func(fila: Dictionary) -> bool: return fila.momento == "post")
 			if post.is_empty():
