@@ -152,19 +152,16 @@ func responder(respuesta: Variant, tiempo_ms: int, fuente: String, ahora: int) -
 
 
 func guardar(ahora: int) -> Dictionary:
+	# La ruta se muestra como mapa, sin preguntas: el paso se cierra al continuar.
+	if paso == "ruta":
+		return Recorrido.cerrar_paso(base, base + ".respaldo.sqlite", perfil.id, paso, ruta,
+			estado.microlecciones_hechas, ahora)
 	if items.is_empty() or intentos.size() != items.size():
 		return {}
 	var completadas: int = estado.microlecciones_hechas
 	resultados = Diagnostico.resultado(intentos)
 	if paso == "diagnostico":
 		ruta = ordenar(resultados, intentos)
-	elif paso == "ruta":
-		var cierre := Sesion.cerrar(plan, intentos, historial, 1)
-		if cierre.is_empty():
-			return {}
-		resultados = Diagnostico.resultado(historial + intentos, true)
-		ruta = cierre.ruta
-		completadas += plan.lecciones.size()
 	var valores := intentos.map(func(intento: Dictionary) -> Array:
 		return Registro.preparar(perfil.alias, intento))
 	return Recorrido.cerrar_paso(base, base + ".respaldo.sqlite", perfil.id, paso, ruta,

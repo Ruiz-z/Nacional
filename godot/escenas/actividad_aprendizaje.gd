@@ -21,6 +21,7 @@ var seleccion := []
 var fuente_entrada := "interfaz"
 var inicio_ms := 0
 var guardado := false
+var mapa_pendiente := false
 var ultima_retro := {}
 
 var titulo_preparado := ""
@@ -212,12 +213,23 @@ func mostrar_item() -> void:
 	mostrar_avisos()
 	var indice := actividad.intentos.size()
 	intro.text = texto_intro()
+	# La ruta es solo el mapa, sin preguntas: «Continuar» cierra el paso.
+	mapa_pendiente = actividad.paso == "ruta"
 	intro.visible = indice == 0 and not intro.text.is_empty()
-	if actividad.paso == "ruta" and indice == 0:
+	if mapa_pendiente:
+		item = {}
 		mostrar_roadmap()
-	else:
-		panel_detalle_mapa.hide()
-		roadmap_caja.hide()
+		retro.hide()
+		progreso.hide()
+		reiniciar.hide()
+		contenido.get_node("Numero").hide()
+		pregunta_visible.text = ""
+		enviar.text = "Continuar"
+		enviar.show()
+		enviar.grab_focus()
+		return
+	panel_detalle_mapa.hide()
+	roadmap_caja.hide()
 	mostrar_retro()
 	progreso.max_value = actividad.items.size()
 	progreso.value = mini(indice + 1, actividad.items.size())

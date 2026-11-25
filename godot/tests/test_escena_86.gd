@@ -18,10 +18,14 @@ static func comprobar(base: String) -> bool:
 	var correcto: bool = avance.guardado and menu.pantalla != null
 	if correcto:
 		var pantalla: Node = menu.pantalla
-		correcto = pantalla.detalle.text.is_empty() and pantalla.fuente.text.begins_with("Fuente:") \
-			and Pantallas.responder(pantalla, 6) and pantalla.detalle.text.contains("Temas para repasar")
+		# La ruta es solo el mapa: sin preguntas ni opciones; «Continuar» cierra el paso.
+		correcto = pantalla.mapa_pendiente and pantalla.roadmap_caja.visible and pantalla.opciones.get_child_count() == 0 \
+			and pantalla.enviar.text == "Continuar" and not pantalla.progreso.visible \
+			and pantalla.fuente.text.is_empty() and pantalla.item.is_empty()
+		pantalla.enviar.pressed.emit()
+		correcto = correcto and pantalla.guardado and pantalla.detalle.text.contains("Temas para repasar")
 	var estado := Recorrido.estado(base, menu.perfil.id, ahora)
 	var filas: Variant = Registro.leer(base, "T-85")
 	menu.free()
-	return correcto and filas.size() == 6 and estado.siguiente == "escenario" \
-		and estado.microlecciones_hechas == 3 and estado.ruta.size() == 4
+	return correcto and filas.is_empty() and estado.siguiente == "escenario" \
+		and estado.microlecciones_hechas == 0 and estado.ruta.size() == 4
