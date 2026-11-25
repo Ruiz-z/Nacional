@@ -8,6 +8,7 @@ const Banco = preload("res://logica/competencias/banco.gd")
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Cuentas = preload("res://logica/flujo/cuentas.gd")
 const UI = preload("res://escenas/cuenta_ui.gd")
+const Foundry = preload("res://logica/aprendizaje/foundry.gd")
 const Materiales = preload("res://logica/flujo/materiales.gd")
 const Administracion = preload("res://escenas/administracion.tscn")
 const Recorrido = preload("res://logica/flujo/recorrido.gd")
@@ -31,6 +32,7 @@ var conexion := Conexion.new()
 var pantalla: Node
 var ruta_en_pausa: Control
 var inicio_practica_mapa := 0
+var acceso_rapido: VBoxContainer
 var botones := {}
 var destacados := {}
 var disponible := false
@@ -64,6 +66,7 @@ func _ready() -> void:
 	inicio.get_node("Elegir").disabled = not disponible
 	inicio.get_node("Elegir").pressed.connect(enviar_ingreso)
 	inicio.get_node("Alta").toggled.connect(mostrar_claves)
+	crear_accesos_rapidos()
 	for campo in [usuario, clave, repeticion]:
 		campo.text_submitted.connect(func(_texto: String): enviar_ingreso())
 	barra.get_node("Salir").pressed.connect(cerrar_sesion)
@@ -273,6 +276,49 @@ func preparar_tarjeta() -> void:
 	inicio.get_node("Alta").text = "Mostrar contraseña"
 
 
+# Botones «Entrar con» para las cuentas de la variable NACIONAL_ACCESO_RAPIDO del .env (no se sube al repositorio).
+func crear_accesos_rapidos() -> void:
+	var lista := Cuentas.accesos_rapidos(Foundry.leer_env(Foundry.ENV))
+	if lista.is_empty():
+		return
+	acceso_rapido = VBoxContainer.new()
+	acceso_rapido.add_theme_constant_override("separation", 8)
+	var etiqueta := Label.new()
+	etiqueta.text = "Entrar con"
+	etiqueta.add_theme_color_override("font_color", Color("#566873"))
+	acceso_rapido.add_child(etiqueta)
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 8)
+	for nombre in lista:
+		var boton := Button.new()
+		boton.text = nombre
+		boton.name = "Rapido_" + nombre
+		boton.custom_minimum_size = Vector2(0, 44)
+		boton.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		boton.theme_type_variation = &"BotonClaro"
+		boton.pressed.connect(entrar_rapido.bind(nombre))
+		fila.add_child(boton)
+	acceso_rapido.add_child(fila)
+	var contenedor := inicio.get_node("Elegir").get_parent()
+	contenedor.add_child(acceso_rapido)
+	contenedor.move_child(acceso_rapido, inicio.get_node("Elegir").get_index() + 1)
+
+
+func entrar_rapido(nombre: String) -> void:
+	if etapa != "ingreso" or (is_instance_valid(aviso) and aviso.visible):
+		return
+	var resultado := Cuentas.entrar_rapido(base, nombre, Cuentas.accesos_rapidos(Foundry.leer_env(Foundry.ENV)))
+	if not resultado.ok:
+		aviso = UI.aviso(self, resultado.mensaje, usuario)
+		return
+	perfil = {"ok": true, "id": resultado.id, "alias": resultado.alias, "rol": resultado.rol}
+	usuario.text = ""
+	clave.text = ""
+	etapa = "menu"
+	actualizar()
+	enfocar_inicio()
+
+
 func enviar_ingreso() -> void:
 	var boton: Button = inicio.get_node("Elegir")
 	if boton.disabled or (is_instance_valid(aviso) and aviso.visible):
@@ -381,6 +427,8 @@ func actualizar() -> void:
 	columna.get_node("Hero/Margen/Fila").alignment = BoxContainer.ALIGNMENT_CENTER if solo_ingreso else BoxContainer.ALIGNMENT_BEGIN
 	tarjeta.custom_minimum_size.x = 400.0 if solo_ingreso else 342.0
 	tarjeta.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if solo_ingreso else Control.SIZE_FILL
+	if acceso_rapido != null:
+		acceso_rapido.visible = solo_ingreso and etapa == "ingreso" and disponible
 	ajustar_hero()
 	var formulario := not con_sesion or etapa == "cambio"
 	for nombre in ["EtiquetaAlias", "Alias", "EtiquetaClave", "Clave", "EtiquetaRepetir", "Repetir", "Elegir", "Alta"]:

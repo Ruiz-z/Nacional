@@ -241,3 +241,4 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-206 — La práctica en el taller se bloquea hasta terminar el diagnóstico y las órdenes se abren por nivel según el dominio de cada competencia (Media desde 50, Difícil desde 75; `niveles.gd`).
 - [x] T-207 — Sonido sintetizado en código (clics, pasos, éxito, error, falta crítica, EPP, elevador, victoria). La tecla M lo silencia y la preferencia se guarda; sin archivos de audio externos.
 - [x] T-208 — Materiales: botón Publicar y Retirar en cada tarjeta y en el visor; el técnico recibe primero los publicados que le tocan según su ruta de aprendizaje y su nivel (`asignacion.py`, sección «Para ti»).
+- [x] T-209 — Botones «Entrar con» (mau, admin, prueba) en el ingreso, solo si el `.env` local trae NACIONAL_ACCESO_RAPIDO; sin esa línea el ingreso pide contraseña.
