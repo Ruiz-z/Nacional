@@ -8,6 +8,8 @@ const Actividad = preload("res://logica/flujo/actividad_aprendizaje.gd")
 const Foundry = preload("res://logica/aprendizaje/foundry.gd")
 const RutaIA = preload("res://logica/aprendizaje/ruta_ia.gd")
 const Ordenes = preload("res://logica/simulador/ordenes.gd")
+const DatosMapa = preload("res://logica/aprendizaje/mapa_ruta.gd")
+const MapaRuta = preload("res://escenas/mapa_ruta.gd")
 const PanelVirtual = preload("res://escenas/panel_virtual.tscn")
 
 var actividad := Actividad.new()
@@ -24,7 +26,7 @@ var cliente_ia: Node
 var retro: Label
 var intro: Label
 var resultados_caja: VBoxContainer
-var roadmap_caja: VBoxContainer
+var roadmap_caja: MapaRuta
 @onready var contenido := $Margen/Centro/Tarjeta/Contenido
 @onready var opciones := contenido.get_node("Opciones")
 @onready var enviar := contenido.get_node("Enviar")
@@ -93,8 +95,7 @@ func crear_bloques() -> void:
 	retro.hide()
 	contenido.add_child(retro)
 	contenido.move_child(retro, intro.get_index() + 1)
-	roadmap_caja = VBoxContainer.new()
-	roadmap_caja.add_theme_constant_override("separation", 0)
+	roadmap_caja = MapaRuta.new()
 	roadmap_caja.hide()
 	contenido.add_child(roadmap_caja)
 	contenido.move_child(roadmap_caja, intro.get_index() + 1)
@@ -113,86 +114,19 @@ func texto_intro() -> String:
 			var origen := "Ruta calculada sin IA."
 			if actividad.origen_ruta == "ia":
 				origen = "Ruta generada con IA."
-				if not actividad.fuentes_ia.is_empty():
-					origen += " Basada en: %s." % ", ".join(actividad.fuentes_ia)
-			return "Este es tu camino según tu diagnóstico. Hoy haces %d preguntas con %d lecciones cortas; el resto queda para después. %s" % [
+			return "Tu ruta parte del diagnóstico. Hoy tienes %d preguntas en %d lecciones cortas. %s" % [
 				total, actividad.plan.lecciones.size(), origen]
 	return ""
 
 
-func circulo(color: Color, texto: String) -> Control:
-	var nodo := PanelContainer.new()
-	var caja := StyleBoxFlat.new()
-	caja.bg_color = color
-	caja.set_corner_radius_all(18)
-	nodo.add_theme_stylebox_override("panel", caja)
-	nodo.custom_minimum_size = Vector2(36, 36)
-	nodo.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	var rotulo := Label.new()
-	rotulo.text = texto
-	rotulo.add_theme_color_override("font_color", Color("#0B1C26"))
-	rotulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	rotulo.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	nodo.add_child(rotulo)
-	return nodo
-
-
-# Camino de la ruta: un paso por competencia, de la que más necesita a la que menos.
 func mostrar_roadmap() -> void:
-	for hijo in roadmap_caja.get_children():
-		roadmap_caja.remove_child(hijo)
-		hijo.queue_free()
-	var motivos: Array = actividad.motivos_ruta()
 	var instantanea := Actividad.Diagnostico.resultado(actividad.historial, true)
 	var de_hoy := {}
 	for leccion in actividad.plan.lecciones:
 		de_hoy[leccion.competencia] = true
-	for indice in motivos.size():
-		var tema: Dictionary = motivos[indice]
-		var dominio: float = instantanea[tema.competencia].dominio
-		var hoy: bool = de_hoy.has(tema.competencia)
-		var fila := HBoxContainer.new()
-		fila.add_theme_constant_override("separation", 14)
-		roadmap_caja.add_child(fila)
-		var riel := VBoxContainer.new()
-		riel.add_theme_constant_override("separation", 0)
-		riel.custom_minimum_size.x = 36
-		fila.add_child(riel)
-		riel.add_child(circulo(Color("#72F5ED") if hoy else Color("#5E7A8A"), str(indice + 1)))
-		if indice < motivos.size() - 1:
-			var linea := ColorRect.new()
-			linea.color = Color("#72F5ED") if hoy else Color("#3C5666")
-			linea.custom_minimum_size = Vector2(4, 40)
-			linea.size_flags_vertical = Control.SIZE_EXPAND_FILL
-			linea.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-			riel.add_child(linea)
-		var cuerpo := VBoxContainer.new()
-		cuerpo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		cuerpo.add_theme_constant_override("separation", 4)
-		fila.add_child(cuerpo)
-		var titulo := Label.new()
-		titulo.text = "%s · %s" % [Actividad.Banco.COMPETENCIAS[tema.competencia], "Hoy" if hoy else "Después"]
-		titulo.theme_type_variation = &"Seccion"
-		cuerpo.add_child(titulo)
-		var barra := ProgressBar.new()
-		barra.max_value = 100
-		barra.value = dominio
-		barra.show_percentage = false
-		barra.custom_minimum_size.y = 10
-		var relleno := StyleBoxFlat.new()
-		relleno.bg_color = nivel_color(dominio)
-		relleno.set_corner_radius_all(5)
-		barra.add_theme_stylebox_override("fill", relleno)
-		cuerpo.add_child(barra)
-		var detalle_tema := Label.new()
-		detalle_tema.text = "%s%s" % [tema.motivo, (" " + tema.refuerzo) if not tema.refuerzo.is_empty() else ""]
-		detalle_tema.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		detalle_tema.theme_type_variation = &"Secundario"
-		cuerpo.add_child(detalle_tema)
-		var espacio := Control.new()
-		espacio.custom_minimum_size.y = 12
-		cuerpo.add_child(espacio)
-	roadmap_caja.show()
+	var nodos := DatosMapa.armar(actividad.motivos_ruta(), instantanea, actividad.historial,
+		Ordenes.listar().ordenes, actividad.detalle_ia, de_hoy)
+	roadmap_caja.mostrar(nodos, actividad.fuentes_ia, actividad.detalle_ia)
 
 
 func mostrar_retro() -> void:

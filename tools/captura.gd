@@ -1,6 +1,8 @@
 extends SceneTree
 
 # Uso: godot --path godot -s ../tools/captura.gd -- escenas/bus.tscn ../build/capturas/bus.png
+# Mapa: godot --path godot -s ../tools/captura.gd -- mapa-ruta salida.png 1280 720
+# Tramo final: usa mapa-ruta-final como escena.
 # Órdenes: godot --path godot -s ../tools/captura.gd -- ordenes salida.png 1280 720
 # Menú: godot --path godot -s ../tools/captura.gd -- escenas/menu.tscn salida.png 1280 720
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
@@ -109,7 +111,12 @@ func capturar() -> void:
 	if not verificar and DisplayServer.get_name() == "headless":
 		fallar("La captura requiere un servidor gráfico. Usa --verificar para comprobar el estado sin generar PNG.")
 		return
-	var ruta := "escenas/ordenes.tscn" if args[0] == "ordenes" else args[0]
+	var mapa := args[0] in ["mapa-ruta", "mapa-ruta-final"]
+	if mapa:
+		OS.set_environment("NACIONAL_SIN_NUBE", "1")
+	var rutas_captura := {"ordenes": "escenas/ordenes.tscn",
+		"mapa-ruta": "escenas/ruta.tscn", "mapa-ruta-final": "escenas/ruta.tscn"}
+	var ruta: String = rutas_captura.get(args[0], args[0])
 	var paquete := load("res://" + ruta) as PackedScene
 	if paquete == null:
 		fallar("No se pudo cargar la escena.")
@@ -142,6 +149,8 @@ func capturar() -> void:
 			escena.archivo = "escenarios/%s.json" % {"cabina": "comunicacion", "banco": "modulo_auxiliar"}.get(zona, zona)
 		escena.get_node("Jugador").set_physics_process(false)
 	vp.add_child(escena)
+	if mapa:
+		preparar_mapa(escena)
 	if vista != "orden" and escena.get_node_or_null("Flashcard") != null:
 		escena.flashcard.confirmar()
 
@@ -351,6 +360,23 @@ func capturar() -> void:
 		preparar_flashcard(escena, tipo_flashcard)
 	await process_frame
 	await process_frame
+	if mapa:
+		var control: Control = escena.roadmap_caja
+		var rectangulo := control.get_global_rect()
+		if not control.visible or rectangulo.position.x < 0 or rectangulo.end.x > tam.x \
+				or not mapa_cabe(control, rectangulo):
+			fallar("El contenido del mapa queda recortado.")
+			return
+		if args[0] == "mapa-ruta-final":
+			escena.scroll_vertical += maxi(0, ceili(rectangulo.end.y - tam.y + 24.0))
+			await process_frame
+			var borde_inferior := control.get_global_rect().end.y
+			if borde_inferior < 0 or borde_inferior > tam.y:
+				fallar("El final del mapa queda fuera del desplazamiento.")
+				return
+		elif escena.scroll_vertical != 0:
+			fallar("La vista inicial debe mostrar el comienzo del mapa.")
+			return
 	if not tipo_flashcard.is_empty() and (not escena.flashcard.visible \
 			or not vp.get_visible_rect().encloses(escena.flashcard.tarjeta.get_global_rect())):
 		fallar("La tarjeta no se abrió o queda recortada.")
@@ -400,6 +426,52 @@ func capturar() -> void:
 		return
 	print("Guardado ", args[1], " ", img.get_size())
 	quit(0)
+
+
+func preparar_mapa(escena: ScrollContainer) -> void:
+	var actividad: RefCounted = escena.actividad
+	actividad.paso = "ruta"
+	actividad.historial = [
+		{"competencia": "seguridad-alto-voltaje", "tipo_error": "falta-critica", "valor": 0, "peso": 3},
+		{"competencia": "seguridad-alto-voltaje", "tipo_error": "paso-omitido", "valor": 0, "peso": 1,
+			"formato": "caso-diagnostico"},
+		{"competencia": "seguridad-alto-voltaje", "tipo_error": "paso-omitido", "valor": 0, "peso": 1,
+			"formato": "caso-diagnostico"},
+		{"competencia": "sistema-electrico-bateria", "tipo_error": "punto-de-medicion-incorrecto",
+			"valor": 0, "peso": 1, "formato": "caso-diagnostico"},
+		{"competencia": "diagnostico-fallas", "resultado": "incorrecto", "valor": 0, "peso": 1,
+			"formato": "opcion-multiple"},
+		{"competencia": "sistema-electrico-bateria", "resultado": "correcto", "valor": 100, "peso": 1,
+			"formato": "opcion-multiple"},
+		{"competencia": "electronica-conectividad", "resultado": "correcto", "valor": 100, "peso": 1,
+			"formato": "opcion-multiple"},
+	]
+	var instantanea: Dictionary = actividad.Diagnostico.resultado(actividad.historial, true)
+	actividad.ruta = actividad.ordenar(instantanea, actividad.historial)
+	actividad.origen_ruta = "ia"
+	actividad.fuentes_ia = ["ejemplo didáctico, sin fuente oficial"]
+	actividad.detalle_ia = {"seguridad-alto-voltaje": {
+		"motivo": "Tuviste una falta crítica.",
+		"practica": "Practica el procedimiento de seguridad.",
+		"ordenes": [],
+	}}
+	var catalogo: Array = actividad.Sesion.catalogo(actividad.Banco.cargar())
+	actividad.plan = actividad.Sesion.preparar(actividad.ruta, catalogo)
+	for leccion in actividad.plan.lecciones:
+		actividad.items.append_array(leccion.items)
+	escena.contenido.get_node("Titulo").text = "Ruta de aprendizaje"
+	escena.mostrar_item()
+
+
+func mapa_cabe(nodo: Node, rectangulo: Rect2) -> bool:
+	if nodo is Control and not rectangulo.grow(1.0).encloses(nodo.get_global_rect()):
+		return false
+	if nodo is Label and nodo.get_visible_line_count() != nodo.get_line_count():
+		return false
+	for hijo in nodo.get_children():
+		if not mapa_cabe(hijo, rectangulo):
+			return false
+	return true
 
 
 func preparar_guia(escena: Node3D, vista: String) -> bool:

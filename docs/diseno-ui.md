@@ -25,3 +25,9 @@ El catálogo presenta Fácil, Media y Difícil en ese orden. Cada sección indic
 - **Difícil (4).** Motor combina medición de temperatura con bloqueo de seguridad. Módulo auxiliar exige medir, reportar e interpretar varios puntos. Fuga neumática y amortiguador combinan trabajo en los bajos con comprobaciones o apriete de componentes de la suspensión.
 
 Estas asignaciones cubren los diez escenarios. Aislamiento requiere evaluar un riesgo crítico, aunque tenga pocas misiones.
+
+## Mapa de la ruta de aprendizaje
+
+Un camino vertical sólido une las competencias en el orden de la ruta. Las líneas punteadas enlazan los errores con su conteo a la izquierda y las órdenes con el refuerzo a la derecha. El mapa cabe en el desplazamiento vertical de la actividad a 1280 × 720 y 1920 × 1080. Los títulos y las fuentes se ajustan en varias líneas.
+
+Los nodos usan Poppins y rectángulos con radio de 3 px y borde de 2 px. Cada competencia muestra su dominio y el estado «Primero», «Hoy», «Después» o «Hecho». El ámbar señala la falta crítica y el turquesa marca la práctica de hoy. Las ramas y los estados restantes usan tonos neutros. La nota de fuente va debajo del nodo central cuando hay una cita para la propuesta.
