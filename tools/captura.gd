@@ -14,6 +14,7 @@ extends SceneTree
 # Resumen y hallazgo del motor: [ancho alto] resumen|resumen-critico|exito [--verificar]
 # Cierre: [ancho alto] cierre [correcto|incorrecto] [--verificar]
 # Misiones: [ancho alto] mision [motor|faros|neumatico] [--verificar]
+# EPP: -- epp|epp-puesto salida.png [1280 720|1920 1080] [--verificar]
 # Inventario: [ancho alto] inventario|inventario-lleno [--verificar]
 # Guía automática: [ancho alto] guia-objeto|guia-inventario [--verificar]
 # Taller: [ancho alto] taller|cajon|rotulos|baliza|elevador|elevador-guia|bajos [--verificar]
@@ -132,7 +133,9 @@ func capturar() -> void:
 	var dashboard := DASHBOARDS.has(args[0])
 	var tablero := args[0] in ["tablero-jefe-lista", "tablero-jefe-ficha"]
 	var ficha := args[0] == "tablero-jefe-ficha"
-	var rutas_captura := {"tablero-jefe-lista": "escenas/tablero.tscn",
+	var vista_epp := args[0] in ["epp", "epp-puesto"]
+	var rutas_captura := {"epp": "escenas/bus.tscn", "epp-puesto": "escenas/bus.tscn",
+		"tablero-jefe-lista": "escenas/tablero.tscn",
 		"tablero-jefe-ficha": "escenas/tablero.tscn", "ordenes": "escenas/ordenes.tscn",
 		"mapa-ruta": "escenas/ruta.tscn", "mapa-ruta-final": "escenas/ruta.tscn",
 		"mapa-ruta-detalle": "escenas/ruta.tscn"}
@@ -149,6 +152,11 @@ func capturar() -> void:
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(vp)
 	var escena := paquete.instantiate()
+	if vista_epp:
+		escena.modo_captura = true
+		escena.archivo = "escenarios/motor.json"
+		escena.epp_obligatorio = true
+		escena.get_node("Jugador").set_physics_process(false)
 	var sector := escena.get_node_or_null("Sector")
 	if not vista.is_empty():
 		if sector == null or not escena.has_method("mostrar_estado"):
@@ -208,6 +216,10 @@ func capturar() -> void:
 		preparar_mapa(escena)
 	if vista != "orden" and escena.get_node_or_null("Flashcard") != null:
 		escena.flashcard.confirmar()
+
+	if vista_epp and not await preparar_epp(escena, args[0] == "epp-puesto"):
+		fallar("La estación o el EPP equipado no corresponde a la captura.")
+		return
 
 	if not vista.is_empty():
 		if escena.motor == null:
@@ -1112,6 +1124,38 @@ func pieza_gabinete(vista: String, menu: bool) -> String:
 		return "compuerta"
 	return "terminal" if menu and vista == "danado" else "monitor"
 
+
+
+func preparar_epp(escena: Node3D, puesto: bool) -> bool:
+	var estacion: Node3D = escena.estacion_epp
+	if estacion == null or not escena.jugador.activo:
+		return false
+	var camara: Camera3D = escena.jugador.camara
+	var cuadro := camara.get_viewport().get_visible_rect()
+	var puntos: Array[Node3D] = [escena.taller.rotulos[estacion], estacion.piezas[estacion.LISTO]]
+	for id in estacion.ofrecidos:
+		puntos.append(estacion.piezas[id])
+	for nodo in puntos:
+		var punto := nodo.global_position
+		if camara.is_position_behind(punto) or not cuadro.has_point(camara.unproject_position(punto)):
+			return false
+	# Comprueba el alcance de cada hueco y del panel al acercarse al casillero.
+	await physics_frame
+	var frente := estacion.global_position + Vector3.UP * 1.22
+	escena.jugador.ubicar(estacion.ENTRADA + Vector3.BACK * 0.65)
+	for nodo in puntos.slice(1):
+		escena.apuntar_jugador(nodo.global_position)
+		escena.alcance.force_raycast_update()
+		if escena.alcance.get_collider() != nodo:
+			printerr("La mira no alcanza ", nodo.nombre)
+			return false
+	escena.jugador.ubicar(estacion.ENTRADA)
+	escena.apuntar_jugador(frente)
+	if puesto:
+		Acciones.vestir(escena)
+		await create_timer(0.28).timeout
+		return escena.motor.epp_listo() and not estacion.elegidos().is_empty()
+	return escena.motor.epp_pendiente() and estacion.elegidos().is_empty()
 
 func comprobar_pieza(escena: Node3D, esperado: String) -> bool:
 	var alcance: RayCast3D = escena.alcance

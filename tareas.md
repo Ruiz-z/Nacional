@@ -237,4 +237,4 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-202 — Implementar los cuatro visores con botones, foco visible y retroalimentación anunciada.
 - [ ] T-203 — Verificar los visores con capturas de Chromium a 1280 × 800 y 390 px de ancho. Las interacciones se comprobaron en el DOM. El entorno de ejecución bloqueó el inicio de Chromium y los sockets de localhost.
 - [x] T-204 — EPP como primer paso de cada orden: catálogo y requisitos por tarea (`epp.gd`), vestidor con señuelos, bloqueo de pasos en el motor y registro del intento (SPEC-simulador RF-39).
-- [ ] T-205 — Casillero de EPP en el taller 3D y animación de ponerse el equipo (hoy es un vestidor en pantalla). Validar con Volvo qué EPP exige cada tarea.
+- [x] T-205 — Casillero de EPP en el taller 3D, selección en primera persona y retroalimentación del equipo puesto (SPEC-simulador RF-39). Queda pendiente la validación con Volvo de los requisitos por tarea.

@@ -1,5 +1,6 @@
 extends CharacterBody3D
 
+const ModeloEpp = preload("res://escenas/epp_3d.gd")
 const Movimiento = preload("res://logica/simulador/movimiento.gd")
 
 const Brazos = preload("res://assets/modelos/manos/arms_low_poly.fbx")
@@ -18,6 +19,9 @@ var gravedad: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 @onready var camara: Camera3D = $Camara
 
+var brazos: Node3D
+var material_guantes := StandardMaterial3D.new()
+var animacion_equipo: Tween
 var herramientas := {}
 var soporte_mano: Node3D
 var objeto_mano: Node3D
@@ -26,7 +30,7 @@ var pantalla_multimetro: Label3D
 
 
 func _ready() -> void:
-	var brazos := Brazos.instantiate() as Node3D
+	brazos = Brazos.instantiate() as Node3D
 	brazos.position = Vector3(0, -0.47, -0.49)
 	brazos.rotation_degrees = Vector3(-5, 180, 0)
 	brazos.scale = Vector3.ONE * 0.27
@@ -68,6 +72,19 @@ func _ready() -> void:
 		malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mostrar_herramienta()
 
+
+func mostrar_guantes(id: String) -> void:
+	material_guantes.albedo_color = ModeloEpp.DIELECTRICOS if id == "guantes_dielectricos" else ModeloEpp.TRABAJO
+	for malla in brazos.find_children("*", "MeshInstance3D", true, false):
+		malla.material_override = null if id.is_empty() else material_guantes
+
+
+func animar_equipamiento() -> void:
+	if animacion_equipo != null:
+		animacion_equipo.kill()
+	animacion_equipo = create_tween().set_trans(Tween.TRANS_SINE)
+	animacion_equipo.tween_property(brazos, "position:y", -0.55, 0.08)
+	animacion_equipo.tween_property(brazos, "position:y", -0.47, 0.17)
 
 func etiqueta_multimetro(padre: Node3D, centro: Vector3, texto: String, escala: float) -> Label3D:
 	var etiqueta := Label3D.new()
