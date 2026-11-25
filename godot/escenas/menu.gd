@@ -404,7 +404,7 @@ func actualizar() -> void:
 		var boton: Button = botones[paso]
 		boton.visible = not con_sesion or paso in permitidos
 		boton.disabled = not con_sesion or (rol == "tecnico" and paso not in estado.get("habilitados", [])
-			and not (paso == "retest" and siguiente == "retest") and paso not in ["tablero", "materiales"] and not (paso in ["ruta", "escenario"] and siguiente != "diagnostico"))
+			and not (paso == "retest" and siguiente == "retest") and paso != "tablero" and not (paso in ["ruta", "escenario", "materiales"] and siguiente != "diagnostico"))
 		# Los pasos anteriores al siguiente ya se hicieron: no están bloqueados, están completados.
 		var hecho: bool = rol == "tecnico" and Recorrido.PASOS.has(paso) and Recorrido.PASOS.has(siguiente) \
 			and Recorrido.PASOS.find(paso) < Recorrido.PASOS.find(siguiente) and paso != "tablero"
