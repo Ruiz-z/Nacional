@@ -33,6 +33,46 @@ const nombre = {
   competencia: (id) => estado.catalogo.competencias.find((c) => c.id === id)?.nombre || id,
   formato: (id) => estado.catalogo.formatos.find((f) => f.id === id)?.nombre || id,
 };
+// Un glifo por formato, trazo único de 1.75 px. El nombre del formato siempre va escrito al lado.
+const GLIFOS = {
+  tarjetas: ["rect:3,7,13,10,2", "rect:8,3,13,10,2"],
+  presentacion: ["rect:3,4,18,12,2", "line:12,16,12,20", "line:8,20,16,20"],
+  infografia: ["line:5,20,5,13", "line:12,20,12,5", "line:19,20,19,9"],
+  quiz: ["circle:12,12,9", "poly:8,12.5,11,15.5,16,9"],
+  pareo: ["circle:6,7,2.5", "circle:18,17,2.5", "poly:8.5,7,13,7,13,17,15.5,17"],
+  secuencia: ["line:10,6,20,6", "line:10,12,20,12", "line:10,18,20,18", "circle:5,6,1", "circle:5,12,1", "circle:5,18,1"],
+};
+const ESPACIO_SVG = "http://www.w3.org/2000/svg";
+
+function glifo(formato) {
+  const svg = document.createElementNS(ESPACIO_SVG, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("class", "glifo");
+  for (const trazo of GLIFOS[formato] || []) {
+    const [tipo, datos] = trazo.split(":");
+    const n = datos.split(",").map(Number);
+    let nodo;
+    if (tipo === "rect") { nodo = document.createElementNS(ESPACIO_SVG, "rect"); [["x", n[0]], ["y", n[1]], ["width", n[2]], ["height", n[3]], ["rx", n[4]]].forEach(([k, v]) => nodo.setAttribute(k, v)); }
+    else if (tipo === "circle") { nodo = document.createElementNS(ESPACIO_SVG, "circle"); [["cx", n[0]], ["cy", n[1]], ["r", n[2]]].forEach(([k, v]) => nodo.setAttribute(k, v)); }
+    else if (tipo === "line") { nodo = document.createElementNS(ESPACIO_SVG, "line"); [["x1", n[0]], ["y1", n[1]], ["x2", n[2]], ["y2", n[3]]].forEach(([k, v]) => nodo.setAttribute(k, v)); }
+    else { nodo = document.createElementNS(ESPACIO_SVG, "polyline"); nodo.setAttribute("points", n.reduce((p, v, i) => p + (i % 2 ? "," : " ") + v, "").trim()); }
+    svg.append(nodo);
+  }
+  return svg;
+}
+
+// Cuánto contiene el material, para decidirlo de un vistazo: «8 preguntas».
+function contenidoDe(m) {
+  const c = m.contenido || {};
+  const por = { tarjetas: ["tarjetas", "tarjeta", "tarjetas"], presentacion: ["diapositivas", "diapositiva", "diapositivas"],
+    infografia: ["bloques", "bloque", "bloques"], quiz: ["preguntas", "pregunta", "preguntas"],
+    pareo: ["pares", "par", "pares"], secuencia: ["pasos", "paso", "pasos"] }[m.formato];
+  if (!por || !Array.isArray(c[por[0]])) return "";
+  const n = c[por[0]].length;
+  return `${n} ${n === 1 ? por[1] : por[2]}`;
+}
+
 const ORIGEN = { ia: "Generado con IA", banco: "Generado sin IA (banco)", manual: "Editado a mano" };
 
 function opciones(select, lista, todos) {
@@ -43,7 +83,8 @@ function opciones(select, lista, todos) {
 
 function mostrarMensaje(caja, tipo, texto, detalles = []) {
   caja.className = `mensaje ${tipo}`;
-  caja.replaceChildren(texto, detalles.length ? el("ul", {}, detalles.slice(0, 8).map((d) => el("li", {}, d))) : "");
+  caja.replaceChildren(el("strong", {}, tipo === "error" ? "No se pudo: " : ""), texto,
+    detalles.length ? el("ul", {}, detalles.slice(0, 8).map((d) => el("li", {}, d))) : "");
 }
 
 // --- Filtros ---
@@ -51,14 +92,14 @@ function mostrarMensaje(caja, tipo, texto, detalles = []) {
 function pintarFiltroNivel() {
   const basicos = estado.catalogo.enfoques.basicos;
   const opcionesNivel = [
-    { etiqueta: "Básicos (Novato y Básico)", niveles: basicos },
+    { etiqueta: "Básicos", niveles: basicos },
     { etiqueta: "Todos", niveles: [] },
     ...estado.catalogo.niveles.map((n) => ({ etiqueta: n.nombre, niveles: [n.id] })),
   ];
   $("filtro-nivel").replaceChildren(...opcionesNivel.map((o) => {
     const activo = o.niveles.join() === estado.niveles.join();
     return el("button", {
-      type: "button", clase: "chip-filtro", "aria-pressed": String(activo),
+      type: "button", "aria-pressed": String(activo),
       onclick: () => { estado.niveles = o.niveles; pintarFiltroNivel(); cargarMateriales(); },
     }, o.etiqueta);
   }));
@@ -85,23 +126,32 @@ async function cargarMateriales() {
 
 // --- Catálogo: agrupado por modelo de autobús ---
 
+function marcaEstado(m) {
+  return el("span", { clase: `estado-material ${m.estado}` }, el("i", { "aria-hidden": "true" }), m.estado === "revisado" ? "Revisado" : "Borrador");
+}
+
 function tarjetaMaterial(m) {
-  return el("button", { type: "button", clase: "material", onclick: () => abrir(m.id) },
-    el("div", { clase: "chips" },
-      el("span", { clase: "chip formato-c" }, nombre.formato(m.formato)),
-      el("span", { clase: `chip nivel-${m.nivel}` }, nombre.nivel(m.nivel)),
-      estado.vista === "autor" ? el("span", { clase: `chip ${m.estado}` }, m.estado === "revisado" ? "Revisado" : "Borrador") : null,
-      m.muestra ? el("span", { clase: "chip muestra" }, "Ejemplo didáctico") : null),
+  const cuanto = contenidoDe(m);
+  return el("button", { type: "button", clase: `material tipo-${m.formato}`, onclick: () => abrir(m.id) },
+    el("span", { clase: "material-formato" }, glifo(m.formato), nombre.formato(m.formato)),
     el("h3", {}, m.titulo),
-    el("p", { clase: "tema" }, `${nombre.competencia(m.competencia)} · ${m.tema}`));
+    el("p", { clase: "tema" }, nombre.competencia(m.competencia)),
+    el("span", { clase: "material-pie" },
+      el("span", {}, [`Nivel ${nombre.nivel(m.nivel).toLowerCase()}`, cuanto].filter(Boolean).join(" · ")),
+      estado.vista === "autor" ? marcaEstado(m) : null,
+      m.muestra ? el("span", { clase: "muestra" }, "Ejemplo") : null));
 }
 
 function pintarCatalogo() {
   const raiz = $("catalogo");
-  if (!estado.materiales.length) {
-    raiz.replaceChildren(el("div", { clase: "vacio" }, estado.vista === "autor"
-      ? "No hay materiales con estos filtros. Crea uno arriba."
-      : "Todavía no hay materiales revisados con estos filtros. Prueba con «Todos» o pide a tu instructor que publique uno."));
+  const total = estado.materiales.length;
+  $("cuenta").textContent = total ? `${total} ${total === 1 ? "material" : "materiales"}` : "";
+  if (!total) {
+    raiz.replaceChildren(el("div", { clase: "vacio" },
+      el("strong", {}, estado.vista === "autor" ? "No hay materiales con estos filtros." : "Aún no hay materiales revisados con estos filtros."),
+      el("span", {}, estado.vista === "autor"
+        ? "Crea uno arriba, o quita algún filtro."
+        : "Prueba con el nivel «Todos» o pide a tu instructor que publique uno.")));
     return;
   }
   const grupos = new Map();
@@ -120,11 +170,16 @@ function pintarCatalogo() {
 // --- Panel de autor ---
 
 function pintarFormatosCrear() {
-  $("formatos").replaceChildren(...estado.catalogo.formatos.map((f) => el("button", {
-    type: "button", clase: "formato", "aria-pressed": String(f.id === estado.formatoCrear),
-    onclick: () => { estado.formatoCrear = f.id; pintarFormatosCrear(); },
-  }, el("span", { clase: "tipo" }, f.tipo), el("strong", {}, f.nombre), el("small", {}, f.descripcion))));
+  const grupos = [["Para estudiar", "estudio"], ["Juegos", "juego"]];
+  $("formatos").replaceChildren(...grupos.map(([titulo, tipo]) => el("div", { clase: "formatos-grupo", role: "presentation" },
+    el("span", { clase: "formatos-titulo" }, titulo),
+    el("div", { clase: "segmentos" }, estado.catalogo.formatos.filter((f) => f.tipo === tipo).map((f) => el("button", {
+      type: "button", role: "radio", "aria-checked": String(f.id === estado.formatoCrear),
+      "aria-pressed": String(f.id === estado.formatoCrear),
+      onclick: () => { estado.formatoCrear = f.id; pintarFormatosCrear(); },
+    }, glifo(f.id), f.nombre))))));
   const formato = estado.catalogo.formatos.find((f) => f.id === estado.formatoCrear);
+  $("descripcion-formato").textContent = formato.descripcion;
   $("generar").textContent = estado.ia ? "Generar con IA" : "Generar desde el banco";
   $("aviso-generar").textContent = estado.ia
     ? "La IA consulta los manuales (unos 10 a 40 s). El material queda como borrador hasta que alguien lo revise."
@@ -140,6 +195,7 @@ async function generar() {
   const tema = $("crear-tema").value.trim();
   if (!tema) { mostrarMensaje(caja, "error", "Escribe el tema del material."); $("crear-tema").focus(); return; }
   boton.disabled = true;
+  boton.setAttribute("aria-busy", "true");
   const texto = boton.textContent;
   boton.textContent = estado.ia ? "Consultando los manuales…" : "Armando…";
   mostrarMensaje(caja, "ok", estado.ia ? "Consultando los manuales de Volvo…" : "Armando el material con el banco…");
@@ -155,6 +211,7 @@ async function generar() {
   } catch (error) {
     mostrarMensaje(caja, "error", error.message, error.detalles);
   } finally {
+    boton.removeAttribute("aria-busy");
     boton.textContent = texto;
     pintarFormatosCrear();
   }
@@ -175,13 +232,11 @@ async function abrir(id) {
   const visorDe = Formatos[m.formato];
   visor.replaceChildren(...[
     el("button", { type: "button", clase: "boton secundario chico cerrar", onclick: cerrarVisor }, "Cerrar"),
-    el("div", { clase: "chips" },
-      el("span", { clase: "chip formato-c" }, nombre.formato(m.formato)),
-      el("span", { clase: `chip nivel-${m.nivel}` }, nombre.nivel(m.nivel)),
-      el("span", { clase: "chip" }, nombre.modelo(m.modelo)),
-      el("span", { clase: "chip" }, nombre.competencia(m.competencia)),
-      el("span", { clase: `chip ${m.estado}` }, m.estado === "revisado" ? "Revisado" : "Borrador"),
-      m.muestra ? el("span", { clase: "chip muestra" }, "Ejemplo didáctico") : null),
+    el("p", { clase: "visor-meta" },
+      el("span", { clase: "material-formato" }, glifo(m.formato), nombre.formato(m.formato)),
+      el("span", {}, `${nombre.modelo(m.modelo)} · ${nombre.competencia(m.competencia)} · Nivel ${nombre.nivel(m.nivel).toLowerCase()}`),
+      marcaEstado(m),
+      m.muestra ? el("span", { clase: "muestra" }, "Ejemplo didáctico") : null),
     el("h2", { id: "visor-titulo" }, m.titulo),
     m.doble_revision ? el("div", { clase: "aviso-seguridad" }, "Requiere revisión de ambos subequipos: es contenido de alto voltaje generado con IA.") : null,
     el("div", { clase: "escenario" }, visorDe ? visorDe(m.contenido) : "Formato desconocido."),
@@ -262,7 +317,7 @@ function cambiarVista(vista) {
   $("campo-estado").classList.toggle("oculto", vista !== "autor");
   $("intro").textContent = vista === "autor"
     ? "Genera materiales con la base de manuales, revísalos y publícalos. El técnico solo ve los revisados."
-    : "Elige tu modelo de autobús y tu nivel. Empieza por los básicos: tarjetas, presentaciones, infografías y juegos cortos, con la fuente de cada uno.";
+    : "Elige tu modelo de autobús y tu nivel. Empieza por los básicos, con la fuente de cada material.";
   cargarMateriales();
 }
 
@@ -277,7 +332,7 @@ async function iniciar() {
   }
   const c = estado.catalogo;
   estado.niveles = c.enfoques[c.enfoque_por_defecto];
-  $("estado-ia").textContent = estado.ia ? "IA conectada (Foundry)" : "Sin IA: respaldo desde el banco";
+  $("estado-ia").querySelector("span").textContent = estado.ia ? "IA conectada (Foundry)" : "Sin IA: respaldo desde el banco";
   $("estado-ia").classList.toggle("si", estado.ia);
   opciones($("filtro-modelo"), c.modelos, "Todos los modelos");
   opciones($("filtro-competencia"), c.competencias, "Todas");

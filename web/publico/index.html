@@ -8,25 +8,28 @@
 </head>
 <body>
   <header class="cabecera">
-    <h1>Técnicos del Mañana <span>· Materiales de estudio</span></h1>
+    <h1>Técnicos del Mañana <span>Materiales de estudio</span></h1>
     <div class="espacio"></div>
-    <span id="estado-ia" class="estado-ia">Comprobando IA…</span>
-    <div class="vista" role="group" aria-label="Vista">
+    <span id="estado-ia" class="estado-ia" role="status"><i aria-hidden="true"></i><span>Comprobando IA…</span></span>
+    <div class="vista" role="group" aria-label="Vista de la página">
       <button type="button" data-vista="tecnico" aria-pressed="true">Técnico</button>
       <button type="button" data-vista="autor" aria-pressed="false">Autor</button>
     </div>
   </header>
 
   <main>
-    <p class="intro" id="intro">Elige tu modelo de autobús y tu nivel. Empieza por los básicos: tarjetas, presentaciones, infografías y juegos cortos, con la fuente de cada uno.</p>
+    <p class="intro" id="intro">Elige tu modelo de autobús y tu nivel. Empieza por los básicos, con la fuente de cada material.</p>
 
     <section id="panel-autor" class="panel-autor oculto" aria-labelledby="titulo-crear">
-      <h2 id="titulo-crear">Crear material con la base de manuales</h2>
-      <div id="formatos" class="formatos" role="group" aria-label="Formato"></div>
+      <h2 id="titulo-crear">Crear material</h2>
+      <div id="formatos" class="formatos" role="radiogroup" aria-label="Formato del material"></div>
+      <p id="descripcion-formato" class="descripcion-formato"></p>
       <div class="fila">
         <label class="campo">Modelo de autobús<select id="crear-modelo"></select></label>
         <label class="campo">Nivel<select id="crear-nivel"></select></label>
         <label class="campo">Competencia<select id="crear-competencia"></select></label>
+      </div>
+      <div class="fila fila-tema">
         <label class="campo ancho">Tema
           <input id="crear-tema" maxlength="120" list="temas-sugeridos" placeholder="Ej.: Bloqueo y etiquetado antes de tocar cables naranja">
         </label>
@@ -46,10 +49,10 @@
     </section>
 
     <section class="filtros" aria-label="Filtros del catálogo">
-      <label class="campo">Modelo de autobús<select id="filtro-modelo"></select></label>
       <div class="campo">Nivel
-        <div class="enfoque" id="filtro-nivel" role="group" aria-label="Nivel"></div>
+        <div class="segmentos" id="filtro-nivel" role="group" aria-label="Nivel"></div>
       </div>
+      <label class="campo">Modelo de autobús<select id="filtro-modelo"></select></label>
       <label class="campo">Competencia<select id="filtro-competencia"></select></label>
       <label class="campo">Formato<select id="filtro-formato"></select></label>
       <label class="campo oculto" id="campo-estado">Estado
@@ -59,6 +62,7 @@
           <option value="revisado">Revisado</option>
         </select>
       </label>
+      <p class="cuenta" id="cuenta" aria-live="polite"></p>
     </section>
 
     <div id="catalogo" aria-live="polite"></div>
