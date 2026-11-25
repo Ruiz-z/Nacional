@@ -6,3 +6,6 @@ godot/contenido/
 
 # Configuración local de Foundry (nunca en git)
 .env
+
+# Python
+__pycache__/

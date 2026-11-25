@@ -1,0 +1,57 @@
+{
+  "id": "pareo-componentes-del-sistema-electrico-de-un-315657",
+  "formato": "pareo",
+  "titulo": "Componentes del sistema eléctrico de un autobús eléctrico Volvo",
+  "modelo": "general",
+  "nivel": "novato",
+  "competencia": "sistema-electrico-bateria",
+  "tema": "Componentes del sistema eléctrico de un autobús eléctrico",
+  "contenido": {
+    "pares": [
+      {
+        "termino": "Batería de ion de litio",
+        "definicion": "Almacena energía eléctrica para el autobús. Tiene módulos y celdas protegidos térmica y mecánicamente."
+      },
+      {
+        "termino": "Sistema de gestión de la batería",
+        "definicion": "Monitorea temperatura, voltaje y desconecta la batería si detecta fallas para evitar riesgos."
+      },
+      {
+        "termino": "Circuito HVIL",
+        "definicion": "Bucle de interbloqueo que monitorea el cableado de alto voltaje y desconecta si hay interrupciones."
+      },
+      {
+        "termino": "Protección térmica",
+        "definicion": "Sistema independiente con líquidos para enfriar o calentar las baterías y evitar sobrecalentamiento."
+      },
+      {
+        "termino": "Estructura mecánica de protección",
+        "definicion": "Carcasa robusta de acero que protege las baterías de impactos y vibraciones durante colisiones."
+      },
+      {
+        "termino": "Fuga térmica",
+        "definicion": "Situación peligrosa donde una celda se sobrecalienta y se desconecta automáticamente para evitar incendio."
+      },
+      {
+        "termino": "Procedimientos para alta tensión",
+        "definicion": "Solo técnicos certificados pueden trabajar en alta tensión y deben seguir puesta fuera y puesta en servicio."
+      },
+      {
+        "termino": "Regla de seguridad para alta tensión",
+        "definicion": "Nunca realizar mantenimiento sin puesta fuera de servicio adecuada para evitar lesiones graves o muerte."
+      }
+    ]
+  },
+  "fuentes": [
+    "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"
+  ],
+  "origen": "ia",
+  "muestra": false,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T00:42:19-06:00",
+  "actualizado": "2026-11-25T00:42:19-06:00",
+  "historial": []
+}

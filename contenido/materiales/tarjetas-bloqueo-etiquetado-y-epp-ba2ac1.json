@@ -1,0 +1,63 @@
+{
+  "id": "tarjetas-bloqueo-etiquetado-y-epp-ba2ac1",
+  "formato": "tarjetas",
+  "titulo": "Tarjetas: Bloqueo, etiquetado y EPP",
+  "modelo": "general",
+  "nivel": "novato",
+  "competencia": "seguridad-alto-voltaje",
+  "tema": "Bloqueo, etiquetado y EPP",
+  "contenido": {
+    "tarjetas": [
+      {
+        "frente": "¿Para qué sirve el bloqueo en el procedimiento LOTO?",
+        "reverso": "Para evitar que alguien vuelva a conectar el circuito sin permiso."
+      },
+      {
+        "frente": "¿Qué puede dañar un impacto fuerte en un autobús eléctrico Volvo?",
+        "reverso": "Los cables de alto voltaje y las baterías del piso."
+      },
+      {
+        "frente": "¿Qué indica la etiqueta en el procedimiento LOTO?",
+        "reverso": "Avisa que hay trabajo en curso y que nadie debe operar el dispositivo."
+      },
+      {
+        "frente": "¿Cómo eliges el EPP para un trabajo eléctrico?",
+        "reverso": "Según los peligros que identificaste y el procedimiento de la tarea."
+      },
+      {
+        "frente": "El instrumento no marcó tensión. Al comprobarlo después, falló. ¿Qué haces con esa lectura?",
+        "reverso": "Da por pendiente la comprobación y mantén detenida la tarea."
+      },
+      {
+        "frente": "Bloqueaste la alimentación principal. El esquema muestra otra fuente que alimenta los puntos de trabajo. ¿Qué haces?",
+        "reverso": "Mantén detenida la tarea. Controla la fuente auxiliar y comprueba que sea seguro seguir."
+      },
+      {
+        "frente": "En un eléctrico Volvo, ¿qué ocurre si se interrumpe el interbloqueo de alto voltaje (HVIL)?",
+        "reverso": "La batería se desconecta desde la fuente."
+      },
+      {
+        "frente": "¿Qué riesgo describe Volvo si un vuelco daña gravemente las baterías del techo?",
+        "reverso": "Una fuga en las baterías o un incendio por cortocircuitos internos."
+      }
+    ]
+  },
+  "fuentes": [
+    "NOM-029-STPS: Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad, Control de la reenergización",
+    "Volvo Buses: Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx, p. 4",
+    "NOM-029-STPS: Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad, Señalización durante el mantenimiento",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Selección del equipo de protección personal",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Comprobación del instrumento para verificar ausencia de tensión",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Identificación de todas las fuentes de alimentación",
+    "Volvo Buses: Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx, p. 8"
+  ],
+  "origen": "banco",
+  "muestra": true,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-24T23:18:29-06:00",
+  "actualizado": "2026-11-24T23:18:29-06:00",
+  "historial": []
+}

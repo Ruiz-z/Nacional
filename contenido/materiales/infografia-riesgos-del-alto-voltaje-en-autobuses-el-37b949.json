@@ -1,0 +1,52 @@
+{
+  "id": "infografia-riesgos-del-alto-voltaje-en-autobuses-el-37b949",
+  "formato": "infografia",
+  "titulo": "Riesgos del alto voltaje en autobuses eléctricos Volvo",
+  "modelo": "general",
+  "nivel": "novato",
+  "competencia": "seguridad-alto-voltaje",
+  "tema": "Riesgos del alto voltaje en autobuses eléctricos Volvo",
+  "contenido": {
+    "idea_central": "Los autobuses eléctricos Volvo cuentan con múltiples niveles de seguridad para proteger contra riesgos de alto voltaje y mal funcionamiento de las baterías.",
+    "bloques": [
+      {
+        "titulo": "Protección mecánica",
+        "dato": "Carcasa robusta y barreras",
+        "explicacion": "Las baterías están protegidas con cajas de acero y barreras que absorben impactos, vibraciones y evitan daños por agua, asegurando integridad ante choques."
+      },
+      {
+        "titulo": "Protección térmica",
+        "dato": "Control de temperatura activo",
+        "explicacion": "Un sistema de refrigeración y calefacción con líquido mantiene la temperatura segura y previene calentamientos peligrosos que podrían provocar fallas o incendios."
+      },
+      {
+        "titulo": "Protección eléctrica",
+        "dato": "Monitoreo continuo y corte automático",
+        "explicacion": "El sistema monitorea voltaje, corriente y aislamiento; si detecta anomalías o riesgos como sobrecarga, desconecta las baterías automáticamente para evitar daños."
+      },
+      {
+        "titulo": "Seguridad en mantenimiento",
+        "dato": "Técnicos certificados solamente",
+        "explicacion": "Solo el personal con capacitación especial puede trabajar en el sistema de alto voltaje, siguiendo estrictos procedimientos para evitar riesgos de descarga eléctrica."
+      },
+      {
+        "titulo": "Regla de seguridad para alto voltaje",
+        "dato": "Realizar puesta fuera de servicio",
+        "explicacion": "Antes de cualquier trabajo, se debe poner fuera de servicio el sistema de alto voltaje para evitar contacto con partes energizadas que pueden causar lesiones graves o muerte."
+      }
+    ],
+    "aviso_seguridad": "Nunca ignores la regla de puesta fuera de servicio antes de intervenir componentes de alto voltaje. Sólo técnicos capacitados deben manipular estos sistemas."
+  },
+  "fuentes": [
+    "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"
+  ],
+  "origen": "ia",
+  "muestra": false,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T00:42:46-06:00",
+  "actualizado": "2026-11-25T00:42:46-06:00",
+  "historial": []
+}

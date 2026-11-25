@@ -43,7 +43,7 @@ Campos comunes: `id`, `competencia`, `formato`, `dificultad`, `criticidad` (`nor
 - RF-11: EL SISTEMA etiqueta cada paso de un `caso-diagnostico` con el tipo de error que produce si se elige mal: `causa-equivocada`, `paso-omitido`, `orden-incorrecto`, `accion-insegura`, `paso-innecesario`, `herramienta-equivocada` (error leve en el taller), `valor-fuera-de-rango` (por ejemplo, torque excesivo).
 - RF-12: CUANDO un consumidor solicita ítems por competencia y dificultad, EL SISTEMA devuelve solo ítems válidos de esa competencia.
 - RF-13: EL SISTEMA expone la fuente (título, sección o página, URL o referencia) de cada ítem para mostrarla en pantalla.
-- RF-14: EL SISTEMA no genera ni modifica ítems con IA; el banco solo cambia editando el JSON.
+- RF-14: EL SISTEMA no genera ni modifica ítems del banco de evaluación con IA; el banco solo cambia editando el JSON. Los materiales de estudio generados con IA viven aparte (`SPEC-materiales.md`), requieren revisión humana y no cuentan para el dominio.
 
 ## Fuentes permitidas
 Documentación pública de fabricantes (Volvo Buses); NFPA 70E, NOM-029-STPS, NOM-001-SEDE, ISO 6469; material oficial entregado por la empresa (prioridad máxima). Un ítem fuera de esta lista no entra.

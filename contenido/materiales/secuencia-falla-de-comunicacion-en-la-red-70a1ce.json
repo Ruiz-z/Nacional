@@ -1,0 +1,30 @@
+{
+  "id": "secuencia-falla-de-comunicacion-en-la-red-70a1ce",
+  "formato": "secuencia",
+  "titulo": "Ordena el diagnóstico: Una rama de la red perdió comunicación",
+  "modelo": "general",
+  "nivel": "basico",
+  "competencia": "diagnostico-fallas",
+  "tema": "Falla de comunicación en la red",
+  "contenido": {
+    "procedimiento": "Una rama de la red perdió comunicación",
+    "pasos": [
+      "Revisar y guardar los avisos de comunicación",
+      "Ubicar los módulos en el esquema de red",
+      "Comprobar el enlace de esa rama"
+    ],
+    "explicacion": "Causa: Interrupción del enlace compartido por los módulos de la rama afectada."
+  },
+  "fuentes": [
+    "Volvo Buses: MID 221 AIC, fault tracing, Diagnóstico del enlace de datos entre unidades"
+  ],
+  "origen": "banco",
+  "muestra": true,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-24T23:18:29-06:00",
+  "actualizado": "2026-11-24T23:18:29-06:00",
+  "historial": []
+}

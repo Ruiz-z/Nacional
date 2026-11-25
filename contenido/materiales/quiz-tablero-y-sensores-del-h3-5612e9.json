@@ -1,0 +1,112 @@
+{
+  "id": "quiz-tablero-y-sensores-del-h3-5612e9",
+  "formato": "quiz",
+  "titulo": "Quiz: Tablero y sensores del H3",
+  "modelo": "prevost-h3",
+  "nivel": "basico",
+  "competencia": "electronica-conectividad",
+  "tema": "Tablero y sensores del H3",
+  "contenido": {
+    "preguntas": [
+      {
+        "pregunta": "¿Qué conectas al puerto DDR del Prevost H3?",
+        "opciones": [
+          "Un receptor de los sensores de las llantas.",
+          "Un monitor para la cámara de reversa.",
+          "Un lector de datos de diagnóstico."
+        ],
+        "correcta": 2,
+        "explicacion": "Respuesta: Un lector de datos de diagnóstico. Fuente: Volvo Buses: h3_operator_manual_en_0, p. 64"
+      },
+      {
+        "pregunta": "En el Prevost H3, ¿qué prueba revisa las entradas de los interruptores del tablero?",
+        "opciones": [
+          "La prueba de entradas del sistema multiplexado.",
+          "La prueba de las agujas del tablero.",
+          "La prueba de motores eléctricos del vehículo."
+        ],
+        "correcta": 0,
+        "explicacion": "Respuesta: La prueba de entradas del sistema multiplexado. Fuente: Volvo Buses: h3_operator_manual_en_0, p. 132"
+      },
+      {
+        "pregunta": "El tablero muestra «Sin datos» en una lectura. ¿Qué significa?",
+        "opciones": [
+          "El tablero no tiene una lectura válida que mostrar.",
+          "La medición bajó automáticamente al valor mínimo.",
+          "El sensor se calibró con la última lectura."
+        ],
+        "correcta": 0,
+        "explicacion": "Respuesta: El tablero no tiene una lectura válida que mostrar. Fuente: Volvo Buses: MID 221 AIC, fault tracing, Comunicación y disponibilidad de datos"
+      },
+      {
+        "pregunta": "¿Para qué sirve una pasarela entre las redes del autobús?",
+        "opciones": [
+          "Para sustituir las lecturas de los sensores de cada red.",
+          "Para conectar redes y reenviar los datos que le indicaron.",
+          "Para dar energía de tracción a los módulos de ambas redes."
+        ],
+        "correcta": 1,
+        "explicacion": "Respuesta: Para conectar redes y reenviar los datos que le indicaron. Fuente: Volvo Buses: MID 221 AIC, fault tracing, Interconexión de redes de datos"
+      },
+      {
+        "pregunta": "Un módulo tiene alimentación, pero sus mensajes ya no llegan al tablero. ¿Qué puedes concluir?",
+        "opciones": [
+          "La alimentación confirma que el tablero recibe los mensajes.",
+          "Si no llegan mensajes, el sensor del módulo está dañado.",
+          "Tener alimentación no basta para confirmar que hay comunicación."
+        ],
+        "correcta": 2,
+        "explicacion": "Respuesta: Tener alimentación no basta para confirmar que hay comunicación. Fuente: Volvo Buses: MID 221 AIC, fault tracing, Diagnóstico de enlaces de datos"
+      },
+      {
+        "pregunta": "¿Para qué sirve la red CAN del autobús?",
+        "opciones": [
+          "Para que las unidades electrónicas intercambien mensajes.",
+          "Para llevar potencia eléctrica al motor de tracción.",
+          "Para guardar la energía que usan las unidades electrónicas."
+        ],
+        "correcta": 0,
+        "explicacion": "Respuesta: Para que las unidades electrónicas intercambien mensajes. Fuente: Volvo Buses: MID 221 AIC, fault tracing, Redes de datos del vehículo"
+      },
+      {
+        "pregunta": "¿Para qué sirve un sensor de temperatura?",
+        "opciones": [
+          "Para repartir la alimentación entre las unidades de control.",
+          "Para enviar una señal que representa la temperatura donde mide.",
+          "Para decidir por sí mismo si el autobús puede avanzar."
+        ],
+        "correcta": 1,
+        "explicacion": "Respuesta: Para enviar una señal que representa la temperatura donde mide. Fuente: Volvo Buses: Electric safety, Monitoreo de parámetros eléctricos"
+      },
+      {
+        "pregunta": "¿Qué hace una unidad de control al publicar una lectura en la red?",
+        "opciones": [
+          "Pasa al receptor la alimentación del sensor.",
+          "Cambia por sí misma lo que midió el sensor.",
+          "Comparte la lectura con las unidades que usan ese mensaje."
+        ],
+        "correcta": 2,
+        "explicacion": "Respuesta: Comparte la lectura con las unidades que usan ese mensaje. Fuente: Volvo Buses: MID 221 AIC, fault tracing, Comunicación entre unidades electrónicas"
+      }
+    ]
+  },
+  "fuentes": [
+    "Volvo Buses: h3_operator_manual_en_0, p. 64",
+    "Volvo Buses: h3_operator_manual_en_0, p. 132",
+    "Volvo Buses: MID 221 AIC, fault tracing, Comunicación y disponibilidad de datos",
+    "Volvo Buses: MID 221 AIC, fault tracing, Interconexión de redes de datos",
+    "Volvo Buses: MID 221 AIC, fault tracing, Diagnóstico de enlaces de datos",
+    "Volvo Buses: MID 221 AIC, fault tracing, Redes de datos del vehículo",
+    "Volvo Buses: Electric safety, Monitoreo de parámetros eléctricos",
+    "Volvo Buses: MID 221 AIC, fault tracing, Comunicación entre unidades electrónicas"
+  ],
+  "origen": "banco",
+  "muestra": true,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-24T23:18:29-06:00",
+  "actualizado": "2026-11-24T23:18:29-06:00",
+  "historial": []
+}

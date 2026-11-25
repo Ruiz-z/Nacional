@@ -1,0 +1,97 @@
+{
+  "version": "1",
+  "enfoque_por_defecto": "basicos",
+  "enfoques": {
+    "basicos": ["novato", "basico"],
+    "todos": ["novato", "basico", "competente", "experto"]
+  },
+  "modelos": [
+    {
+      "id": "general",
+      "nombre": "Todos los autobuses",
+      "tipo": "general",
+      "descripcion": "Fundamentos que aplican a cualquier autobús: seguridad, herramientas y lógica de diagnóstico.",
+      "pdf": ["Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"]
+    },
+    {
+      "id": "bzl-electrico",
+      "nombre": "Volvo BZL Eléctrico",
+      "tipo": "electrico",
+      "descripcion": "Chasis eléctrico urbano con baterías de tracción y red de 24 V.",
+      "pdf": ["Data sheet BZL Electric ES-MX 2021.pdf", "Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"]
+    },
+    {
+      "id": "bzr-le-electrico",
+      "nombre": "Volvo BZR Low Entry Eléctrico",
+      "tipo": "electrico",
+      "descripcion": "Chasis eléctrico de piso bajo con ESS de 600 V y baterías Volvo Cube.",
+      "pdf": ["Fact-sheet-Electric-Safety-EN-VolvoBuses-2024-Es-Mx.pdf"]
+    },
+    {
+      "id": "volvo-9700",
+      "nombre": "Volvo 9700",
+      "tipo": "diesel",
+      "descripcion": "Autobús de turismo e interurbano.",
+      "pdf": ["volvo_9700_manual_en_3.pdf"]
+    },
+    {
+      "id": "prevost-h3",
+      "nombre": "Prevost H3",
+      "tipo": "diesel",
+      "descripcion": "Autocar de turismo; manual de operador con tablero y presión de neumáticos.",
+      "pdf": ["h3_operator_manual_en_0.pdf", "PA1583-2 Literature.pdf"]
+    },
+    {
+      "id": "volvo-b8r",
+      "nombre": "Volvo B8R",
+      "tipo": "diesel",
+      "descripcion": "Chasis diésel del Módulo I de los cursos Volvo (familiarización y mantenimiento).",
+      "pdf": []
+    },
+    {
+      "id": "volvo-b13r",
+      "nombre": "Volvo B13R",
+      "tipo": "diesel",
+      "descripcion": "Chasis diésel del Módulo I de los cursos Volvo (familiarización y mantenimiento).",
+      "pdf": []
+    }
+  ],
+  "niveles": [
+    {
+      "id": "novato",
+      "nombre": "Novato",
+      "rango": "menos de 40",
+      "dificultad_banco": ["facil"],
+      "guia": "Vocabulario y qué es cada sistema. Una idea por frase. Explica para qué sirve cada parte y la regla de seguridad que nunca se salta."
+    },
+    {
+      "id": "basico",
+      "nombre": "Básico",
+      "rango": "40 a 69",
+      "dificultad_banco": ["facil", "media"],
+      "guia": "Cómo funciona el sistema, revisiones de rutina y procedimientos sencillos paso a paso. Relaciona cada síntoma con la revisión que corresponde."
+    },
+    {
+      "id": "competente",
+      "nombre": "Competente",
+      "rango": "70 a 89",
+      "dificultad_banco": ["media", "dificil"],
+      "guia": "Lógica del diagnóstico: qué medir primero, cómo interpretar la lectura y cómo descartar causas."
+    },
+    {
+      "id": "experto",
+      "nombre": "Experto",
+      "rango": "90 o más",
+      "dificultad_banco": ["dificil"],
+      "guia": "Casos con varias causas posibles, fallas intermitentes y decisiones con poca información."
+    }
+  ],
+  "formatos": [
+    {"id": "tarjetas", "nombre": "Tarjetas", "tipo": "estudio", "descripcion": "Frente y reverso para repasar términos y respuestas cortas.", "sin_ia": true},
+    {"id": "presentacion", "nombre": "Presentación", "tipo": "estudio", "descripcion": "Diapositivas cortas para explicar un tema.", "sin_ia": false},
+    {"id": "infografia", "nombre": "Infografía", "tipo": "estudio", "descripcion": "Una página con la idea central y los datos clave.", "sin_ia": false},
+    {"id": "quiz", "nombre": "Quiz", "tipo": "juego", "descripcion": "Preguntas con puntaje y explicación de cada respuesta.", "sin_ia": true},
+    {"id": "pareo", "nombre": "Pareo", "tipo": "juego", "descripcion": "Une cada término con su definición.", "sin_ia": false},
+    {"id": "secuencia", "nombre": "Ordena los pasos", "tipo": "juego", "descripcion": "Pon en orden los pasos de un procedimiento.", "sin_ia": true}
+  ]
+}

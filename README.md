@@ -13,6 +13,8 @@ Juego de escritorio que entrena a técnicos de autobuses eléctricos con escenar
 | Pruebas | `godot --headless --path godot -s tests/run.gd` |
 | Validar el banco de contenido | `godot --headless -s tools/validar_contenido.gd` |
 | Emitir eventos de prueba del panel | ver `docs/protocolo-panel.md` |
+| Página de materiales de estudio con IA | `python web/servidor.py` → http://127.0.0.1:8765 |
+| Pruebas de la página de materiales | `python -m unittest discover web/pruebas` |
 
 Si Godot no puede escribir sus logs, antepón `XDG_DATA_HOME=/tmp/nacional-godot`.
 
@@ -33,6 +35,7 @@ En **Escenario**, elige una orden de servicio. Al abrir el menú de una pieza se
 godot/       proyecto Godot: logica/ (sin nodos, con pruebas), escenas/, config/, tests/, addons/
 contenido/   banco de preguntas y escenarios en JSON, con su fuente
 firmware/    código del ESP32 o Arduino (a cargo de electrónica)
+web/         página de materiales de estudio con IA (Python estándar + HTML/JS); materiales en contenido/materiales/
 tools/       validador de contenido y emisor de eventos
 docs/        constitución, arquitectura, protocolo del panel, modelo de datos, escalabilidad, privacidad, demo
 SPEC-*.md    especificaciones por módulo; plan.md y tareas.md
@@ -43,6 +46,7 @@ SPEC-*.md    especificaciones por módulo; plan.md y tareas.md
 - Escalabilidad e integración: `docs/escalabilidad.md`
 - Privacidad y contenido: `docs/privacidad.md`
 - Guion de la demo: `docs/demo.md`
+- Materiales de estudio con IA (tarjetas, presentaciones, infografías y juegos por modelo y nivel): `docs/materiales.md`
 - Dependencias y versiones: `docs/dependencias.md`
 
 El contenido no oficial está marcado `[MUESTRA]` y los datos de demostración `[DEMO]`.

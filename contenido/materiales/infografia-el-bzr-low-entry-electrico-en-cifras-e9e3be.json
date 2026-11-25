@@ -1,0 +1,52 @@
+{
+  "id": "infografia-el-bzr-low-entry-electrico-en-cifras-e9e3be",
+  "formato": "infografia",
+  "titulo": "BZR Low Entry Eléctrico: lo básico del sistema de energía",
+  "modelo": "bzr-le-electrico",
+  "nivel": "novato",
+  "competencia": "sistema-electrico-bateria",
+  "tema": "El BZR Low Entry Eléctrico en cifras",
+  "contenido": {
+    "idea_central": "El autobús guarda su energía en baterías de iones de litio de 600 V que vigila el BMS. Antes de tocar un cable naranja, bloquea, etiqueta y verifica.",
+    "bloques": [
+      {
+        "titulo": "Sistema de almacenamiento (ESS)",
+        "dato": "600 V",
+        "explicacion": "Baterías de iones de litio con control automático de temperatura y recuperación de energía al frenar."
+      },
+      {
+        "titulo": "Baterías Volvo Cube",
+        "dato": "Hasta 7 × 90 kWh",
+        "explicacion": "Hasta 630 kWh en total (valor nominal), según la configuración del chasis."
+      },
+      {
+        "titulo": "BMS",
+        "dato": "Vigila la batería",
+        "explicacion": "El sistema de gestión de batería controla la carga y la descarga y vigila su estado y rendimiento."
+      },
+      {
+        "titulo": "Motores eléctricos",
+        "dato": "200 kW c/u",
+        "explicacion": "Uno o dos motores; hasta 400 kW con dos. Transmisión automática de 2 velocidades."
+      },
+      {
+        "titulo": "Carga",
+        "dato": "CCS y OppCharge",
+        "explicacion": "En cochera con cable CCS (máx. 250 kW) y en ruta con OppCharge (máx. 450 kW)."
+      }
+    ],
+    "aviso_seguridad": "600 V es alto voltaje: nunca trabajes en el ESS sin bloqueo, etiquetado y verificación de ausencia de tensión."
+  },
+  "fuentes": [
+    "Volvo Buses: Chasis de autobús BZR Low Entry Eléctrico, volvobuses.com/es (consultada el 24/11/2026)"
+  ],
+  "origen": "manual",
+  "muestra": false,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-24T23:16:10-06:00",
+  "actualizado": "2026-11-24T23:16:10-06:00",
+  "historial": []
+}
