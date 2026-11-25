@@ -15,6 +15,8 @@ var teclas := {}
 var mover_stick := false
 var mirar_stick := false
 var mirar_raton := false
+var agachado := false
+var corriendo := false
 var gravedad: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 @onready var camara: Camera3D = $Camara
@@ -179,10 +181,19 @@ func _physics_process(delta: float) -> void:
 				direccion += stick(mando, JOY_AXIS_LEFT_X, JOY_AXIS_LEFT_Y)
 			if mirar_stick:
 				mirar(stick(mando, JOY_AXIS_RIGHT_X, JOY_AXIS_RIGHT_Y) * delta * 2.3)
-	var horizontal := Movimiento.velocidad(direccion, rotation.y)
-	velocity = Vector3(horizontal.x, 0.0 if is_on_floor() else velocity.y - gravedad * delta,
-		horizontal.z)
+	var mandos_activos := activo and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	# Shift corre, Control agacha y Espacio salta; agachado no se corre ni se salta.
+	agachado = mandos_activos and Input.is_physical_key_pressed(KEY_CTRL)
+	corriendo = mandos_activos and not agachado and direccion != Vector2.ZERO \
+		and Input.is_physical_key_pressed(KEY_SHIFT)
+	var horizontal := Movimiento.velocidad(direccion, rotation.y, Movimiento.factor(corriendo, agachado))
+	var vertical := 0.0 if is_on_floor() else velocity.y - gravedad * delta
+	if mandos_activos and not agachado and is_on_floor() and Input.is_physical_key_pressed(KEY_SPACE):
+		vertical = Movimiento.SALTO
+	velocity = Vector3(horizontal.x, vertical, horizontal.z)
 	move_and_slide()
+	var altura := Movimiento.ALTURA_OJOS_AGACHADO if agachado else Movimiento.ALTURA_OJOS
+	camara.position.y = move_toward(camara.position.y, altura, delta * 4.0)
 	var limitada := origen_zona + Movimiento.limitar(position - origen_zona, limites_zona)
 	if limitada != position:
 		position = limitada

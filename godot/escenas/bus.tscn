@@ -1273,7 +1273,7 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_outline_color = Color(0.04, 0.06, 0.08, 1)
 theme_override_constants/outline_size = 5
-text = "1 a 8 · Elige una herramienta    Tab · Libera el cursor\n← / →, rueda o L / R · Elige un objeto    G / Y · Refuerza la guía    V · Alterna la guía automática"
+text = "1 a 8 · Elige una herramienta    Tab · Libera el cursor\n← / →, rueda o L / R · Elige un objeto    G / Y · Refuerza la guía    V · Alterna la guía automática    M · Sonido\nShift · Correr    Ctrl · Agacharse    Espacio · Saltar"
 
 [node name="PistaOrden" type="Label" parent="."]
 anchor_left = 0.5

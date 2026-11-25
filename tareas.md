@@ -242,3 +242,4 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-207 — Sonido sintetizado en código (clics, pasos, éxito, error, falta crítica, EPP, elevador, victoria). La tecla M lo silencia y la preferencia se guarda; sin archivos de audio externos.
 - [x] T-208 — Materiales: botón Publicar y Retirar en cada tarjeta y en el visor; el técnico recibe primero los publicados que le tocan según su ruta de aprendizaje y su nivel (`asignacion.py`, sección «Para ti»).
 - [x] T-209 — Botones «Entrar con» (mau, admin, prueba) en el ingreso, solo si el `.env` local trae NACIONAL_ACCESO_RAPIDO; sin esa línea el ingreso pide contraseña.
+- [x] T-210 — El jugador corre con Shift (×1,7), se agacha con Control (ojos a 1,15 m y mitad de velocidad) y salta con Espacio (unos 0,7 m); agachado no corre ni salta.
