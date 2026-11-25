@@ -49,6 +49,7 @@ static func armar(motivos: Array, instantanea: Dictionary, historial: Array,
 			"competencia": competencia, "nombre": nombre, "dominio": roundi(dominio),
 			"estado": estado, "errores": errores(propios),
 			"ordenes": ordenes(catalogo, detalle.get("ordenes", []), nombre),
+			"temas": detalle.get("temas", []),
 			"refuerzo": refuerzo(tema.get("refuerzo", ""), propios),
 		})
 	return primeros + resto

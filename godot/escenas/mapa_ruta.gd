@@ -72,6 +72,11 @@ func mostrar(nodos: Array, fuentes: Array, detalles: Dictionary) -> void:
 			ramas_izquierda.append(rama.get_parent())
 
 		var ramas_derecha: Array[Control] = []
+		for tema in nodo.temas:
+			var rama := tarjeta(derecha)
+			rama.add_child(etiqueta(tema.titulo, 16))
+			rama.add_child(etiqueta("Fuente: %s" % tema.fuente.trim_suffix(".pdf"), 13, &"Secundario"))
+			ramas_derecha.append(rama.get_parent())
 		for orden in nodo.ordenes:
 			var rama := tarjeta(derecha)
 			rama.add_child(etiqueta(orden.titulo, 16))

@@ -30,6 +30,13 @@ NACIONAL_FOUNDRY_AGENTE=Faro
 - Si el JSON no cumple el esquema, repite competencias, inventa ids de órdenes o pasa de 220 caracteres, se descarta y queda "Ruta calculada sin IA".
 - Coste: cada consulta con búsqueda usa unos 16 000 tokens. Por eso el resultado se guarda en SQLite y se reutiliza mientras el diagnóstico no cambie.
 
+## Temas del mapa
+- Cada paso de la respuesta puede traer hasta tres `temas` (título de hasta 90 caracteres y `fuente`). Son conceptos a estudiar sacados de los manuales y se dibujan en la rama derecha del mapa de la ruta.
+- Un tema solo se acepta si su fuente es uno de los PDF que la base devolvió en esa misma respuesta (se compara sin distinguir mayúsculas). Si no, se descarta ese tema y la ruta sigue.
+- Un id en `ordenes` que no exista en el catálogo se ignora; el mapa completa con órdenes de esa competencia. El orden de las cuatro competencias y la falta crítica primero siguen siendo obligatorios.
+- La clave de la caché lleva un prefijo de versión: al cambiar el formato de la respuesta no se reutilizan rutas guardadas sin temas.
+- Pruebas reales: 3 de 3 respuestas válidas en unos 10 s cada una.
+
 ## Permisos de Azure que hicieron falta
 - `volvo-resource` y la identidad de `volvo-srch-f54r`: Lector de datos de Storage Blob en `faroarchivos`.
 - `volvo-resource` y el proyecto `volvo`: Lector de datos del índice de búsqueda y Colaborador de servicio de búsqueda en `volvo-srch-f54r`.

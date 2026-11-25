@@ -72,13 +72,29 @@ static func validacion() -> bool:
 	largo.pasos[0].motivo = "x".repeat(RutaIA.MAX_TEXTO + 1)
 	var con_fuentes := respuesta(ORDEN)
 	con_fuentes["fuentes"] = ["Manual.pdf", "../secreto.txt", 5, "Manual.pdf"]
-	return RutaIA.validar(con_fuentes, ORDEN, [], IDS).fuentes == ["Manual.pdf"] \
+	var con_temas := respuesta(ORDEN)
+	con_temas["fuentes"] = ["Manual.pdf"]
+	con_temas.pasos[0]["temas"] = [
+		{"titulo": "Bloqueo y etiquetado", "fuente": "Manual.pdf"},
+		{"titulo": "Tema sin fuente de la base", "fuente": "Otro.pdf"},
+		{"titulo": "Otro tema", "fuente": "MANUAL.PDF"},
+		{"titulo": "x".repeat(RutaIA.MAX_TITULO + 1), "fuente": "Manual.pdf"},
+		{"titulo": "Bloqueo y etiquetado", "fuente": "Manual.pdf"}]
+	var temas: Array = RutaIA.validar(con_temas, ORDEN, [], IDS).detalle[ORDEN[0]].temas
+	return temas == [{"titulo": "Bloqueo y etiquetado", "fuente": "Manual.pdf"},
+			{"titulo": "Otro tema", "fuente": "Manual.pdf"}] \
+		and RutaIA.validar(valida_sin_temas(), ORDEN, [], IDS).detalle[ORDEN[0]].temas == [] \
+		and RutaIA.validar(con_fuentes, ORDEN, [], IDS).fuentes == ["Manual.pdf"] \
 		and valida.orden == ORDEN and corregida.orden[0] == "sistema-electrico-bateria" \
 		and RutaIA.validar(repetida, ORDEN, [], IDS).is_empty() \
-		and RutaIA.validar(id_inventado, ORDEN, [], IDS).is_empty() \
+		and RutaIA.validar(id_inventado, ORDEN, [], IDS).detalle[ORDEN[0]].ordenes == [] \
 		and RutaIA.validar(largo, ORDEN, [], IDS).is_empty() \
 		and RutaIA.validar({"pasos": []}, ORDEN, [], IDS).is_empty() \
 		and RutaIA.validar("texto", ORDEN, [], IDS).is_empty()
+
+
+static func valida_sin_temas() -> Dictionary:
+	return respuesta(ORDEN)
 
 
 static func cliente() -> bool:

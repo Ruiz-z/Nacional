@@ -206,3 +206,4 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [ ] T-172 H — Revisión humana: correr un diagnóstico en la app con `az login` y revisar que la ruta tenga sentido (corrida real hecha: válida, con fuentes).
 - [x] T-173 — Cliente del agente Faro (API Responses con token de `az`, `.env` fuera de git), extracción de JSON y de fuentes citadas, y "Basada en: …" en la ruta. Pruebas sin nube.
 - [ ] T-174 S — Mostrar el mapa del diagnóstico con camino central y ramas de error y práctica (aprendizaje RF-25). Modelo, texto y desplazamiento verificados a 1280 × 720 y 1920 × 1080. Queda pendiente la revisión de las capturas en un entorno gráfico.
+- [x] T-175 — Faro genera los temas de cada paso del mapa (con fuente de los manuales), la app los valida contra las fuentes devueltas y tolera ids de órdenes inválidos; caché con versión.
