@@ -70,7 +70,10 @@ static func validacion() -> bool:
 	id_inventado.pasos[0] = paso(ORDEN[0], ["no_existe"])
 	var largo := respuesta(ORDEN)
 	largo.pasos[0].motivo = "x".repeat(RutaIA.MAX_TEXTO + 1)
-	return valida.orden == ORDEN and corregida.orden[0] == "sistema-electrico-bateria" \
+	var con_fuentes := respuesta(ORDEN)
+	con_fuentes["fuentes"] = ["Manual.pdf", "../secreto.txt", 5, "Manual.pdf"]
+	return RutaIA.validar(con_fuentes, ORDEN, [], IDS).fuentes == ["Manual.pdf"] \
+		and valida.orden == ORDEN and corregida.orden[0] == "sistema-electrico-bateria" \
 		and RutaIA.validar(repetida, ORDEN, [], IDS).is_empty() \
 		and RutaIA.validar(id_inventado, ORDEN, [], IDS).is_empty() \
 		and RutaIA.validar(largo, ORDEN, [], IDS).is_empty() \
@@ -82,20 +85,28 @@ static func cliente() -> bool:
 	var f := Foundry.new()
 	f.config = {}
 	var sin_configuracion := not f.disponible()
-	f.config = {"endpoint": "http://inseguro", "clave": "k"}
+	f.config = {"endpoint": "http://inseguro"}
 	var sin_https := not f.disponible()
-	f.config = {"endpoint": "https://ejemplo.invalid/chat", "clave": "k", "modelo": "m", "auth": "bearer"}
+	f.config = {"endpoint": "https://ejemplo.invalid/api/projects/p/", "agente": "Faro", "token": "t"}
 	var cuerpo := f.cuerpo("sistema", {"a": 1}, RutaIA.esquema(ORDEN))
 	var interno := JSON.stringify({"pasos": []})
-	var externo := JSON.stringify({"choices": [{"message": {"content": interno}}]}).to_utf8_buffer()
-	var correcto: bool = f.disponible() and cuerpo.model == "m" and cuerpo.response_format.type == "json_schema" \
-		and f.encabezados()[1] == "Authorization: Bearer k" \
-		and Foundry.extraer(HTTPRequest.RESULT_SUCCESS, 200, externo) == {"pasos": []} \
+	var documento := JSON.stringify({"documents": [{"content": JSON.stringify({
+		"blob_url": "https://x.blob.core.windows.net/doc/Manual%20Uno.pdf"})}]})
+	var externo := JSON.stringify({"status": "completed", "output": [
+		{"type": "mcp_call", "output": documento},
+		{"type": "message", "content": [{"type": "output_text", "text": "```json\n" + interno + "\n```"}]}]}).to_utf8_buffer()
+	var leido := Foundry.extraer(HTTPRequest.RESULT_SUCCESS, 200, externo)
+	var correcto: bool = f.disponible() and f.url() == "https://ejemplo.invalid/api/projects/p/agents/Faro/endpoint/protocols/openai/responses?api-version=v1" \
+		and cuerpo.store == false and str(cuerpo.input).contains("sistema") and str(cuerpo.input).contains("ruta_aprendizaje") == false \
+		and f.encabezados("t")[1] == "Authorization: Bearer t" and f.token() == "t" \
+		and leido.pasos == [] and leido.fuentes == ["Manual Uno.pdf"] \
 		and Foundry.extraer(HTTPRequest.RESULT_TIMEOUT, 0, externo).is_empty() \
 		and Foundry.extraer(HTTPRequest.RESULT_SUCCESS, 500, externo).is_empty() \
-		and Foundry.extraer(HTTPRequest.RESULT_SUCCESS, 200, "no json".to_utf8_buffer()).is_empty()
+		and Foundry.extraer(HTTPRequest.RESULT_SUCCESS, 200, "no json".to_utf8_buffer()).is_empty() \
+		and Foundry.extraer(HTTPRequest.RESULT_SUCCESS, 200, JSON.stringify({"status": "failed", "output": []}).to_utf8_buffer()).is_empty()
+	var env := Foundry.leer_env("res://tests/no_existe.env")
 	f.free()
-	return sin_configuracion and sin_https and correcto
+	return sin_configuracion and sin_https and correcto and env.is_empty()
 
 
 static func cache(base: String) -> bool:

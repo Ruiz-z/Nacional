@@ -110,9 +110,13 @@ func texto_intro() -> String:
 		"diagnostico":
 			return "Este diagnóstico mide lo que ya sabes en cuatro temas. Son %d preguntas, unos %d minutos. No es una calificación: sirve para armar tu ruta de aprendizaje." % [total, maxi(5, total)]
 		"ruta":
+			var origen := "Ruta calculada sin IA."
+			if actividad.origen_ruta == "ia":
+				origen = "Ruta generada con IA."
+				if not actividad.fuentes_ia.is_empty():
+					origen += " Basada en: %s." % ", ".join(actividad.fuentes_ia)
 			return "Este es tu camino según tu diagnóstico. Hoy haces %d preguntas con %d lecciones cortas; el resto queda para después. %s" % [
-				total, actividad.plan.lecciones.size(),
-				"Ruta generada con IA." if actividad.origen_ruta == "ia" else "Ruta calculada sin IA."]
+				total, actividad.plan.lecciones.size(), origen]
 	return ""
 
 

@@ -9,30 +9,37 @@ La ruta se genera con IA solo si hay un servicio de Azure AI Foundry configurado
 - El resultado se guarda en SQLite (tabla `ruta_generada`) y se reutiliza si el diagnóstico no cambia.
 
 ## Configuración (nunca en git)
-Opción 1, variables de entorno antes de abrir la app:
+La app llama al agente **Faro** de Azure AI Foundry (API Responses del agente, con búsqueda en los manuales de Volvo). No usa clave de API: usa un token de Microsoft Entra.
+
+Archivo `.env` en la raíz del repositorio (ya está en `.gitignore`):
 
 ```sh
-export NACIONAL_FOUNDRY_ENDPOINT="https://<recurso>.services.ai.azure.com/<ruta de chat completions>?api-version=<versión>"
-export NACIONAL_FOUNDRY_CLAVE="<clave>"
-export NACIONAL_FOUNDRY_MODELO="<nombre del despliegue>"
-# opcional: NACIONAL_FOUNDRY_AUTH=bearer para usar "Authorization: Bearer" en lugar de "api-key"
+NACIONAL_FOUNDRY_ENDPOINT=https://<recurso>.services.ai.azure.com/api/projects/<proyecto>
+NACIONAL_FOUNDRY_AGENTE=Faro
 ```
 
-Opción 2, archivo `user://foundry.cfg` (en Linux: `~/.local/share/godot/app_userdata/<proyecto>/foundry.cfg`):
+- El token sale de la CLI de Azure: haz `az login` antes de abrir la app. Se guarda en memoria unos 50 minutos.
+- Opcional: `NACIONAL_FOUNDRY_TOKEN` para dar un token ya obtenido.
+- También se puede usar el archivo `user://foundry.cfg` con la sección `[foundry]` (`endpoint`, `agente`, `token`) o variables de entorno con los mismos nombres.
+- El endpoint debe empezar con `https://`. Tiempo de espera: 30 s (la búsqueda en los manuales tarda unos 9 s).
+- La suite de pruebas pone `NACIONAL_SIN_NUBE=1` y nunca llama a Foundry.
 
-```ini
-[foundry]
-endpoint="https://..."
-clave="..."
-modelo="..."
-```
+## Cómo responde el agente
+- Con un agente fijo la API no permite cambiar el formato de salida: el esquema viaja en el mensaje y la app lo valida.
+- La app extrae el JSON del mensaje y los nombres de PDF que devolvió la base de conocimiento (`basefaro123`, origen `ks-docs-volvo`). Se muestran como "Basada en: …" en la intro de la ruta.
+- Si el JSON no cumple el esquema, repite competencias, inventa ids de órdenes o pasa de 220 caracteres, se descarta y queda "Ruta calculada sin IA".
+- Coste: cada consulta con búsqueda usa unos 16 000 tokens. Por eso el resultado se guarda en SQLite y se reutiliza mientras el diagnóstico no cambie.
 
-El endpoint debe empezar con `https://`. Tiempo de espera: 8 s.
+## Permisos de Azure que hicieron falta
+- `volvo-resource` y la identidad de `volvo-srch-f54r`: Lector de datos de Storage Blob en `faroarchivos`.
+- `volvo-resource` y el proyecto `volvo`: Lector de datos del índice de búsqueda y Colaborador de servicio de búsqueda en `volvo-srch-f54r`.
+- Sin el rol del proyecto el agente fallaba con "A user error occurred while executing a tool call".
 
 ## Cómo probar
-1. Configura una de las dos opciones y abre la app.
+1. Crea el `.env`, haz `az login` y abre la app.
 2. Entra con un alias, completa el diagnóstico y abre **Ruta de aprendizaje**.
 3. Debe verse "Armando tu ruta…" y después el camino con "Ruta generada con IA". Si falla, aparece "Ruta calculada sin IA".
 
 ## Pendiente
-- T-172: prueba con la clave real y revisión de que la ruta tenga sentido. La suite automática no llama a Foundry.
+- T-172: revisión humana de que la ruta tenga sentido. Hecha una corrida real: válida, con tres PDF de fuente, en unos 9 s. La suite automática no llama a Foundry.
+- Confirmar con Volvo que sus documentos pueden estar en la nube de Azure.

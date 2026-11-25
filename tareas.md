@@ -203,4 +203,5 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-169 S — Cliente Foundry con `HTTPRequest`, configuración local y tiempo de espera de 8 s.
 - [x] T-170 S — Caché de la ruta generada en SQLite.
 - [x] T-171 S — Pantalla de ruta: "Armando tu ruta…", ruta con IA y respaldo "Ruta calculada sin IA".
-- [ ] T-172 H — Prueba con la clave real de Foundry: correr un diagnóstico y revisar que la ruta tenga sentido.
+- [ ] T-172 H — Revisión humana: correr un diagnóstico en la app con `az login` y revisar que la ruta tenga sentido (corrida real hecha: válida, con fuentes).
+- [x] T-173 — Cliente del agente Faro (API Responses con token de `az`, `.env` fuera de git), extracción de JSON y de fuentes citadas, y "Basada en: …" en la ruta. Pruebas sin nube.

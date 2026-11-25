@@ -60,7 +60,7 @@ static func esquema(competencias: Array) -> Dictionary:
 				"ordenes": {"type": "array", "items": {"type": "string"}}}}}}}}
 
 
-# Devuelve {"orden": [...], "detalle": {competencia: {motivo, practica, ordenes}}} o {} si no es válida.
+# Devuelve {"orden": [...], "detalle": {competencia: {motivo, practica, ordenes}}, "fuentes": [pdf]} o {} si no es válida.
 static func validar(respuesta: Variant, orden_base: Array, historial: Array, ids_ordenes: Array) -> Dictionary:
 	if not respuesta is Dictionary or not respuesta.get("pasos") is Array:
 		return {}
@@ -91,7 +91,19 @@ static func validar(respuesta: Variant, orden_base: Array, historial: Array, ids
 	var criticas := Ruta.pendientes_criticas(historial)
 	var primeras := orden.filter(func(id: String) -> bool: return criticas.has(id))
 	var resto := orden.filter(func(id: String) -> bool: return not criticas.has(id))
-	return {"orden": primeras + resto, "detalle": detalle}
+	return {"orden": primeras + resto, "detalle": detalle, "fuentes": fuentes_validas(respuesta.get("fuentes"))}
+
+
+# Solo nombres de PDF cortos y limpios; la IA no decide qué se muestra como fuente.
+static func fuentes_validas(valor: Variant) -> Array:
+	var fuentes := []
+	if not valor is Array:
+		return fuentes
+	for nombre in valor:
+		if nombre is String and nombre.to_lower().ends_with(".pdf") and nombre.length() <= 120 \
+				and nombre not in fuentes and fuentes.size() < 3:
+			fuentes.append(TextoLimpio.limpiar(nombre).texto)
+	return fuentes
 
 
 static func texto_corto(valor: Variant) -> String:

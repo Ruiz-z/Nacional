@@ -29,6 +29,7 @@ var sesion := ""
 var banco_cargado := {}
 var detalle_ia := {}
 var origen_ruta := "reglas"
+var fuentes_ia := []
 
 
 func preparar(banco: Dictionary, ahora: int) -> bool:
@@ -119,6 +120,7 @@ func aplicar_ruta_ia(validada: Dictionary) -> bool:
 	plan = nuevo_plan
 	items = nuevos
 	detalle_ia = validada.detalle.duplicate(true)
+	fuentes_ia = validada.get("fuentes", []).duplicate()
 	origen_ruta = "ia"
 	return true
 
