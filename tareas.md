@@ -213,3 +213,9 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-179 — Rediseñar el mapa de aprendizaje y su panel de detalle (RF-25 y RF-26). Camino numerado, cuatro estados con color, fichas compactas con acceso al detalle y pie fijo. Suite y geometría verificadas a 1280 × 720 y 1920 × 1080. Revisión de PNG pendiente por falta de acceso a una sesión gráfica.
 
 - [x] T-180 S — Tablero para el jefe directo (tablero RF-3, RF-24 a RF-26). Lista por prioridad, ficha con evidencia y recomendación, y exportación por alias. Suite y geometría verificadas a 1280 × 720 y 1920 × 1080. Los PNG requieren una sesión gráfica.
+
+
+- [x] T-183 S — Sustituir el ingreso por alias con usuario y contraseña, creación del primer administrador, cambio obligatorio, bloqueo y cierre de sesión (flujo RF-1, RF-10 a RF-15).
+- [x] T-184 S — Aplicar roles al menú y a las vistas personal, de equipo y operativa (flujo RF-12 y tablero RF-3).
+- [x] T-185 S — Gestionar cuentas, mostrar la contraseña temporal una vez y confirmar el borrado con protecciones (flujo RF-13 y tablero RF-14).
+- [x] T-186 S — Probar las pantallas de cuenta e incorporar las seis vistas a la herramienta de captura.

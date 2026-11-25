@@ -22,9 +22,8 @@ static func comprobar(base: String) -> bool:
 	tablero.rol = "jefe"
 	(Engine.get_main_loop() as SceneTree).root.add_child(tablero)
 	var jefe: Button = tablero.get_node("Vistas/JefeDirecto")
-	jefe.pressed.emit()
 	var texto_lista := leer(tablero.datos)
-	var correcto: bool = jefe.text == "Jefe directo" and tablero.botones_tecnicos.keys() == ["A-01", Demo.ALIAS] \
+	var correcto: bool = not jefe.visible and tablero.jefe_directo and tablero.botones_tecnicos.keys() == ["A-01", Demo.ALIAS] \
 		and texto_lista.contains("Con falta crítica") and texto_lista.contains("Última actividad")
 	tablero.botones_tecnicos[Demo.ALIAS].pressed.emit()
 	var historial: CheckButton = tablero.datos.get_node("AbrirHistorial")

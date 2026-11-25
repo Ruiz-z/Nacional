@@ -8,7 +8,7 @@ enlazados mediante `?`.
 
 | Tabla | Campos y restricciones |
 |---|---|
-| `tecnico` | `id` entero, clave primaria. `alias` texto único y no vacío. `demo` entero booleano (`0` o `1`, por defecto `0`). `creado` texto con fecha y hora UTC, por defecto al insertar. |
+| `tecnico` | `id` entero, clave primaria. `alias` texto único. Guarda el usuario. `demo` entero booleano (`0` o `1`, por defecto `0`). `creado` texto con fecha y hora UTC, por defecto al insertar. `rol` (`tecnico`, `jefe`, `admin`). `clave_hash` guarda el hash con algoritmo, iteraciones y sal. `cambiar_clave`, `fallos` y `bloqueado_hasta` guardan el estado de acceso. |
 | `intento` | `id` entero, clave primaria. `tecnico` entero, clave foránea. `competencia`, `item`, `formato`, `dificultad`, `respuesta`, `resultado`, `tipo_error`, `fuente_entrada`, `momento`, `reloj_sim` y `version_contenido` son texto. `tipo_error` admite `NULL`. `valor` es real de 0 a 100, `peso` es real positivo y `tiempo_ms` es entero no negativo. `momento` admite `pre`, `post`, `retest` o `practica`. |
 | `evento` | `id` entero, clave primaria. `tecnico` entero, clave foránea. `escenario`, `accion`, `estado_antes`, `estado_despues`, `criticidad`, `fuente_entrada` y `reloj_sim` son texto. |
 | `brecha` | `id` entero, clave primaria. `tecnico` entero, clave foránea. `competencia`, `caso`, `causa_marcada`, `accion_ejecutada` y `reloj_sim` son texto. |
@@ -20,7 +20,7 @@ Cada `tecnico` referencia a `tecnico.id` con borrado en cascada. Los
 identificadores de competencia, ítem y caso remiten al contenido JSON.
 Los intentos conservan su versión de contenido. El dominio, el nivel y
 los errores recurrentes se calculan al consultar el historial de `intento`.
-La identificación de los técnicos se limita al alias o ID.
+El usuario de cada cuenta se elige sin datos personales. Las cuentas heredadas conservan su identificador y tienen `clave_hash` vacío. Administración permite borrarlas y crear cuentas nuevas.
 
 ## Creación y respaldo
 

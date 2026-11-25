@@ -26,7 +26,7 @@ static func comprobar(base: String) -> bool:
 		pantalla.enviar.pressed.emit()
 		correcto = correcto and pantalla.guardado and menu.get_node("Marco").visible and not menu.get_node("Marco/Volver").visible
 	var estado := Recorrido.estado(base, menu.perfil.id, ahora)
-	var filas: Variant = Registro.leer(base, "T-85")
+	var filas: Variant = Registro.leer(base, menu.perfil.alias)
 	menu.free()
 	return correcto and filas.is_empty() and estado.siguiente == "escenario" \
 		and estado.microlecciones_hechas == 0 and estado.ruta.size() == 4

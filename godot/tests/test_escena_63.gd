@@ -13,6 +13,7 @@ static func comprobar(base: String) -> bool:
 		return false
 	var tablero := Tablero.instantiate()
 	tablero.base = base
+	tablero.rol = "tecnico"
 	tablero.alias_actual = Demo.ALIAS
 	(Engine.get_main_loop() as SceneTree).root.add_child(tablero)
 	var correcto := false

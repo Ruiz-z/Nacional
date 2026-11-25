@@ -36,13 +36,28 @@ El camino enlaza las competencias con una línea sólida y flechas descendentes.
 
 Cada tarjeta se activa con clic, Enter o Espacio. Al pasar el ratón se aclara el relleno y aparece el cursor de mano. Un borde blanco de 3 px marca el foco de teclado.
 
-El panel se abre a la derecha y se desplaza por separado. Tiene fondo oscuro, un borde izquierdo de 4 px del color del estado, título de 22 px y texto de 16 px. «Cerrar» recibe el foco al abrir. Escape y «Cerrar» devuelven el foco a la tarjeta. Al elegir otra tarjeta visible, el panel actualiza su contenido. Los errores muestran los intentos disponibles. La acción de una competencia abre el catálogo filtrado y la de una orden abre su práctica. «Volver» retoma la ruta.
+El panel se abre a la derecha y se desplaza por separado. Tiene fondo oscuro, un borde neutro de 1 px, un título de 22 px, el estado con texto y color, y texto de 16 px. «Cerrar» recibe el foco al abrir. Escape y «Cerrar» devuelven el foco a la tarjeta. Al elegir otra tarjeta visible, el panel actualiza su contenido. Los errores muestran los intentos disponibles. La acción de una competencia abre el catálogo filtrado y la de una orden abre su práctica. «Volver» retoma la ruta.
 
 
 ## Tablero de progreso
 
-«Jefe directo» abre la lista de técnicos. El alias es el acceso a la ficha y el estado combina una marca de color con una palabra. Las cuatro barras usan un relleno neutro y muestran el nombre del nivel. La última columna indica la fecha del historial más reciente.
+La cuenta de jefe directo abre la lista de técnicos. El usuario es el acceso a la ficha y el estado combina una marca de color con una palabra. Las cuatro barras usan un relleno neutro y muestran el nombre del nivel. La última columna indica la fecha del historial más reciente.
 
 La ficha usa el título más grande para la recomendación. Debajo quedan sus evidencias y la frase que atribuye la decisión al jefe directo. Las competencias se leen en dos columnas, con separadores finos, texto breve y barras de 6 px sobre el fondo oscuro. Los tiempos, las brechas y el historial se pueden desplegar. «Volver a la lista» y «Exportar» están en la barra fija. Al volver, el foco regresa al alias abierto.
 
 Las vistas admiten desplazamiento vertical a 1280 × 720 y 1920 × 1080. Los botones usan el foco visible del tema Poppins.
+
+
+## Ingreso y menú
+
+El formulario se centra en 420 px. Usa etiquetas visibles y Poppins sobre fondo oscuro. La acción principal va en turquesa con texto oscuro. La tarjeta de error se cierra con Aceptar o Escape. Si la cuenta queda bloqueada, el formulario muestra los segundos restantes junto a Entrar. La creación del primer administrador y el cambio obligatorio usan el mismo formulario.
+
+El menú muestra el usuario, su rol y Cerrar sesión. Las acciones de formación se presentan en filas y la actividad recomendada usa el acento principal. El jefe directo abre Nuevo técnico desde su tablero.
+
+## Administración y estado del taller
+
+Administración presenta una tabla con usuario, rol, estado y acciones. Nueva cuenta abre un formulario. La contraseña temporal se muestra en una tarjeta con Copiar y se borra de la pantalla al cerrarla. Borrar abre una confirmación.
+
+El tablero del administrador agrupa cuentas, contenido y servicios, y actividad de técnicos. Los estados se expresan con texto. Las otras vistas están disponibles para consulta. El botón Administración lleva a la gestión de cuentas.
+
+Los controles de cuenta usan bordes de 1 px, radio de 3 px y foco de teclado de 3 px. Las listas pueden desplazarse a 1280 × 720 y 1920 × 1080.

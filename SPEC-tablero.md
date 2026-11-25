@@ -33,9 +33,9 @@ Muestra el avance, dominio, errores y retención de cada técnico, con trazabili
 10. Evidencia por competencia: teoría, prácticas virtuales, casos con banco, errores por oportunidad e intentos sin ayuda.
 
 ## Requisitos funcionales (EARS)
-- RF-1: EL SISTEMA define el esquema único de la base SQLite local (en `docs/modelo-datos.md`) y guarda en ella técnico (alias), competencia, ítem, respuesta, tiempo, resultado, tipo de error, evento, fuente y versión de contenido; `aprendizaje` y `simulador` escriben mediante ese esquema.
+- RF-1: EL SISTEMA define el esquema único de la base SQLite local (en `docs/modelo-datos.md`) y guarda en ella técnico (usuario, guardado en alias), competencia, ítem, respuesta, tiempo, resultado, tipo de error, evento, fuente y versión de contenido; `aprendizaje` y `simulador` escriben mediante ese esquema.
 - RF-2: CUANDO `aprendizaje` o `simulador` entregan resultados, EL SISTEMA los guarda sin recalcular dominio ni ruta.
-- RF-3: EL SISTEMA ofrece la vista del técnico y la vista «Jefe directo» con cambio desde un menú.
+- RF-3: EL SISTEMA abre la vista personal para el técnico, la de equipo para el jefe directo y la operativa para el administrador. El técnico solo ve sus datos. El administrador consulta también las dos vistas de progreso en modo lectura. La vista operativa muestra cuentas por rol, heredadas, actividad de técnicos, revisión por Volvo, respaldo y configuración de IA.
 - RF-4: EL SISTEMA muestra los indicadores de la lista según la vista.
 - RF-5: CUANDO el usuario pide ayuda de un indicador, EL SISTEMA muestra su fórmula.
 - RF-6: EL SISTEMA muestra el dominio por competencia con barras horizontales y el nivel marcado.
@@ -46,7 +46,7 @@ Muestra el avance, dominio, errores y retención de cada técnico, con trazabili
 - RF-11: EL SISTEMA usa color solo para estado (rojo, ámbar, verde) y siempre acompañado de texto.
 - RF-12: CUANDO se abre un técnico en la vista «Jefe directo», EL SISTEMA muestra su historial con evento, ítem, fuente y versión.
 - RF-13: EL SISTEMA exporta los resultados de un técnico o de todos a CSV y JSON con fecha y versión del contenido.
-- RF-14: CUANDO el usuario elige borrar un técnico, EL SISTEMA elimina sus datos tras confirmación.
+- RF-14: CUANDO el administrador confirma el borrado de una cuenta en Administración, EL SISTEMA elimina la cuenta y sus datos asociados. Protege la cuenta propia y la última cuenta de administración activa.
 - RF-15: EL SISTEMA marca los datos de demostración con `[DEMO]` y los distingue de los reales.
 - RF-16: EL SISTEMA precarga un técnico ficticio con historial al iniciar en modo demo.
 - RF-17: EL SISTEMA funciona sin conexión a internet.
@@ -58,7 +58,7 @@ Muestra el avance, dominio, errores y retención de cada técnico, con trazabili
 - RF-23: EL SISTEMA envía al asistente solo datos con alias, nunca nombres.
 - RF-24: CUANDO se abre una ficha de «Jefe directo», EL SISTEMA resume la evidencia guardada por competencia. Una oportunidad es una respuesta o intento de práctica registrado. Los detalles de una práctica y las brechas se consultan aparte. Cuenta los intentos incorrectos sobre las oportunidades y los intentos con `ayudas = 0`. Identifica las prácticas virtuales y los casos con banco mediante la fuente de entrada. También reconoce el banco cuando un evento de medición se puede asociar con una sola sesión del caso y fecha. El panel físico por sí solo no acredita banco de arnés. Si falta evidencia, los conteos se quedan en cero. Los tiempos usan el promedio de las acciones registradas con duración y competencia identificables.
 - RF-25: CUANDO se abre una ficha, EL SISTEMA muestra una recomendación con la evidencia que la respalda y el pie «Es una recomendación. La decisión de avance es del jefe directo.». Prioriza una falta crítica pendiente, luego una competencia por debajo de 70 % con un error que se repite al menos tres veces. Para recomendar práctica supervisada, las cuatro competencias deben estar aprobadas según SPEC-aprendizaje. Con resultados faltantes o alertas restantes, señala qué falta completar o revisar. La vista «Técnico» conserva su lenguaje.
-- RF-26: CUANDO se abre «Jefe directo», EL SISTEMA muestra una fila por alias con estado textual y color, cuatro barras de nivel y fecha de última actividad. Ordena por estado en este orden: «Con falta crítica», «Con alertas», «Sin completar», «Sin alertas». CUANDO se abre una ficha, muestra primero la recomendación con respaldo, luego evidencia por competencia, faltas críticas con fecha, ganancia, retención con el retest marcado como simulado, ruta pendiente e historial. «Volver a la lista» y «Exportar» quedan visibles al desplazar la ficha. La exportación de la ficha usa el alias abierto y permite elegir CSV o JSON.
+- RF-26: CUANDO se abre «Jefe directo», EL SISTEMA muestra una fila por alias con estado textual y color, cuatro barras de nivel y fecha de última actividad. Ordena por estado en este orden: «Con falta crítica», «Con alertas», «Sin completar», «Sin alertas». CUANDO se abre una ficha, muestra primero la recomendación con respaldo, luego evidencia por competencia, faltas críticas con fecha, ganancia, retención con el retest marcado como simulado, ruta pendiente e historial. «Volver a la lista» queda visible al desplazar la ficha. El jefe directo conserva acceso a «Exportar». La exportación de la ficha usa el alias abierto y permite elegir CSV o JSON.
 
 ## Requisitos no funcionales
 - SQLite como almacenamiento; CSV y JSON solo para exportar.

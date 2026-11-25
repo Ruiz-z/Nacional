@@ -6,7 +6,10 @@ signal paso_solicitado(paso: String, perfil: Dictionary)
 
 const Banco = preload("res://logica/competencias/banco.gd")
 const Escenario = preload("res://logica/simulador/escenario.gd")
-const Alias = preload("res://logica/flujo/alias.gd")
+const Acceso = preload("res://logica/datos/acceso_sqlite.gd")
+const Cuentas = preload("res://logica/flujo/cuentas.gd")
+const UI = preload("res://escenas/cuenta_ui.gd")
+const Administracion = preload("res://escenas/administracion.tscn")
 const Recorrido = preload("res://logica/flujo/recorrido.gd")
 const Esquema = preload("res://logica/datos/esquema.gd")
 const Conexion = preload("res://logica/entrada/conexion_panel.gd")
@@ -17,7 +20,7 @@ const Demo = preload("res://escenas/modo_demo.tscn")
 const Diagnostico = preload("res://escenas/diagnostico.tscn")
 const Ruta = preload("res://escenas/ruta.tscn")
 const Evaluacion = preload("res://escenas/evaluacion.tscn")
-const NOMBRES := {"alias": "Elegir alias", "diagnostico": "Diagnóstico", "ruta": "Ruta de aprendizaje",
+const NOMBRES := {"administracion": "Administración", "diagnostico": "Diagnóstico", "ruta": "Ruta de aprendizaje",
 	"escenario": "Práctica", "post": "Evaluación", "retest": "Repetir la evaluación", "tablero": "Tablero"}
 
 var base := "user://nacional.sqlite"
@@ -25,164 +28,230 @@ var perfil := {}
 var banco_aprendizaje := {}
 var conexion := Conexion.new()
 var pantalla: Node
+var volver_al_tablero := false
 var ruta_en_pausa: Control
 var inicio_practica_mapa := 0
 var botones := {}
-var destacados := {}
+var disponible := false
+var pendiente := {}
+var etapa := ""
+var espera_hasta := 0
+var inicio: VBoxContainer
+var barra: HBoxContainer
+var usuario: LineEdit
+var clave: LineEdit
+var repeticion: LineEdit
+var enviar: Button
+var demo_boton: Button
+var espera: Label
+var aviso: AcceptDialog
 @onready var entrada_inicio: ScrollContainer = $Marco/EntradaInicio
-@onready var columna := $Marco/EntradaInicio/Columna
-@onready var barra := columna.get_node("Barra/Margen/Fila")
-@onready var texto_hero := columna.get_node("Hero/Margen/Fila/Texto")
-@onready var inicio := columna.get_node("Hero/Margen/Fila/Tarjeta/Inicio")
-@onready var recorrido := columna.get_node("Recorrido/Margen/Contenido")
 
 
 func _ready() -> void:
 	if "--verificar-contenido" in OS.get_cmdline_user_args():
 		verificar_contenido()
 		return
-	var disponible := Esquema.crear(base)
-	inicio.get_node("Alta").disabled = not disponible
-	inicio.get_node("Elegir").disabled = not disponible
-	inicio.get_node("Alta").pressed.connect(func(): seleccionar_alias(true))
-	inicio.get_node("Elegir").pressed.connect(func(): seleccionar_alias(false))
-	inicio.get_node("Alias").placeholder_text = "Ejemplo: T-0001"
-	inicio.get_node("Alias").text_submitted.connect(func(_texto: String): seleccionar_alias(false))
+	disponible = Esquema.crear(base)
 	$Marco/Volver.pressed.connect(volver)
-	preparar_inicio(disponible)
-	actualizar()
-	enfocar_inicio()
+	mostrar_ingreso()
+
+
+func renovar_inicio(centrado: bool) -> void:
+	for hijo in entrada_inicio.get_children():
+		entrada_inicio.remove_child(hijo)
+		hijo.queue_free()
+	var marco := MarginContainer.new()
+	marco.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	marco.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	for lado in ["left", "right", "top", "bottom"]:
+		marco.add_theme_constant_override("margin_" + lado, 32)
+	entrada_inicio.add_child(marco)
+	var centro := CenterContainer.new()
+	marco.add_child(centro)
+	inicio = VBoxContainer.new()
+	inicio.custom_minimum_size.x = 420 if centrado else 780
+	inicio.add_theme_constant_override("separation", 10)
+	centro.add_child(inicio)
+	entrada_inicio.set_deferred("scroll_vertical", 0)
+
+
+func mostrar_ingreso() -> void:
+	renovar_inicio(true)
+	etapa = "cambio" if not pendiente.is_empty() else (
+		"ingreso" if not disponible or Cuentas.hay_admin(base) else "primer-admin")
+	var titulo: String = {"ingreso": "Entrar al taller", "primer-admin": "Crea la cuenta de administración",
+		"cambio": "Cambia tu contraseña"}[etapa]
+	inicio.add_child(UI.etiqueta(titulo, &"Titulo"))
+	if etapa == "cambio":
+		inicio.add_child(UI.etiqueta("Antes de seguir, reemplaza tu contraseña temporal.", &"Secundario"))
+	else:
+		usuario = UI.campo(inicio, "Usuario")
+		if etapa == "primer-admin":
+			inicio.add_child(UI.etiqueta("Usa de 3 a 24 caracteres. Evita tu nombre real.", &"Secundario"))
+	clave = UI.campo(inicio, "Contraseña" if etapa == "ingreso" else "Nueva contraseña", true)
+	if etapa != "ingreso":
+		repeticion = UI.campo(inicio, "Repite la contraseña", true)
+		inicio.add_child(UI.etiqueta("Usa al menos 8 caracteres.", &"Secundario"))
+	var revelar := UI.boton("Mostrar contraseña")
+	revelar.toggle_mode = true
+	revelar.toggled.connect(func(visible_clave: bool):
+		clave.secret = not visible_clave
+		if etapa != "ingreso":
+			repeticion.secret = not visible_clave
+		revelar.text = "Ocultar contraseña" if visible_clave else "Mostrar contraseña")
+	inicio.add_child(revelar)
+	var texto: String = {"ingreso": "Entrar", "primer-admin": "Crear cuenta", "cambio": "Guardar contraseña"}[etapa]
+	enviar = UI.boton(texto, true)
+	enviar.pressed.connect(enviar_ingreso)
+	inicio.add_child(enviar)
+	if etapa != "cambio":
+		usuario.text_submitted.connect(func(_texto: String): enviar_ingreso())
+	clave.text_submitted.connect(func(_texto: String): enviar_ingreso())
+	if etapa != "ingreso":
+		repeticion.text_submitted.connect(func(_texto: String): enviar_ingreso())
+	espera = UI.etiqueta("", &"Aviso")
+	inicio.add_child(espera)
+	if etapa == "ingreso":
+		demo_boton = UI.boton("Modo demo")
+		demo_boton.pressed.connect(abrir_demo)
+		inicio.add_child(demo_boton)
+	elif etapa == "cambio":
+		var cancelar := UI.boton("Cerrar sesión")
+		cancelar.pressed.connect(cerrar_sesion)
+		inicio.add_child(cancelar)
 	if not disponible:
-		inicio.get_node("Aviso").text = "No se pudo abrir tu progreso. Cierra el juego y ábrelo de nuevo."
-
-
-func preparar_inicio(disponible: bool) -> void:
-	var foto := "res://assets/ui/hero.png"
-	if ResourceLoader.exists(foto, "Texture2D"):
-		columna.get_node("Hero/Foto").texture = load(foto)
-	var logo: Control = barra.get_node("Logo")
-	logo.draw.connect(dibujar_icono.bind(logo, "logo"))
-	var acciones := texto_hero.get_node("Acciones")
-	acciones.get_node("IrAlias").disabled = not disponible
-	acciones.get_node("IrAlias").pressed.connect(entrar_desde_hero)
-	acciones.get_node("DemoHero").pressed.connect(abrir_demo)
-	recorrido.get_node("Demo").pressed.connect(abrir_demo)
-	var fichas := columna.get_node("Destacados/Tarjetas")
-	for datos in [
-		["diagnostico", "Diagnóstico", "Contesta preguntas para saber qué necesitas practicar."],
-		["ruta", "Ruta de aprendizaje", "Repasa los temas que te faltan según tu diagnóstico."],
-		["escenario", "Práctica en el taller", "Resuelve fallas en el autobús eléctrico."]
-	]:
-		var tarjeta := crear_tarjeta(datos[0], datos[1], datos[2], true)
-		fichas.add_child(tarjeta)
-		destacados[datos[0]] = tarjeta
-	for indice in Recorrido.PASOS.size():
-		var paso: String = Recorrido.PASOS[indice]
-		var boton := crear_tarjeta(paso, NOMBRES[paso], "", false)
-		recorrido.get_node("Pasos").add_child(boton)
-		boton.get_node("Contenido/Insignia").text = "%02d" % (indice + 1)
-		botones[paso] = boton
-	entrada_inicio.resized.connect(ajustar_margenes)
-	texto_hero.resized.connect(ajustar_titulo)
-	ajustar_margenes()
-
-
-func entrar_desde_hero() -> void:
-	var campo: LineEdit = inicio.get_node("Alias")
-	if campo.text.strip_edges().is_empty():
-		campo.grab_focus()
+		espera.text = "No se pudo abrir el progreso. Cierra el juego y ábrelo de nuevo."
+	actualizar_espera()
+	if etapa == "cambio":
+		clave.grab_focus()
 	else:
-		seleccionar_alias(false)
+		usuario.grab_focus()
 
 
-func ajustar_margenes() -> void:
-	var margen := maxi(24, int((entrada_inicio.size.x - 1160.0) / 2.0))
-	for ruta in ["Barra/Margen", "Hero/Margen", "Destacados", "Recorrido/Margen"]:
-		var contenedor: MarginContainer = columna.get_node(ruta)
-		contenedor.add_theme_constant_override("margin_left", margen)
-		contenedor.add_theme_constant_override("margin_right", margen)
+func actualizar_espera() -> void:
+	var segundos := maxi(0, ceili((espera_hasta - Time.get_ticks_msec()) / 1000.0))
+	enviar.disabled = not disponible or (etapa == "ingreso" and segundos > 0)
+	if disponible:
+		espera.text = "Puedes volver a intentar en %d s." % segundos if segundos > 0 else ""
+	espera.visible = not espera.text.is_empty()
 
 
-func ajustar_titulo() -> void:
-	for nombre in ["Titulo", "Acento"]:
-		var etiqueta: Label = texto_hero.get_node(nombre)
-		var fuente := etiqueta.get_theme_font("font")
-		var ancho := fuente.get_string_size(etiqueta.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 56).x
-		etiqueta.add_theme_font_size_override("font_size",
-			clampi(int(56.0 * texto_hero.size.x / ancho), 34, 56))
-
-
-func crear_tarjeta(paso: String, titulo: String, detalle: String, destacada: bool) -> Button:
-	var boton := Button.new()
-	boton.name = paso
-	boton.theme_type_variation = &"BotonPetroleo" if destacada else &"BotonClaro"
-	boton.accessibility_name = titulo
-	boton.custom_minimum_size.y = 148 if destacada else 122
-	boton.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	boton.pressed.connect(abrir_paso.bind(paso))
-	var contenido := VBoxContainer.new()
-	contenido.name = "Contenido"
-	contenido.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	boton.add_child(contenido)
-	contenido.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	contenido.offset_left = 16
-	contenido.offset_top = 12
-	contenido.offset_right = -16
-	if destacada:
-		var icono := Control.new()
-		icono.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		icono.custom_minimum_size = Vector2(38, 38)
-		icono.draw.connect(dibujar_icono.bind(icono, paso))
-		contenido.add_child(icono)
-	else:
-		var insignia := Label.new()
-		insignia.name = "Insignia"
-		insignia.theme_type_variation = &"Insignia"
-		insignia.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		contenido.add_child(insignia)
-	var encabezado := Label.new()
-	encabezado.theme_type_variation = &"Seccion"
-	encabezado.text = titulo
-	encabezado.add_theme_font_size_override("font_size", 20)
-	if not destacada:
-		encabezado.add_theme_color_override("font_color", Color("#1A2327"))
-	contenido.add_child(encabezado)
-	var descripcion := Label.new()
-	descripcion.name = "Estado"
-	descripcion.theme_type_variation = &"Secundario" if destacada else &"DetalleClaro"
-	descripcion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	descripcion.text = detalle
-	contenido.add_child(descripcion)
-	return boton
-
-
-func dibujar_icono(icono: Control, paso: String) -> void:
-	var tinta := Color("#0E1A22")
-	var turquesa := Color("#1AA7A6")
-	var centro := Vector2(19, 19)
-	if paso == "logo":
-		var caja := StyleBoxFlat.new()
-		caja.bg_color = turquesa
-		caja.set_corner_radius_all(7)
-		icono.draw_style_box(caja, Rect2(Vector2.ZERO, Vector2(38, 38)))
-		for indice in 8:
-			var radio := Vector2.RIGHT.rotated(indice * TAU / 8.0)
-			icono.draw_line(centro + radio * 8, centro + radio * 13, tinta, 4, true)
-		icono.draw_arc(centro, 8, 0, TAU, 24, tinta, 4, true)
+func enviar_ingreso() -> void:
+	if enviar.disabled or (is_instance_valid(aviso) and aviso.visible):
 		return
-	icono.draw_circle(centro, 19, turquesa, true, -1.0, true)
-	match paso:
-		"diagnostico":
-			icono.draw_polyline(PackedVector2Array([Vector2(7, 19), Vector2(13, 19),
-				Vector2(17, 11), Vector2(22, 27), Vector2(25, 19), Vector2(31, 19)]), tinta, 2, true)
-		"ruta":
-			icono.draw_polyline(PackedVector2Array([Vector2(11, 26), Vector2(11, 16),
-				Vector2(26, 16), Vector2(26, 10)]), tinta, 2, true)
-			icono.draw_circle(Vector2(11, 26), 3, tinta)
-			icono.draw_circle(Vector2(26, 10), 3, tinta)
-		"escenario":
-			icono.draw_line(Vector2(11, 27), Vector2(23, 15), tinta, 5, true)
-			icono.draw_arc(Vector2(23, 15), 6, 0, PI * 1.5, 16, tinta, 3, true)
+	var resultado: Dictionary
+	if etapa != "ingreso" and clave.text != repeticion.text:
+		UI.marcar_error(repeticion)
+		aviso = UI.aviso(self, "Las contraseñas no coinciden. Escríbelas de nuevo.", repeticion)
+		return
+	match etapa:
+		"primer-admin":
+			if Cuentas.hay_admin(base):
+				mostrar_ingreso()
+				return
+			resultado = Cuentas.crear(base, usuario.text, "admin", clave.text)
+		"cambio":
+			resultado = Cuentas.cambiar_clave(base, pendiente.id, clave.text)
+		_:
+			var error_usuario := Cuentas.revisar_usuario(usuario.text)
+			if not error_usuario.is_empty():
+				UI.marcar_error(usuario)
+				aviso = UI.aviso(self, error_usuario, usuario)
+				return
+			if clave.text.is_empty():
+				UI.marcar_error(clave)
+				aviso = UI.aviso(self, "Escribe tu contraseña para entrar.", clave)
+				return
+			var instante := ahora()
+			resultado = Cuentas.entrar(base, usuario.text, clave.text, instante)
+			if resultado.get("mensaje", "") == Cuentas.MENSAJE_INVALIDO:
+				# Cuentas registra el bloqueo al quinto fallo y comunica la espera al siguiente intento.
+				var filas: Variant = Acceso.consultar(base,
+					"SELECT bloqueado_hasta FROM tecnico WHERE alias = ? AND demo = 0;",
+					[Cuentas.normalizar(usuario.text)])
+				if filas is Array and not filas.is_empty() and int(filas[0].bloqueado_hasta) > instante:
+					resultado = Cuentas.entrar(base, usuario.text, clave.text, instante)
+	if not resultado.ok:
+		if resultado.get("bloqueado", false):
+			espera_hasta = Time.get_ticks_msec() + int(resultado.espera_s) * 1000
+			actualizar_espera()
+		var campo_error := clave
+		if etapa == "primer-admin" and (not Cuentas.revisar_usuario(usuario.text).is_empty() \
+				or resultado.mensaje.contains("usuario")):
+			campo_error = usuario
+		UI.marcar_error(campo_error)
+		aviso = UI.aviso(self, resultado.mensaje, campo_error)
+		return
+	if etapa == "cambio":
+		resultado = pendiente
+	pendiente = {"ok": true, "id": resultado.id, "alias": resultado.alias, "rol": resultado.rol}
+	if resultado.get("cambiar_clave", false):
+		mostrar_ingreso()
+		return
+	perfil = pendiente
+	pendiente = {}
+	mostrar_menu()
+
+
+func cerrar_sesion() -> void:
+	perfil = {}
+	pendiente = {}
+	botones.clear()
+	mostrar_ingreso()
+
+
+func ahora() -> int:
+	return int(Time.get_unix_time_from_system())
+
+
+func actualizar() -> void:
+	if not perfil.is_empty():
+		mostrar_menu()
+
+
+func mostrar_menu() -> void:
+	renovar_inicio(false)
+	etapa = "menu"
+	barra = HBoxContainer.new()
+	barra.add_theme_constant_override("separation", 16)
+	inicio.add_child(barra)
+	var identidad := UI.etiqueta("%s · %s" % [TextoLimpio.linea(perfil.alias), Cuentas.NOMBRES_ROL[perfil.rol]])
+	identidad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	barra.add_child(identidad)
+	var entrada := UI.etiqueta(conexion.etiqueta(), &"Secundario")
+	entrada.name = "Entrada"
+	entrada.visible = perfil.rol == "tecnico"
+	barra.add_child(entrada)
+	var salir := UI.boton("Cerrar sesión")
+	salir.pressed.connect(cerrar_sesion)
+	barra.add_child(salir)
+	inicio.add_child(HSeparator.new())
+	inicio.add_child(UI.etiqueta("Menú del taller", &"Titulo"))
+	botones.clear()
+	var siguiente := "tablero"
+	var estado := {}
+	var pasos := ["tablero", "administracion"] if perfil.rol == "admin" else ["tablero"]
+	if perfil.rol == "tecnico":
+		estado = Recorrido.estado(base, perfil.id, ahora())
+		siguiente = estado.get("siguiente", "diagnostico")
+		pasos = Recorrido.PASOS
+		inicio.add_child(UI.etiqueta("Siguiente paso · %s" % NOMBRES.get(siguiente, "Diagnóstico"), &"Secundario"))
+		if not estado.get("aviso", "").is_empty():
+			inicio.add_child(UI.etiqueta(estado.aviso, &"Aviso"))
+	for paso in pasos:
+		var boton := UI.boton(NOMBRES[paso], paso == siguiente)
+		boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		boton.disabled = perfil.rol == "tecnico" and paso not in ["escenario", "tablero"] \
+			and paso not in estado.get("habilitados", []) and not (paso == "retest" and siguiente == "retest")
+		boton.tooltip_text = "Completa el paso anterior para abrir esta actividad." if boton.disabled else ""
+		boton.pressed.connect(abrir_paso.bind(paso))
+		inicio.add_child(boton)
+		botones[paso] = boton
+	var foco: Button = botones.get(siguiente, botones.tablero)
+	if foco.disabled:
+		foco = botones.tablero
+	foco.grab_focus()
 
 
 func verificar_contenido() -> void:
@@ -199,63 +268,12 @@ func verificar_contenido() -> void:
 
 func _process(_delta: float) -> void:
 	conexion.actualizar(Time.get_ticks_msec())
-	barra.get_node("Entrada").text = conexion.etiqueta()
-
-
-func seleccionar_alias(alta: bool) -> void:
-	var entrada: String = inicio.get_node("Alias").text
-	var seleccion := Alias.alta(base, entrada) if alta else Alias.elegir(base, entrada)
-	if seleccion.ok:
-		perfil = seleccion
-		actualizar()
-		enfocar_inicio()
-	else:
-		inicio.get_node("Aviso").text = seleccion.mensaje
-
-
-func actualizar() -> void:
-	var estado := Recorrido.estado(base, perfil.get("id", 0), int(Time.get_unix_time_from_system()))
-	var siguiente: String = estado.get("siguiente", "alias")
-	barra.get_node("Perfil").text = "Técnico · %s" % TextoLimpio.linea(perfil.get("alias", "Sin alias"))
-	inicio.get_node("Siguiente").text = "Siguiente paso · %s" % NOMBRES[siguiente]
-	var razon: String = estado.get("aviso", "")
-	inicio.get_node("Aviso").text = razon if not razon.is_empty() else (
-		"Entra con tu alias para empezar el diagnóstico." if perfil.is_empty()
-		else "Sigue con esta actividad: %s. También puedes abrir una práctica libre." % NOMBRES[siguiente]
-			if siguiente != "escenario" else "Sigue con esta actividad: %s." % NOMBRES[siguiente])
-	for paso in botones:
-		var boton: Button = botones[paso]
-		boton.disabled = paso not in estado.get("habilitados", []) \
-			and not (paso == "retest" and siguiente == "retest") \
-			and not (paso == "escenario" and not perfil.is_empty())
-		var estado_paso := "Bloqueado"
-		if not boton.disabled:
-			if paso == siguiente:
-				estado_paso = "Siguiente"
-			elif paso == "escenario":
-				estado_paso = "Práctica libre"
-			else:
-				estado_paso = "Disponible"
-		boton.get_node("Contenido/Estado").text = estado_paso
-		boton.accessibility_description = estado_paso
-		boton.get_node("Contenido").modulate.a = 0.76 if boton.disabled else 1.0
-		if destacados.has(paso):
-			destacados[paso].disabled = boton.disabled
-			destacados[paso].get_node("Contenido").modulate.a = 0.72 if boton.disabled else 1.0
-		boton.tooltip_text = ("Selecciona un alias para empezar." if perfil.is_empty() else
-			"Completa el paso anterior para abrir esta actividad.") if boton.disabled else razon
-
-
-func enfocar_inicio() -> void:
-	var siguiente: String = Recorrido.estado(base, perfil.get("id", 0),
-		int(Time.get_unix_time_from_system())).get("siguiente", "alias")
-	var boton: Control = botones.get(siguiente, inicio.get_node("Alias"))
-	if not (boton is Button and boton.disabled):
-		boton.grab_focus()
-	# Enfocar un control desplaza el scroll; la barra superior debe verse al entrar.
-	var desplazable := get_node_or_null("Marco/EntradaInicio") as ScrollContainer
-	if desplazable != null:
-		desplazable.set_deferred("scroll_vertical", 0)
+	if etapa == "menu" and is_instance_valid(barra):
+		barra.get_node("Entrada").text = conexion.etiqueta()
+	elif etapa == "ingreso" and espera_hasta > 0:
+		actualizar_espera()
+		if Time.get_ticks_msec() >= espera_hasta:
+			espera_hasta = 0
 
 
 func abrir_paso(paso: String) -> void:
@@ -265,7 +283,9 @@ func abrir_paso(paso: String) -> void:
 		"escenario":
 			abrir_ordenes(perfil.merged({"base": base}))
 		"tablero":
-			abrir_tablero({"base": base, "alias": perfil.alias, "rol": perfil.get("rol", "")})
+			abrir_tablero(perfil.merged({"base": base}))
+		"administracion":
+			abrir_administracion()
 		"diagnostico", "ruta", "post", "retest":
 			paso_solicitado.emit(paso, perfil.duplicate())
 			var recurso := {"diagnostico": Diagnostico, "ruta": Ruta}.get(paso, Evaluacion) as PackedScene
@@ -285,6 +305,8 @@ func abrir_paso(paso: String) -> void:
 
 
 func abrir_demo() -> void:
+	if etapa == "cambio":
+		return
 	var demo := Demo.instantiate()
 	demo.base_real = base
 	demo.tablero_solicitado.connect(abrir_tablero)
@@ -297,7 +319,22 @@ func abrir_tablero(tecnico: Dictionary) -> void:
 	tablero.base = tecnico.base
 	tablero.alias_actual = tecnico.alias
 	tablero.rol = tecnico.get("rol", "")
+	tablero.perfil = tecnico
+	tablero.administracion_solicitada.connect(abrir_administracion)
 	abrir(tablero)
+
+
+func abrir_administracion() -> void:
+	if not Cuentas.puede_crear(perfil.get("rol", ""), "tecnico"):
+		return
+	var gestion := Administracion.instantiate()
+	gestion.base = base
+	gestion.perfil = perfil
+	var desde_tablero: bool = is_instance_valid(pantalla) and pantalla.has_signal("administracion_solicitada")
+	abrir(gestion)
+	volver_al_tablero = desde_tablero
+	if volver_al_tablero:
+		$Marco/Volver.text = "Volver al tablero"
 
 
 func practicar_desde_ruta(accion: Dictionary) -> void:
@@ -348,6 +385,8 @@ func abrir(nueva: Node) -> void:
 	ajustar_marco(true)
 	inicio.hide()
 	pantalla = nueva
+	volver_al_tablero = false
+	$Marco/Volver.text = "Volver"
 	$Marco/Volver.show()
 	if nueva is Control:
 		nueva.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -355,6 +394,9 @@ func abrir(nueva: Node) -> void:
 
 
 func volver() -> void:
+	if volver_al_tablero:
+		abrir_tablero(perfil.merged({"base": base}))
+		return
 	if is_instance_valid(pantalla):
 		$Marco.remove_child(pantalla)
 		pantalla.queue_free()
@@ -371,9 +413,10 @@ func volver() -> void:
 	$Marco/Volver.hide()
 	ajustar_marco(false)
 	entrada_inicio.show()
-	inicio.show()
-	actualizar()
-	enfocar_inicio()
+	if perfil.is_empty():
+		mostrar_ingreso()
+	else:
+		mostrar_menu()
 
 
 func ajustar_marco(actividad: bool) -> void:

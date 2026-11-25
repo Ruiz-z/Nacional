@@ -62,6 +62,8 @@ static func crear(base: String, usuario: String, rol: String, clave: String, tem
 # Devuelve {ok, id, alias, rol, cambiar_clave}. Tras 5 fallos seguidos hay que esperar; la espera crece.
 static func entrar(base: String, usuario: String, clave: String, ahora: int,
 		consultar: Callable = Acceso.consultar) -> Dictionary:
+	if clave.is_empty():
+		return error(MENSAJE_INVALIDO)
 	var filas: Variant = consultar.call(base, """
 		SELECT id, alias, rol, clave_hash, cambiar_clave, fallos, bloqueado_hasta
 		FROM tecnico WHERE alias = ? AND demo = 0;
@@ -83,6 +85,9 @@ static func entrar(base: String, usuario: String, clave: String, ahora: int,
 			hasta = ahora + ESPERA_BASE_S * (fallos / FALLOS_PARA_BLOQUEO)
 		consultar.call(base, "UPDATE tecnico SET fallos = ?, bloqueado_hasta = ? WHERE id = ?;",
 			[fallos, hasta, int(fila.id)])
+		if hasta > 0:
+			return {"ok": false, "bloqueado": true, "espera_s": hasta - ahora,
+				"mensaje": "Demasiados intentos. Espera %d s para volver a probar." % (hasta - ahora)}
 		return error(MENSAJE_INVALIDO)
 	consultar.call(base, "UPDATE tecnico SET fallos = 0, bloqueado_hasta = 0 WHERE id = ?;", [int(fila.id)])
 	return {"ok": true, "id": int(fila.id), "alias": fila.alias, "rol": fila.rol,

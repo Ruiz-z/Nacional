@@ -57,7 +57,7 @@ static func bloqueo(base: String) -> bool:
 	for _i in range(5):
 		Cuentas.entrar(base, "tecnico01", "mal-mal-mal", AHORA + 100)
 	var segunda := Cuentas.entrar(base, "tecnico01", "clave-del-tecnico", AHORA + 101)
-	return not quinto.ok and not durante.ok and durante.bloqueado and durante.espera_s == 20 \
+	return not quinto.ok and quinto.get("bloqueado", false) and quinto.espera_s == 30 and not durante.ok and durante.bloqueado and durante.espera_s == 20 \
 		and despues.ok and limpio[0].fallos == 0 and limpio[0].bloqueado_hasta == 0 \
 		and segunda.get("bloqueado", false) and segunda.espera_s == 29
 

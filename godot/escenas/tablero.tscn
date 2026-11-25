@@ -34,6 +34,14 @@ text = "Vista del técnico"
 custom_minimum_size = Vector2(0, 52)
 text = "Jefe directo"
 
+[node name="Operativa" type="Button" parent="Vistas"]
+custom_minimum_size = Vector2(0, 52)
+text = "Estado del taller"
+
+[node name="Administracion" type="Button" parent="Vistas"]
+custom_minimum_size = Vector2(0, 52)
+text = "Administración"
+
 [node name="Ayuda" type="Button" parent="Vistas"]
 custom_minimum_size = Vector2(0, 52)
 text = "Cómo se calcula tu progreso"

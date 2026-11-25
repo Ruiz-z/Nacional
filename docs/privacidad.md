@@ -1,10 +1,12 @@
 # Nota de privacidad y contenido
 
 ## Datos
-- Los técnicos se identifican con un **alias** (por ejemplo `T-0001`); la aplicación no pide nombres reales ni datos personales.
-- Los datos viven **en el equipo** (SQLite local). Solo la generación opcional de la ruta con Foundry envía a la nube un identificador seudónimo, el dominio por competencia, los tipos de error y el catálogo de órdenes; nunca alias, nombres ni texto libre. Sin configuración o sin conexión no se envía nada.
+- Cada cuenta usa un **usuario** (por ejemplo `tecnico01`). Elige un identificador sin nombres reales ni datos personales.
+- Los datos viven **en el equipo** (SQLite local). Solo la generación opcional de la ruta con Foundry envía a la nube un identificador seudónimo, el dominio por competencia, los tipos de error y el catálogo de órdenes; nunca el usuario, nombres ni texto libre. Sin configuración o sin conexión no se envía nada.
 - El asistente opcional usa un modelo local y solo recibe datos con alias.
-- Se puede exportar y borrar a un técnico desde el tablero.
+- La contraseña se registra únicamente como hash PBKDF2 con sal. El usuario, el rol, la contraseña, su hash y la información de bloqueo se mantienen en el equipo.
+- El archivo SQLite y sus respaldos locales se guardan sin cifrar. El ingreso protege contra el uso casual. Quien pueda editar el archivo puede modificar los datos y los permisos.
+- El jefe directo puede exportar resultados desde la ficha de un técnico. El administrador puede borrar cuentas y su progreso desde Administración.
 
 ## Contenido
 - Cada pregunta, caso y paso cita su fuente. Fuentes permitidas: documentación pública de Volvo Buses, NFPA 70E, NOM-029-STPS, NOM-001-SEDE, ISO 6469 y material oficial de la empresa.

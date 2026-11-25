@@ -1,6 +1,7 @@
 extends RefCounted
 
 const Base = preload("res://tests/base_tablero.gd")
+const Pantallas = preload("res://tests/pantallas_aprendizaje.gd")
 const Taller = preload("res://tests/acciones_taller.gd")
 const Menu = preload("res://escenas/menu.tscn")
 
@@ -15,22 +16,26 @@ static func comprobar(base: String) -> bool:
 	var control := InputEventJoypadButton.new()
 	control.button_index = JOY_BUTTON_A
 	var correcto: bool = InputMap.event_is_action(control, "ui_accept")
-	correcto = correcto and menu.botones.diagnostico.disabled and menu.botones.ruta.disabled
-	menu.inicio.get_node("Alias").text = "T-73"
-	menu.inicio.get_node("Alta").pressed.emit()
+	correcto = correcto and menu.botones.is_empty() and menu.etapa == "primer-admin"
+	correcto = Pantallas.entrar(menu, "tecnico73") and correcto
 	correcto = correcto and not menu.botones.diagnostico.disabled and menu.botones.ruta.disabled
-	correcto = correcto and menu.inicio.get_node("Siguiente").text.contains("Diagnóstico")
+	correcto = correcto and menu.inicio.get_child(3).text.contains("Diagnóstico")
 	menu._process(0.0)
 	correcto = correcto and menu.barra.get_node("Entrada").text == "Panel virtual"
 	menu.conexion.iniciar_panel(Time.get_ticks_msec() - 3000)
 	menu._process(0.0)
 	correcto = correcto and menu.barra.get_node("Entrada").text.contains("Panel desconectado")
-	menu.recorrido.get_node("Demo").pressed.emit()
+	menu.cerrar_sesion()
+	menu.demo_boton.pressed.emit()
 	correcto = correcto and menu.pantalla != null and not menu.inicio.visible
 	menu.pantalla.get_node("Tablero").pressed.emit()
 	correcto = correcto and menu.pantalla.alias_actual.begins_with("[DEMO]")
 	menu.get_node("Marco/Volver").pressed.emit()
-	correcto = correcto and menu.inicio.visible and menu.perfil.alias == "T-73"
+	correcto = correcto and menu.inicio.visible and menu.perfil.is_empty()
+	menu.usuario.text = "tecnico73"
+	menu.clave.text = "clave-de-prueba"
+	menu.enviar.pressed.emit()
+	correcto = correcto and menu.perfil.get("alias") == "tecnico73"
 	var raiz := menu.get_tree().root
 	menu.abrir_bus(menu.perfil.merged({"base": base}))
 	menu.pantalla.flashcard.confirmar()

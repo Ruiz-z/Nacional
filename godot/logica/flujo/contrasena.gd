@@ -32,6 +32,9 @@ static func hash_de(clave: String, iteraciones: int = 0) -> String:
 
 
 static func verificar(clave: String, guardado: String) -> bool:
+	# HMAC no admite clave vacía; una contraseña vacía nunca es válida.
+	if clave.is_empty():
+		return false
 	var partes := guardado.split("$")
 	if partes.size() != 4 or partes[0] != ALGORITMO or not partes[1].is_valid_int():
 		return false

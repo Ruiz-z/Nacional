@@ -15,11 +15,11 @@ static func comprobar(base: String) -> bool:
 		return false
 	menu.pantalla.opciones.get_child(0).pressed.emit()
 	menu.volver()
-	var correcto: bool = Registro.leer(base, "T-85") == [] and menu.botones.ruta.disabled
+	var correcto: bool = Registro.leer(base, menu.perfil.alias) == [] and menu.botones.ruta.disabled
 	menu.botones.diagnostico.pressed.emit()
 	correcto = correcto and menu.pantalla.actividad.intentos.is_empty() \
 		and Pantallas.responder(menu.pantalla, 10, true)
-	var filas: Variant = Registro.leer(base, "T-85")
+	var filas: Variant = Registro.leer(base, menu.perfil.alias)
 	correcto = correcto and filas.size() == 10 and filas[1].dificultad == "facil" \
 		and filas[8].formato == "accion-panel" and filas[8].resultado == "correcto" \
 		and filas[9].formato == "caso-diagnostico" and filas[9].resultado == "correcto"

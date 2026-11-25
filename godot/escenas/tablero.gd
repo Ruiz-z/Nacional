@@ -1,5 +1,12 @@
 extends VBoxContainer
 
+signal administracion_solicitada
+
+const UI = preload("res://escenas/cuenta_ui.gd")
+const Permisos = preload("res://logica/tablero/permisos.gd")
+const VistaAdmin = preload("res://logica/tablero/vista_admin.gd")
+const Cuentas = preload("res://logica/flujo/cuentas.gd")
+const Foundry = preload("res://logica/aprendizaje/foundry.gd")
 const TextoLimpio = preload("res://logica/texto_limpio.gd")
 
 const Consultas = preload("res://logica/tablero/consultas.gd")
@@ -24,6 +31,9 @@ var alias_actual := ""
 var jefe_directo := false
 # Rol de quien abre el tablero (tecnico, jefe o admin). Sin rol no se entrega nada.
 var rol := ""
+var perfil := {}
+var vista := ""
+var usuario_personal := ""
 var alias_ficha := ""
 var ordenes := {}
 var botones_tecnicos := {}
@@ -32,23 +42,37 @@ var botones_tecnicos := {}
 
 
 func _ready() -> void:
-	$Vistas/Tecnico.pressed.connect(func(): cambiar_vista(false))
-	$Vistas/JefeDirecto.pressed.connect(func(): cambiar_vista(true))
+	for boton in [$Vistas/Tecnico, $Vistas/JefeDirecto, $Vistas/Operativa,
+			$Vistas/Ayuda, $Vistas/VolverLista, $Vistas/Exportar]:
+		UI.estilizar_boton(boton)
+	UI.estilizar_boton($Vistas/Administracion, true)
+	$Vistas/Tecnico.pressed.connect(cambiar_a.bind("tecnico"))
+	$Vistas/JefeDirecto.pressed.connect(cambiar_a.bind("jefe"))
+	$Vistas/Operativa.pressed.connect(cambiar_a.bind("admin"))
+	$Vistas/Administracion.pressed.connect(func(): administracion_solicitada.emit())
 	$Vistas/Ayuda.toggled.connect(func(_visible: bool): mostrar())
 	$Vistas/VolverLista.pressed.connect(volver_lista)
 	$Vistas/Exportar.pressed.connect(abrir_exportacion)
 	$GuardarResultados.file_selected.connect(exportar)
-	cambiar_vista(false)
-	$Vistas/Tecnico.grab_focus()
+	cambiar_a(Permisos.vista_inicial(rol))
 
 
-func cambiar_vista(es_jefe: bool) -> void:
-	jefe_directo = es_jefe
+func cambiar_a(destino: String) -> void:
+	if destino not in ["tecnico", "jefe", "admin"]:
+		return
+	if destino != Permisos.vista_inicial(rol) and not Permisos.puede_administrar(rol):
+		return
+	vista = destino
+	jefe_directo = vista == "jefe"
 	alias_ficha = ""
-	$Vistas/Tecnico.theme_type_variation = &"" if jefe_directo else &"Primario"
-	$Vistas/JefeDirecto.theme_type_variation = &"Primario" if jefe_directo else &""
 	$Vistas/Ayuda.set_pressed_no_signal(false)
 	mostrar()
+	if vista == "admin":
+		$Vistas/Administracion.grab_focus()
+	elif vista == "jefe" and not botones_tecnicos.is_empty():
+		botones_tecnicos.values()[0].grab_focus()
+	else:
+		$Vistas/Ayuda.grab_focus()
 
 
 func mostrar() -> void:
@@ -57,11 +81,22 @@ func mostrar() -> void:
 		hijo.queue_free()
 	botones_tecnicos.clear()
 	contenido.scroll_vertical = 0
+	var admin := Permisos.puede_administrar(rol)
+	$Titulo.text = "Estado del taller" if vista == "admin" else "Tablero de progreso"
+	$Vistas/Tecnico.visible = admin and vista != "tecnico"
+	$Vistas/JefeDirecto.visible = admin and vista != "jefe"
+	$Vistas/Operativa.visible = admin and vista != "admin"
+	$Vistas/Administracion.visible = vista == "admin" or (rol == "jefe" and not alias_actual.begins_with("[DEMO]"))
+	$Vistas/Administracion.text = "Nuevo técnico" if rol == "jefe" else "Administración"
+	$Vistas/Ayuda.visible = vista != "admin"
 	$Titulo.theme_type_variation = &"Seccion" if jefe_directo else &"Titulo"
-	$Subtitulo.visible = not jefe_directo
+	$Subtitulo.visible = vista == "tecnico" and not admin
 	$Vistas/Ayuda.text = "Cómo se calcula" if jefe_directo else "Cómo se calcula tu progreso"
 	$Vistas/VolverLista.visible = jefe_directo and not alias_ficha.is_empty()
-	$Vistas/Exportar.visible = $Vistas/VolverLista.visible
+	$Vistas/Exportar.visible = puede_exportar_ficha()
+	if vista == "admin":
+		mostrar_operacion()
+		return
 	if $Vistas/Ayuda.button_pressed:
 		linea(Vistas.AYUDA)
 		if jefe_directo:
@@ -73,10 +108,15 @@ func mostrar() -> void:
 		else:
 			mostrar_ficha()
 		return
-	var perfil := Consultas.tecnico(base, alias_actual) if not base.is_empty() and not alias_actual.is_empty() else {}
-	if perfil.is_empty() or perfil.estado == "sin_sesiones":
-		if not perfil.is_empty():
-			linea(perfil.alias, &"Chip")
+	var objetivo: String = perfil.get("alias", alias_actual)
+	if admin:
+		selector_personal()
+		objetivo = usuario_personal
+	var ficha_personal := Consultas.tecnico(base, objetivo) if not base.is_empty() and \
+		Permisos.puede_ver(rol, perfil.get("alias", alias_actual), objetivo) and not objetivo.is_empty() else {}
+	if ficha_personal.is_empty() or ficha_personal.estado == "sin_sesiones":
+		if not ficha_personal.is_empty():
+			linea(ficha_personal.alias, &"Chip")
 		var indicadores := fila_indicadores()
 		indicador(indicadores, "Ganancia indicativa", "Pendiente", "Completa el diagnóstico y la evaluación")
 		indicador(indicadores, "Retención simulada", "Pendiente", "Completa la evaluación y repítela")
@@ -84,28 +124,28 @@ func mostrar() -> void:
 		var mensaje := tarjeta(datos)
 		linea("Aún no hay resultados para mostrar", &"Seccion", mensaje)
 		var detalle := "Completa tu primera actividad para empezar a ver tu progreso aquí."
-		if perfil.is_empty():
-			detalle = "Elige un alias desde el menú o abre el tablero del modo demo para explorar un historial de ejemplo."
+		if ficha_personal.is_empty():
+			detalle = "Elige un técnico para consultar su progreso."
 		linea(detalle, &"Secundario", mensaje)
 		return
-	linea(perfil.alias, &"Chip")
+	linea(ficha_personal.alias, &"Chip")
 	var indicadores := fila_indicadores()
-	indicador(indicadores, "Ruta de aprendizaje", str(perfil.avance_ruta.completadas),
-		"%d microlecciones pendientes" % perfil.avance_ruta.pendientes)
-	indicador(indicadores, "Faltas críticas", str(perfil.faltas_criticas.conteo),
-		"Última · %s" % perfil.faltas_criticas.ultima if perfil.faltas_criticas.ultima != null else "Sin faltas registradas")
-	indicador(indicadores, "Brechas registradas", str(perfil.brechas.size()), "Diagnóstico frente a acción")
-	if not perfil.errores_arnes.is_empty():
+	indicador(indicadores, "Ruta de aprendizaje", str(ficha_personal.avance_ruta.completadas),
+		"%d microlecciones pendientes" % ficha_personal.avance_ruta.pendientes)
+	indicador(indicadores, "Faltas críticas", str(ficha_personal.faltas_criticas.conteo),
+		"Última · %s" % ficha_personal.faltas_criticas.ultima if ficha_personal.faltas_criticas.ultima != null else "Sin faltas registradas")
+	indicador(indicadores, "Brechas registradas", str(ficha_personal.brechas.size()), "Diagnóstico frente a acción")
+	if not ficha_personal.errores_arnes.is_empty():
 		linea("Banco de arnés", &"Seccion")
 		var fila_banco := fila_indicadores()
-		indicador(fila_banco, "Errores de medición", str(perfil.errores_arnes.medicion),
+		indicador(fila_banco, "Errores de medición", str(ficha_personal.errores_arnes.medicion),
 			"Punto, lectura reportada o paso omitido")
-		indicador(fila_banco, "Errores de interpretación", str(perfil.errores_arnes.interpretacion),
+		indicador(fila_banco, "Errores de interpretación", str(ficha_personal.errores_arnes.interpretacion),
 			"Causa elegida tras lecturas correctas")
 	linea("Dominio por competencia", &"Seccion")
 	var filas: Array[Array] = []
-	for competencia in perfil.competencias:
-		var valor: Dictionary = perfil.competencias[competencia]
+	for competencia in ficha_personal.competencias:
+		var valor: Dictionary = ficha_personal.competencias[competencia]
 		var nombre_competencia: String = Banco.COMPETENCIAS.get(competencia, competencia)
 		linea("%s · %s · Confianza %s" % [nombre_competencia, valor.nivel.capitalize(),
 			valor.confianza], &"Chip")
@@ -128,7 +168,7 @@ func mostrar() -> void:
 				tendencia(valor.retencion, 100, " %"), "Retest ÷ post-test")
 		for error in valor.errores_recurrentes:
 			var casos := PackedStringArray()
-			for intento in perfil.intentos:
+			for intento in ficha_personal.intentos:
 				if intento.competencia == competencia and intento.tipo_error == error and not casos.has(intento.item):
 					casos.append(intento.item)
 			filas.append(["Error recurrente", nombre_competencia,
@@ -143,23 +183,82 @@ func mostrar() -> void:
 				str(valor.brechas - valor.detalle_brechas.size())])
 	mostrar_tabla(filas)
 	linea("Actividad y recorrido", &"Seccion")
-	linea("Ruta: %d completadas · %d pendientes" % [perfil.avance_ruta.completadas, perfil.avance_ruta.pendientes])
-	for paso in perfil.ruta:
+	linea("Ruta: %d completadas · %d pendientes" % [ficha_personal.avance_ruta.completadas, ficha_personal.avance_ruta.pendientes])
+	for paso in ficha_personal.ruta:
 		if paso is String:
 			linea("Pendiente: %s" % Banco.COMPETENCIAS.get(paso, paso))
 		elif paso is Dictionary:
 			linea("Pendiente: %s" % paso.get("titulo", paso.get("competencia", paso.get("id", ""))))
-	linea("Faltas críticas: %d · última: %s" % [perfil.faltas_criticas.conteo,
-		perfil.faltas_criticas.ultima if perfil.faltas_criticas.ultima != null else "pendiente"])
-	for escenario in perfil.tiempos_por_escenario:
-		for accion in perfil.tiempos_por_escenario[escenario]:
+	linea("Faltas críticas: %d · última: %s" % [ficha_personal.faltas_criticas.conteo,
+		ficha_personal.faltas_criticas.ultima if ficha_personal.faltas_criticas.ultima != null else "pendiente"])
+	for escenario in ficha_personal.tiempos_por_escenario:
+		for accion in ficha_personal.tiempos_por_escenario[escenario]:
 			linea("%s · %s · promedio %.0f ms" % [nombre_orden(escenario),
-				nombre_accion(escenario, accion), perfil.tiempos_por_escenario[escenario][accion]])
-	var comparacion := Vistas.ultimas_sesiones(Vistas.sesiones(perfil.intentos))
+				nombre_accion(escenario, accion), ficha_personal.tiempos_por_escenario[escenario][accion]])
+	var comparacion := Vistas.ultimas_sesiones(Vistas.sesiones(ficha_personal.intentos))
 	for competencia in comparacion:
 		linea(Banco.COMPETENCIAS.get(competencia, competencia))
 		for sesion in comparacion[competencia]:
 			mostrar_sesion(sesion)
+
+
+func mostrar_operacion() -> void:
+	var servicio := Foundry.new()
+	var resumen := VistaAdmin.resumen(base, Banco.cargar().items, servicio.disponible(), base + ".respaldo.sqlite")
+	servicio.free()
+	linea("Cuentas", &"Seccion")
+	linea("%s · %s · %s" % [
+		cantidad(resumen.cuentas.tecnico, "técnico", "técnicos"),
+		cantidad(resumen.cuentas.jefe, "jefe directo", "jefes directos"),
+		cantidad(resumen.cuentas.admin, "administrador", "administradores")])
+	linea("%s sin contraseña" % cantidad(resumen.heredadas, "cuenta heredada", "cuentas heredadas"), &"Secundario")
+	separador(datos)
+	linea("Contenido y servicios", &"Seccion")
+	linea("%d de %d sin revisar por Volvo" % [resumen.pendientes_revision, resumen.preguntas])
+	linea("Respaldo guardado · " + resumen.respaldo.fecha if resumen.respaldo.existe else "Sin respaldo",
+		&"Secundario" if resumen.respaldo.existe else &"Aviso")
+	linea("Servicio de IA configurado" if resumen.foundry else "Servicio de IA sin configurar",
+		&"Secundario" if resumen.foundry else &"Aviso")
+	separador(datos)
+	linea("Actividad de técnicos", &"Seccion")
+	linea("%d con actividad · %d sin actividad" % [resumen.con_actividad, resumen.sin_actividad], &"Secundario")
+	if resumen.tecnicos.is_empty():
+		linea("Aún no hay técnicos. Crea la primera cuenta en Administración.", &"Secundario")
+		return
+	var tabla := GridContainer.new()
+	tabla.columns = 2
+	tabla.add_theme_constant_override("h_separation", 28)
+	datos.add_child(tabla)
+	linea("Usuario", &"Metadato", tabla)
+	linea("Última actividad", &"Metadato", tabla)
+	for tecnico in resumen.tecnicos:
+		linea(tecnico.alias, &"", tabla)
+		linea(fecha_visible(tecnico.ultima), &"Secundario", tabla)
+
+
+func selector_personal() -> void:
+	var selector := OptionButton.new()
+	UI.estilizar_boton(selector)
+	selector.accessibility_name = "Usuario del técnico"
+	selector.custom_minimum_size.y = 44
+	selector.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	var usuarios := []
+	for cuenta in Cuentas.listar(base):
+		if cuenta.rol == "tecnico" and not cuenta.heredada:
+			usuarios.append(cuenta.alias)
+			selector.add_item(cuenta.alias)
+	if usuarios.is_empty():
+		selector.free()
+		usuario_personal = ""
+		return
+	if usuario_personal not in usuarios:
+		usuario_personal = usuarios[0]
+	selector.select(usuarios.find(usuario_personal))
+	selector.item_selected.connect(func(indice: int):
+		usuario_personal = usuarios[indice]
+		mostrar()
+		datos.get_child(0).grab_focus())
+	datos.add_child(selector)
 
 
 func mostrar_historial(perfil: Dictionary, sesiones: Array, padre: Control) -> void:
@@ -271,6 +370,8 @@ static func tendencia(valor: Variant, referencia: float, unidad: String) -> Stri
 
 
 func perfil_jefe(nombre: String) -> Dictionary:
+	if not Permisos.puede_ver_equipo(rol):
+		return {}
 	var perfil := Consultas.tecnico(base, nombre)
 	if perfil.is_empty():
 		return {}
@@ -303,12 +404,20 @@ func mostrar_lista() -> void:
 	linea("Técnicos", &"Titulo")
 	var perfiles: Array[Dictionary] = []
 	if not base.is_empty():
+		var personal := {}
+		for cuenta in Cuentas.listar(base):
+			personal[cuenta.alias] = cuenta.rol
 		for nombre in Vistas.aliases(base, rol, alias_actual):
+			if personal.get(nombre, "tecnico") != "tecnico":
+				continue
 			var perfil := perfil_jefe(nombre)
 			if not perfil.is_empty():
 				perfiles.append(perfil)
 	if perfiles.is_empty():
-		linea("Aún no hay técnicos registrados.", &"Secundario")
+		var mensaje := "Aún no hay técnicos registrados."
+		if rol == "jefe" and perfil.get("base", "") == base and not alias_actual.begins_with("[DEMO]"):
+			mensaje = "Aún no hay técnicos. Crea la primera cuenta con Nuevo técnico."
+		linea(mensaje, &"Secundario")
 		return
 	perfiles.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if a.recomendacion.prioridad != b.recomendacion.prioridad:
@@ -320,7 +429,7 @@ func mostrar_lista() -> void:
 	tabla.add_theme_constant_override("h_separation", 16)
 	tabla.add_theme_constant_override("v_separation", 10)
 	datos.add_child(tabla)
-	for texto in ["Alias", "Estado"] + COLUMNAS_COMPETENCIA + ["Última actividad"]:
+	for texto in ["Usuario", "Estado"] + COLUMNAS_COMPETENCIA + ["Última actividad"]:
 		linea(texto, &"Metadato", tabla)
 	for perfil in perfiles:
 		var abrir := Button.new()
@@ -349,6 +458,8 @@ func mostrar_lista() -> void:
 
 
 func abrir_ficha(nombre: String) -> void:
+	if vista != "jefe" or not Permisos.puede_ver_equipo(rol) or not botones_tecnicos.has(nombre):
+		return
 	alias_ficha = nombre
 	$Vistas/Ayuda.set_pressed_no_signal(false)
 	mostrar()
@@ -515,12 +626,20 @@ func separador(padre: Control) -> void:
 	padre.add_child(linea_divisoria)
 
 
+func puede_exportar_ficha() -> bool:
+	return vista == "jefe" and not alias_ficha.is_empty() and Permisos.puede_exportar(rol) and rol == "jefe"
+
+
 func abrir_exportacion() -> void:
+	if not puede_exportar_ficha():
+		return
 	$GuardarResultados.current_file = "resultados"
 	$GuardarResultados.popup_centered_clamped()
 
 
 func exportar(destino: String) -> void:
+	if not puede_exportar_ficha():
+		return
 	var correcto := Resultados.exportar(base, destino, destino.get_extension(), alias_ficha, rol)
 	$AvisoExportacion.dialog_text = "Guardaste los resultados." if correcto else "No se pudo guardar. Elige otra carpeta e inténtalo de nuevo."
 	$AvisoExportacion.popup_centered()

@@ -5,6 +5,7 @@ extends SceneTree
 # Tramo final: usa mapa-ruta-final como escena. Panel abierto: usa mapa-ruta-detalle.
 # Tablero: godot --path godot -s ../tools/captura.gd -- tablero-jefe-lista|tablero-jefe-ficha salida.png 1280 720
 # Órdenes: godot --path godot -s ../tools/captura.gd -- ordenes salida.png 1280 720
+# Cuentas: ingreso|ingreso-error|primer-admin|administracion|tablero-admin|menu-jefe salida.png [ancho alto]
 # Menú: godot --path godot -s ../tools/captura.gd -- escenas/menu.tscn salida.png 1280 720
 # Cabina: [ancho alto] cabina|interior [tablero|puerta] [menu] [--verificar]
 # Otras zonas: [ancho alto] comunicacion|faros|motor [cerrado|abierto|animacion] [menu] [--verificar]
@@ -21,6 +22,9 @@ extends SceneTree
 # Gabinete: [ancho alto [x y z yaw [pitch]]] [entrada|cerrado|abierto|danado] [menu] [--verificar]
 const EsquemaTablero = preload("res://logica/datos/esquema.gd")
 const DemoTablero = preload("res://logica/tablero/demo.gd")
+const Cuentas = preload("res://logica/flujo/cuentas.gd")
+const Contrasena = preload("res://logica/flujo/contrasena.gd")
+const Acceso = preload("res://logica/datos/acceso_sqlite.gd")
 const Acciones = preload("res://tests/acciones_taller.gd")
 
 
@@ -114,6 +118,9 @@ func capturar() -> void:
 	if not verificar and DisplayServer.get_name() == "headless":
 		fallar("La captura requiere un servidor gráfico. Usa --verificar para comprobar el estado sin generar PNG.")
 		return
+	var cuenta := args[0] in ["ingreso", "ingreso-error", "primer-admin", "administracion", "tablero-admin", "menu-jefe"]
+	if cuenta:
+		OS.set_environment("NACIONAL_SIN_NUBE", "1")
 	var mapa := args[0] in ["mapa-ruta", "mapa-ruta-final", "mapa-ruta-detalle"]
 	if mapa:
 		OS.set_environment("NACIONAL_SIN_NUBE", "1")
@@ -123,13 +130,14 @@ func capturar() -> void:
 		"tablero-jefe-ficha": "escenas/tablero.tscn", "ordenes": "escenas/ordenes.tscn",
 		"mapa-ruta": "escenas/ruta.tscn", "mapa-ruta-final": "escenas/ruta.tscn",
 		"mapa-ruta-detalle": "escenas/ruta.tscn"}
-	var ruta: String = rutas_captura.get(args[0], args[0])
+	var ruta: String = "escenas/menu.tscn" if cuenta else rutas_captura.get(args[0], args[0])
 	var paquete := load("res://" + ruta) as PackedScene
 	if paquete == null:
 		fallar("No se pudo cargar la escena.")
 		return
 	var vp := SubViewport.new()
 	vp.size = tam
+	vp.gui_embed_subwindows = true
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(vp)
 	var escena := paquete.instantiate()
@@ -155,7 +163,11 @@ func capturar() -> void:
 		if zona != "interior":
 			escena.archivo = "escenarios/%s.json" % {"cabina": "comunicacion", "banco": "modulo_auxiliar"}.get(zona, zona)
 		escena.get_node("Jugador").set_physics_process(false)
+	if cuenta:
+		escena.base = OS.get_temp_dir().path_join("nacional-captura-cuentas-%s.sqlite" %
+			Crypto.new().generate_random_bytes(8).hex_encode())
 	if tablero:
+		escena.rol = "jefe"
 		escena.base = OS.get_temp_dir().path_join("nacional-captura-tablero-%s.sqlite" %
 			Crypto.new().generate_random_bytes(8).hex_encode())
 		if not EsquemaTablero.crear(escena.base) or not DemoTablero.precargar(escena.base):
@@ -164,8 +176,14 @@ func capturar() -> void:
 			fallar("No se pudo preparar el historial de demostración.")
 			return
 	vp.add_child(escena)
+	if cuenta:
+		var preparado := preparar_cuenta(escena, args[0])
+		for sufijo in ["", ".respaldo.sqlite"]:
+			DirAccess.remove_absolute(escena.base + sufijo)
+		if not preparado:
+			fallar("No se pudo preparar la vista de cuentas.")
+			return
 	if tablero:
-		escena.get_node("Vistas/JefeDirecto").pressed.emit()
 		if ficha:
 			escena.botones_tecnicos[DemoTablero.ALIAS].pressed.emit()
 		else:
@@ -466,6 +484,9 @@ func capturar() -> void:
 		if not vp.get_visible_rect().encloses(escena.taller.hud.get_global_rect()):
 			fallar("El inventario debe caber en el encuadre.")
 			return
+	if cuenta and not comprobar_cuenta(escena, vp.get_visible_rect(), args[0]):
+		fallar("La pantalla de cuentas tiene controles recortados o solapados.")
+		return
 	if tablero:
 		if not comprobar_tablero(escena, vp.get_visible_rect(), ficha):
 			fallar("El tablero tiene controles recortados o solapados.")
@@ -499,6 +520,69 @@ func capturar() -> void:
 	quit(0)
 
 
+func preparar_cuenta(menu: Node, vista: String) -> bool:
+	if vista == "primer-admin":
+		return menu.etapa == vista
+	var anterior := Contrasena.iteraciones_actuales
+	Contrasena.iteraciones_actuales = 200
+	var clave := "clave-de-captura"
+	var cuenta := Cuentas.crear(menu.base, "admin-taller", "admin", clave)
+	Cuentas.crear(menu.base, "turno-matutino", "jefe", clave)
+	Cuentas.crear(menu.base, "tecnico01", "tecnico", clave)
+	Cuentas.crear(menu.base, "tecnico02", "tecnico", clave, true)
+	Contrasena.iteraciones_actuales = anterior
+	Acceso.consultar(menu.base, "INSERT INTO tecnico (alias) VALUES ('T-0001');")
+	Acceso.consultar(menu.base, """
+		INSERT INTO intento (tecnico, competencia, item, formato, dificultad, respuesta,
+			valor, peso, resultado, tipo_error, tiempo_ms, fuente_entrada, momento, reloj_sim, version_contenido)
+		SELECT id, 'seguridad-alto-voltaje', 'ejemplo', 'opcion-multiple', 'facil', 'ejemplo',
+			100, 1, 'correcto', '', 1000, 'virtual', 'pre', '2026-11-24T15:00:00Z', '1'
+		FROM tecnico WHERE alias = 'tecnico01';
+	""")
+	EsquemaTablero.respaldar(menu.base, menu.base + ".respaldo.sqlite")
+	menu.mostrar_ingreso()
+	if not cuenta.ok or menu.etapa != "ingreso":
+		return false
+	if vista == "ingreso":
+		return true
+	menu.usuario.text = "turno-matutino" if vista == "menu-jefe" else "admin-taller"
+	menu.clave.text = "clave-incorrecta" if vista == "ingreso-error" else clave
+	menu.enviar.pressed.emit()
+	if vista == "ingreso-error":
+		return menu.aviso != null and menu.aviso.visible
+	if menu.perfil.is_empty():
+		return false
+	if vista == "administracion":
+		menu.botones.administracion.pressed.emit()
+	elif vista == "tablero-admin":
+		menu.botones.tablero.pressed.emit()
+	return true
+
+
+func comprobar_cuenta(menu: Control, ventana: Rect2, vista: String) -> bool:
+	var principal: Control = menu.pantalla if is_instance_valid(menu.pantalla) else menu.inicio
+	if not ventana.encloses(principal.get_global_rect()) or not comprobar_celdas_tablero(principal):
+		printerr(principal.name, " ", principal.get_global_rect(), " fuera de ", ventana, " o con celdas inválidas.")
+		return false
+	if vista == "ingreso-error":
+		var dialogo: Window = menu.aviso
+		var tarjeta := Rect2(Vector2(dialogo.position), Vector2(dialogo.size))
+		if not ventana.encloses(tarjeta) or not dialogo.visible or dialogo.size.y < 100:
+			printerr("Tarjeta de error ", tarjeta, " fuera de ", ventana, " o con altura insuficiente.")
+			return false
+		var bloque: Control = dialogo.get_child(0)
+		var aceptar := (dialogo as AcceptDialog).get_ok_button()
+		if not dialogo.get_visible_rect().encloses(bloque.get_global_rect()) \
+				or not dialogo.get_visible_rect().encloses(aceptar.get_global_rect()) \
+				or bloque.get_global_rect().intersects(aceptar.get_global_rect()) \
+				or not comprobar_celdas_tablero(bloque):
+			printerr("El contenido de la tarjeta de error no cabe.")
+			return false
+		print("Tarjeta ", tarjeta, " · botón ", aceptar.get_global_rect())
+	print(vista, " ", ventana.size, " · área ", principal.get_global_rect())
+	return true
+
+
 func comprobar_tablero(escena: Control, ventana: Rect2, ficha: bool) -> bool:
 	var barra: HBoxContainer = escena.get_node("Vistas")
 	var area: ScrollContainer = escena.get_node("Contenido")
@@ -530,9 +614,11 @@ func comprobar_celdas_tablero(padre: Control) -> bool:
 			continue
 		var caja: Rect2 = hijo.get_global_rect()
 		if not limites.grow(0.01).encloses(caja):
+			printerr(hijo.name, " ", caja, " fuera de ", padre.name, " ", limites)
 			return false
 		for anterior in celdas:
 			if caja.intersects(anterior):
+				printerr(hijo.name, " ", caja, " se solapa con ", anterior)
 				return false
 		celdas.append(caja)
 		if hijo is Container and not comprobar_celdas_tablero(hijo):
