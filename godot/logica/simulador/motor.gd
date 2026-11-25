@@ -3,6 +3,7 @@ extends RefCounted
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Mediciones = preload("res://logica/simulador/mediciones_arnes.gd")
 const EvaluacionPanel = preload("res://logica/entrada/evaluacion_panel.gd")
+const Epp = preload("res://logica/simulador/epp.gd")
 const FUENTE_ELEVADOR := "[MUESTRA] procedimiento didáctico, sin fuente oficial"
 const ENTRADAS := ["panel", "virtual", "teclado", "control", "banco"]
 
@@ -33,6 +34,9 @@ var _causa_banco := ""
 var _lecturas_correctas := false
 var _sesion := ""
 var _variante := ""
+var _epp_exigido := false
+var _epp_listo := false
+var _epp_registros: Array = []
 
 
 func _init(escenario: Dictionary, lector_banco: Callable = Mediciones.leer_variante,
@@ -68,6 +72,37 @@ func faltas() -> Array:
 	return _faltas.duplicate(true)
 
 
+# Con el EPP exigido, ningún paso de la orden corre hasta que el técnico se equipe.
+func exigir_epp() -> void:
+	_epp_exigido = true
+
+
+func epp_pendiente() -> bool:
+	return _epp_exigido and not _epp_listo
+
+
+func epp_listo() -> bool:
+	return _epp_listo
+
+
+func registrar_epp(elegidos: Array, fuente_entrada: String, tiempo_ms: int) -> Dictionary:
+	if not epp_pendiente() or not _fin.is_empty() or fuente_entrada not in ENTRADAS or tiempo_ms < 0:
+		return {}
+	var revision := Epp.evaluar(_escenario, elegidos)
+	var tipo_error := "paso-omitido" if not revision.completo \
+		else "paso-innecesario" if not revision.sobrantes.is_empty() else ""
+	var decision := {"accion": "equiparse_epp", "estado_antes": estado(), "estado_despues": estado(),
+		"fuente_entrada": fuente_entrada, "tiempo_ms": tiempo_ms, "competencia": Epp.COMPETENCIA,
+		"fuente": Epp.FUENTE, "criticidad": "leve", "tipo_error": tipo_error,
+		"aplicada": revision.completo, "motivo": "", "recuperacion": false, "eventos": [],
+		"epp": {"elegidos": elegidos.duplicate(), "faltantes": revision.faltantes,
+			"sobrantes": revision.sobrantes}}
+	puntuar(decision)
+	_epp_registros.append(decision)
+	_epp_listo = revision.completo
+	return decision.duplicate(true)
+
+
 static func seguridad_confirmada(controles: Dictionary) -> bool:
 	return controles.get("bloqueo", false) == true and controles.get("etiquetado", false) == true
 
@@ -84,6 +119,8 @@ func ejecutar(id: String, fuente_entrada: String, tiempo_ms: int, controles: Dic
 		lectura_previa: Dictionary = {}) -> Dictionary:
 	if not _fin.is_empty():
 		return rechazo("La práctica ya terminó. Abre otra orden o vuelve a intentarla.")
+	if epp_pendiente():
+		return rechazo("Primero ponte el EPP que pide esta orden.")
 	if fuente_entrada not in ENTRADAS or tiempo_ms < 0:
 		return rechazo("No se recibió el paso. Intenta de nuevo.")
 	var recuperacion: bool = _escenario.recuperaciones.has(id)
@@ -319,6 +356,8 @@ func reintentar() -> RefCounted:
 		var nuevo_banco := get_script().new(variante, mediciones.leer, mediciones.fuente) as RefCounted
 		nuevo_banco._intento_anterior = metricas()
 		nuevo_banco.enviar_brecha = enviar_brecha
+		nuevo_banco._epp_exigido = _epp_exigido
+		nuevo_banco._epp_listo = _epp_listo
 		return nuevo_banco
 	var nuevo := get_script().new(variante) as RefCounted
 	if not nuevo.fin().is_empty() or nuevo.hay_problemas():
@@ -346,6 +385,8 @@ func reintentar() -> RefCounted:
 	nuevo._puntaje = 100
 	nuevo._punto_seguro = 0
 	nuevo.enviar_brecha = enviar_brecha
+	nuevo._epp_exigido = _epp_exigido
+	nuevo._epp_listo = _epp_listo
 	return nuevo
 
 
@@ -431,7 +472,7 @@ func resultados(reloj_sim: String) -> Dictionary:
 	var intentos := []
 	var por_competencia := {}
 	var eventos := []
-	for decision in _decisiones:
+	for decision in _epp_registros + _decisiones:
 		var evento: Dictionary = decision.duplicate(true)
 		evento["escenario"] = _escenario.id
 		evento["reloj_sim"] = reloj_sim

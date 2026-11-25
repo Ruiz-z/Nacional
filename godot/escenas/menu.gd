@@ -560,6 +560,7 @@ func abrir_ordenes(tecnico: Dictionary, competencia: String = "") -> void:
 func abrir_bus(tecnico: Dictionary, archivo: String = Escenario.AISLAMIENTO) -> void:
 	var bus := Bus.instantiate()
 	bus.archivo = archivo
+	bus.epp_obligatorio = true
 	if tecnico.base == base:
 		bus.resultados_registrados.connect(func():
 			var cierre := Recorrido.cerrar_escenario(base, tecnico.id, bus.motor.fin(),

@@ -56,6 +56,8 @@ const MenuVisual = preload("res://escenas/menu_pieza.gd")
 const FuenteBanco = preload("res://logica/simulador/fuente_banco.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
 const Elevador = preload("res://escenas/elevador.gd")
+const Epp = preload("res://logica/simulador/epp.gd")
+const Vestidor = preload("res://escenas/vestidor.gd")
 const ZonaBase = preload("res://escenas/zona_base.gd")
 const Interactuable = preload("res://escenas/interactuable.gd")
 
@@ -81,6 +83,9 @@ var fuente_banco := FuenteBanco.new()
 var _udp_banco := PacketPeerUDP.new()
 var tecnico := {}
 var resultados_guardados := false
+var epp_obligatorio := false
+var vestidor: CanvasLayer
+var inicio_epp := 0
 var pausa_visible := false
 var hud_oculto := false
 var salida_hasta := 0
@@ -228,6 +233,50 @@ func _ready() -> void:
 	mostrar_estado(true)
 	actualizar_panel(ultimo_ms)
 	mostrar_orden()
+	if epp_obligatorio:
+		preparar_epp()
+
+
+func vestidor_abierto() -> bool:
+	return vestidor != null and vestidor.visible
+
+
+# El EPP es el primer paso de toda orden: sin él, el motor no acepta ningún paso.
+func preparar_epp() -> void:
+	motor.exigir_epp()
+	vestidor = Vestidor.new()
+	add_child(vestidor)
+	vestidor.confirmado.connect(confirmar_epp)
+	vestidor.equipado.connect(reanudar_tras_epp)
+	if flashcard.visible:
+		flashcard.terminada.connect(abrir_vestidor, CONNECT_ONE_SHOT)
+	else:
+		abrir_vestidor()
+
+
+func abrir_vestidor() -> void:
+	if motor.epp_listo():
+		return
+	jugador.activo = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	inicio_epp = Time.get_ticks_msec()
+	vestidor.abrir(datos)
+
+
+func confirmar_epp(elegidos: Array) -> void:
+	var decision: Dictionary = motor.registrar_epp(elegidos, "teclado", Time.get_ticks_msec() - inicio_epp)
+	if decision.is_empty():
+		return
+	inicio_epp = Time.get_ticks_msec()
+	vestidor.mostrar_revision(Epp.evaluar(datos, elegidos))
+
+
+func reanudar_tras_epp() -> void:
+	ultimo_ms = Time.get_ticks_msec()
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	mostrar_estado()
+	actualizar_panel(ultimo_ms)
+	avisar_temporal("EPP puesto. Ya puedes trabajar.")
 
 
 func mostrar_orden() -> void:
@@ -675,7 +724,7 @@ func siguiente_ayuda(progreso: Dictionary) -> String:
 func mostrar_estado(inmediato := false) -> void:
 	var estado: Dictionary = motor.estado()
 	var terminado: bool = not motor.fin().is_empty()
-	jugador.activo = not flashcard.visible and not terminado and not pausa_visible and not navegando and not menu_pieza.visible and not hoja_abierta()
+	jugador.activo = not flashcard.visible and not vestidor_abierto() and not terminado and not pausa_visible and not navegando and not menu_pieza.visible and not hoja_abierta()
 	if terminado:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var falla: bool = motor.hay_problemas() or motor.fin() == "falta-critica"
@@ -1539,7 +1588,7 @@ func sincronizar_fuente_seguridad() -> void:
 
 func _unhandled_input(evento: InputEvent) -> void:
 	# Un clic en la escena (fuera de los paneles) recupera el ratón si la ventana no lo tenía capturado.
-	if not flashcard.visible and not hoja_abierta() and motor != null and motor.fin().is_empty() and not pausa_visible and not menu_pieza.visible \
+	if not flashcard.visible and not vestidor_abierto() and not hoja_abierta() and motor != null and motor.fin().is_empty() and not pausa_visible and not menu_pieza.visible \
 			and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED \
 			and evento is InputEventMouseButton and evento.pressed and evento.button_index == MOUSE_BUTTON_LEFT:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -1547,7 +1596,7 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 
 func _input(evento: InputEvent) -> void:
-	if flashcard.visible or hoja_abierta() or resumen.visible or navegando or motor == null or not evento.is_pressed() or evento.is_echo():
+	if flashcard.visible or vestidor_abierto() or hoja_abierta() or resumen.visible or navegando or motor == null or not evento.is_pressed() or evento.is_echo():
 		return
 	if ((evento is InputEventKey and evento.keycode == KEY_O) \
 			or (evento is InputEventJoypadButton and evento.button_index == JOY_BUTTON_START)) and datos.has("briefing"):

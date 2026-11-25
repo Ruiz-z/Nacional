@@ -39,6 +39,13 @@ static func cerrar_exitos(bus: Node3D) -> void:
 		bus.flashcard.ok.pressed.emit()
 
 
+static func vestir(bus: Node3D) -> void:
+	if bus.vestidor_abierto():
+		for id in bus.Epp.requeridos(bus.datos):
+			bus.vestidor.botones[id].button_pressed = true
+		bus.vestidor.confirmar()
+
+
 static func equipar(bus: Node3D, accion: String) -> bool:
 	cerrar_exitos(bus)
 	var requiere: Dictionary = bus.requisitos(accion)

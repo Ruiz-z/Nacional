@@ -40,6 +40,7 @@ static func comprobar(base: String) -> bool:
 	var raiz := menu.get_tree().root
 	menu.abrir_bus(menu.perfil.merged({"base": base}))
 	menu.pantalla.flashcard.confirmar()
+	Taller.vestir(menu.pantalla)
 	var esc := InputEventKey.new()
 	esc.keycode = KEY_ESCAPE
 	esc.pressed = true
@@ -51,6 +52,7 @@ static func comprobar(base: String) -> bool:
 	menu.abrir_bus(menu.perfil.merged({"base": base}))
 	var bus: Node3D = menu.pantalla
 	bus.flashcard.confirmar()
+	Taller.vestir(bus)
 	for id in bus.datos.ruta_ideal:
 		if not Taller.equipar(bus, id):
 			correcto = false
