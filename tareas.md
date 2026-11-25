@@ -223,3 +223,8 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 - [x] T-188 — Generar y actualizar con el agente de Foundry (materiales RF-4 a RF-10, RF-14, RF-15): esquema por formato, guía por nivel, PDF sugeridos por modelo, validación de fuentes contra las devueltas, borrador, historial de versiones y edición manual validada. Pruebas con agente simulado.
 - [x] T-189 — Respaldo sin IA desde el banco (materiales RF-12) y materiales de inicio de nivel básico en borrador (7 del banco y a mano, 6 generados con Faro).
 - [ ] T-190 H — Crear el agente `materiales` en el portal con la base de conocimiento de Faro y revisar y publicar los materiales de inicio. Hecho: generación real de los seis formatos con Faro, fuentes verificadas (25/11/2026).
+
+- [x] T-187 S — Preparar datos de gráficas a partir de las consultas existentes y probar estados vacíos, límites, orden y máximo de series (tablero RF-27 a RF-29).
+- [x] T-188 S — Integrar las gráficas de técnico, equipo, ficha y administración con acceso por rol, foco, tooltips y tablas equivalentes (tablero RF-27 a RF-30).
+- [x] T-189 S — Añadir las cuatro vistas de captura con datos temporales y verificar geometría a 1280 × 720 y 1920 × 1080.
+- [ ] T-190 H — Revisar los PNG de las cuatro vistas en una sesión gráfica.
