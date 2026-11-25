@@ -411,7 +411,10 @@ func actualizar() -> void:
 		boton.visible = not con_sesion or paso in permitidos
 		boton.disabled = not con_sesion or (rol == "tecnico" and paso not in estado.get("habilitados", [])
 			and not (paso == "retest" and siguiente == "retest") and paso not in ["escenario", "tablero", "materiales"])
-		var estado_paso := "Bloqueado"
+		# Los pasos anteriores al siguiente ya se hicieron: no están bloqueados, están completados.
+		var hecho: bool = rol == "tecnico" and Recorrido.PASOS.has(paso) and Recorrido.PASOS.has(siguiente) \
+			and Recorrido.PASOS.find(paso) < Recorrido.PASOS.find(siguiente) and paso != "tablero"
+		var estado_paso := "Completado" if hecho else "Bloqueado"
 		if not boton.disabled:
 			if paso == siguiente and rol == "tecnico":
 				estado_paso = "Siguiente"
@@ -427,7 +430,8 @@ func actualizar() -> void:
 			destacados[paso].disabled = boton.disabled
 			destacados[paso].get_node("Contenido").modulate.a = 0.72 if boton.disabled else 1.0
 		boton.tooltip_text = ("Entra con tu cuenta para empezar." if not con_sesion else
-			"Completa el paso anterior para abrir esta actividad.") if boton.disabled else razon
+			("Ya completaste este paso." if hecho else "Completa el paso anterior para abrir esta actividad.")) \
+			if boton.disabled else razon
 	tarjeta.show()
 
 
