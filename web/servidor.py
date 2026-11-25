@@ -12,6 +12,7 @@ import hmac
 import json
 import mimetypes
 import os
+import re
 import secrets
 import sys
 from http import HTTPStatus
@@ -21,6 +22,7 @@ from urllib.parse import parse_qs, quote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from logica import asignacion  # noqa: E402
 from logica.almacen import Almacen, NoEncontrado  # noqa: E402
 from logica.catalogo import Catalogo, ErrorSeleccion  # noqa: E402
 from logica.foundry import ClienteFoundry  # noqa: E402
@@ -32,6 +34,9 @@ MAX_CUERPO = 256 * 1024
 MAX_REVISOR = 40
 RUTA_TOKEN = Path(__file__).resolve().parent / ".token-autor"
 COOKIE = "autor"
+COOKIE_USUARIO = "usuario"
+COOKIE_RUTA = "ruta"
+FORMATO_USUARIO = re.compile(r"^[a-z0-9][a-z0-9._-]{2,23}$")
 SOLO_AUTOR = "Solo el jefe directo o la administración pueden hacer esto. Entra desde la app con tu cuenta."
 FILTROS = ("modelo", "nivel", "competencia", "formato", "estado")
 
@@ -103,13 +108,35 @@ class Manejador(BaseHTTPRequestHandler):
                 return True
         return False
 
+    def _cookie(self, nombre):
+        for cookie in (self.headers.get("Cookie") or "").split(";"):
+            clave, _, valor = cookie.strip().partition("=")
+            if clave == nombre:
+                return valor
+        return ""
+
+    def _usuario(self):
+        """Cuenta con la que se entró desde la app. Quien revisa queda registrado con ella, no con un texto libre."""
+        if self.app.token_autor is None or not self._es_autor():
+            return ""
+        usuario = self._cookie(COOKIE_USUARIO)
+        return usuario if FORMATO_USUARIO.match(usuario) else ""
+
     def _acceso(self, consulta):
-        """Entrada desde la app: guarda el permiso en una cookie y lleva a la página sin el token en la dirección."""
+        """Entrada desde la app. Con el token guarda el permiso de autor; el técnico entra sin permiso, pero con su
+        ruta de aprendizaje, para ver primero los materiales que le tocan."""
         token = (consulta.get("token") or [""])[0]
         esperado = self.app.token_autor
         self.send_response(HTTPStatus.SEE_OTHER)
         if esperado is not None and hmac.compare_digest(token.encode(), esperado.encode()):
             self.send_header("Set-Cookie", f"{COOKIE}={quote(esperado)}; Path=/; HttpOnly; SameSite=Strict")
+        usuario = (consulta.get("usuario") or [""])[0]
+        if FORMATO_USUARIO.match(usuario):
+            self.send_header("Set-Cookie", f"{COOKIE_USUARIO}={usuario}; Path=/; HttpOnly; SameSite=Strict")
+        if consulta.get("ruta"):
+            ruta = asignacion.leer_ruta(consulta["ruta"][0], self.app.catalogo.competencias)
+            texto = ".".join(f"{c}~{d:g}" for c, d in ruta)
+            self.send_header("Set-Cookie", f"{COOKIE_RUTA}={texto}; Path=/; HttpOnly; SameSite=Strict")
         self.send_header("Location", "/")
         self.send_header("Content-Length", "0")
         self.end_headers()
@@ -178,7 +205,11 @@ class Manejador(BaseHTTPRequestHandler):
             ruta = partes[1:]
             autor = self._es_autor()
             if metodo == "GET" and ruta == ["estado"]:
-                return self._json(HTTPStatus.OK, {"ia": app.generador.ia_disponible(), "autor": autor})
+                return self._json(HTTPStatus.OK, {"ia": app.generador.ia_disponible(), "autor": autor, "usuario": self._usuario()})
+            if metodo == "GET" and ruta == ["asignados"]:
+                lista = asignacion.leer_ruta(self._cookie(COOKIE_RUTA), app.catalogo.competencias)
+                return self._json(HTTPStatus.OK, {"pasos": asignacion.asignar(
+                    [app.con_marcas(m) for m in app.almacen.listar()], lista)})
             if not autor and (metodo != "GET" or "vista=autor" in url.query):
                 return self._error(HTTPStatus.FORBIDDEN, SOLO_AUTOR)
             if metodo == "GET" and ruta == ["catalogo"]:
@@ -212,9 +243,11 @@ class Manejador(BaseHTTPRequestHandler):
                 if metodo == "POST" and accion == "actualizar":
                     material = app.generador.actualizar(id_material, self._cuerpo().get("indicacion"))
                     return self._json(HTTPStatus.OK, app.con_marcas(material))
+                if metodo == "POST" and accion == "retirar":
+                    return self._json(HTTPStatus.OK, app.con_marcas(app.almacen.retirar(id_material)))
                 if metodo == "POST" and accion == "revisar":
                     app.almacen.obtener(id_material)  # 404 antes de validar el cuerpo.
-                    revisor = " ".join(str(self._cuerpo().get("revisor") or "").split())
+                    revisor = self._usuario() or " ".join(str(self._cuerpo().get("revisor") or "").split())
                     if not revisor or len(revisor) > MAX_REVISOR:
                         raise ErrorGeneracion(f"Escribe el alias de quien revisó (hasta {MAX_REVISOR} caracteres).")
                     return self._json(HTTPStatus.OK, app.con_marcas(app.almacen.revisar(id_material, revisor)))

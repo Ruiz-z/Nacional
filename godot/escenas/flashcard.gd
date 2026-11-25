@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const TextoLimpio = preload("res://logica/texto_limpio.gd")
+const Sonido = preload("res://logica/sonido.gd")
 
 signal abierta
 signal confirmada(aviso: Dictionary)
@@ -59,6 +60,8 @@ func encolar(aviso: Dictionary) -> void:
 func mostrar_primera() -> void:
 	var aviso: Dictionary = cola[0]
 	var estilo: Array = TIPOS[aviso.tipo]
+	Sonido.reproducir({"exito": "exito", "correcto": "exito", "error": "error", "incorrecto": "error",
+		"critico": "critico", "falta": "aviso", "aviso": "aviso"}.get(aviso.tipo, "clic"))
 	var fondo := chip.get_theme_stylebox("normal", "Chip").duplicate() as StyleBoxFlat
 	fondo.bg_color = estilo[1]
 	fondo.border_color = fondo.bg_color.lightened(0.2)

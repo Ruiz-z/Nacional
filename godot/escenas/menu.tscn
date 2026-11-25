@@ -160,11 +160,6 @@ custom_minimum_size = Vector2(0, 50)
 text = "Entrar"
 theme_type_variation = &"Primario"
 
-[node name="DemoHero" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Texto/Acciones"]
-custom_minimum_size = Vector2(0, 50)
-text = "Abrir modo demo"
-theme_type_variation = &"Contorno"
-
 [node name="Tarjeta" type="PanelContainer" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila"]
 theme_type_variation = &"TarjetaClara"
 custom_minimum_size = Vector2(342, 0)
@@ -223,12 +218,6 @@ text = "Mostrar contraseña"
 toggle_mode = true
 theme_type_variation = &"BotonClaro"
 
-[node name="DemoTarjeta" type="Button" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
-visible = false
-custom_minimum_size = Vector2(0, 50)
-text = "Abrir modo demo"
-theme_type_variation = &"BotonClaro"
-
 [node name="Aviso" type="Label" parent="Marco/EntradaInicio/Columna/Hero/Margen/Fila/Tarjeta/Inicio"]
 theme_type_variation = &"DetalleClaro"
 autowrap_mode = 3
@@ -271,8 +260,3 @@ columns = 3
 theme_override_constants/h_separation = 16
 theme_override_constants/v_separation = 16
 
-[node name="Demo" type="Button" parent="Marco/EntradaInicio/Columna/Recorrido/Margen/Contenido"]
-custom_minimum_size = Vector2(0, 50)
-text = "Abrir modo demo"
-theme_type_variation = &"Primario"
-size_flags_horizontal = 0

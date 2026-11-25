@@ -35,6 +35,7 @@ static func recorrido(menu: Node, base: String) -> bool:
 	comunicacion.pressed.emit()
 	var bus: Node = menu.pantalla
 	bus.flashcard.confirmar()
+	Taller.vestir(bus)
 	if bus.archivo.get_file() != "comunicacion.json" or bus.datos.id != "comunicacion":
 		return false
 	bus.abrir_menu(bus.get_node("Sector").piezas.terminal)

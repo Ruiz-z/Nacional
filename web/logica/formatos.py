@@ -8,7 +8,11 @@ import re
 import unicodedata
 
 MAX_TITULO = 90
-FORMATOS = ("tarjetas", "presentacion", "infografia", "quiz", "pareo", "secuencia", "ahorcado")
+MAX_AFIRMACION = 420
+MAX_EXPLICACION_VF = 520
+HUECO = r"(?<!_)____(?!_)"
+FORMATOS = ("tarjetas", "presentacion", "infografia", "quiz", "pareo", "secuencia", "ahorcado",
+            "verdadero_falso", "completar", "clasificar", "caso")
 MAX_PALABRA = 24
 MARCA_ENE = "\x00"  # Protege la Ñ mientras se quitan los acentos.
 
@@ -167,6 +171,73 @@ def _ahorcado(c, e):
         })
     _sin_repetir([letras_ahorcado(p["palabra"]) for p in palabras], "palabras", e)
     return {"palabras": palabras}
+def _verdadero_falso(c, e):
+    afirmaciones = []
+    for i, a in enumerate(_lista(c.get("afirmaciones"), "afirmaciones", 6, 12, e)):
+        ruta = f"afirmaciones[{i}]"
+        a = _objeto(a, ruta, ("afirmacion", "verdadero", "explicacion"), e)
+        verdadero = a.get("verdadero")
+        if not isinstance(verdadero, bool):
+            e.agregar(f"{ruta}.verdadero", "debe ser true o false")
+        afirmaciones.append({
+            "afirmacion": _texto(a.get("afirmacion"), f"{ruta}.afirmacion", MAX_AFIRMACION, e),
+            "verdadero": verdadero,
+            "explicacion": _texto(a.get("explicacion"), f"{ruta}.explicacion", MAX_EXPLICACION_VF, e),
+        })
+    _sin_repetir([a["afirmacion"] for a in afirmaciones], "afirmaciones", e)
+    return {"afirmaciones": afirmaciones}
+
+
+def _decisiones(c, e, lista, campo, minimo, maximo, max_opciones):
+    decisiones = []
+    for i, d in enumerate(_lista(c.get(lista), lista, minimo, maximo, e)):
+        ruta = f"{lista}[{i}]"
+        d = _objeto(d, ruta, (campo, "opciones", "correcta", "explicacion"), e)
+        texto = _texto(d.get(campo), f"{ruta}.{campo}", 200, e)
+        if campo == "frase" and (len(re.findall(HUECO, texto)) != 1 or texto.count("____") != 1):
+            e.agregar(f"{ruta}.frase", "debe contener el marcador «____» exactamente una vez")
+        opciones = [_texto(o, f"{ruta}.opciones[{j}]", 140, e)
+                    for j, o in enumerate(_lista(d.get("opciones"), f"{ruta}.opciones", 3, max_opciones, e))]
+        _sin_repetir(opciones, f"{ruta}.opciones", e)
+        correcta = d.get("correcta")
+        if type(correcta) is not int or not 0 <= correcta < len(opciones):
+            e.agregar(f"{ruta}.correcta", "debe ser el índice de una opción")
+            correcta = 0
+        decisiones.append({campo: texto, "opciones": opciones, "correcta": correcta,
+                            "explicacion": _texto(d.get("explicacion"), f"{ruta}.explicacion", 240, e)})
+    _sin_repetir([d[campo] for d in decisiones], lista, e)
+    return decisiones
+
+
+def _completar(c, e):
+    return {"frases": _decisiones(c, e, "frases", "frase", 5, 10, 4)}
+
+
+def _clasificar(c, e):
+    categorias = []
+    for i, categoria in enumerate(_lista(c.get("categorias"), "categorias", 2, 3, e)):
+        ruta = f"categorias[{i}]"
+        categoria = _objeto(categoria, ruta, ("id", "nombre"), e)
+        categorias.append({"id": _texto(categoria.get("id"), f"{ruta}.id", 40, e),
+                           "nombre": _texto(categoria.get("nombre"), f"{ruta}.nombre", 70, e)})
+    ids = [categoria["id"] for categoria in categorias]
+    _sin_repetir(ids, "categorias.id", e)
+    _sin_repetir([categoria["nombre"] for categoria in categorias], "categorias.nombre", e)
+    elementos = []
+    for i, elemento in enumerate(_lista(c.get("elementos"), "elementos", 6, 12, e)):
+        ruta = f"elementos[{i}]"
+        elemento = _objeto(elemento, ruta, ("texto", "categoria"), e)
+        categoria = _texto(elemento.get("categoria"), f"{ruta}.categoria", 40, e)
+        if categoria and categoria not in ids:
+            e.agregar(f"{ruta}.categoria", f"la categoría «{categoria}» no existe")
+        elementos.append({"texto": _texto(elemento.get("texto"), f"{ruta}.texto", 160, e), "categoria": categoria})
+    _sin_repetir([elemento["texto"] for elemento in elementos], "elementos", e)
+    return {"categorias": categorias, "elementos": elementos}
+
+
+def _caso(c, e):
+    return {"situacion": _texto(c.get("situacion"), "situacion", 420, e),
+            "pasos": _decisiones(c, e, "pasos", "pregunta", 3, 6, 3)}
 
 
 VALIDADORES = {
@@ -177,6 +248,10 @@ VALIDADORES = {
     "pareo": _pareo,
     "secuencia": _secuencia,
     "ahorcado": _ahorcado,
+    "verdadero_falso": _verdadero_falso,
+    "completar": _completar,
+    "clasificar": _clasificar,
+    "caso": _caso,
 }
 
 
@@ -223,6 +298,13 @@ CONTENIDO = {
     "pareo": _obj(pares=_arr(_obj(termino=_s(), definicion=_s()), 4, 8)),
     "secuencia": _obj(procedimiento=_s(), pasos=_arr(_s(), 3, 8), explicacion=_s()),
     "ahorcado": _obj(palabras=_arr(_obj(palabra=_s(), pista=_s(), explicacion=_s()), 4, 10)),
+    "verdadero_falso": _obj(afirmaciones=_arr(_obj(afirmacion=_s(), verdadero=_s("boolean"), explicacion=_s()), 6, 12)),
+    "completar": _obj(frases=_arr(_obj(frase=_s(), opciones=_arr(_s(), 3, 4), correcta=_s("integer"),
+                                       explicacion=_s()), 5, 10)),
+    "clasificar": _obj(categorias=_arr(_obj(id=_s(), nombre=_s()), 2, 3),
+                       elementos=_arr(_obj(texto=_s(), categoria=_s()), 6, 12)),
+    "caso": _obj(situacion=_s(), pasos=_arr(_obj(pregunta=_s(), opciones=_arr(_s(), 3, 3), correcta=_s("integer"),
+                                              explicacion=_s()), 3, 6)),
 }
 
 LIMITES = {
@@ -233,6 +315,17 @@ LIMITES = {
     "pareo": "término hasta 60, definición hasta 160; sin términos ni definiciones repetidos.",
     "ahorcado": "cada «palabra» es un término técnico del manual de 1 a 3 palabras y hasta 24 caracteres, solo letras (sin números, siglas con números ni signos); «pista» hasta 160 describe el término sin nombrarlo; «explicacion» hasta 200 dice para qué sirve o por qué importa.",
     "secuencia": "«pasos» va en el orden correcto (la app los revuelve), cada paso hasta 140; explicación hasta 240 dice por qué ese orden.",
+    "verdadero_falso": f"Mezcla afirmaciones verdaderas y falsas sin repetir. Afirmación hasta {MAX_AFIRMACION}, "
+                       f"explicación hasta {MAX_EXPLICACION_VF}. Explica por qué y corrige las falsas.",
+    "completar": "Frase hasta 200 con «____» exactamente una vez, opciones hasta 140 y explicación hasta 240. "
+                 "Usa vocabulario, valores o condiciones del procedimiento. Una sola opción encaja. "
+                 "«correcta» es el índice desde 0. Evita frases y opciones repetidas.",
+    "clasificar": "Usa categorías claras con id hasta 40 y nombre hasta 70, ambos únicos. "
+                  "Cada elemento tiene texto hasta 160 y el id exacto de su categoría. "
+                  "Incluye ejemplos de cada categoría y evita elementos repetidos o ambiguos.",
+    "caso": "Situación hasta 420. Presenta un caso de taller y revela lo que encuentras paso a paso. "
+            "Pregunta hasta 200, tres opciones distintas de hasta 140, «correcta» es el índice desde 0 "
+            "y explicación hasta 240. Evita preguntas repetidas.",
 }
 
 

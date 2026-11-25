@@ -13,7 +13,7 @@ from pathlib import Path
 os.environ["NACIONAL_SIN_NUBE"] = "1"  # Nunca llamar a Foundry en las pruebas.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from logica import formatos  # noqa: E402
+from logica import asignacion, formatos  # noqa: E402
 from logica.almacen import Almacen, NoEncontrado  # noqa: E402
 from logica.catalogo import Catalogo, ErrorSeleccion  # noqa: E402
 from logica.foundry import ClienteFoundry, ErrorFoundry, cargar_config, extraer  # noqa: E402
@@ -33,6 +33,14 @@ EJEMPLOS = {
     "secuencia": {"procedimiento": "LOTO", "pasos": ["Apagar", "Bloquear", "Verificar"], "explicacion": "Así"},
     "ahorcado": {"palabras": [{"palabra": p, "pista": f"Pista {i}", "explicacion": "Sirve para algo"}
                               for i, p in enumerate(["Batería", "Interbloqueo", "Multímetro", "Peña alta"])]},
+    "verdadero_falso": {"afirmaciones": [{"afirmacion": f"Afirmación {i}", "verdadero": i % 2 == 0,
+                                          "explicacion": "Motivo"} for i in range(6)]},
+    "completar": {"frases": [{"frase": f"Frase {i} ____.", "opciones": ["A", "B", "C"],
+                             "correcta": 1, "explicacion": "Motivo"} for i in range(5)]},
+    "clasificar": {"categorias": [{"id": "seguro", "nombre": "Seguro"}, {"id": "peligroso", "nombre": "Peligroso"}],
+                   "elementos": [{"texto": f"Acción {i}", "categoria": "seguro"} for i in range(6)]},
+    "caso": {"situacion": "Llega el autobús.", "pasos": [{"pregunta": f"¿Paso {i}?", "opciones": ["A", "B", "C"],
+                                                         "correcta": 0, "explicacion": "Motivo"} for i in range(3)]},
 }
 
 
@@ -110,6 +118,39 @@ class PruebaFormatos(unittest.TestCase):
         limpio, _ = formatos.validar("secuencia", {**EJEMPLOS["secuencia"], "procedimiento": "  LOTO \n seguro "})
         self.assertEqual(limpio["procedimiento"], "LOTO seguro")
 
+    def test_cantidades_y_repetidos_de_juegos_nuevos(self):
+        for formato, campo, minimo, maximo in (
+            ("verdadero_falso", "afirmaciones", 6, 12), ("completar", "frases", 5, 10),
+            ("clasificar", "categorias", 2, 3), ("clasificar", "elementos", 6, 12), ("caso", "pasos", 3, 6),
+        ):
+            ejemplo = EJEMPLOS[formato]
+            with self.subTest(formato=formato, campo=campo):
+                self.assertTrue(formatos.validar(formato, {})[1])
+                for cantidad in (0, minimo - 1, maximo + 1):
+                    contenido = {**ejemplo, campo: [ejemplo[campo][0]] * cantidad}
+                    self.assertTrue(any(f"de {minimo} a {maximo}" in e for e in formatos.validar(formato, contenido)[1]))
+                repetido = {**ejemplo, campo: [ejemplo[campo][0]] * minimo}
+                self.assertTrue(any("repetido" in e for e in formatos.validar(formato, repetido)[1]))
+
+    def test_campos_de_juegos_nuevos(self):
+        for formato, lista, campo, valor in (
+            ("verdadero_falso", "afirmaciones", "afirmacion", " "),
+            ("verdadero_falso", "afirmaciones", "verdadero", 1),
+            ("completar", "frases", "frase", "Sin hueco."),
+            ("completar", "frases", "frase", "____ y ____."),
+            ("completar", "frases", "frase", "Cinco guiones _____."),
+            ("completar", "frases", "correcta", 3),
+            ("completar", "frases", "opciones", ["A", "a", "C"]),
+            ("caso", "pasos", "correcta", True),
+            ("caso", "pasos", "correcta", -1),
+            ("caso", "pasos", "opciones", ["A", "B", "C", "D"]),
+            ("clasificar", "elementos", "categoria", "inexistente"),
+        ):
+            with self.subTest(formato=formato, campo=campo, valor=valor):
+                contenido = json.loads(json.dumps(EJEMPLOS[formato]))
+                contenido[lista][0][campo] = valor
+                self.assertTrue(any(campo in e for e in formatos.validar(formato, contenido)[1]))
+
     def test_esquema_por_formato(self):
         for formato in formatos.FORMATOS:
             self.assertEqual(formatos.esquema(formato)["required"], ["titulo", "contenido", "fuentes"])
@@ -169,6 +210,16 @@ class PruebaGeneradorIA(Base):
         self.assertIn("Data sheet BZL Electric ES-MX 2021.pdf", contexto["modelo"]["manuales_sugeridos"])
         self.assertEqual(esquema, formatos.esquema("tarjetas"))
         self.assertTrue(requiere_doble_revision(m))
+
+    def test_genera_juegos_nuevos_con_su_esquema(self):
+        for formato in ("verdadero_falso", "completar", "clasificar", "caso"):
+            with self.subTest(formato=formato):
+                cliente = ClienteFalso(respuesta_ia(formato))
+                material = self.generador(cliente).generar(formato, "general", "basico", "seguridad-alto-voltaje", "LOTO")
+                self.assertEqual(self.almacen.obtener(material["id"])["contenido"], EJEMPLOS[formato])
+                _, contexto, esquema = cliente.llamadas[0]
+                self.assertEqual(contexto["formato"]["limites"], formatos.LIMITES[formato])
+                self.assertEqual(esquema["properties"]["contenido"], formatos.CONTENIDO[formato])
 
     def test_rechaza_sin_fuente_devuelta(self):
         cliente = ClienteFalso(respuesta_ia(fuentes=["otro.pdf"]))
@@ -254,6 +305,34 @@ class PruebaSinIA(Base):
         self.assertEqual(banco[quiz[0]["pregunta"]]["dificultad"], "facil")
         self.assertIn("BZL", banco[quiz[0]["pregunta"]]["fuente"].get("referencia", ""))
 
+    def test_verdadero_falso_desde_banco(self):
+        g = self.generador()
+        material = g.generar("verdadero_falso", "bzl-electrico", "novato", "sistema-electrico-bateria", "Repaso")
+        self.assertEqual(material, self.almacen.obtener(material["id"]))
+        self.assertEqual(material["origen"], "banco")
+        afirmaciones = material["contenido"]["afirmaciones"]
+        self.assertEqual(formatos.validar("verdadero_falso", material["contenido"])[1], [])
+        items = g._items("opcion-multiple", "bzl-electrico", "novato", "sistema-electrico-bateria", "Repaso")
+        for indice in range(0, len(afirmaciones), 2):
+            verdadera, falsa = afirmaciones[indice:indice + 2]
+            item = items[indice // 2]
+            correcta = item["opciones"][item["correcta"]]
+            self.assertIs(verdadera["verdadero"], True)
+            self.assertIs(falsa["verdadero"], False)
+            self.assertIn(correcta, verdadera["afirmacion"])
+            self.assertIn(item["pregunta"], falsa["afirmacion"])
+            self.assertTrue(any(o in falsa["afirmacion"] for o in item["opciones"] if o != correcta))
+            self.assertIn(correcta, falsa["explicacion"])
+            fuente = g._referencia(item["fuente"])
+            self.assertIn(fuente, falsa["explicacion"])
+            self.assertIn(fuente, material["fuentes"])
+
+    def test_juegos_que_necesitan_ia(self):
+        for formato in ("completar", "clasificar", "caso"):
+            self.assertFalse(self.catalogo.formatos[formato]["sin_ia"])
+            with self.assertRaisesRegex(ErrorGeneracion, "necesita la IA"):
+                self.generador().generar(formato, "general", "basico", "seguridad-alto-voltaje", "LOTO")
+
     def test_tema_prioriza_preguntas_que_lo_mencionan(self):
         m = self.generador(None).generar("quiz", "general", "basico", "seguridad-alto-voltaje", "Etiqueta LOTO")
         self.assertIn("etiqueta", m["contenido"]["preguntas"][0]["pregunta"].lower())
@@ -308,7 +387,7 @@ class PruebaServidor(Base):
         return estado, json.loads(datos)
 
     def test_flujo_completo(self):
-        self.assertEqual(self.json("GET", "/api/estado"), (200, {"ia": True, "autor": True}))
+        self.assertEqual(self.json("GET", "/api/estado"), (200, {"ia": True, "autor": True, "usuario": ""}))
         estado, catalogo = self.json("GET", "/api/catalogo")
         self.assertEqual(catalogo["enfoque_por_defecto"], "basicos")
         estado, m = self.json("POST", "/api/materiales", {"formato": "quiz", "modelo": "general", "nivel": "novato",
@@ -423,6 +502,65 @@ class PruebaPermisoDeAutor(Base):
         self.assertEqual(self.pedir("GET", f"/api/materiales/{identificador}", cookie=f"autor={self.TOKEN}")[0], 200)
         self.pedir("POST", f"/api/materiales/{identificador}/revisar", {"revisor": "jefe-1"}, cookie=f"autor={self.TOKEN}")
         self.assertEqual(self.pedir("GET", f"/api/materiales/{identificador}")[0], 200)
+
+    def test_quien_revisa_queda_registrado_con_su_cuenta(self):
+        cookie = f"autor={self.TOKEN}; usuario=jefa.taller"
+        creado = json.loads(self.pedir("POST", "/api/materiales", {"formato": "quiz", "modelo": "general", "nivel": "novato",
+                            "competencia": "seguridad-alto-voltaje", "tema": "EPP"}, cookie=cookie)[1])
+        self.assertEqual(json.loads(self.pedir("GET", "/api/estado", cookie=cookie)[1])["usuario"], "jefa.taller")
+        # El texto libre del cuerpo no puede suplantar a la cuenta.
+        estado, revisado = self.pedir("POST", f"/api/materiales/{creado['id']}/revisar", {"revisor": "otra-persona"}, cookie=cookie)
+        self.assertEqual(estado, 200)
+        self.assertEqual(json.loads(revisado)["revisado_por"], "jefa.taller")
+        # Un usuario con formato inválido se ignora; sin cuenta valida, sirve el texto libre.
+        malo = f"autor={self.TOKEN}; usuario=<script>"
+        self.assertEqual(json.loads(self.pedir("GET", "/api/estado", cookie=malo)[1])["usuario"], "")
+        # Sin permiso, el usuario de la cookie no cuenta.
+        self.assertEqual(json.loads(self.pedir("GET", "/api/estado", cookie="usuario=jefa.taller")[1])["usuario"], "")
+
+    def test_publicar_retirar_y_asignar_segun_la_ruta(self):
+        cookie = f"autor={self.TOKEN}; usuario=jefa.taller"
+        ids = {}
+        for nivel in ("novato", "basico", "experto"):
+            creado = json.loads(self.pedir("POST", "/api/materiales", {"formato": "quiz", "modelo": "general",
+                                "nivel": nivel, "competencia": "diagnostico-fallas", "tema": "Fallas"}, cookie=cookie)[1])
+            ids[nivel] = creado["id"]
+        ruta = "diagnostico-fallas~30.seguridad-alto-voltaje~80.inventada~10"
+        tecnico = f"ruta={ruta}"
+        # Un borrador no se asigna.
+        self.assertEqual(json.loads(self.pedir("GET", "/api/asignados", cookie=tecnico)[1])["pasos"][0]["materiales"], [])
+        for nivel in ids:
+            self.assertEqual(self.pedir("POST", f"/api/materiales/{ids[nivel]}/revisar", {}, cookie=cookie)[0], 200)
+        pasos = json.loads(self.pedir("GET", "/api/asignados", cookie=tecnico)[1])["pasos"]
+        self.assertEqual([p["competencia"] for p in pasos], ["diagnostico-fallas", "seguridad-alto-voltaje"])
+        self.assertEqual((pasos[0]["paso"], pasos[0]["nivel"]), (1, "novato"))
+        # Dominio 30 (novato): recibe novato y básico, no experto.
+        self.assertEqual({m["id"] for m in pasos[0]["materiales"]}, {ids["novato"], ids["basico"]})
+        # Sin ruta no hay asignación; con retirar, el material deja de llegar.
+        self.assertEqual(json.loads(self.pedir("GET", "/api/asignados")[1])["pasos"], [])
+        self.assertEqual(self.pedir("POST", f"/api/materiales/{ids['novato']}/retirar", {}, cookie=cookie)[0], 200)
+        pasos = json.loads(self.pedir("GET", "/api/asignados", cookie=tecnico)[1])["pasos"]
+        self.assertEqual({m["id"] for m in pasos[0]["materiales"]}, {ids["basico"]})
+        # Solo el autor retira.
+        self.assertEqual(self.pedir("POST", f"/api/materiales/{ids['basico']}/retirar", {})[0], 403)
+
+    def test_el_tecnico_entra_con_su_ruta_en_una_cookie_sin_permiso(self):
+        class SinSeguir(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *args, **kwargs):
+                return None
+        try:
+            urllib.request.build_opener(SinSeguir).open(
+                f"{self.base}/acceso?usuario=ana.t&ruta=diagnostico-fallas~42.mala~5", timeout=10)
+            self.fail("debía redirigir")
+        except urllib.error.HTTPError as respuesta:
+            cookies = respuesta.headers.get_all("Set-Cookie")
+            self.assertTrue(any(c.startswith("ruta=diagnostico-fallas~42") and "mala" not in c for c in cookies))
+            self.assertFalse(any(c.startswith("autor=") for c in cookies))
+
+    def test_asignacion_pura(self):
+        self.assertEqual([asignacion.nivel_de(d) for d in (0, 39, 40, 69, 70, 89, 90)],
+                         ["novato", "novato", "basico", "basico", "competente", "competente", "experto"])
+        self.assertEqual(asignacion.leer_ruta("a~10.a~20.b~x.c~150.b~55", {"a": 1, "b": 1, "c": 1}), [("a", 10.0), ("b", 55.0)])
 
     def test_el_token_se_crea_una_vez_y_con_permisos_cerrados(self):
         with tempfile.TemporaryDirectory() as carpeta:

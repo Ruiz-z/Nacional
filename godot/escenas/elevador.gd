@@ -1,5 +1,7 @@
 extends "res://escenas/zona_base.gd"
 
+const Sonido = preload("res://logica/sonido.gd")
+
 const ALTURA := 1.5
 const CONSOLA := "consola_elevador"
 const CALZAS := "posicion_calzas"
@@ -104,6 +106,7 @@ func mover(subir: bool, inmediato := false) -> void:
 		aplicar_altura(ALTURA if subir else 0.0)
 		terminar_movimiento(subir)
 		return
+	Sonido.reproducir("elevador")
 	recorrido = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
 	recorrido.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	var altura := carga[0].position.y - bases[0].y

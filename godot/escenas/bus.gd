@@ -56,6 +56,9 @@ const MenuVisual = preload("res://escenas/menu_pieza.gd")
 const FuenteBanco = preload("res://logica/simulador/fuente_banco.gd")
 const Motor = preload("res://logica/simulador/motor.gd")
 const Elevador = preload("res://escenas/elevador.gd")
+const Epp = preload("res://logica/simulador/epp.gd")
+const Sonido = preload("res://logica/sonido.gd")
+const EstacionEpp = preload("res://escenas/estacion_epp.gd")
 const ZonaBase = preload("res://escenas/zona_base.gd")
 const Interactuable = preload("res://escenas/interactuable.gd")
 
@@ -81,6 +84,11 @@ var fuente_banco := FuenteBanco.new()
 var _udp_banco := PacketPeerUDP.new()
 var tecnico := {}
 var resultados_guardados := false
+var epp_obligatorio := false
+var estacion_epp: EstacionEpp
+var puesto_epp: Label
+var marco_epp: StyleBoxFlat
+var inicio_epp := 0
 var pausa_visible := false
 var hud_oculto := false
 var salida_hasta := 0
@@ -118,6 +126,7 @@ var pieza_menu: Interactuable
 
 
 func _ready() -> void:
+	Sonido.cargar_preferencia()
 	var carga_elevador: Array[Node3D] = [$Autobus, $Sector, $Faros, $Motor, $PuertaPasajeros, $Bajos]
 	$Elevador.configurar(carga_elevador, $Colisiones/Casco, $Bajos)
 	$Bajos.acceso = Elevador.CONSOLA
@@ -211,7 +220,7 @@ func _ready() -> void:
 			zona.reflejar_estado({}, false, true)
 	configurar_misiones()
 	get_viewport().size_changed.connect(actualizar_hud)
-	if not modo_captura:
+	if not modo_captura and not epp_obligatorio:
 		ubicar_jugador(zona_activa.acceso)
 		if zona_activa == $Banco and $Banco.piezas.multimetro.visible:
 			apuntar_jugador($Banco.piezas.multimetro.global_position)
@@ -228,6 +237,96 @@ func _ready() -> void:
 	mostrar_estado(true)
 	actualizar_panel(ultimo_ms)
 	mostrar_orden()
+	if epp_obligatorio:
+		preparar_epp()
+
+
+func preparar_epp() -> void:
+	motor.exigir_epp()
+	estacion_epp = EstacionEpp.new()
+	estacion_epp.name = "EstacionEpp"
+	taller.add_child(estacion_epp)
+	estacion_epp.montar(datos)
+	taller.registrar_mueble(estacion_epp, "Casillero de EPP", "junto a la entrada del taller",
+		1.92, EstacionEpp.ROTULO_EPP)
+	estacion_epp.confirmado.connect(confirmar_epp)
+	estacion_epp.cambiado.connect(cambiar_equipo_epp)
+	jugador.ubicar(EstacionEpp.ENTRADA)
+	apuntar_jugador(estacion_epp.global_position + Vector3.UP * 1.22)
+
+	var marco := Panel.new()
+	marco.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(marco)
+	move_child(marco, 0)
+	marco.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	marco_epp = StyleBoxFlat.new()
+	marco_epp.draw_center = false
+	marco_epp.border_color = Color("#142a32aa")
+	marco.add_theme_stylebox_override("panel", marco_epp)
+
+	puesto_epp = Label.new()
+	puesto_epp.theme_type_variation = &"Secundario"
+	puesto_epp.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	puesto_epp.add_theme_color_override("font_color", Color("#b4ece2"))
+	lateral.add_child(puesto_epp)
+	lateral.move_child(puesto_epp, hud_mision.get_index() + 1)
+	puesto_epp.text = "Puesto: —"
+	objetos_requeridos.clear()
+	cambiar_subpaso_guia({})
+	hud_mision.mostrar(0, "Ponte el EPP en el casillero", [false], [], Epp.resumen_riesgo(datos))
+	hud_mision.contador.text = "PRIMER PASO · EPP"
+	actualizar_hud()
+	inicio_epp = Time.get_ticks_msec()
+	if flashcard.visible:
+		flashcard.terminada.connect(func(): inicio_epp = Time.get_ticks_msec(), CONNECT_ONE_SHOT)
+	aplicar_guia()
+
+
+func cambiar_equipo_epp(id: String, puesto: bool) -> void:
+	var equipo := estacion_epp.elegidos()
+	var nombres := equipo.map(func(pieza_id: String) -> String: return Epp.nombre(pieza_id))
+	puesto_epp.text = "Puesto: " + ("—" if nombres.is_empty() else ", ".join(nombres))
+	if id.begins_with("guantes_"):
+		var guantes := estacion_epp.puestos.keys().filter(func(pieza_id: String) -> bool:
+			return pieza_id.begins_with("guantes_"))
+		jugador.mostrar_guantes(guantes[-1] if not guantes.is_empty() else "")
+	jugador.animar_equipamiento()
+	Sonido.reproducir("epp" if puesto else "epp_quitar")
+	var careta := "careta" in equipo
+	var gafas := "gafas" in equipo
+	marco_epp.border_width_top = 16 if "casco" in equipo else (4 if gafas else 0)
+	marco_epp.border_width_bottom = 9 if careta else (4 if gafas else 0)
+	marco_epp.border_width_left = 8 if careta else (4 if gafas else 0)
+	marco_epp.border_width_right = marco_epp.border_width_left
+	actualizar_hud()
+	avisar_temporal(("%s · " % ("Puesto" if puesto else "Devuelto")) + Epp.MOTIVOS[id])
+
+
+func confirmar_epp(elegidos: Array, fuente := "teclado") -> void:
+	if flashcard.visible:
+		return
+	var decision: Dictionary = motor.registrar_epp(elegidos, fuente, Time.get_ticks_msec() - inicio_epp)
+	if decision.is_empty():
+		return
+	inicio_epp = Time.get_ticks_msec()
+	if not decision.aplicada:
+		var faltan: Array = decision.epp.faltantes.map(func(id: String) -> String:
+			return "%s. %s" % [Epp.nombre(id), Epp.MOTIVOS[id]])
+		avisar("\n".join(faltan), "falta", "Te falta EPP")
+		return
+	estacion_epp.cerrar()
+	reanudar_tras_epp()
+
+
+func reanudar_tras_epp() -> void:
+	ultimo_ms = Time.get_ticks_msec()
+	puesto_epp.hide()
+	taller.apagar_guia()
+	hud_mision.reiniciar()
+	firma_mision.clear()
+	mostrar_estado(true)
+	actualizar_panel(ultimo_ms)
+	avisar_temporal("EPP puesto. Ya puedes trabajar.")
 
 
 func mostrar_orden() -> void:
@@ -359,6 +458,9 @@ func ejecutar(id: String, fuente: String, lectura_previa: Dictionary = {}) -> vo
 		if not regla.is_empty() and (id == "inspeccionar" \
 				or zona.es_pieza_interna(regla.get("componente", "bateria"))):
 			zona.cambiar_acceso(true)
+	if decision.get("aplicada", false) and decision.get("tipo_error", "").is_empty() \
+			and decision.get("criticidad") != "critica":
+		Sonido.reproducir("paso")
 	mostrar_resultado(decision)
 	actualizar_inventario()
 	actualizar_mision()
@@ -380,6 +482,8 @@ func finalizar_orden() -> void:
 
 
 func guardar_resultados() -> void:
+	if motor.fin() == "resuelto" and not resultados_guardados:
+		Sonido.reproducir("victoria")
 	if not tecnico.is_empty() and not resultados_guardados:
 		resultados_guardados = Practica.guardar(tecnico.base, tecnico.id, tecnico.alias, motor,
 			int(Time.get_unix_time_from_system()))
@@ -748,6 +852,8 @@ func problema_activo() -> Dictionary:
 
 
 func actualizar_mision(inmediato := false) -> void:
+	if motor.epp_pendiente():
+		return
 	if misiones.is_empty():
 		objetos_requeridos.clear()
 		cambiar_subpaso_guia({})
@@ -961,6 +1067,9 @@ func cambiar_subpaso_guia(guia: Dictionary) -> void:
 
 
 func aplicar_guia(manual := false) -> bool:
+	if motor.epp_pendiente() and estacion_epp != null:
+		taller.senalar("estacion_epp", estacion_epp, manual, false, "Casillero de EPP")
+		return true
 	if subpaso_guia.is_empty():
 		return false
 	if subpaso_guia.has("pieza"):
@@ -993,12 +1102,16 @@ func actualizar_hud() -> void:
 	var terminado: bool = motor != null and not motor.fin().is_empty()
 	var aviso: Control = lateral.get_node("Aviso")
 	aviso.visible = not aviso.text.is_empty()
-	var mision_visible: bool = not misiones.is_empty() and (not terminado or hud_mision.celebrando)
+	var epp_pendiente: bool = motor != null and motor.epp_pendiente()
+	var mision_visible: bool = epp_pendiente or (not misiones.is_empty() and (not terminado or hud_mision.celebrando))
+	if puesto_epp != null:
+		puesto_epp.visible = not hud_oculto and not terminado
 	hud_mision.visible = mision_visible
 	hud_mision.mostrando_detalle = not hud_oculto
 	hud_mision.actualizar_visibilidad()
 	$PistaOrden.visible = datos.has("briefing") and not terminado
-	$Interfaz.visible = mision_visible or terminado or pausa_visible or aviso.visible or datos.is_empty()
+	$Interfaz.visible = mision_visible or terminado or pausa_visible or aviso.visible or datos.is_empty() \
+		or (puesto_epp != null and puesto_epp.visible)
 	var ventana := get_viewport().get_visible_rect().size
 	$Interfaz.offset_right = minf(12.0 + ANCHO_HUD, ventana.x - 12.0)
 	$Interfaz.anchor_bottom = 1.0 if terminado and not mision_visible else 0.0
@@ -1039,10 +1152,13 @@ func reintentar() -> void:
 	mostrar_orden()
 
 
-func abrir_menu(pieza: Interactuable) -> void:
+func abrir_menu(pieza: Interactuable, fuente := "teclado") -> void:
 	if flashcard.visible or hoja_abierta():
 		return
 	if motor == null or not motor.fin().is_empty() or pausa_visible or navegando or not accion_pendiente.is_empty():
+		return
+	if estacion_epp != null and pieza.zona == estacion_epp:
+		estacion_epp.interactuar(pieza.componente, fuente)
 		return
 	if pieza.zona == $Bajos and not $Elevador.arriba:
 		return
@@ -1372,7 +1488,7 @@ func recibir_accion(accion: Dictionary) -> void:
 					tocar_borne(pieza.componente, accion.fuente_entrada)
 				else:
 					if pieza != null:
-						abrir_menu(pieza)
+						abrir_menu(pieza, accion.fuente_entrada)
 		"elegir-accion":
 			elegir_accion(int(accion.valor) - 1, accion.get("fuente_entrada", "teclado"))
 		"cancelar":
@@ -1444,7 +1560,7 @@ func _process(_delta: float) -> void:
 	if motor != null:
 		actualizar_inventario()
 		actualizar_mision()
-		if not flashcard.visible and guia_automatica:
+		if not flashcard.visible and (guia_automatica or motor.epp_pendiente()):
 			aplicar_guia()
 	taller.actualizar_flecha(jugador.camara, not flashcard.visible and not menu_pieza.visible and not hoja_abierta() and not hud_oculto)
 	if zona_activa != $Banco:
@@ -1481,6 +1597,8 @@ func _physics_process(_delta: float) -> void:
 		var mediciones: RefCounted = motor.mediciones
 		rotulo = Mediciones.texto_apuntado(mediciones.punta_negra, mediciones.punta_roja, objetivo.componente) \
 			if taller.mano == "multimetro" else "Toma el multímetro para medir (%s)" % objetivo.nombre
+	if objetivo != null and estacion_epp != null and objetivo.zona == estacion_epp and Epp.MOTIVOS.has(objetivo.componente):
+		rotulo += "\n" + Epp.MOTIVOS[objetivo.componente]
 	$Apuntado/Fondo/Nombre.text = rotulo
 
 
@@ -1564,6 +1682,10 @@ func _input(evento: InputEvent) -> void:
 			else:
 				avisar_temporal("Presiona Esc otra vez para salir")
 				salida_hasta = ahora + int(duracion_aviso.wait_time * 1000)
+			return
+		if evento.keycode == KEY_M:
+			Sonido.alternar()
+			avisar_temporal("Sonido apagado" if Sonido.silenciado else "Sonido activado")
 			return
 		if evento.keycode == KEY_V and motor.fin().is_empty():
 			guia_automatica = not guia_automatica

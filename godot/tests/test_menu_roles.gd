@@ -24,9 +24,12 @@ static func comprobar(base: String) -> bool:
 			and menu.columna.get_node("Destacados").visible == (rol == "tecnico")
 		# La tarjeta de materiales abre la página local con la dirección del servidor, sin lanzar procesos en la prueba.
 		var roles_enviados := []
-		menu.lanzar_materiales = func(rol_actual: String): roles_enviados.append(rol_actual)
+		menu.lanzar_materiales = func(rol_actual: String, usuario: String): roles_enviados.append([rol_actual, usuario])
 		menu.botones.materiales.pressed.emit()
-		correcto = correcto and roles_enviados == [rol] and not menu.botones.materiales.disabled
+		# Sin diagnóstico, el técnico aún no abre los materiales.
+		var abierta: bool = rol != "tecnico"
+		correcto = correcto and roles_enviados == ([[rol, rol + "01"]] if abierta else []) \
+			and menu.botones.materiales.disabled != abierta
 		menu.botones.tablero.pressed.emit()
 		correcto = correcto and menu.pantalla != null and menu.pantalla.perfil.rol == rol
 		if rol == "jefe" and menu.pantalla != null:

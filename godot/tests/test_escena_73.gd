@@ -27,11 +27,6 @@ static func comprobar(base: String) -> bool:
 	menu._process(0.0)
 	correcto = correcto and menu.barra.get_node("Entrada").text.contains("Panel desconectado")
 	menu.cerrar_sesion()
-	menu.demo_boton.pressed.emit()
-	correcto = correcto and menu.pantalla != null and not menu.inicio.visible
-	menu.pantalla.get_node("Tablero").pressed.emit()
-	correcto = correcto and menu.pantalla.alias_actual.begins_with("[DEMO]")
-	menu.get_node("Marco/Volver").pressed.emit()
 	correcto = correcto and menu.inicio.visible and menu.perfil.is_empty()
 	menu.usuario.text = "tecnico73"
 	menu.clave.text = "clave-de-prueba"
@@ -40,6 +35,7 @@ static func comprobar(base: String) -> bool:
 	var raiz := menu.get_tree().root
 	menu.abrir_bus(menu.perfil.merged({"base": base}))
 	menu.pantalla.flashcard.confirmar()
+	Taller.vestir(menu.pantalla)
 	var esc := InputEventKey.new()
 	esc.keycode = KEY_ESCAPE
 	esc.pressed = true
@@ -51,6 +47,7 @@ static func comprobar(base: String) -> bool:
 	menu.abrir_bus(menu.perfil.merged({"base": base}))
 	var bus: Node3D = menu.pantalla
 	bus.flashcard.confirmar()
+	Taller.vestir(bus)
 	for id in bus.datos.ruta_ideal:
 		if not Taller.equipar(bus, id):
 			correcto = false

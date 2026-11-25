@@ -35,18 +35,117 @@ function desordenar(lista) {
 
 const APROBACION = 91; // Línea de aprobación de los cursos de Volvo (docs/fuentes-volvo.md).
 
-function resultadoFinal(aciertos, total, alReiniciar, texto) {
+function resultadoFinal(aciertos, total, alReiniciar, texto, anunciar = false) {
   const porcentaje = total ? Math.round((aciertos / total) * 100) : 0;
   const aprobado = porcentaje >= APROBACION;
+  const mensaje = texto || (anunciar
+    ? `${aciertos} aciertos de ${total}. Línea de aprobación de los cursos Volvo: ${APROBACION} %. ${aprobado ? "Aprobaste." : "Repasa y vuelve a intentarlo."}`
+    : `${aciertos} de ${total} correctas. ${aprobado
+      ? "¡Superaste la línea de 91 de los cursos Volvo!"
+      : `La línea de aprobación de los cursos Volvo es ${APROBACION}. Repasa y vuelve a intentarlo.`}`);
+  const nota = el("p", anunciar ? { role: "status", tabindex: "-1" } : {},
+    anunciar ? `${porcentaje} %. ${mensaje}` : mensaje);
   return el("div", { clase: "resultado" },
     el("div", { clase: "grande" }, `${porcentaje}%`),
     el("div", { clase: "barra", role: "img", "aria-label": `${porcentaje} de 100, línea de aprobación ${APROBACION}` },
       el("span", { style: `width:${porcentaje}%;background:${aprobado ? "var(--exito)" : "var(--turquesa)"}` }),
       el("i", { style: `left:${APROBACION}%` })),
-    el("p", {}, texto || `${aciertos} de ${total} correctas. ${aprobado
-      ? "¡Superaste la línea de 91 de los cursos Volvo!"
-      : `La línea de aprobación de los cursos Volvo es ${APROBACION}. Repasa y vuelve a intentarlo.`}`),
+    nota,
     el("button", { type: "button", clase: "boton", onclick: alReiniciar }, "Jugar otra vez"));
+}
+
+function cerrarJuego(raiz, aciertos, total, reiniciar, resumen = null) {
+  const resultado = resultadoFinal(aciertos, total, reiniciar, null, true);
+  raiz.replaceChildren(resultado);
+  if (resumen) raiz.append(resumen);
+  resultado.querySelector("[role='status']").focus();
+}
+
+function juegoDeOpciones(rondas, unidad, { situacion, reintento = false } = {}) {
+  const raiz = el("div", { clase: "juego-material" });
+  let orden, indice, aciertos;
+
+  function iniciar(enfocar = false) {
+    orden = situacion ? rondas : barajar(rondas);
+    indice = 0;
+    aciertos = 0;
+    pintar(enfocar);
+  }
+
+  function pintar(enfocar) {
+    const ronda = orden[indice];
+    const pregunta = el("h3", { clase: "pregunta", tabindex: "-1" }, ronda.texto);
+    if (ronda.hueco) pregunta.setAttribute("aria-label", ronda.texto.replace("____", "espacio en blanco"));
+    const retro = el("div", { clase: "retro juego-retro", role: "status", "aria-atomic": "true" });
+    const controles = el("div", { clase: "juego-controles" });
+    const opciones = ronda.fijas ? ronda.opciones : barajar(ronda.opciones);
+    let errores = 0;
+    const botones = opciones.map((opcion, i) => el("button", {
+      type: "button", clase: "opcion", onclick: () => responder(i),
+    }, opcion.texto));
+
+    function responder(i) {
+      const opcion = opciones[i];
+      if (opcion.correcta) {
+        aciertos++;
+      } else {
+        errores++;
+        botones[i].disabled = true;
+        botones[i].classList.add("incorrecta");
+        botones[i].textContent = `Incorrecta · ${opcion.texto}`;
+        if (reintento && errores === 1) {
+          retro.textContent = "Esa decisión no resuelve este paso. Prueba otra opción.";
+          botones.find((boton) => !boton.disabled).focus();
+          return;
+        }
+      }
+
+      const correcta = opciones.findIndex((o) => o.correcta);
+      botones.forEach((boton) => { boton.disabled = true; });
+      botones[correcta].classList.add("correcta");
+      botones[correcta].textContent = `Correcta · ${opciones[correcta].texto}`;
+      if (ronda.hueco) {
+        pregunta.textContent = ronda.texto.replace("____", () => opciones[correcta].texto);
+        pregunta.removeAttribute("aria-label");
+      }
+      retro.textContent = opcion.correcta
+        ? `Respuesta correcta. ${ronda.explicacion}`
+        : `La respuesta correcta es «${opciones[correcta].texto}». ${ronda.explicacion}`;
+
+      const siguiente = el("button", {
+        type: "button", clase: "boton", onclick: () => {
+          indice++;
+          if (indice < orden.length) {
+            pintar(true);
+          } else {
+            const resumen = situacion ? el("section", { clase: "juego-resumen" },
+              el("h3", {}, "Recorrido ideal"),
+              el("ol", {}, orden.map((paso) => el("li", {},
+                el("strong", {}, paso.opciones.find((o) => o.correcta).texto),
+                el("p", {}, paso.explicacion))))) : null;
+            cerrarJuego(raiz, aciertos, orden.length, () => iniciar(true), resumen);
+          }
+        },
+      }, indice + 1 < orden.length ? "Continuar" : "Ver resultado");
+      controles.append(siguiente);
+      siguiente.focus();
+    }
+
+    raiz.replaceChildren(
+      ...(situacion ? [el("p", { clase: "juego-situacion" }, situacion)] : []),
+      el("div", { clase: "marcador" },
+        el("span", {}, `${unidad} ${indice + 1} de ${orden.length}`),
+        el("span", {}, `Aciertos: ${aciertos}`)),
+      pregunta, el("div", { clase: "opciones" }, botones), retro, controles);
+    if (enfocar) pregunta.focus();
+  }
+
+  iniciar();
+  return raiz;
+}
+
+function opcionesDe(decision) {
+  return decision.opciones.map((texto, i) => ({ texto, correcta: i === decision.correcta }));
 }
 
 const Formatos = {
@@ -256,6 +355,92 @@ const Formatos = {
     }
     iniciar();
     return raiz;
+  },
+
+  verdadero_falso(contenido) {
+    return juegoDeOpciones(contenido.afirmaciones.map((a) => ({
+      texto: a.afirmacion,
+      explicacion: a.explicacion,
+      fijas: true,
+      opciones: [{ texto: "Verdadero", correcta: a.verdadero }, { texto: "Falso", correcta: !a.verdadero }],
+    })), "Afirmación");
+  },
+
+  completar(contenido) {
+    return juegoDeOpciones(contenido.frases.map((f) => ({
+      texto: f.frase, explicacion: f.explicacion, opciones: opcionesDe(f), hueco: true,
+    })), "Frase");
+  },
+
+  clasificar(contenido) {
+    const raiz = el("div", { clase: "juego-material" });
+    function iniciar(enfocar = false) {
+      const elementos = barajar(contenido.elementos);
+      const resueltos = new Set();
+      let elegido;
+      let aciertos = 0;
+      const contador = el("p", { clase: "progreso" });
+      const actualizar = () => { contador.textContent = `Clasificaste ${resueltos.size} de ${elementos.length} elementos.`; };
+      const retro = el("div", { clase: "retro juego-retro", role: "status", "aria-atomic": "true" });
+      const controles = el("div", { clase: "juego-controles" });
+      const categorias = contenido.categorias.map((categoria) => el("button", {
+        type: "button", clase: "opcion", disabled: true, onclick: () => clasificar(categoria),
+      }, categoria.nombre));
+      const botones = elementos.map((elemento, i) => el("button", {
+        type: "button", clase: "opcion", "aria-pressed": "false", onclick: () => {
+          elegido = i;
+          botones.forEach((boton, j) => {
+            if (!resueltos.has(j)) boton.setAttribute("aria-pressed", String(i === j));
+          });
+          categorias.forEach((boton) => { boton.disabled = false; });
+          retro.textContent = `Elegiste «${elemento.texto}». Elige su categoría.`;
+          categorias[0].focus();
+        },
+      }, elemento.texto));
+
+      function clasificar(categoria) {
+        const elemento = elementos[elegido];
+        const correcta = contenido.categorias.find((c) => c.id === elemento.categoria);
+        const acierto = categoria.id === correcta.id;
+        if (acierto) aciertos++;
+        resueltos.add(elegido);
+        const boton = botones[elegido];
+        boton.disabled = true;
+        boton.removeAttribute("aria-pressed");
+        boton.classList.add(acierto ? "correcta" : "incorrecta");
+        const aviso = acierto ? "Correcto" : "Incorrecto";
+        boton.textContent = `${elemento.texto} · ${aviso} (${correcta.nombre})`;
+        categorias.forEach((opcion) => { opcion.disabled = true; });
+        retro.textContent = `${aviso}. «${elemento.texto}» va en «${correcta.nombre}».`;
+        actualizar();
+
+        const pendiente = botones.find((opcion) => !opcion.disabled);
+        if (pendiente) {
+          pendiente.focus();
+        } else {
+          const ver = el("button", { type: "button", clase: "boton", onclick: () =>
+            cerrarJuego(raiz, aciertos, elementos.length, () => iniciar(true)) }, "Ver resultado");
+          controles.append(ver);
+          ver.focus();
+        }
+      }
+
+      actualizar();
+      raiz.replaceChildren(el("p", { clase: "pregunta" }, "Elige un elemento y luego su categoría."),
+        contador, el("div", { clase: "juego-clasificar" },
+          el("section", {}, el("h3", {}, "Elementos"), el("div", { clase: "opciones" }, botones)),
+          el("section", {}, el("h3", {}, "Categorías"), el("div", { clase: "opciones" }, categorias))),
+        retro, controles);
+      if (enfocar) botones[0].focus();
+    }
+    iniciar();
+    return raiz;
+  },
+
+  caso(contenido) {
+    return juegoDeOpciones(contenido.pasos.map((p) => ({
+      texto: p.pregunta, explicacion: p.explicacion, opciones: opcionesDe(p),
+    })), "Paso", { situacion: contenido.situacion, reintento: true });
   },
 };
 

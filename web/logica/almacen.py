@@ -47,7 +47,7 @@ class Almacen:
 
     def nuevo_id(self, formato, tema):
         while True:
-            candidato = f"{formato}-{slug(tema)}-{secrets.token_hex(3)}"
+            candidato = f"{slug(formato)}-{slug(tema)}-{secrets.token_hex(3)}"
             if not self._ruta(candidato).exists():
                 return candidato
 
@@ -119,6 +119,12 @@ class Almacen:
     def revisar(self, id_material, revisor):
         material = self.obtener(id_material)
         material.update(estado="revisado", revisado_por=revisor, revisado_en=ahora())
+        return self.guardar(material)
+
+    def retirar(self, id_material):
+        """Vuelve el material a borrador: el técnico deja de verlo y de recibirlo en su ruta."""
+        material = self.obtener(id_material)
+        material.update(estado="borrador", revisado_por="", revisado_en="")
         return self.guardar(material)
 
     def eliminar(self, id_material):

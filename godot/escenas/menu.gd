@@ -8,6 +8,7 @@ const Banco = preload("res://logica/competencias/banco.gd")
 const Escenario = preload("res://logica/simulador/escenario.gd")
 const Cuentas = preload("res://logica/flujo/cuentas.gd")
 const UI = preload("res://escenas/cuenta_ui.gd")
+const Foundry = preload("res://logica/aprendizaje/foundry.gd")
 const Materiales = preload("res://logica/flujo/materiales.gd")
 const Administracion = preload("res://escenas/administracion.tscn")
 const Recorrido = preload("res://logica/flujo/recorrido.gd")
@@ -16,9 +17,10 @@ const Conexion = preload("res://logica/entrada/conexion_panel.gd")
 const Tablero = preload("res://escenas/tablero.tscn")
 const Ordenes = preload("res://escenas/ordenes.tscn")
 const Bus = preload("res://escenas/bus.tscn")
-const Demo = preload("res://escenas/modo_demo.tscn")
 const Diagnostico = preload("res://escenas/diagnostico.tscn")
 const Ruta = preload("res://escenas/ruta.tscn")
+const Sonido = preload("res://logica/sonido.gd")
+const Niveles = preload("res://logica/flujo/niveles.gd")
 const Evaluacion = preload("res://escenas/evaluacion.tscn")
 const NOMBRES := {"alias": "Iniciar sesión", "administracion": "Administración", "materiales": "Materiales de estudio", "diagnostico": "Diagnóstico", "ruta": "Ruta de aprendizaje",
 	"escenario": "Práctica", "post": "Evaluación", "retest": "Repetir la evaluación", "tablero": "Tablero"}
@@ -30,6 +32,7 @@ var conexion := Conexion.new()
 var pantalla: Node
 var ruta_en_pausa: Control
 var inicio_practica_mapa := 0
+var acceso_rapido: VBoxContainer
 var botones := {}
 var destacados := {}
 var disponible := false
@@ -49,12 +52,13 @@ var lanzar_materiales: Callable = abrir_pagina_materiales
 @onready var clave: LineEdit = inicio.get_node("Clave")
 @onready var repeticion: LineEdit = inicio.get_node("Repetir")
 @onready var enviar: Button = inicio.get_node("Elegir")
-@onready var demo_boton: Button = inicio.get_node("DemoTarjeta")
 @onready var espera: Label = inicio.get_node("Aviso")
 @onready var recorrido := columna.get_node("Recorrido/Margen/Contenido")
 
 
 func _ready() -> void:
+	Sonido.cargar_preferencia()
+	Sonido.clics_globales(get_tree())
 	if "--verificar-contenido" in OS.get_cmdline_user_args():
 		verificar_contenido()
 		return
@@ -62,6 +66,7 @@ func _ready() -> void:
 	inicio.get_node("Elegir").disabled = not disponible
 	inicio.get_node("Elegir").pressed.connect(enviar_ingreso)
 	inicio.get_node("Alta").toggled.connect(mostrar_claves)
+	crear_accesos_rapidos()
 	for campo in [usuario, clave, repeticion]:
 		campo.text_submitted.connect(func(_texto: String): enviar_ingreso())
 	barra.get_node("Salir").pressed.connect(cerrar_sesion)
@@ -83,10 +88,7 @@ func preparar_inicio(disponible: bool) -> void:
 	var acciones := texto_hero.get_node("Acciones")
 	acciones.get_node("IrAlias").disabled = not disponible
 	acciones.get_node("IrAlias").pressed.connect(entrar_desde_hero)
-	acciones.get_node("DemoHero").pressed.connect(abrir_demo)
-	inicio.get_node("DemoTarjeta").pressed.connect(abrir_demo)
 	entrada_inicio.resized.connect(ajustar_hero)
-	recorrido.get_node("Demo").pressed.connect(abrir_demo)
 	var fichas := columna.get_node("Destacados/Tarjetas")
 	for datos in [
 		["diagnostico", "Diagnóstico", "Contesta preguntas para saber qué necesitas practicar."],
@@ -105,6 +107,8 @@ func preparar_inicio(disponible: bool) -> void:
 	var materiales := crear_tarjeta("materiales", NOMBRES.materiales, "", false)
 	recorrido.get_node("Pasos").add_child(materiales)
 	materiales.get_node("Contenido/Insignia").text = "WEB"
+	# Los materiales van justo después de la práctica en el taller.
+	recorrido.get_node("Pasos").move_child(materiales, botones.escenario.get_index() + 1)
 	botones["materiales"] = materiales
 	var gestion := crear_tarjeta("administracion", NOMBRES.administracion, "", false)
 	recorrido.get_node("Pasos").add_child(gestion)
@@ -274,6 +278,49 @@ func preparar_tarjeta() -> void:
 	inicio.get_node("Alta").text = "Mostrar contraseña"
 
 
+# Botones «Entrar con» para las cuentas de la variable NACIONAL_ACCESO_RAPIDO del .env (no se sube al repositorio).
+func crear_accesos_rapidos() -> void:
+	var lista := Cuentas.accesos_rapidos(Foundry.leer_env(Foundry.ENV))
+	if lista.is_empty():
+		return
+	acceso_rapido = VBoxContainer.new()
+	acceso_rapido.add_theme_constant_override("separation", 8)
+	var etiqueta := Label.new()
+	etiqueta.text = "Entrar con"
+	etiqueta.add_theme_color_override("font_color", Color("#566873"))
+	acceso_rapido.add_child(etiqueta)
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 8)
+	for nombre in lista:
+		var boton := Button.new()
+		boton.text = nombre
+		boton.name = "Rapido_" + nombre
+		boton.custom_minimum_size = Vector2(0, 44)
+		boton.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		boton.theme_type_variation = &"BotonClaro"
+		boton.pressed.connect(entrar_rapido.bind(nombre))
+		fila.add_child(boton)
+	acceso_rapido.add_child(fila)
+	var contenedor := inicio.get_node("Elegir").get_parent()
+	contenedor.add_child(acceso_rapido)
+	contenedor.move_child(acceso_rapido, inicio.get_node("Elegir").get_index() + 1)
+
+
+func entrar_rapido(nombre: String) -> void:
+	if etapa != "ingreso" or (is_instance_valid(aviso) and aviso.visible):
+		return
+	var resultado := Cuentas.entrar_rapido(base, nombre, Cuentas.accesos_rapidos(Foundry.leer_env(Foundry.ENV)))
+	if not resultado.ok:
+		aviso = UI.aviso(self, resultado.mensaje, usuario)
+		return
+	perfil = {"ok": true, "id": resultado.id, "alias": resultado.alias, "rol": resultado.rol}
+	usuario.text = ""
+	clave.text = ""
+	etapa = "menu"
+	actualizar()
+	enfocar_inicio()
+
+
 func enviar_ingreso() -> void:
 	var boton: Button = inicio.get_node("Elegir")
 	if boton.disabled or (is_instance_valid(aviso) and aviso.visible):
@@ -382,7 +429,8 @@ func actualizar() -> void:
 	columna.get_node("Hero/Margen/Fila").alignment = BoxContainer.ALIGNMENT_CENTER if solo_ingreso else BoxContainer.ALIGNMENT_BEGIN
 	tarjeta.custom_minimum_size.x = 400.0 if solo_ingreso else 342.0
 	tarjeta.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if solo_ingreso else Control.SIZE_FILL
-	demo_boton.visible = solo_ingreso and etapa == "ingreso"
+	if acceso_rapido != null:
+		acceso_rapido.visible = solo_ingreso and etapa == "ingreso" and disponible
 	ajustar_hero()
 	var formulario := not con_sesion or etapa == "cambio"
 	for nombre in ["EtiquetaAlias", "Alias", "EtiquetaClave", "Clave", "EtiquetaRepetir", "Repetir", "Elegir", "Alta"]:
@@ -410,13 +458,18 @@ func actualizar() -> void:
 		var boton: Button = botones[paso]
 		boton.visible = not con_sesion or paso in permitidos
 		boton.disabled = not con_sesion or (rol == "tecnico" and paso not in estado.get("habilitados", [])
-			and not (paso == "retest" and siguiente == "retest") and paso not in ["escenario", "tablero", "materiales"])
-		var estado_paso := "Bloqueado"
+			and not (paso == "retest" and siguiente == "retest") and paso != "tablero" and not (paso in ["ruta", "escenario", "materiales"] and siguiente != "diagnostico"))
+		# Los pasos anteriores al siguiente ya se hicieron: no están bloqueados, están completados.
+		var hecho: bool = rol == "tecnico" and Recorrido.PASOS.has(paso) and Recorrido.PASOS.has(siguiente) \
+			and Recorrido.PASOS.find(paso) < Recorrido.PASOS.find(siguiente) and paso != "tablero"
+		var estado_paso := "Completado" if hecho else "Bloqueado"
 		if not boton.disabled:
 			if paso == siguiente and rol == "tecnico":
 				estado_paso = "Siguiente"
+			elif hecho:
+				estado_paso = "Completado"
 			elif paso == "escenario":
-				estado_paso = "Práctica libre"
+				estado_paso = "Práctica por niveles"
 			else:
 				estado_paso = "Disponible"
 		boton.get_node("Contenido/Insignia").visible = rol == "tecnico" or not con_sesion
@@ -427,7 +480,8 @@ func actualizar() -> void:
 			destacados[paso].disabled = boton.disabled
 			destacados[paso].get_node("Contenido").modulate.a = 0.72 if boton.disabled else 1.0
 		boton.tooltip_text = ("Entra con tu cuenta para empezar." if not con_sesion else
-			"Completa el paso anterior para abrir esta actividad.") if boton.disabled else razon
+			("Ya completaste este paso." if hecho else "Completa el paso anterior para abrir esta actividad.")) \
+			if boton.disabled else ("Ya la completaste. Puedes repasarla." if hecho else razon)
 	tarjeta.show()
 
 
@@ -477,12 +531,12 @@ func abrir_paso(paso: String) -> void:
 
 
 func abrir_materiales() -> void:
-	lanzar_materiales.call(perfil.get("rol", ""))
+	lanzar_materiales.call(perfil.get("rol", ""), perfil.get("alias", ""))
 
 
 # Levanta `python web/servidor.py` (si ya corre, el nuevo proceso termina solo) y abre el navegador. Jefe directo y
 # admin entran con el permiso de autor que el servidor guarda en web/.token-autor; el técnico entra sin él.
-func abrir_pagina_materiales(rol: String) -> void:
+func abrir_pagina_materiales(rol: String, usuario: String) -> void:
 	var raiz := ProjectSettings.globalize_path("res://").path_join("..").simplify_path()
 	var servidor := raiz.path_join("web/servidor.py")
 	if not FileAccess.file_exists(servidor):
@@ -498,15 +552,11 @@ func abrir_pagina_materiales(rol: String) -> void:
 		token = Materiales.leer_token(raiz)
 		if not token.is_empty() or rol not in Materiales.ROLES_AUTOR:
 			break
-	OS.shell_open(Materiales.url(rol, token))
-
-
-func abrir_demo() -> void:
-	var demo := Demo.instantiate()
-	demo.base_real = base
-	demo.tablero_solicitado.connect(abrir_tablero)
-	demo.escenario_solicitado.connect(abrir_ordenes)
-	abrir(demo)
+	var ruta := ""
+	if rol == "tecnico" and perfil.has("id"):
+		var progreso := Recorrido.estado(base, perfil.id, ahora())
+		ruta = Materiales.texto_ruta(progreso.get("ruta", []), Niveles.dominios(base, perfil.get("alias", "")))
+	OS.shell_open(Materiales.url(rol, token, usuario, ruta))
 
 
 func abrir_tablero(tecnico: Dictionary) -> void:
@@ -556,6 +606,7 @@ func abrir_ordenes(tecnico: Dictionary, competencia: String = "") -> void:
 func abrir_bus(tecnico: Dictionary, archivo: String = Escenario.AISLAMIENTO) -> void:
 	var bus := Bus.instantiate()
 	bus.archivo = archivo
+	bus.epp_obligatorio = true
 	if tecnico.base == base:
 		bus.resultados_registrados.connect(func():
 			var cierre := Recorrido.cerrar_escenario(base, tecnico.id, bus.motor.fin(),
@@ -618,3 +669,10 @@ func ajustar_marco(actividad: bool) -> void:
 	$Marco.offset_right = -24 if actividad else 0
 	$Marco.offset_top = 16 if actividad else 0
 	$Marco.offset_bottom = -16 if actividad else 0
+
+
+func _unhandled_key_input(evento: InputEvent) -> void:
+	if evento is InputEventKey and evento.pressed and not evento.echo and evento.keycode == KEY_M \
+			and not (get_viewport().gui_get_focus_owner() is LineEdit):
+		Sonido.alternar()
+		get_viewport().set_input_as_handled()

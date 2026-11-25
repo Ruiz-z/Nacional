@@ -231,3 +231,14 @@ Electrónica: T-05, T-54 a T-56 desde el primer día. Contenido: T-12 a T-17 en 
 
 - [x] T-195 — Banco de competencias (RF-2 y RF-3). Retirar 14 preguntas repetitivas o poco útiles, incorporar 14 preguntas respaldadas por los PDF y agrupar las 52 preguntas por tema. Ajustar distractores y repartir la posición de las respuestas correctas. [Fuentes y cobertura por dificultad](docs/fuentes-volvo.md#fuentes-vigentes-del-banco-t-185).
 - [x] T-196 — Juego de ahorcado en materiales: formato validado (solo letras, sin distinguir acentos), teclado en pantalla y físico, dibujo por errores y explicación al terminar cada término; uno generado con Faro.
+
+- [x] T-200 — Incorporar los esquemas, la validación, el catálogo y las instrucciones de Foundry para Verdadero o falso, Completa la frase, Clasifica y Caso de falla (materiales RF-16 a RF-20).
+- [x] T-201 — Generar Verdadero o falso con el banco cuando no hay IA e incorporar un borrador con fuentes por juego nuevo.
+- [x] T-202 — Implementar los cuatro visores con botones, foco visible y retroalimentación anunciada.
+- [ ] T-203 — Verificar los visores con capturas de Chromium a 1280 × 800 y 390 px de ancho. Las interacciones se comprobaron en el DOM. El entorno de ejecución bloqueó el inicio de Chromium y los sockets de localhost.
+- [x] T-204 — EPP como primer paso de cada orden: catálogo y requisitos por tarea (`epp.gd`), vestidor con señuelos, bloqueo de pasos en el motor y registro del intento (SPEC-simulador RF-39).
+- [x] T-205 — Casillero de EPP en el taller 3D, selección en primera persona y retroalimentación del equipo puesto (SPEC-simulador RF-39). Queda pendiente la validación con Volvo de los requisitos por tarea.
+- [x] T-206 — La práctica en el taller se bloquea hasta terminar el diagnóstico y las órdenes se abren por nivel según el dominio de cada competencia (Media desde 50, Difícil desde 75; `niveles.gd`).
+- [x] T-207 — Sonido sintetizado en código (clics, pasos, éxito, error, falta crítica, EPP, elevador, victoria). La tecla M lo silencia y la preferencia se guarda; sin archivos de audio externos.
+- [x] T-208 — Materiales: botón Publicar y Retirar en cada tarjeta y en el visor; el técnico recibe primero los publicados que le tocan según su ruta de aprendizaje y su nivel (`asignacion.py`, sección «Para ti»).
+- [x] T-209 — Botones «Entrar con» (mau, admin, prueba) en el ingreso, solo si el `.env` local trae NACIONAL_ACCESO_RAPIDO; sin esa línea el ingreso pide contraseña.

@@ -1,0 +1,85 @@
+{
+  "id": "completar-baterias-y-carga-del-volvo-bzr-low-entry-156b7f",
+  "formato": "completar",
+  "titulo": "Baterías y carga del Volvo BZR Low Entry Eléctrico",
+  "modelo": "bzr-le-electrico",
+  "nivel": "basico",
+  "competencia": "sistema-electrico-bateria",
+  "tema": "Baterías y carga del Volvo BZR Low Entry Eléctrico",
+  "contenido": {
+    "frases": [
+      {
+        "frase": "El sistema de almacenamiento de energía del BZR Low Entry Eléctrico guarda energía en ____.",
+        "opciones": [
+          "las baterías de iones de litio",
+          "el sistema de gestión de batería (BMS)",
+          "el motor de tracción"
+        ],
+        "correcta": 0,
+        "explicacion": "La ficha del chasis indica que su sistema de almacenamiento usa iones de litio."
+      },
+      {
+        "frase": "Cada batería Volvo Cube de este chasis tiene una capacidad nominal de ____.",
+        "opciones": [
+          "La capacidad de dos unidades",
+          "90 kWh",
+          "La misma capacidad que todo el conjunto"
+        ],
+        "correcta": 1,
+        "explicacion": "La ficha indica 90 kWh por unidad. La capacidad total depende del número de baterías."
+      },
+      {
+        "frase": "Con siete baterías, la capacidad nominal total llega a ____.",
+        "opciones": [
+          "90 kWh",
+          "La capacidad de una sola unidad",
+          "630 kWh"
+        ],
+        "correcta": 2,
+        "explicacion": "Siete unidades de 90 kWh suman 630 kWh."
+      },
+      {
+        "frase": "El sistema que controla la carga y descarga de las baterías se llama ____.",
+        "opciones": [
+          "BMS",
+          "CCS",
+          "AVAS"
+        ],
+        "correcta": 0,
+        "explicacion": "El sistema de gestión de batería (BMS) también vigila su estado y rendimiento."
+      },
+      {
+        "frase": "Para cargar en la cochera, el chasis admite un cable ____.",
+        "opciones": [
+          "OppCharge",
+          "CCS",
+          "AVAS"
+        ],
+        "correcta": 1,
+        "explicacion": "La ficha indica CCS para la carga con cable en cochera."
+      },
+      {
+        "frase": "Para cargar en ruta, el chasis admite ____.",
+        "opciones": [
+          "AVAS",
+          "BMS",
+          "OppCharge"
+        ],
+        "correcta": 2,
+        "explicacion": "La ficha indica OppCharge para la carga en ruta."
+      }
+    ]
+  },
+  "fuentes": [
+    "Volvo Buses: Chasis de autobús BZR Low Entry Eléctrico (docs/fuentes-volvo.md)"
+  ],
+  "origen": "manual",
+  "muestra": true,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T01:33:31-06:00",
+  "actualizado": "2026-11-25T01:33:31-06:00",
+  "historial": []
+}

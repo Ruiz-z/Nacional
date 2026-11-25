@@ -29,3 +29,7 @@ Se declara si las personas que probaron el sistema tenían o no conocimiento té
 - Herramientas: "Tool Pack 1", CC0 (https://opengameart.org/content/tool-pack-1).
 
 - Fuente Poppins (SIL Open Font License), en godot/assets/fuentes/.
+
+## Accesos rápidos
+
+La pantalla de ingreso puede mostrar botones «Entrar con» que entran sin contraseña. Solo existen si el archivo `.env` (que no se sube al repositorio) trae `NACIONAL_ACCESO_RAPIDO=usuario1,usuario2`. Sin esa línea el ingreso siempre pide la contraseña. Úsalo solo en equipos de demostración: quien abra la app en ese equipo entra con esas cuentas.

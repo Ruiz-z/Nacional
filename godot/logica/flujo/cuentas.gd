@@ -94,6 +94,29 @@ static func entrar(base: String, usuario: String, clave: String, ahora: int,
 		"cambiar_clave": int(fila.cambiar_clave) == 1}
 
 
+# Cuentas con acceso rápido (botones «Entrar con»), de la variable NACIONAL_ACCESO_RAPIDO del .env.
+# Sin esa variable no hay atajos: el ingreso siempre pide la contraseña.
+static func accesos_rapidos(env: Dictionary) -> Array[String]:
+	var lista: Array[String] = []
+	for nombre in str(env.get("NACIONAL_ACCESO_RAPIDO", "")).split(",", false):
+		var usuario := normalizar(nombre)
+		if revisar_usuario(usuario).is_empty() and usuario not in lista:
+			lista.append(usuario)
+	return lista
+
+
+# Entra sin contraseña, solo si la cuenta está en la lista de accesos rápidos.
+static func entrar_rapido(base: String, usuario: String, permitidos: Array, consultar: Callable = Acceso.consultar) -> Dictionary:
+	var alias := normalizar(usuario)
+	if alias not in permitidos:
+		return error(MENSAJE_INVALIDO)
+	var filas: Variant = consultar.call(base, "SELECT id, alias, rol FROM tecnico WHERE alias = ? AND demo = 0 AND clave_hash <> '';", [alias])
+	if filas == null or filas.is_empty():
+		return error("La cuenta %s aún no existe. Créala en Administración." % alias)
+	consultar.call(base, "UPDATE tecnico SET fallos = 0, bloqueado_hasta = 0 WHERE id = ?;", [int(filas[0].id)])
+	return {"ok": true, "id": int(filas[0].id), "alias": filas[0].alias, "rol": filas[0].rol, "cambiar_clave": false}
+
+
 # El técnico cambia su contraseña; desaparece la marca de contraseña temporal.
 static func cambiar_clave(base: String, id: int, clave_nueva: String,
 		consultar: Callable = Acceso.consultar) -> Dictionary:

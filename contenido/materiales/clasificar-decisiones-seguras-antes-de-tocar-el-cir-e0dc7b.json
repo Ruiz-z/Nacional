@@ -1,0 +1,78 @@
+{
+  "id": "clasificar-decisiones-seguras-antes-de-tocar-el-cir-e0dc7b",
+  "formato": "clasificar",
+  "titulo": "Decisiones seguras antes de tocar el circuito",
+  "modelo": "general",
+  "nivel": "basico",
+  "competencia": "seguridad-alto-voltaje",
+  "tema": "Decisiones seguras antes de tocar el circuito",
+  "contenido": {
+    "categorias": [
+      {
+        "id": "seguro",
+        "nombre": "Acción segura"
+      },
+      {
+        "id": "peligroso",
+        "nombre": "Acción peligrosa"
+      }
+    ],
+    "elementos": [
+      {
+        "texto": "Bloquear el circuito para impedir que lo vuelvan a conectar.",
+        "categoria": "seguro"
+      },
+      {
+        "texto": "Etiquetar el dispositivo para avisar que hay trabajo en curso.",
+        "categoria": "seguro"
+      },
+      {
+        "texto": "Elegir el equipo de protección personal según el riesgo y la tarea.",
+        "categoria": "seguro"
+      },
+      {
+        "texto": "Solo mirar el tablero apagado para dar por hecho que no hay tensión.",
+        "categoria": "peligroso"
+      },
+      {
+        "texto": "Ignorar la energía almacenada después de aislar la alimentación principal.",
+        "categoria": "peligroso"
+      },
+      {
+        "texto": "Trabajar con el equipo de protección personal sin confirmar la condición segura.",
+        "categoria": "peligroso"
+      },
+      {
+        "texto": "Invalidar la lectura si el instrumento falla al comprobarlo después.",
+        "categoria": "seguro"
+      },
+      {
+        "texto": "Omitir la fuente auxiliar que alimenta los puntos de trabajo.",
+        "categoria": "peligroso"
+      },
+      {
+        "texto": "Medir en los puntos indicados con un instrumento verificado.",
+        "categoria": "seguro"
+      }
+    ]
+  },
+  "fuentes": [
+    "NOM-029-STPS: Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad, Control de la reenergización",
+    "NOM-029-STPS: Mantenimiento de las instalaciones eléctricas en los centros de trabajo-Condiciones de seguridad, Señalización durante el mantenimiento",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Selección del equipo de protección personal",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Verificación de una condición eléctricamente segura",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Fuentes de energía y energía almacenada",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Equipo de protección personal y desenergización",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Comprobación del instrumento para verificar ausencia de tensión",
+    "NFPA 70E: Standard for Electrical Safety in the Workplace, Identificación de todas las fuentes de alimentación"
+  ],
+  "origen": "manual",
+  "muestra": true,
+  "estado": "borrador",
+  "revisado_por": "",
+  "revisado_en": "",
+  "version": 1,
+  "creado": "2026-11-25T01:33:31-06:00",
+  "actualizado": "2026-11-25T01:33:31-06:00",
+  "historial": []
+}
