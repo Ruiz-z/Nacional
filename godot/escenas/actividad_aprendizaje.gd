@@ -261,8 +261,6 @@ func mostrar_item() -> void:
 	var pregunta_limpia := TextoLimpio.limpiar(pregunta)
 	pregunta_visible.text = pregunta_limpia.texto
 	var marca: String = pregunta_limpia.etiqueta
-	if marca.is_empty() and item.get("muestra", false):
-		marca = "Ejemplo didáctico"
 	var etiqueta: Label = contenido.get_node("Marca")
 	etiqueta.text = marca
 	etiqueta.visible = not marca.is_empty()

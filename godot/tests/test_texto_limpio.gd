@@ -86,8 +86,8 @@ static func revisar_banco(items: Array) -> bool:
 			for paso in item.pasos:
 				pantalla.agregar_paso(paso)
 		var ruta: String = item.id
-		correcto = revisar_nodo(pantalla, ruta) \
-			and (not item.muestra or pantalla.contenido.get_node("Marca").text == "Ejemplo didáctico")
+		# El rótulo «Ejemplo didáctico» ya no se agrega solo; solo aparece si el texto trae su propia etiqueta.
+		correcto = revisar_nodo(pantalla, ruta)
 		if not correcto:
 			break
 		pantalla.actividad.intentos.append({})
